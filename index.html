@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform RPG Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .game-area {
+            flex: 1;
+            position: relative;
+            background-color: #2a2a2a;
+        }
+
+        .dashboard {
+            width: 300px;
+            background-color: #333;
+            border-left: 2px solid #555;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .dashboard.hidden {
+            display: none;
+        }
+
+        canvas {
+            display: block;
+            background-color: #87CEEB;
+        }
+
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn.danger {
+            background-color: #f44336;
+        }
+
+        .btn.danger:hover {
+            background-color: #da190b;
+        }
+
+        .coordinates {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+
+        .item {
+            background-color: #444;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .item-details {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 4px;
+        }
+
+        input, select {
+            background-color: #555;
+            border: 1px solid #777;
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="controls">
+                <button class="btn" id="devModeBtn">Development Mode</button>
+                <button class="btn" id="productionBtn">Production Mode</button>
+                <button class="btn" id="toggleDashboardBtn">Toggle Dashboard</button>
+            </div>
+            <div class="coordinates" id="coordinates" style="display: none;">
+                X: 0, Y: 0
+            </div>
+        </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="section">
+                <h3>Game Mode</h3>
+                <div class="item">
+                    <div class="item-name">Current Mode: <span id="currentMode">Development</span></div>
+                    <div class="item-details">Switch between development and production modes</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Scenes</h3>
+                <div id="scenesList">
+                    <div class="item">
+                        <div class="item-name">Scene 1 - Tutorial</div>
+                        <div class="item-details">Starting scene with basic platforms</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Characters</h3>
+                <div id="charactersList">
+                    <div class="item">
+                        <div class="item-name">Hero</div>
+                        <div class="item-details">Main player character</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Classes</h3>
+                <div id="classesList">
+                    <div class="item">
+                        <div class="item-name">Warrior</div>
+                        <div class="item-details">Melee combat specialist</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Weapons</h3>
+                <div id="weaponsList">
+                    <div class="item">
+                        <div class="item-name">Iron Sword</div>
+                        <div class="item-details">Basic melee weapon</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Items</h3>
+                <div id="itemsList">
+                    <div class="item">
+                        <div class="item-name">Health Potion</div>
+                        <div class="item-details">Restores 50 HP</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

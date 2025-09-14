@@ -1,0 +1,8 @@
+Create a platform RPG game.
+Need to have a development dashboard where I can see the setup of the game parts like characters, classes, weapons, gear, items etc.
+Each level in this platform game should be called a scene. The progress of the scene is a player moving from left to right. 
+I should be able to see all the scenes on the development dashboard.
+The player should be able to jump up or down on platforms as he/she moves forward to the right.
+I should be able to enter a development mode of the game, where I can move the player around. be able to see the x and y offset of my mouse cursor so i can make instructions for alterations.
+You can make some start platforms that the player walks on and can jump on to, but i will be instructing how the scene should be build as I build the game.
+in the end I should be able to publish a version of the game without dashboard or development mode for production.
