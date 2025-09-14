@@ -116,6 +116,67 @@
             color: white;
             padding: 4px;
             border-radius: 4px;
+            width: 60px;
+        }
+
+        .platform-editor {
+            background-color: #222;
+            border: 1px solid #555;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        .platform-editor h4 {
+            margin: 0 0 10px 0;
+            color: #4CAF50;
+        }
+
+        .platform-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .platform-item {
+            background-color: #444;
+            padding: 5px 8px;
+            margin: 2px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .platform-item:hover {
+            background-color: #555;
+        }
+
+        .platform-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .property-row {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            gap: 5px;
+        }
+
+        .property-label {
+            min-width: 30px;
+            font-size: 12px;
+        }
+
+        .btn.small {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .file-info {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -148,6 +209,42 @@
                     <div class="item">
                         <div class="item-name">Scene 1 - Tutorial</div>
                         <div class="item-details">Starting scene with basic platforms</div>
+                    </div>
+                </div>
+
+                <div class="platform-editor" id="platformEditor" style="display: none;">
+                    <h4>Platform Editor</h4>
+                    <div class="platform-list" id="platformList"></div>
+
+                    <div id="platformProperties" style="display: none;">
+                        <h4>Selected Platform</h4>
+                        <div class="property-row">
+                            <span class="property-label">X:</span>
+                            <input type="number" id="platformX" min="0">
+                            <span class="property-label">Y:</span>
+                            <input type="number" id="platformY" min="0">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">W:</span>
+                            <input type="number" id="platformWidth" min="10">
+                            <span class="property-label">H:</span>
+                            <input type="number" id="platformHeight" min="10">
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="updatePlatform">Update</button>
+                            <button class="btn small danger" id="deletePlatform">Delete</button>
+                        </div>
+                    </div>
+
+                    <div class="property-row">
+                        <button class="btn small" id="addPlatform">Add Platform</button>
+                        <button class="btn small" id="savePlatforms">Save Scene</button>
+                    </div>
+
+                    <div class="property-row" style="margin-top: 15px; border-top: 1px solid #555; padding-top: 10px;">
+                        <button class="btn small" id="exportGameData">Export Game Data</button>
+                        <input type="file" id="importGameData" accept=".json" style="display: none;">
+                        <button class="btn small" id="importGameDataBtn">Import Game Data</button>
                     </div>
                 </div>
             </div>

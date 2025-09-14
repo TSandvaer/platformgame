@@ -25,12 +25,13 @@ class PlatformRPG {
         this.friction = 0.8;
 
         this.platforms = [
-            { x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4' },
-            { x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4' },
-            { x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4' },
-            { x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4' },
-            { x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4' }
+            { id: 0, x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4' },
+            { id: 1, x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4' },
+            { id: 2, x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4' },
+            { id: 3, x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4' },
+            { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4' }
         ];
+        this.nextPlatformId = 5;
 
         this.camera = {
             x: 0,
@@ -40,6 +41,11 @@ class PlatformRPG {
         this.keys = {};
         this.mouseX = 0;
         this.mouseY = 0;
+        this.isDragging = false;
+        this.isResizing = false;
+        this.selectedPlatform = null;
+        this.dragOffset = { x: 0, y: 0 };
+        this.resizeHandle = null;
 
         this.scenes = [
             {
@@ -72,6 +78,7 @@ class PlatformRPG {
         this.setupEventListeners();
         this.gameLoop();
         this.updateUI();
+        this.loadGameDataFromFile();
     }
 
     setupEventListeners() {
@@ -91,6 +98,20 @@ class PlatformRPG {
             if (this.isDevelopmentMode) {
                 document.getElementById('coordinates').textContent =
                     `X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`;
+
+                this.handlePlatformDrag(e);
+            }
+        });
+
+        this.canvas.addEventListener('mousedown', (e) => {
+            if (this.isDevelopmentMode) {
+                this.handlePlatformMouseDown(e);
+            }
+        });
+
+        this.canvas.addEventListener('mouseup', (e) => {
+            if (this.isDevelopmentMode) {
+                this.handlePlatformMouseUp(e);
             }
         });
 
@@ -110,12 +131,19 @@ class PlatformRPG {
             this.canvas.width = window.innerWidth - (this.showDashboard ? 300 : 0);
             this.canvas.height = window.innerHeight;
         });
+
+        this.setupPlatformEditorListeners();
     }
 
     setDevelopmentMode(isDev) {
         this.isDevelopmentMode = isDev;
         document.getElementById('currentMode').textContent = isDev ? 'Development' : 'Production';
         document.getElementById('coordinates').style.display = isDev ? 'block' : 'none';
+        document.getElementById('platformEditor').style.display = isDev ? 'block' : 'none';
+
+        if (isDev) {
+            this.updatePlatformList();
+        }
     }
 
     toggleDashboard() {
@@ -206,8 +234,16 @@ class PlatformRPG {
             this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
 
             if (this.isDevelopmentMode) {
-                this.ctx.strokeStyle = '#333';
-                this.ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+                if (this.selectedPlatform && this.selectedPlatform.id === platform.id) {
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+                    this.drawResizeHandles(platform);
+                } else {
+                    this.ctx.strokeStyle = '#333';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+                }
             }
         });
 
@@ -274,6 +310,365 @@ class PlatformRPG {
                 <div class="item-details">${item.description}</div>
             </div>`
         ).join('');
+    }
+
+    setupPlatformEditorListeners() {
+        document.getElementById('addPlatform').addEventListener('click', () => {
+            this.addPlatform();
+        });
+
+        document.getElementById('savePlatforms').addEventListener('click', () => {
+            this.savePlatforms();
+        });
+
+        document.getElementById('updatePlatform').addEventListener('click', () => {
+            this.updateSelectedPlatform();
+        });
+
+        document.getElementById('deletePlatform').addEventListener('click', () => {
+            this.deleteSelectedPlatform();
+        });
+
+        document.getElementById('exportGameData').addEventListener('click', () => {
+            this.exportGameData();
+        });
+
+        document.getElementById('importGameDataBtn').addEventListener('click', () => {
+            document.getElementById('importGameData').click();
+        });
+
+        document.getElementById('importGameData').addEventListener('change', (e) => {
+            this.importGameData(e);
+        });
+    }
+
+    handlePlatformMouseDown(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left + this.camera.x;
+        const mouseY = e.clientY - rect.top + this.camera.y;
+
+        for (let platform of this.platforms) {
+            const resizeHandle = this.getResizeHandle(platform, mouseX, mouseY);
+            if (resizeHandle) {
+                this.isResizing = true;
+                this.resizeHandle = resizeHandle;
+                this.selectedPlatform = platform;
+                this.updatePlatformProperties();
+                return;
+            }
+
+            if (this.isPointInPlatform(mouseX, mouseY, platform)) {
+                this.isDragging = true;
+                this.selectedPlatform = platform;
+                this.dragOffset = {
+                    x: mouseX - platform.x,
+                    y: mouseY - platform.y
+                };
+                this.updatePlatformProperties();
+                this.updatePlatformList();
+                return;
+            }
+        }
+
+        this.selectedPlatform = null;
+        this.updatePlatformProperties();
+        this.updatePlatformList();
+    }
+
+    handlePlatformDrag(e) {
+        if (!this.selectedPlatform) return;
+
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left + this.camera.x;
+        const mouseY = e.clientY - rect.top + this.camera.y;
+
+        if (this.isDragging) {
+            this.selectedPlatform.x = mouseX - this.dragOffset.x;
+            this.selectedPlatform.y = mouseY - this.dragOffset.y;
+            this.updatePlatformProperties();
+        } else if (this.isResizing) {
+            this.handlePlatformResize(mouseX, mouseY);
+            this.updatePlatformProperties();
+        }
+    }
+
+    handlePlatformMouseUp(e) {
+        this.isDragging = false;
+        this.isResizing = false;
+        this.resizeHandle = null;
+    }
+
+    handlePlatformResize(mouseX, mouseY) {
+        if (!this.selectedPlatform || !this.resizeHandle) return;
+
+        const platform = this.selectedPlatform;
+        const minSize = 20;
+
+        switch (this.resizeHandle) {
+            case 'se': // Bottom-right
+                platform.width = Math.max(minSize, mouseX - platform.x);
+                platform.height = Math.max(minSize, mouseY - platform.y);
+                break;
+            case 'sw': // Bottom-left
+                const newWidth = Math.max(minSize, platform.x + platform.width - mouseX);
+                platform.x = platform.x + platform.width - newWidth;
+                platform.width = newWidth;
+                platform.height = Math.max(minSize, mouseY - platform.y);
+                break;
+            case 'ne': // Top-right
+                platform.width = Math.max(minSize, mouseX - platform.x);
+                const newHeight = Math.max(minSize, platform.y + platform.height - mouseY);
+                platform.y = platform.y + platform.height - newHeight;
+                platform.height = newHeight;
+                break;
+            case 'nw': // Top-left
+                const newWidthNW = Math.max(minSize, platform.x + platform.width - mouseX);
+                const newHeightNW = Math.max(minSize, platform.y + platform.height - mouseY);
+                platform.x = platform.x + platform.width - newWidthNW;
+                platform.y = platform.y + platform.height - newHeightNW;
+                platform.width = newWidthNW;
+                platform.height = newHeightNW;
+                break;
+        }
+    }
+
+    getResizeHandle(platform, mouseX, mouseY) {
+        const handleSize = 8;
+        const corners = {
+            nw: { x: platform.x, y: platform.y },
+            ne: { x: platform.x + platform.width, y: platform.y },
+            sw: { x: platform.x, y: platform.y + platform.height },
+            se: { x: platform.x + platform.width, y: platform.y + platform.height }
+        };
+
+        for (let [handle, corner] of Object.entries(corners)) {
+            if (Math.abs(mouseX - corner.x) <= handleSize && Math.abs(mouseY - corner.y) <= handleSize) {
+                return handle;
+            }
+        }
+        return null;
+    }
+
+    drawResizeHandles(platform) {
+        const handleSize = 6;
+        this.ctx.fillStyle = '#FFD700';
+
+        // Draw corner handles
+        const corners = [
+            { x: platform.x, y: platform.y },
+            { x: platform.x + platform.width, y: platform.y },
+            { x: platform.x, y: platform.y + platform.height },
+            { x: platform.x + platform.width, y: platform.y + platform.height }
+        ];
+
+        corners.forEach(corner => {
+            this.ctx.fillRect(corner.x - handleSize/2, corner.y - handleSize/2, handleSize, handleSize);
+        });
+    }
+
+    isPointInPlatform(x, y, platform) {
+        return x >= platform.x && x <= platform.x + platform.width &&
+               y >= platform.y && y <= platform.y + platform.height;
+    }
+
+    updatePlatformList() {
+        const listElement = document.getElementById('platformList');
+        listElement.innerHTML = this.platforms.map(platform =>
+            `<div class="platform-item ${this.selectedPlatform && this.selectedPlatform.id === platform.id ? 'selected' : ''}"
+                  data-platform-id="${platform.id}">
+                Platform ${platform.id + 1} (${platform.x}, ${platform.y}) ${platform.width}x${platform.height}
+            </div>`
+        ).join('');
+
+        // Add click listeners to platform items
+        listElement.querySelectorAll('.platform-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const platformId = parseInt(item.dataset.platformId);
+                this.selectedPlatform = this.platforms.find(p => p.id === platformId);
+                this.updatePlatformProperties();
+                this.updatePlatformList();
+            });
+        });
+    }
+
+    updatePlatformProperties() {
+        const propertiesDiv = document.getElementById('platformProperties');
+
+        if (this.selectedPlatform) {
+            propertiesDiv.style.display = 'block';
+            document.getElementById('platformX').value = Math.round(this.selectedPlatform.x);
+            document.getElementById('platformY').value = Math.round(this.selectedPlatform.y);
+            document.getElementById('platformWidth').value = this.selectedPlatform.width;
+            document.getElementById('platformHeight').value = this.selectedPlatform.height;
+        } else {
+            propertiesDiv.style.display = 'none';
+        }
+    }
+
+    updateSelectedPlatform() {
+        if (!this.selectedPlatform) return;
+
+        this.selectedPlatform.x = parseInt(document.getElementById('platformX').value);
+        this.selectedPlatform.y = parseInt(document.getElementById('platformY').value);
+        this.selectedPlatform.width = parseInt(document.getElementById('platformWidth').value);
+        this.selectedPlatform.height = parseInt(document.getElementById('platformHeight').value);
+
+        this.updatePlatformList();
+    }
+
+    deleteSelectedPlatform() {
+        if (!this.selectedPlatform) return;
+
+        this.platforms = this.platforms.filter(p => p.id !== this.selectedPlatform.id);
+        this.selectedPlatform = null;
+        this.updatePlatformProperties();
+        this.updatePlatformList();
+    }
+
+    addPlatform() {
+        const newPlatform = {
+            id: this.nextPlatformId++,
+            x: this.mouseX || 100,
+            y: this.mouseY || 100,
+            width: 150,
+            height: 20,
+            color: '#4ECDC4'
+        };
+
+        this.platforms.push(newPlatform);
+        this.selectedPlatform = newPlatform;
+        this.updatePlatformProperties();
+        this.updatePlatformList();
+    }
+
+    savePlatforms() {
+        // Update the current scene with the current platforms
+        if (this.scenes.length > 0) {
+            this.scenes[0].platforms = JSON.parse(JSON.stringify(this.platforms));
+
+            // Save to localStorage as backup
+            localStorage.setItem('platformGame_scenes', JSON.stringify(this.scenes));
+
+            alert('Platforms saved! Use "Export Game Data" to download the JSON file.');
+        }
+    }
+
+    async loadGameDataFromFile() {
+        try {
+            const response = await fetch('./gameData.json');
+            if (response.ok) {
+                const gameData = await response.json();
+                this.loadGameDataFromObject(gameData);
+            } else {
+                // Fallback to localStorage if JSON file not found
+                this.loadSavedData();
+            }
+        } catch (error) {
+            console.log('No gameData.json found, using default data');
+            // Fallback to localStorage
+            this.loadSavedData();
+        }
+    }
+
+    loadGameDataFromObject(gameData) {
+        try {
+            if (gameData.scenes && gameData.scenes.length > 0) {
+                this.scenes = gameData.scenes;
+                if (this.scenes[0].platforms) {
+                    this.platforms = [...this.scenes[0].platforms];
+                    this.nextPlatformId = Math.max(...this.platforms.map(p => p.id || 0)) + 1;
+                }
+            }
+
+            if (gameData.characters) {
+                this.gameData.characters = gameData.characters;
+            }
+            if (gameData.classes) {
+                this.gameData.classes = gameData.classes;
+            }
+            if (gameData.weapons) {
+                this.gameData.weapons = gameData.weapons;
+            }
+            if (gameData.items) {
+                this.gameData.items = gameData.items;
+            }
+
+            this.updateUI();
+        } catch (e) {
+            console.error('Error loading game data:', e);
+        }
+    }
+
+    loadSavedData() {
+        const savedScenes = localStorage.getItem('platformGame_scenes');
+        if (savedScenes) {
+            try {
+                this.scenes = JSON.parse(savedScenes);
+                if (this.scenes.length > 0 && this.scenes[0].platforms) {
+                    this.platforms = [...this.scenes[0].platforms];
+                    this.nextPlatformId = Math.max(...this.platforms.map(p => p.id || 0)) + 1;
+                }
+            } catch (e) {
+                console.error('Error loading saved data:', e);
+            }
+        }
+    }
+
+    exportGameData() {
+        // Update current scene with current platforms
+        if (this.scenes.length > 0) {
+            this.scenes[0].platforms = JSON.parse(JSON.stringify(this.platforms));
+        }
+
+        const gameData = {
+            gameInfo: {
+                title: "Platform RPG Game",
+                version: "1.0.0",
+                lastModified: new Date().toISOString().split('T')[0]
+            },
+            scenes: this.scenes,
+            characters: this.gameData.characters,
+            classes: this.gameData.classes,
+            weapons: this.gameData.weapons,
+            items: this.gameData.items
+        };
+
+        const dataStr = JSON.stringify(gameData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = 'gameData.json';
+        link.click();
+
+        URL.revokeObjectURL(link.href);
+    }
+
+    importGameData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const gameData = JSON.parse(e.target.result);
+                this.loadGameDataFromObject(gameData);
+
+                // Reset platform editor
+                this.selectedPlatform = null;
+                this.updatePlatformProperties();
+                this.updatePlatformList();
+
+                alert('Game data imported successfully!');
+            } catch (error) {
+                alert('Error importing game data. Please check the file format.');
+                console.error('Import error:', error);
+            }
+        };
+        reader.readAsText(file);
+
+        // Reset the file input
+        event.target.value = '';
     }
 
     gameLoop() {

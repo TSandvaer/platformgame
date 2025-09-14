@@ -1,0 +1,67 @@
+{
+  "gameInfo": {
+    "title": "Platform RPG Game",
+    "version": "1.0.0",
+    "lastModified": "2025-01-14"
+  },
+  "scenes": [
+    {
+      "id": 1,
+      "name": "Tutorial",
+      "description": "Starting scene with basic platforms",
+      "platforms": [
+        { "id": 0, "x": 0, "y": 550, "width": 300, "height": 50, "color": "#4ECDC4" },
+        { "id": 1, "x": 400, "y": 450, "width": 200, "height": 20, "color": "#4ECDC4" },
+        { "id": 2, "x": 700, "y": 350, "width": 150, "height": 20, "color": "#4ECDC4" },
+        { "id": 3, "x": 950, "y": 250, "width": 200, "height": 20, "color": "#4ECDC4" },
+        { "id": 4, "x": 1200, "y": 400, "width": 300, "height": 50, "color": "#4ECDC4" }
+      ],
+      "playerSpawn": {
+        "x": 100,
+        "y": 400
+      }
+    }
+  ],
+  "characters": [
+    {
+      "id": 1,
+      "name": "Hero",
+      "description": "Main player character",
+      "stats": {
+        "health": 100,
+        "speed": 5,
+        "jumpPower": 15
+      }
+    }
+  ],
+  "classes": [
+    {
+      "id": 1,
+      "name": "Warrior",
+      "description": "Melee combat specialist",
+      "bonuses": {
+        "health": 20,
+        "damage": 5
+      }
+    }
+  ],
+  "weapons": [
+    {
+      "id": 1,
+      "name": "Iron Sword",
+      "description": "Basic melee weapon",
+      "damage": 10,
+      "type": "melee"
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "name": "Health Potion",
+      "description": "Restores 50 HP",
+      "effect": "heal",
+      "value": 50,
+      "type": "consumable"
+    }
+  ]
+}
