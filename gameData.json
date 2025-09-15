@@ -14,38 +14,14 @@
           "id": 0,
           "x": 0,
           "y": 550,
-          "width": 300,
-          "height": 50,
-          "color": "#4ECDC4"
-        },
-        {
-          "id": 2,
-          "x": 700,
-          "y": 350,
-          "width": 254,
-          "height": 127,
-          "color": "#4ECDC4"
-        },
-        {
-          "id": 3,
-          "x": 944,
-          "y": 250,
-          "width": 209,
-          "height": 86,
-          "color": "#4ECDC4"
-        },
-        {
-          "id": 4,
-          "x": 1149,
-          "y": 359,
-          "width": 300,
-          "height": 50,
+          "width": 855,
+          "height": 29,
           "color": "#4ECDC4"
         },
         {
           "id": 5,
-          "x": 358,
-          "y": 447,
+          "x": 912,
+          "y": 481,
           "width": 272,
           "height": 88,
           "color": "#4ECDC4"
