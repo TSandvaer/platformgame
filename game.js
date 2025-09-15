@@ -674,7 +674,7 @@ class PlatformRPG {
         this.updatePlatformList();
     }
 
-    savePlatforms() {
+    async savePlatforms() {
         // Update the current scene with the current platforms
         if (this.scenes.length > 0) {
             this.scenes[0].platforms = JSON.parse(JSON.stringify(this.platforms));
@@ -682,7 +682,41 @@ class PlatformRPG {
             // Save to localStorage as backup
             localStorage.setItem('platformGame_scenes', JSON.stringify(this.scenes));
 
-            alert('Platforms saved! Use "Export Game Data" to download the JSON file.');
+            // Create the gameData object
+            const gameData = {
+                gameInfo: {
+                    title: "Platform RPG Game",
+                    version: "1.0.0",
+                    lastModified: new Date().toISOString().split('T')[0]
+                },
+                scenes: this.scenes,
+                characters: this.gameData.characters,
+                classes: this.gameData.classes,
+                weapons: this.gameData.weapons,
+                items: this.gameData.items
+            };
+
+            try {
+                // Try to save to gameData.json file
+                const response = await fetch('./gameData.json', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(gameData, null, 2)
+                });
+
+                if (response.ok) {
+                    alert('Platforms and game data saved to gameData.json!');
+                } else {
+                    throw new Error('Could not save to file');
+                }
+            } catch (error) {
+                console.log('Could not save directly to file, downloading instead...');
+                // Fallback: trigger download
+                this.exportGameData();
+                alert('Platforms saved! gameData.json downloaded - please replace the existing file.');
+            }
         }
     }
 
