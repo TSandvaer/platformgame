@@ -40,15 +40,32 @@ class PlatformRPG {
         this.spritesLoaded = false;
         this.loadSprites();
 
+        // Platform sprites
+        this.platformSprites = {
+            tileset: { image: null, tileWidth: 32, tileHeight: 32 }
+        };
+        this.platformSpritesLoaded = false;
+        this.loadPlatformSprites();
+
+        // Platform sprite type mappings - using seamless tiling approach
+        this.platformSpriteTypes = {
+            color: { tileX: -1, tileY: -1 }, // Use solid color instead
+            grass: { tileX: 0, tileY: 4 }, // Bottom grass tile that tiles well
+            dirt: { tileX: 0, tileY: 5 }, // Pure dirt tile
+            stone: { tileX: 1, tileY: 4 }, // Stone tile
+            darkDirt: { tileX: 0, tileY: 6 }, // Darker dirt variation
+            lightGrass: { tileX: 1, tileY: 5 } // Light grass variation
+        };
+
         this.gravity = 0.8;
         this.friction = 0.8;
 
         this.platforms = [
-            { id: 0, x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4' },
-            { id: 1, x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4' },
-            { id: 2, x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4' },
-            { id: 3, x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4' },
-            { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4' }
+            { id: 0, x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color' },
+            { id: 1, x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color' },
+            { id: 2, x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4', spriteType: 'color' },
+            { id: 3, x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color' },
+            { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color' }
         ];
         this.nextPlatformId = 5;
 
@@ -123,6 +140,19 @@ class PlatformRPG {
             img.src = filePath;
             this.sprites[animationName].image = img;
         });
+    }
+
+    loadPlatformSprites() {
+        const img = new Image();
+        img.onload = () => {
+            this.platformSpritesLoaded = true;
+        };
+        img.onerror = () => {
+            console.error('Failed to load platform tileset');
+            this.platformSpritesLoaded = false;
+        };
+        img.src = 'Pixel Art Platformer/Texture/TX Tileset Ground.png';
+        this.platformSprites.tileset.image = img;
     }
 
     init() {
@@ -361,8 +391,14 @@ class PlatformRPG {
         this.ctx.translate(-this.camera.x, -this.camera.y);
 
         this.platforms.forEach(platform => {
-            this.ctx.fillStyle = platform.color;
-            this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            // Render platform with sprite or color
+            if (platform.spriteType !== 'color' && this.platformSpritesLoaded && this.platformSprites.tileset.image) {
+                this.drawPlatformSprite(platform);
+            } else {
+                // Fallback to solid color
+                this.ctx.fillStyle = platform.color;
+                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            }
 
             if (this.isDevelopmentMode) {
                 if (this.selectedPlatform && this.selectedPlatform.id === platform.id) {
@@ -435,6 +471,54 @@ class PlatformRPG {
         }
 
         this.ctx.restore();
+    }
+
+    drawPlatformSprite(platform) {
+        const tileset = this.platformSprites.tileset;
+        const tileWidth = tileset.tileWidth;
+        const tileHeight = tileset.tileHeight;
+
+        // Get sprite type info
+        const spriteInfo = this.platformSpriteTypes[platform.spriteType];
+        if (!spriteInfo || spriteInfo.tileX === -1) return;
+
+        // Calculate how many tiles we need to fill the platform
+        const tilesX = Math.ceil(platform.width / tileWidth);
+        const tilesY = Math.ceil(platform.height / tileHeight);
+
+        // Disable image smoothing for pixel-perfect rendering
+        this.ctx.imageSmoothingEnabled = false;
+
+        // Draw tiled sprite
+        for (let tileY = 0; tileY < tilesY; tileY++) {
+            for (let tileX = 0; tileX < tilesX; tileX++) {
+                // Use Math.floor to ensure pixel-perfect positioning
+                const drawX = Math.floor(platform.x + (tileX * tileWidth));
+                const drawY = Math.floor(platform.y + (tileY * tileHeight));
+
+                // Calculate the width and height to draw (handle partial tiles at edges)
+                const drawWidth = Math.min(tileWidth, platform.width - (tileX * tileWidth));
+                const drawHeight = Math.min(tileHeight, platform.height - (tileY * tileHeight));
+
+                // Only draw if the tile would be visible
+                if (drawWidth > 0 && drawHeight > 0) {
+                    // For partial tiles, we need to be careful with source clipping
+                    const sourceWidth = Math.min(tileWidth, drawWidth);
+                    const sourceHeight = Math.min(tileHeight, drawHeight);
+
+                    this.ctx.drawImage(
+                        tileset.image,
+                        spriteInfo.tileX * tileWidth, spriteInfo.tileY * tileHeight, // Source position
+                        sourceWidth, sourceHeight, // Source size (clipped for partial tiles)
+                        drawX, drawY, // Destination position
+                        drawWidth, drawHeight // Destination size
+                    );
+                }
+            }
+        }
+
+        // Re-enable image smoothing for other rendering
+        this.ctx.imageSmoothingEnabled = true;
     }
 
     renderDevInfo() {
@@ -675,6 +759,7 @@ class PlatformRPG {
             document.getElementById('platformY').value = Math.round(this.selectedPlatform.y);
             document.getElementById('platformWidth').value = this.selectedPlatform.width;
             document.getElementById('platformHeight').value = this.selectedPlatform.height;
+            document.getElementById('platformSpriteType').value = this.selectedPlatform.spriteType || 'color';
         } else {
             propertiesDiv.style.display = 'none';
         }
@@ -687,6 +772,7 @@ class PlatformRPG {
         this.selectedPlatform.y = parseInt(document.getElementById('platformY').value);
         this.selectedPlatform.width = parseInt(document.getElementById('platformWidth').value);
         this.selectedPlatform.height = parseInt(document.getElementById('platformHeight').value);
+        this.selectedPlatform.spriteType = document.getElementById('platformSpriteType').value;
 
         this.updatePlatformList();
     }
@@ -707,7 +793,8 @@ class PlatformRPG {
             y: this.mouseY || 100,
             width: 150,
             height: 20,
-            color: '#4ECDC4'
+            color: '#4ECDC4',
+            spriteType: 'color'
         };
 
         this.platforms.push(newPlatform);
