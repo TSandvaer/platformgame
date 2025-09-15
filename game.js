@@ -11,15 +11,31 @@ class PlatformRPG {
         this.player = {
             x: 100,
             y: 400,
-            width: 40,
-            height: 60,
+            width: 27,
+            height: 33,
             velocityX: 0,
             velocityY: 0,
             speed: 5,
             jumpPower: -15,
             onGround: false,
-            color: '#FF6B6B'
+            color: '#FF6B6B',
+            facing: 'right',
+            currentAnimation: 'idle',
+            frameIndex: 0,
+            frameTimer: 0,
+            frameRate: 8
         };
+
+        this.sprites = {
+            idle: { image: null, frames: 6, frameWidth: 100, frameHeight: 100 },
+            walk: { image: null, frames: 8, frameWidth: 100, frameHeight: 100 },
+            attack: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
+            hurt: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
+            death: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 }
+        };
+
+        this.spritesLoaded = false;
+        this.loadSprites();
 
         this.gravity = 0.8;
         this.friction = 0.8;
@@ -72,6 +88,38 @@ class PlatformRPG {
         };
 
         this.init();
+    }
+
+    loadSprites() {
+        const spriteFiles = {
+            idle: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
+            walk: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
+            attack: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
+            hurt: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
+            death: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
+        };
+
+        let loadedCount = 0;
+        const totalSprites = Object.keys(spriteFiles).length;
+
+        Object.entries(spriteFiles).forEach(([animationName, filePath]) => {
+            const img = new Image();
+            img.onload = () => {
+                loadedCount++;
+                if (loadedCount === totalSprites) {
+                    this.spritesLoaded = true;
+                }
+            };
+            img.onerror = () => {
+                console.error(`Failed to load sprite: ${filePath}`);
+                loadedCount++;
+                if (loadedCount === totalSprites) {
+                    this.spritesLoaded = true;
+                }
+            };
+            img.src = filePath;
+            this.sprites[animationName].image = img;
+        });
     }
 
     init() {
@@ -155,23 +203,36 @@ class PlatformRPG {
 
     handleInput() {
         if (this.isDevelopmentMode) {
+            let isMoving = false;
             if (this.keys['arrowleft'] || this.keys['a']) {
                 this.player.x -= this.player.speed;
+                this.player.facing = 'left';
+                isMoving = true;
             }
             if (this.keys['arrowright'] || this.keys['d']) {
                 this.player.x += this.player.speed;
+                this.player.facing = 'right';
+                isMoving = true;
             }
             if (this.keys['arrowup'] || this.keys['w']) {
                 this.player.y -= this.player.speed;
+                isMoving = true;
             }
             if (this.keys['arrowdown'] || this.keys['s']) {
                 this.player.y += this.player.speed;
+                isMoving = true;
             }
+            this.setPlayerAnimation(isMoving ? 'walk' : 'idle');
         } else {
+            let isMoving = false;
             if (this.keys['arrowleft'] || this.keys['a']) {
                 this.player.velocityX = -this.player.speed;
+                this.player.facing = 'left';
+                isMoving = true;
             } else if (this.keys['arrowright'] || this.keys['d']) {
                 this.player.velocityX = this.player.speed;
+                this.player.facing = 'right';
+                isMoving = true;
             } else {
                 this.player.velocityX *= this.friction;
             }
@@ -180,6 +241,34 @@ class PlatformRPG {
                 this.player.velocityY = this.player.jumpPower;
                 this.player.onGround = false;
             }
+
+            // Set animation based on movement and ground state
+            if (!this.player.onGround) {
+                this.setPlayerAnimation('idle'); // Could be jump animation if you have one
+            } else if (isMoving && Math.abs(this.player.velocityX) > 0.5) {
+                this.setPlayerAnimation('walk');
+            } else {
+                this.setPlayerAnimation('idle');
+            }
+        }
+    }
+
+    setPlayerAnimation(animationName) {
+        if (this.player.currentAnimation !== animationName) {
+            this.player.currentAnimation = animationName;
+            this.player.frameIndex = 0;
+            this.player.frameTimer = 0;
+        }
+    }
+
+    updatePlayerAnimation() {
+        if (!this.spritesLoaded) return;
+
+        this.player.frameTimer++;
+        if (this.player.frameTimer >= this.player.frameRate) {
+            this.player.frameTimer = 0;
+            const sprite = this.sprites[this.player.currentAnimation];
+            this.player.frameIndex = (this.player.frameIndex + 1) % sprite.frames;
         }
     }
 
@@ -247,8 +336,14 @@ class PlatformRPG {
             }
         });
 
-        this.ctx.fillStyle = this.player.color;
-        this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        // Render player sprite or fallback to rectangle
+        if (this.spritesLoaded && this.sprites[this.player.currentAnimation].image) {
+            this.drawPlayerSprite();
+        } else {
+            // Fallback to rectangle
+            this.ctx.fillStyle = this.player.color;
+            this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        }
 
         if (this.isDevelopmentMode) {
             this.ctx.strokeStyle = '#333';
@@ -260,6 +355,44 @@ class PlatformRPG {
         if (this.isDevelopmentMode) {
             this.renderDevInfo();
         }
+    }
+
+    drawPlayerSprite() {
+        const sprite = this.sprites[this.player.currentAnimation];
+        if (!sprite.image) return;
+
+        const sourceX = this.player.frameIndex * sprite.frameWidth;
+        const sourceY = 0;
+
+        this.ctx.save();
+
+        // Make sprite render larger than collision box
+        const spriteRenderWidth = 160;
+        const spriteRenderHeight = 160;
+        const spriteOffsetX = (this.player.width - spriteRenderWidth) / 2 + 2;
+        const spriteOffsetY = this.player.height - spriteRenderHeight + 67; // Align feet with bottom of collision box
+
+        // Flip sprite horizontally if facing left
+        if (this.player.facing === 'left') {
+            this.ctx.scale(-1, 1);
+            this.ctx.drawImage(
+                sprite.image,
+                sourceX, sourceY,
+                sprite.frameWidth, sprite.frameHeight,
+                -(this.player.x + spriteOffsetX + spriteRenderWidth), this.player.y + spriteOffsetY,
+                spriteRenderWidth, spriteRenderHeight
+            );
+        } else {
+            this.ctx.drawImage(
+                sprite.image,
+                sourceX, sourceY,
+                sprite.frameWidth, sprite.frameHeight,
+                this.player.x + spriteOffsetX, this.player.y + spriteOffsetY,
+                spriteRenderWidth, spriteRenderHeight
+            );
+        }
+
+        this.ctx.restore();
     }
 
     renderDevInfo() {
@@ -674,6 +807,7 @@ class PlatformRPG {
     gameLoop() {
         this.handleInput();
         this.updatePhysics();
+        this.updatePlayerAnimation();
         this.updateCamera();
         this.render();
 
