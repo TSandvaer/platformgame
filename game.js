@@ -23,7 +23,10 @@ class PlatformRPG {
             currentAnimation: 'idle',
             frameIndex: 0,
             frameTimer: 0,
-            frameRate: 8
+            frameRate: 6,
+            isAttacking: false,
+            attackTimer: 0,
+            attackDuration: 24
         };
 
         this.sprites = {
@@ -132,6 +135,11 @@ class PlatformRPG {
     setupEventListeners() {
         window.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
+
+            // Handle Ctrl key for attack
+            if (e.key === 'Control' && !this.player.isAttacking) {
+                this.handlePlayerAttack();
+            }
         });
 
         window.addEventListener('keyup', (e) => {
@@ -181,6 +189,17 @@ class PlatformRPG {
         });
 
         this.setupPlatformEditorListeners();
+    }
+
+    handlePlayerAttack() {
+        if (!this.player.isAttacking) {
+            this.player.isAttacking = true;
+            this.player.attackTimer = 0;
+            this.setPlayerAnimation('attack');
+
+            // Attack in the direction the player is currently facing
+            // Don't change facing direction during attack - use current facing
+        }
     }
 
     setDevelopmentMode(isDev) {
@@ -237,7 +256,7 @@ class PlatformRPG {
                 this.player.velocityX *= this.friction;
             }
 
-            if ((this.keys['arrowup'] || this.keys['w'] || this.keys[' ']) && this.player.onGround) {
+            if (this.keys[' '] && this.player.onGround) {
                 this.player.velocityY = this.player.jumpPower;
                 this.player.onGround = false;
             }
@@ -254,6 +273,11 @@ class PlatformRPG {
     }
 
     setPlayerAnimation(animationName) {
+        // Don't change animation if currently attacking (unless setting to attack)
+        if (this.player.isAttacking && animationName !== 'attack') {
+            return;
+        }
+
         if (this.player.currentAnimation !== animationName) {
             this.player.currentAnimation = animationName;
             this.player.frameIndex = 0;
@@ -264,11 +288,29 @@ class PlatformRPG {
     updatePlayerAnimation() {
         if (!this.spritesLoaded) return;
 
+        // Update frame animation
         this.player.frameTimer++;
         if (this.player.frameTimer >= this.player.frameRate) {
             this.player.frameTimer = 0;
             const sprite = this.sprites[this.player.currentAnimation];
             this.player.frameIndex = (this.player.frameIndex + 1) % sprite.frames;
+        }
+
+        // Handle attack timing - check this after frame updates
+        if (this.player.isAttacking) {
+            this.player.attackTimer++;
+            if (this.player.attackTimer >= this.player.attackDuration) {
+                this.player.isAttacking = false;
+                this.player.attackTimer = 0;
+                // Return to appropriate animation based on current state
+                if (!this.isDevelopmentMode && !this.player.onGround) {
+                    this.setPlayerAnimation('idle');
+                } else if (Math.abs(this.player.velocityX) > 0.5) {
+                    this.setPlayerAnimation('walk');
+                } else {
+                    this.setPlayerAnimation('idle');
+                }
+            }
         }
     }
 
