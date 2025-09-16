@@ -227,12 +227,23 @@ class PlatformRPG {
 
             // Handle Ctrl key for attack
             if (e.key === 'Control' && !this.player.isAttacking) {
+                e.preventDefault(); // Prevent browser shortcuts like Ctrl+Space
                 this.handlePlayerAttack();
+            }
+
+            // Prevent browser shortcuts when Ctrl is held down with other keys
+            if (e.ctrlKey && (e.key === ' ' || e.key === 'Space')) {
+                e.preventDefault(); // Specifically prevent Ctrl+Space
             }
         });
 
         window.addEventListener('keyup', (e) => {
             this.keys[e.key.toLowerCase()] = false;
+
+            // Prevent browser shortcuts for Control key
+            if (e.key === 'Control') {
+                e.preventDefault();
+            }
         });
 
         this.canvas.addEventListener('mousemove', (e) => {
