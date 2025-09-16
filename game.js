@@ -636,8 +636,8 @@ class PlatformRPG {
         this.ctx.save();
 
         // Make sprite render larger than collision box
-        const spriteRenderWidth = 160;
-        const spriteRenderHeight = 160;
+        const spriteRenderWidth = 256;
+        const spriteRenderHeight = 256;
         const spriteOffsetX = (this.player.width - spriteRenderWidth) / 2 + 2;
         const spriteOffsetY = this.player.height - spriteRenderHeight + 67; // Align feet with bottom of collision box
 
