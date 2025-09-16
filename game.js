@@ -159,11 +159,11 @@ class PlatformRPG {
 
     loadSprites() {
         const spriteFiles = {
-            idle: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
-            walk: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
-            attack: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
-            hurt: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
-            death: 'Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
+            idle: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
+            walk: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
+            attack: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
+            hurt: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
+            death: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
         };
 
         let loadedCount = 0;
@@ -218,7 +218,7 @@ class PlatformRPG {
         propsImg.onerror = () => {
             console.error('Failed to load village props tileset');
         };
-        propsImg.src = 'Pixel Art Platformer/Texture/TX Village Props.png';
+        propsImg.src = 'sprites/Pixel Art Platformer/Texture/TX Village Props.png';
         this.platformSprites.villageProps.image = propsImg;
     }
 
