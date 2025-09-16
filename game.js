@@ -243,6 +243,7 @@ class PlatformRPG {
                 document.getElementById('coordinates').textContent =
                     `X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`;
 
+                this.updateCursor();
                 this.handlePlatformDrag(e);
             }
         });
@@ -728,6 +729,42 @@ class PlatformRPG {
         this.resizeHandle = null;
     }
 
+    updateCursor() {
+        // Default cursor
+        this.canvas.style.cursor = 'default';
+
+        // Check if mouse is over any platform
+        for (const platform of this.platforms) {
+            if (this.mouseX >= platform.x && this.mouseX <= platform.x + platform.width &&
+                this.mouseY >= platform.y && this.mouseY <= platform.y + platform.height) {
+
+                // Check if mouse is near corners (resize handles)
+                const cornerSize = 8; // Size of corner resize area
+                const isNearLeft = this.mouseX <= platform.x + cornerSize;
+                const isNearRight = this.mouseX >= platform.x + platform.width - cornerSize;
+                const isNearTop = this.mouseY <= platform.y + cornerSize;
+                const isNearBottom = this.mouseY >= platform.y + platform.height - cornerSize;
+
+                if (isNearLeft || isNearRight || isNearTop || isNearBottom) {
+                    // Resize cursors for corners
+                    if ((isNearLeft && isNearTop) || (isNearRight && isNearBottom)) {
+                        this.canvas.style.cursor = 'nw-resize';
+                    } else if ((isNearRight && isNearTop) || (isNearLeft && isNearBottom)) {
+                        this.canvas.style.cursor = 'ne-resize';
+                    } else if (isNearLeft || isNearRight) {
+                        this.canvas.style.cursor = 'ew-resize';
+                    } else if (isNearTop || isNearBottom) {
+                        this.canvas.style.cursor = 'ns-resize';
+                    }
+                } else {
+                    // Move cursor for platform body
+                    this.canvas.style.cursor = 'move';
+                }
+                break; // Stop checking other platforms once we find one
+            }
+        }
+    }
+
     handlePlatformResize(mouseX, mouseY) {
         if (!this.selectedPlatform || !this.resizeHandle) return;
 
@@ -842,7 +879,7 @@ class PlatformRPG {
         this.selectedPlatform.x = parseInt(document.getElementById('platformX').value);
         this.selectedPlatform.y = parseInt(document.getElementById('platformY').value);
         this.selectedPlatform.width = parseInt(document.getElementById('platformWidth').value);
-        this.selectedPlatform.height = parseInt(document.getElementById('platformHeight').value);
+        this.selectedPlatform.height = Math.min(32, Math.max(10, parseInt(document.getElementById('platformHeight').value)));
         this.selectedPlatform.spriteType = document.getElementById('platformSpriteType').value;
 
         this.updatePlatformList();
