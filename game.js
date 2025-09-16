@@ -714,8 +714,15 @@ class PlatformRPG {
         const mouseY = e.clientY - rect.top + this.camera.y;
 
         if (this.isDragging) {
-            this.selectedPlatform.x = mouseX - this.dragOffset.x;
-            this.selectedPlatform.y = mouseY - this.dragOffset.y;
+            // Calculate new position based on mouse
+            const newX = mouseX - this.dragOffset.x;
+            const newY = mouseY - this.dragOffset.y;
+
+            // Apply snapping
+            const snappedPos = this.snapPlatformPosition(this.selectedPlatform, newX, newY);
+
+            this.selectedPlatform.x = snappedPos.x;
+            this.selectedPlatform.y = snappedPos.y;
             this.updatePlatformProperties();
         } else if (this.isResizing) {
             this.handlePlatformResize(mouseX, mouseY);
@@ -763,6 +770,55 @@ class PlatformRPG {
                 break; // Stop checking other platforms once we find one
             }
         }
+    }
+
+    snapPlatformPosition(platform, newX, newY) {
+        const snapDistance = 10; // Pixels within which to snap
+        let snappedX = newX;
+        let snappedY = newY;
+
+        // Check against all other platforms
+        for (const otherPlatform of this.platforms) {
+            if (otherPlatform.id === platform.id) continue; // Skip self
+
+            // Horizontal snapping (left/right edges)
+            // Left edge of moving platform to right edge of other platform
+            if (Math.abs(newX - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
+                snappedX = otherPlatform.x + otherPlatform.width;
+            }
+            // Right edge of moving platform to left edge of other platform
+            else if (Math.abs((newX + platform.width) - otherPlatform.x) <= snapDistance) {
+                snappedX = otherPlatform.x - platform.width;
+            }
+            // Left edges align
+            else if (Math.abs(newX - otherPlatform.x) <= snapDistance) {
+                snappedX = otherPlatform.x;
+            }
+            // Right edges align
+            else if (Math.abs((newX + platform.width) - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
+                snappedX = otherPlatform.x + otherPlatform.width - platform.width;
+            }
+
+            // Vertical snapping (top/bottom edges)
+            // Top edge of moving platform to bottom edge of other platform
+            if (Math.abs(newY - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
+                snappedY = otherPlatform.y + otherPlatform.height;
+            }
+            // Bottom edge of moving platform to top edge of other platform
+            else if (Math.abs((newY + platform.height) - otherPlatform.y) <= snapDistance) {
+                snappedY = otherPlatform.y - platform.height;
+            }
+            // Top edges align
+            else if (Math.abs(newY - otherPlatform.y) <= snapDistance) {
+                snappedY = otherPlatform.y;
+            }
+            // Bottom edges align
+            else if (Math.abs((newY + platform.height) - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
+                snappedY = otherPlatform.y + otherPlatform.height - platform.height;
+            }
+        }
+
+        return { x: snappedX, y: snappedY };
     }
 
     handlePlatformResize(mouseX, mouseY) {

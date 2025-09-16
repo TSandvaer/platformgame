@@ -12,7 +12,7 @@
       "platforms": [
         {
           "id": 0,
-          "x": 0,
+          "x": 43,
           "y": 550,
           "width": 855,
           "height": 29,
@@ -52,9 +52,9 @@
         },
         {
           "id": 8,
-          "x": 305,
-          "y": 488,
-          "width": 370,
+          "x": 43,
+          "y": 579,
+          "width": 828,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "dirt"
