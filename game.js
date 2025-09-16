@@ -134,7 +134,7 @@ class PlatformRPG {
 
             // Decorative Items
             barrel: { tileX: 6, tileY: 1, width: 20, height: 20, name: 'Barrel' },
-            crate: { tileX: 1, tileY: 0, width: 16, height: 16, name: 'Crate' },
+            crate: { tileX: 4, tileY: 1, width: 20, height: 20, name: 'Crate' },
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
 
             // Functional Items
