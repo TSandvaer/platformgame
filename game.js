@@ -42,27 +42,57 @@ class PlatformRPG {
 
         // Platform sprites
         this.platformSprites = {
-            tileset: { image: null, tileWidth: 32, tileHeight: 32 },
+            tileset: { image: null, tileWidth: 16, tileHeight: 16 },
             villageProps: { image: null, tileWidth: 32, tileHeight: 32 }
         };
         this.platformSpritesLoaded = false;
         this.loadPlatformSprites();
 
-        // Platform sprite type mappings - using seamless tiling approach
+        // Platform sprite type mappings - based on actual tileset layout
         this.platformSpriteTypes = {
             color: { tileset: 'none', tileX: -1, tileY: -1 }, // Use solid color instead
-            // Ground tileset options
-            grass: { tileset: 'tileset', tileX: 1, tileY: 0 }, // Use stone coordinates for seamless grass
-            dirt: { tileset: 'tileset', tileX: 1, tileY: 2 }, // Try bottom row coordinates for dirt
-            stone: { tileset: 'tileset', tileX: 2, tileY: 0 }, // Different stone tile
-            darkDirt: { tileset: 'tileset', tileX: 1, tileY: 1 }, // Previous dirt coordinates
-            lightGrass: { tileset: 'tileset', tileX: 0, tileY: 0 }, // Original grass tile for light grass
-            // Village Props tileset options
-            woodenLog: { tileset: 'villageProps', tileX: 3, tileY: 11 }, // Wooden log platform
-            stoneBlock: { tileset: 'villageProps', tileX: 24, tileY: 20 }, // Stone block
-            woodenPlank: { tileset: 'villageProps', tileX: 0, tileY: 24 }, // Wooden plank
-            bridge: { tileset: 'villageProps', tileX: 11, tileY: 20 }, // Bridge piece
-            metalPlatform: { tileset: 'villageProps', tileX: 12, tileY: 10 } // Metal platform
+
+            // Stone/Rock textures (examining first few rows for stone-like textures)
+            cobblestone: { tileset: 'tileset', tileX: 6, tileY: 1 }, // Actually cobblestone texture
+            darkStone: { tileset: 'tileset', tileX: 1, tileY: 0 }, // Dark stone variation
+            lightStone: { tileset: 'tileset', tileX: 2, tileY: 0 }, // Light stone variation
+            bricks: { tileset: 'tileset', tileX: 0, tileY: 3 }, // Actually brick pattern
+            roughStone: { tileset: 'tileset', tileX: 3, tileY: 0 }, // Rough stone
+
+            // Ground/Dirt textures (looking for brown/earthy textures)
+            dirt: { tileset: 'tileset', tileX: 21, tileY: 22 }, // Brown dirt texture
+            darkDirt: { tileset: 'tileset', tileX: 1, tileY: 1 }, // Darker dirt
+            sand: { tileset: 'tileset', tileX: 2, tileY: 1 }, // Sandy texture
+            clay: { tileset: 'tileset', tileX: 3, tileY: 1 }, // Clay-like texture
+            rockySoil: { tileset: 'tileset', tileX: 4, tileY: 1 }, // Rocky soil
+
+            // Grass textures (looking for green textures)
+            grass: { tileset: 'tileset', tileX: 20, tileY: 22 }, // Actually grass texture
+            lightGrass: { tileset: 'tileset', tileX: 1, tileY: 2 }, // Light green
+            darkGrass: { tileset: 'tileset', tileX: 2, tileY: 2 }, // Dark green
+            mossyGrass: { tileset: 'tileset', tileX: 3, tileY: 2 }, // Mossy texture
+            dryGrass: { tileset: 'tileset', tileX: 4, tileY: 2 }, // Yellowish grass
+
+            // Wood textures (looking for wooden/brown planked textures)
+            lightWood: { tileset: 'tileset', tileX: 0, tileY: 9 }, // Light wood planks
+            darkWood: { tileset: 'tileset', tileX: 1, tileY: 9 }, // Dark wood planks
+            plank: { tileset: 'tileset', tileX: 2, tileY: 9 }, // Wood plank texture
+            log: { tileset: 'tileset', tileX: 3, tileY: 9 }, // Log texture
+            bark: { tileset: 'tileset', tileX: 4, tileY: 9 }, // Bark texture
+
+            // Metal textures (looking for metallic/shiny textures)
+            iron: { tileset: 'tileset', tileX: 0, tileY: 4 }, // Iron/metal texture
+            steel: { tileset: 'tileset', tileX: 1, tileY: 4 }, // Steel texture
+            copper: { tileset: 'tileset', tileX: 2, tileY: 4 }, // Copper-like
+            gold: { tileset: 'tileset', tileX: 3, tileY: 4 }, // Gold-like
+            silver: { tileset: 'tileset', tileX: 4, tileY: 4 }, // Silver-like
+
+            // Special textures
+            lava: { tileset: 'tileset', tileX: 0, tileY: 5 }, // Red/orange lava
+            water: { tileset: 'tileset', tileX: 1, tileY: 5 }, // Blue water
+            ice: { tileset: 'tileset', tileX: 2, tileY: 5 }, // Light blue ice
+            crystal: { tileset: 'tileset', tileX: 3, tileY: 5 }, // Crystal-like
+            gem: { tileset: 'tileset', tileX: 4, tileY: 5 } // Gem-like
         };
 
         this.gravity = 0.8;
@@ -165,7 +195,7 @@ class PlatformRPG {
         groundImg.onerror = () => {
             console.error('Failed to load ground tileset');
         };
-        groundImg.src = 'Pixel Art Platformer/Texture/TX Tileset Ground.png';
+        groundImg.src = 'textures_02_08_25.png';
         this.platformSprites.tileset.image = groundImg;
 
         // Load village props tileset
@@ -516,12 +546,16 @@ class PlatformRPG {
 
         if (!tileset.image) return;
 
-        const tileWidth = tileset.tileWidth;
-        const tileHeight = tileset.tileHeight;
+        const sourceTileWidth = tileset.tileWidth;  // Source size (16x16)
+        const sourceTileHeight = tileset.tileHeight;
 
-        // Calculate how many tiles we need to fill the platform
-        const tilesX = Math.ceil(platform.width / tileWidth);
-        const tilesY = Math.ceil(platform.height / tileHeight);
+        // Display tiles as 32x32 regardless of source size
+        const displayTileWidth = 32;
+        const displayTileHeight = 32;
+
+        // Calculate how many tiles we need to fill the platform (based on display size)
+        const tilesX = Math.ceil(platform.width / displayTileWidth);
+        const tilesY = Math.ceil(platform.height / displayTileHeight);
 
         // Disable image smoothing for pixel-perfect rendering
         this.ctx.imageSmoothingEnabled = false;
@@ -529,26 +563,26 @@ class PlatformRPG {
         // Draw tiled sprite
         for (let tileY = 0; tileY < tilesY; tileY++) {
             for (let tileX = 0; tileX < tilesX; tileX++) {
-                // Use Math.floor to ensure pixel-perfect positioning
-                const drawX = Math.floor(platform.x + (tileX * tileWidth));
-                const drawY = Math.floor(platform.y + (tileY * tileHeight));
+                // Use Math.floor to ensure pixel-perfect positioning (display size)
+                const drawX = Math.floor(platform.x + (tileX * displayTileWidth));
+                const drawY = Math.floor(platform.y + (tileY * displayTileHeight));
 
                 // Calculate the width and height to draw (handle partial tiles at edges)
-                const drawWidth = Math.min(tileWidth, platform.width - (tileX * tileWidth));
-                const drawHeight = Math.min(tileHeight, platform.height - (tileY * tileHeight));
+                const drawWidth = Math.min(displayTileWidth, platform.width - (tileX * displayTileWidth));
+                const drawHeight = Math.min(displayTileHeight, platform.height - (tileY * displayTileHeight));
 
                 // Only draw if the tile would be visible
                 if (drawWidth > 0 && drawHeight > 0) {
-                    // For partial tiles, we need to be careful with source clipping
-                    const sourceWidth = Math.min(tileWidth, drawWidth);
-                    const sourceHeight = Math.min(tileHeight, drawHeight);
+                    // Use source dimensions for reading from texture, display dimensions for rendering
+                    const sourceX = spriteInfo.tileX * sourceTileWidth;
+                    const sourceY = spriteInfo.tileY * sourceTileHeight;
 
                     this.ctx.drawImage(
                         tileset.image,
-                        spriteInfo.tileX * tileWidth, spriteInfo.tileY * tileHeight, // Source position
-                        sourceWidth, sourceHeight, // Source size (clipped for partial tiles)
+                        sourceX, sourceY, // Source position (16x16 coordinates)
+                        sourceTileWidth, sourceTileHeight, // Source size (always full 16x16 tile)
                         drawX, drawY, // Destination position
-                        drawWidth, drawHeight // Destination size
+                        drawWidth, drawHeight // Destination size (32x32 scaled up)
                     );
                 }
             }
