@@ -53,7 +53,7 @@ class PlatformRPG {
             color: { tileset: 'none', tileX: -1, tileY: -1 }, // Use solid color instead
             // Ground tileset options
             grass: { tileset: 'tileset', tileX: 1, tileY: 0 }, // Use stone coordinates for seamless grass
-            dirt: { tileset: 'tileset', tileX: 2, tileY: 1 }, // Try right-side dirt coordinates for better tiling
+            dirt: { tileset: 'tileset', tileX: 1, tileY: 2 }, // Try bottom row coordinates for dirt
             stone: { tileset: 'tileset', tileX: 2, tileY: 0 }, // Different stone tile
             darkDirt: { tileset: 'tileset', tileX: 1, tileY: 1 }, // Previous dirt coordinates
             lightGrass: { tileset: 'tileset', tileX: 0, tileY: 0 }, // Original grass tile for light grass
@@ -529,13 +529,13 @@ class PlatformRPG {
         // Draw tiled sprite
         for (let tileY = 0; tileY < tilesY; tileY++) {
             for (let tileX = 0; tileX < tilesX; tileX++) {
-                // Use Math.floor to ensure pixel-perfect positioning with 1px overlap
-                const drawX = Math.floor(platform.x + (tileX * tileWidth) - (tileX > 0 ? 1 : 0));
-                const drawY = Math.floor(platform.y + (tileY * tileHeight) - (tileY > 0 ? 1 : 0));
+                // Use Math.floor to ensure pixel-perfect positioning
+                const drawX = Math.floor(platform.x + (tileX * tileWidth));
+                const drawY = Math.floor(platform.y + (tileY * tileHeight));
 
-                // Calculate the width and height to draw (handle partial tiles at edges, add 1px for overlap)
-                const drawWidth = Math.min(tileWidth + (tileX > 0 ? 1 : 0), platform.width - (tileX * tileWidth) + (tileX > 0 ? 1 : 0));
-                const drawHeight = Math.min(tileHeight + (tileY > 0 ? 1 : 0), platform.height - (tileY * tileHeight) + (tileY > 0 ? 1 : 0));
+                // Calculate the width and height to draw (handle partial tiles at edges)
+                const drawWidth = Math.min(tileWidth, platform.width - (tileX * tileWidth));
+                const drawHeight = Math.min(tileHeight, platform.height - (tileY * tileHeight));
 
                 // Only draw if the tile would be visible
                 if (drawWidth > 0 && drawHeight > 0) {

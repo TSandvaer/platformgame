@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-15"
+    "lastModified": "2025-09-16"
   },
   "scenes": [
     {
@@ -16,7 +16,10 @@
           "y": 550,
           "width": 855,
           "height": 29,
-          "color": "#4ECDC4"
+          "color": "#4ECDC4",
+          "spriteType": "dirt",
+          "tileX": 1,
+          "tileY": 0
         },
         {
           "id": 5,
@@ -24,7 +27,10 @@
           "y": 481,
           "width": 272,
           "height": 88,
-          "color": "#4ECDC4"
+          "color": "#4ECDC4",
+          "spriteType": "dirt",
+          "tileX": 1,
+          "tileY": 0
         }
       ]
     }
