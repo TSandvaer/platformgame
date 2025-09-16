@@ -48,6 +48,11 @@ class PlatformRPG {
         this.platformSpritesLoaded = false;
         this.loadPlatformSprites();
 
+        // Background management
+        this.backgrounds = {};
+        this.currentBackground = null;
+        this.loadAvailableBackgrounds();
+
         // Platform sprite type mappings - based on actual tileset layout
         this.platformSpriteTypes = {
             color: { tileset: 'none', tileX: -1, tileY: -1 }, // Use solid color instead
@@ -126,7 +131,11 @@ class PlatformRPG {
                 id: 1,
                 name: 'Tutorial',
                 description: 'Starting scene with basic platforms',
-                platforms: [...this.platforms]
+                platforms: [...this.platforms],
+                background: {
+                    name: 'none',
+                    layers: []
+                }
             }
         ];
 
@@ -211,6 +220,113 @@ class PlatformRPG {
         };
         propsImg.src = 'Pixel Art Platformer/Texture/TX Village Props.png';
         this.platformSprites.villageProps.image = propsImg;
+    }
+
+    loadAvailableBackgrounds() {
+        // For now, manually define available backgrounds
+        // In a real system, this would scan the backgrounds folder
+        this.availableBackgrounds = [
+            'none',
+            'The Dawn'
+        ];
+    }
+
+    loadBackground(backgroundName) {
+        if (backgroundName === 'none' || !backgroundName) {
+            this.currentBackground = null;
+            return;
+        }
+
+        if (this.backgrounds[backgroundName]) {
+            this.currentBackground = this.backgrounds[backgroundName];
+            return;
+        }
+
+        // Load background layers
+        const background = {
+            name: backgroundName,
+            layers: [],
+            layersLoaded: 0,
+            totalLayers: 8 // Assuming 8 layers based on folder structure
+        };
+
+        for (let i = 1; i <= 8; i++) {
+            const img = new Image();
+            const imagePath = `backgrounds/${backgroundName}/${backgroundName}/Layers/${i}.png`;
+
+            img.onload = () => {
+                background.layersLoaded++;
+            };
+            img.onerror = (error) => {
+                console.warn(`Failed to load background layer ${i} for "${backgroundName}"`);
+            };
+            img.src = imagePath;
+            background.layers.push(img);
+        }
+
+        this.backgrounds[backgroundName] = background;
+        this.currentBackground = background;
+    }
+
+    setSceneBackground(backgroundName) {
+        // Update current scene background
+        if (this.scenes.length > 0) {
+            // Initialize background property if it doesn't exist
+            if (!this.scenes[0].background) {
+                this.scenes[0].background = {
+                    name: 'none',
+                    layers: []
+                };
+            }
+            this.scenes[0].background.name = backgroundName;
+            this.scenes[0].background.layers = [];
+        }
+
+        // Load the background
+        this.loadBackground(backgroundName);
+    }
+
+    renderBackground() {
+        if (!this.currentBackground || !this.currentBackground.layers.length) {
+            // Render a default sky color instead of transparent
+            this.ctx.fillStyle = '#87CEEB'; // Sky blue
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            return;
+        }
+
+        const background = this.currentBackground;
+
+        // Render each background layer with different parallax speeds
+        background.layers.forEach((layer, index) => {
+            if (!layer.complete || !layer.naturalWidth) return; // Skip if not loaded
+
+            // Calculate parallax offset for this layer
+            // Layers closer to the back (lower index) move slower
+            const parallaxSpeed = (index + 1) * 0.1; // 0.1, 0.2, 0.3, etc.
+            const parallaxOffset = this.camera.x * parallaxSpeed;
+
+            // Calculate how many times we need to repeat the image to fill the screen
+            const imageWidth = layer.naturalWidth;
+            const imageHeight = layer.naturalHeight;
+
+            // Scale the image to fit the canvas height while maintaining aspect ratio
+            const scale = this.canvas.height / imageHeight;
+            const scaledWidth = imageWidth * scale;
+
+            // Calculate starting position to ensure seamless repetition
+            const startX = -parallaxOffset % scaledWidth;
+            const tilesNeeded = Math.ceil((this.canvas.width + scaledWidth) / scaledWidth);
+
+            // Draw repeated background tiles
+            for (let i = 0; i < tilesNeeded; i++) {
+                const x = startX + (i * scaledWidth);
+                this.ctx.drawImage(
+                    layer,
+                    x, 0,  // Position
+                    scaledWidth, this.canvas.height  // Size
+                );
+            }
+        });
     }
 
     init() {
@@ -308,6 +424,7 @@ class PlatformRPG {
         document.getElementById('currentMode').textContent = isDev ? 'Development' : 'Production';
         document.getElementById('coordinates').style.display = isDev ? 'block' : 'none';
         document.getElementById('platformEditor').style.display = isDev ? 'block' : 'none';
+        document.getElementById('backgroundEditor').style.display = isDev ? 'block' : 'none';
 
         if (isDev) {
             this.updatePlatformList();
@@ -457,6 +574,9 @@ class PlatformRPG {
 
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Render parallax background layers
+        this.renderBackground();
 
         this.ctx.save();
         this.ctx.translate(-this.camera.x, -this.camera.y);
@@ -682,6 +802,12 @@ class PlatformRPG {
 
         document.getElementById('importGameData').addEventListener('change', (e) => {
             this.importGameData(e);
+        });
+
+        // Background controls
+        document.getElementById('applyBackground').addEventListener('click', () => {
+            const selectedBackground = document.getElementById('backgroundSelect').value;
+            this.setSceneBackground(selectedBackground);
         });
     }
 
@@ -1197,7 +1323,6 @@ class PlatformRPG {
                 console.log('Could not save directly to file, downloading instead...');
                 // Fallback: trigger download
                 this.exportGameData();
-                alert('Platforms saved! gameData.json downloaded - please replace the existing file.');
             }
         }
     }
@@ -1226,6 +1351,19 @@ class PlatformRPG {
                 if (this.scenes[0].platforms) {
                     this.platforms = [...this.scenes[0].platforms];
                     this.nextPlatformId = Math.max(...this.platforms.map(p => p.id || 0)) + 1;
+                }
+
+                // Restore background if it exists
+                if (this.scenes[0].background && this.scenes[0].background.name && this.scenes[0].background.name !== 'none') {
+                    this.loadBackground(this.scenes[0].background.name);
+
+                    // Update the UI dropdown to match the loaded background (with small delay for DOM)
+                    setTimeout(() => {
+                        const backgroundSelect = document.getElementById('backgroundSelect');
+                        if (backgroundSelect) {
+                            backgroundSelect.value = this.scenes[0].background.name;
+                        }
+                    }, 100);
                 }
             }
 
@@ -1256,6 +1394,19 @@ class PlatformRPG {
                 if (this.scenes.length > 0 && this.scenes[0].platforms) {
                     this.platforms = [...this.scenes[0].platforms];
                     this.nextPlatformId = Math.max(...this.platforms.map(p => p.id || 0)) + 1;
+                }
+
+                // Restore background if it exists
+                if (this.scenes.length > 0 && this.scenes[0].background && this.scenes[0].background.name && this.scenes[0].background.name !== 'none') {
+                    this.loadBackground(this.scenes[0].background.name);
+
+                    // Update the UI dropdown to match the loaded background (with small delay for DOM)
+                    setTimeout(() => {
+                        const backgroundSelect = document.getElementById('backgroundSelect');
+                        if (backgroundSelect) {
+                            backgroundSelect.value = this.scenes[0].background.name;
+                        }
+                    }, 100);
                 }
             } catch (e) {
                 console.error('Error loading saved data:', e);
