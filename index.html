@@ -226,6 +226,69 @@
                     </div>
                 </div>
 
+                <div class="platform-editor" id="propsEditor" style="display: none;">
+                    <h4>Village Props Editor</h4>
+                    <div class="property-row">
+                        <span class="property-label">Prop Type:</span>
+                        <select id="propTypeSelect" style="width: 120px;">
+                            <optgroup label="Buildings">
+                                <option value="house">House</option>
+                                <option value="tower">Tower</option>
+                                <option value="windmill">Windmill</option>
+                            </optgroup>
+                            <optgroup label="Nature">
+                                <option value="tree1">Tree 1</option>
+                                <option value="tree2">Tree 2</option>
+                                <option value="bush">Bush</option>
+                            </optgroup>
+                            <optgroup label="Items">
+                                <option value="barrel">Barrel</option>
+                                <option value="crate">Crate</option>
+                                <option value="fence">Fence</option>
+                                <option value="well">Well</option>
+                                <option value="signpost">Signpost</option>
+                                <option value="lamp">Lamp</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="property-row">
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="propObstacleCheck">
+                            <span>Is Obstacle (blocks player)</span>
+                        </label>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small" id="addPropBtn">Add Prop (Click on map)</button>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small danger" id="clearPropsBtn">Clear All Props</button>
+                    </div>
+
+                    <div id="propProperties" style="display: none;">
+                        <h4>Selected Prop</h4>
+                        <div class="property-row">
+                            <span class="property-label">Type:</span>
+                            <span id="selectedPropType"></span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">X:</span>
+                            <input type="number" id="propX" min="0">
+                            <span class="property-label">Y:</span>
+                            <input type="number" id="propY" min="0">
+                        </div>
+                        <div class="property-row">
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="selectedPropObstacle">
+                                <span>Is Obstacle</span>
+                            </label>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="updateProp">Update Prop</button>
+                            <button class="btn small danger" id="deleteProp">Delete Prop</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="platform-editor" id="platformEditor" style="display: none;">
                     <h4>Platform Editor</h4>
                     <div class="platform-list" id="platformList"></div>

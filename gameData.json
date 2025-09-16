@@ -54,7 +54,36 @@
       "background": {
         "name": "The Dawn",
         "layers": []
-      }
+      },
+      "props": [
+        {
+          "id": 2,
+          "x": 614,
+          "y": 520,
+          "type": "barrel",
+          "isObstacle": true,
+          "width": 32,
+          "height": 32
+        },
+        {
+          "id": 3,
+          "x": 492,
+          "y": 530,
+          "type": "crate",
+          "isObstacle": false,
+          "width": 32,
+          "height": 32
+        },
+        {
+          "id": 4,
+          "x": 316,
+          "y": 543,
+          "type": "well",
+          "isObstacle": false,
+          "width": 64,
+          "height": 64
+        }
+      ]
     }
   ],
   "characters": [
