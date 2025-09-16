@@ -42,19 +42,27 @@ class PlatformRPG {
 
         // Platform sprites
         this.platformSprites = {
-            tileset: { image: null, tileWidth: 32, tileHeight: 32 }
+            tileset: { image: null, tileWidth: 32, tileHeight: 32 },
+            villageProps: { image: null, tileWidth: 32, tileHeight: 32 }
         };
         this.platformSpritesLoaded = false;
         this.loadPlatformSprites();
 
         // Platform sprite type mappings - using seamless tiling approach
         this.platformSpriteTypes = {
-            color: { tileX: -1, tileY: -1 }, // Use solid color instead
-            grass: { tileX: 0, tileY: 4 }, // Bottom grass tile that tiles well
-            dirt: { tileX: 0, tileY: 5 }, // Pure dirt tile
-            stone: { tileX: 1, tileY: 4 }, // Stone tile
-            darkDirt: { tileX: 0, tileY: 6 }, // Darker dirt variation
-            lightGrass: { tileX: 1, tileY: 5 } // Light grass variation
+            color: { tileset: 'none', tileX: -1, tileY: -1 }, // Use solid color instead
+            // Ground tileset options
+            grass: { tileset: 'tileset', tileX: 1, tileY: 0 }, // Use stone coordinates for seamless grass
+            dirt: { tileset: 'tileset', tileX: 2, tileY: 1 }, // Try right-side dirt coordinates for better tiling
+            stone: { tileset: 'tileset', tileX: 2, tileY: 0 }, // Different stone tile
+            darkDirt: { tileset: 'tileset', tileX: 1, tileY: 1 }, // Previous dirt coordinates
+            lightGrass: { tileset: 'tileset', tileX: 0, tileY: 0 }, // Original grass tile for light grass
+            // Village Props tileset options
+            woodenLog: { tileset: 'villageProps', tileX: 3, tileY: 11 }, // Wooden log platform
+            stoneBlock: { tileset: 'villageProps', tileX: 24, tileY: 20 }, // Stone block
+            woodenPlank: { tileset: 'villageProps', tileX: 0, tileY: 24 }, // Wooden plank
+            bridge: { tileset: 'villageProps', tileX: 11, tileY: 20 }, // Bridge piece
+            metalPlatform: { tileset: 'villageProps', tileX: 12, tileY: 10 } // Metal platform
         };
 
         this.gravity = 0.8;
@@ -143,16 +151,36 @@ class PlatformRPG {
     }
 
     loadPlatformSprites() {
-        const img = new Image();
-        img.onload = () => {
-            this.platformSpritesLoaded = true;
+        let loadedCount = 0;
+        const totalImages = 2;
+
+        // Load ground tileset
+        const groundImg = new Image();
+        groundImg.onload = () => {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+                this.platformSpritesLoaded = true;
+            }
         };
-        img.onerror = () => {
-            console.error('Failed to load platform tileset');
-            this.platformSpritesLoaded = false;
+        groundImg.onerror = () => {
+            console.error('Failed to load ground tileset');
         };
-        img.src = 'Pixel Art Platformer/Texture/TX Tileset Ground.png';
-        this.platformSprites.tileset.image = img;
+        groundImg.src = 'Pixel Art Platformer/Texture/TX Tileset Ground.png';
+        this.platformSprites.tileset.image = groundImg;
+
+        // Load village props tileset
+        const propsImg = new Image();
+        propsImg.onload = () => {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+                this.platformSpritesLoaded = true;
+            }
+        };
+        propsImg.onerror = () => {
+            console.error('Failed to load village props tileset');
+        };
+        propsImg.src = 'Pixel Art Platformer/Texture/TX Village Props.png';
+        this.platformSprites.villageProps.image = propsImg;
     }
 
     init() {
@@ -474,13 +502,22 @@ class PlatformRPG {
     }
 
     drawPlatformSprite(platform) {
-        const tileset = this.platformSprites.tileset;
-        const tileWidth = tileset.tileWidth;
-        const tileHeight = tileset.tileHeight;
-
         // Get sprite type info
         const spriteInfo = this.platformSpriteTypes[platform.spriteType];
         if (!spriteInfo || spriteInfo.tileX === -1) return;
+
+        // Get the correct tileset based on sprite info
+        let tileset;
+        if (spriteInfo.tileset === 'villageProps') {
+            tileset = this.platformSprites.villageProps;
+        } else {
+            tileset = this.platformSprites.tileset;
+        }
+
+        if (!tileset.image) return;
+
+        const tileWidth = tileset.tileWidth;
+        const tileHeight = tileset.tileHeight;
 
         // Calculate how many tiles we need to fill the platform
         const tilesX = Math.ceil(platform.width / tileWidth);
@@ -492,13 +529,13 @@ class PlatformRPG {
         // Draw tiled sprite
         for (let tileY = 0; tileY < tilesY; tileY++) {
             for (let tileX = 0; tileX < tilesX; tileX++) {
-                // Use Math.floor to ensure pixel-perfect positioning
-                const drawX = Math.floor(platform.x + (tileX * tileWidth));
-                const drawY = Math.floor(platform.y + (tileY * tileHeight));
+                // Use Math.floor to ensure pixel-perfect positioning with 1px overlap
+                const drawX = Math.floor(platform.x + (tileX * tileWidth) - (tileX > 0 ? 1 : 0));
+                const drawY = Math.floor(platform.y + (tileY * tileHeight) - (tileY > 0 ? 1 : 0));
 
-                // Calculate the width and height to draw (handle partial tiles at edges)
-                const drawWidth = Math.min(tileWidth, platform.width - (tileX * tileWidth));
-                const drawHeight = Math.min(tileHeight, platform.height - (tileY * tileHeight));
+                // Calculate the width and height to draw (handle partial tiles at edges, add 1px for overlap)
+                const drawWidth = Math.min(tileWidth + (tileX > 0 ? 1 : 0), platform.width - (tileX * tileWidth) + (tileX > 0 ? 1 : 0));
+                const drawHeight = Math.min(tileHeight + (tileY > 0 ? 1 : 0), platform.height - (tileY * tileHeight) + (tileY > 0 ? 1 : 0));
 
                 // Only draw if the tile would be visible
                 if (drawWidth > 0 && drawHeight > 0) {
