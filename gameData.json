@@ -58,8 +58,8 @@
       "props": [
         {
           "id": 2,
-          "x": 614,
-          "y": 520,
+          "x": 593,
+          "y": 423,
           "type": "barrel",
           "isObstacle": true,
           "width": 32,
