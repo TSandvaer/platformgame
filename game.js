@@ -215,6 +215,7 @@ class PlatformRPG {
 
     init() {
         this.setupEventListeners();
+        this.setDevelopmentMode(true); // Properly initialize development mode UI
         this.gameLoop();
         this.updateUI();
         this.loadGameDataFromFile();
