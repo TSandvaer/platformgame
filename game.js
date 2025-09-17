@@ -133,8 +133,8 @@ class PlatformRPG {
             bush: { tileX: 6, tileY: 2, width: 32, height: 16, name: 'Bush' },
 
             // Decorative Items
-            barrel: { tileX: 6, tileY: 1, width: 32, height: 32, name: 'Barrel' },
-            crate: { tileX: 4, tileY: 1, width: 20, height: 20, name: 'Crate' },
+            barrel: { tileX: 6.05, tileY: 1, width: 29, height: 32, name: 'Barrel' },
+            crate: { tileX: 4, tileY: 1, width: 32, height: 32, name: 'Crate' },
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
 
             // Functional Items
@@ -828,8 +828,8 @@ class PlatformRPG {
         const sourceX = propType.tileX * tileset.tileWidth;
         const sourceY = propType.tileY * tileset.tileHeight;
 
-        // Scale props to be more visible (2x scale, except well which is 1x)
-        const scale = prop.type === 'well' ? 1 : 2;
+        // Scale props to be more visible (2x scale, with exceptions)
+        const scale = prop.type === 'well' ? 1 : (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 : 2;
         const renderWidth = propType.width * scale;
         const renderHeight = propType.height * scale;
 
@@ -876,7 +876,7 @@ class PlatformRPG {
         const propType = this.propTypes[type];
         if (!propType) return;
 
-        const scale = type === 'well' ? 1 : 2;
+        const scale = type === 'well' ? 1 : (type === 'barrel' || type === 'crate') ? 1.2 : 2;
         const newProp = {
             id: this.nextPropId++,
             x: x,
@@ -1066,7 +1066,7 @@ class PlatformRPG {
             if (!propType) continue;
 
             // Check if mouse is within prop bounds (using same scale as rendering)
-            const scale = prop.type === 'well' ? 1 : 2;
+            const scale = prop.type === 'well' ? 1 : (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 : 2;
             const renderWidth = propType.width * scale;
             const renderHeight = propType.height * scale;
 
@@ -1164,7 +1164,7 @@ class PlatformRPG {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
 
-            const scale = prop.type === 'well' ? 1 : 2;
+            const scale = prop.type === 'well' ? 1 : (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 : 2;
             const renderWidth = propType.width * scale;
             const renderHeight = propType.height * scale;
 
