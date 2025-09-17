@@ -66,34 +66,34 @@ class PlatformRPG {
 
             // Ground/Dirt textures (looking for brown/earthy textures)
             dirt: { tileset: 'tileset', tileX: 21, tileY: 22 }, // Brown dirt texture
-            darkDirt: { tileset: 'tileset', tileX: 1, tileY: 1 }, // Darker dirt
-            sand: { tileset: 'tileset', tileX: 2, tileY: 1 }, // Sandy texture
+            darkDirt: { tileset: 'tileset', tileX: 3, tileY: 23 }, // Darker dirt
+            sand: { tileset: 'tileset', tileX: 5, tileY: 22 }, // Sandy texture
             clay: { tileset: 'tileset', tileX: 3, tileY: 1 }, // Clay-like texture
             rockySoil: { tileset: 'tileset', tileX: 4, tileY: 1 }, // Rocky soil
 
             // Grass textures (looking for green textures)
             grass: { tileset: 'tileset', tileX: 20, tileY: 22 }, // Actually grass texture
-            lightGrass: { tileset: 'tileset', tileX: 1, tileY: 2 }, // Light green
-            darkGrass: { tileset: 'tileset', tileX: 2, tileY: 2 }, // Dark green
+            sandGrass: { tileset: 'tileset', tileX: 7, tileY: 22 }, // sand substrate and grass
+            darkGrass: { tileset: 'tileset', tileX: 17, tileY: 22 }, // Dark green
             mossyGrass: { tileset: 'tileset', tileX: 3, tileY: 2 }, // Mossy texture
             dryGrass: { tileset: 'tileset', tileX: 4, tileY: 2 }, // Yellowish grass
 
             // Wood textures (looking for wooden/brown planked textures)
-            lightWood: { tileset: 'tileset', tileX: 0, tileY: 9 }, // Light wood planks
-            darkWood: { tileset: 'tileset', tileX: 1, tileY: 9 }, // Dark wood planks
-            plank: { tileset: 'tileset', tileX: 2, tileY: 9 }, // Wood plank texture
-            log: { tileset: 'tileset', tileX: 3, tileY: 9 }, // Log texture
-            bark: { tileset: 'tileset', tileX: 4, tileY: 9 }, // Bark texture
+            lightWood: { tileset: 'tileset', tileX: 16, tileY: 10 }, // Light wood planks
+            darkWood: { tileset: 'tileset', tileX: 3, tileY: 10 }, // Dark wood planks
+            plank: { tileset: 'tileset', tileX: 2, tileY: 10 }, // Wood plank texture
+            log: { tileset: 'tileset', tileX: 4, tileY: 9 }, // Log texture
+            bark: { tileset: 'tileset', tileX: 3, tileY: 9 }, // Bark texture
 
             // Metal textures (looking for metallic/shiny textures)
-            iron: { tileset: 'tileset', tileX: 0, tileY: 4 }, // Iron/metal texture
-            steel: { tileset: 'tileset', tileX: 1, tileY: 4 }, // Steel texture
-            copper: { tileset: 'tileset', tileX: 2, tileY: 4 }, // Copper-like
-            gold: { tileset: 'tileset', tileX: 3, tileY: 4 }, // Gold-like
-            silver: { tileset: 'tileset', tileX: 4, tileY: 4 }, // Silver-like
+            iron: { tileset: 'tileset', tileX: 0, tileY: 5 }, // Iron/metal texture
+            steel: { tileset: 'tileset', tileX: 4, tileY: 4 }, // Steel texture
+            copper: { tileset: 'tileset', tileX: 6, tileY: 4 }, // Copper-like
+            gold: { tileset: 'tileset', tileX: 23, tileY: 13 }, // Gold-like
+            silver: { tileset: 'tileset', tileX: 3, tileY: 4 }, // Silver-like
 
             // Special textures
-            lava: { tileset: 'tileset', tileX: 0, tileY: 5 }, // Red/orange lava
+            lava: { tileset: 'tileset', tileX: 7, tileY: 13 }, // Red/orange lava
             water: { tileset: 'tileset', tileX: 1, tileY: 5 }, // Blue water
             ice: { tileset: 'tileset', tileX: 2, tileY: 5 }, // Light blue ice
             crystal: { tileset: 'tileset', tileX: 3, tileY: 5 }, // Crystal-like
@@ -138,7 +138,7 @@ class PlatformRPG {
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
 
             // Functional Items
-            well: { tileX: 4, tileY: 2, width: 64, height: 64, name: 'Well' },
+            well: { tileX: 1, tileY: 6, width: 64, height: 64, name: 'Well' },
             signpost: { tileX: 11, tileY: 0, width: 16, height: 32, name: 'Signpost' },
             lamp: { tileX: 12, tileY: 0, width: 16, height: 32, name: 'Lamp' }
         };

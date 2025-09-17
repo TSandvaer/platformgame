@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-16"
+    "lastModified": "2025-09-17"
   },
   "scenes": [
     {
@@ -14,7 +14,7 @@
           "id": 0,
           "x": 3,
           "y": 585,
-          "width": 3089,
+          "width": 1133,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "grass",
@@ -25,7 +25,7 @@
           "id": 5,
           "x": 3,
           "y": 617,
-          "width": 3089.9669341784793,
+          "width": 1133,
           "height": 127,
           "color": "#4ECDC4",
           "spriteType": "dirt",
@@ -34,21 +34,48 @@
         },
         {
           "id": 6,
-          "x": 459,
-          "y": 554,
+          "x": 516,
+          "y": 181,
           "width": 242,
-          "height": 31,
+          "height": 63,
           "color": "#4ECDC4",
-          "spriteType": "dirt"
+          "spriteType": "lava"
         },
         {
           "id": 7,
-          "x": 748,
-          "y": 496,
+          "x": 1136,
+          "y": 585,
           "width": 247,
           "height": 32,
           "color": "#4ECDC4",
-          "spriteType": "lightGrass"
+          "spriteType": "sandGrass"
+        },
+        {
+          "id": 8,
+          "x": 1136,
+          "y": 617,
+          "width": 247,
+          "height": 84,
+          "color": "#4ECDC4",
+          "spriteType": "sand"
+        },
+        {
+          "id": 9,
+          "x": 516,
+          "y": 279,
+          "width": 242,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "gold"
+        },
+        {
+          "id": 10,
+          "x": 516,
+          "y": 161,
+          "width": 242,
+          "height": 20,
+          "color": "#4ECDC4",
+          "spriteType": "lightWood"
         }
       ],
       "background": {
@@ -58,8 +85,8 @@
       "props": [
         {
           "id": 2,
-          "x": 593,
-          "y": 423,
+          "x": 686,
+          "y": 546,
           "type": "barrel",
           "isObstacle": true,
           "width": 32,
@@ -76,8 +103,8 @@
         },
         {
           "id": 4,
-          "x": 316,
-          "y": 543,
+          "x": 229,
+          "y": 455,
           "type": "well",
           "isObstacle": false,
           "width": 64,
