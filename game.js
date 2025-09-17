@@ -828,9 +828,10 @@ class PlatformRPG {
         const sourceX = propType.tileX * tileset.tileWidth;
         const sourceY = propType.tileY * tileset.tileHeight;
 
-        // Scale props to be more visible (2x scale)
-        const renderWidth = propType.width * 2;
-        const renderHeight = propType.height * 2;
+        // Scale props to be more visible (2x scale, except well which is 1x)
+        const scale = prop.type === 'well' ? 1 : 2;
+        const renderWidth = propType.width * scale;
+        const renderHeight = propType.height * scale;
 
         // Disable image smoothing for pixel-perfect rendering
         this.ctx.imageSmoothingEnabled = false;
@@ -875,14 +876,15 @@ class PlatformRPG {
         const propType = this.propTypes[type];
         if (!propType) return;
 
+        const scale = type === 'well' ? 1 : 2;
         const newProp = {
             id: this.nextPropId++,
             x: x,
             y: y,
             type: type,
             isObstacle: isObstacle,
-            width: propType.width * 2,  // 2x scale
-            height: propType.height * 2
+            width: propType.width * scale,
+            height: propType.height * scale
         };
 
         this.props.push(newProp);
@@ -1063,9 +1065,10 @@ class PlatformRPG {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
 
-            // Check if mouse is within prop bounds (using 2x scale like in rendering)
-            const renderWidth = propType.width * 2;
-            const renderHeight = propType.height * 2;
+            // Check if mouse is within prop bounds (using same scale as rendering)
+            const scale = prop.type === 'well' ? 1 : 2;
+            const renderWidth = propType.width * scale;
+            const renderHeight = propType.height * scale;
 
             if (mouseX >= prop.x && mouseX <= prop.x + renderWidth &&
                 mouseY >= prop.y && mouseY <= prop.y + renderHeight) {
@@ -1161,8 +1164,9 @@ class PlatformRPG {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
 
-            const renderWidth = propType.width * 2;
-            const renderHeight = propType.height * 2;
+            const scale = prop.type === 'well' ? 1 : 2;
+            const renderWidth = propType.width * scale;
+            const renderHeight = propType.height * scale;
 
             if (this.mouseX >= prop.x && this.mouseX <= prop.x + renderWidth &&
                 this.mouseY >= prop.y && this.mouseY <= prop.y + renderHeight) {
