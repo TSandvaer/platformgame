@@ -85,8 +85,8 @@
       "props": [
         {
           "id": 2,
-          "x": 686,
-          "y": 546,
+          "x": 594,
+          "y": 427,
           "type": "barrel",
           "isObstacle": true,
           "width": 32,
@@ -94,8 +94,8 @@
         },
         {
           "id": 3,
-          "x": 501,
-          "y": 513,
+          "x": 503,
+          "y": 483,
           "type": "crate",
           "isObstacle": true,
           "width": 32,
@@ -103,8 +103,8 @@
         },
         {
           "id": 4,
-          "x": 229,
-          "y": 455,
+          "x": 287,
+          "y": 491,
           "type": "well",
           "isObstacle": false,
           "width": 64,
