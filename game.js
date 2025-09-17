@@ -138,7 +138,7 @@ class PlatformRPG {
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
 
             // Functional Items
-            well: { tileX: 0, tileY: 5, width: 32, height: 32, name: 'Well' },
+            well: { tileX: 4, tileY: 2, width: 64, height: 64, name: 'Well' },
             signpost: { tileX: 11, tileY: 0, width: 16, height: 32, name: 'Signpost' },
             lamp: { tileX: 12, tileY: 0, width: 16, height: 32, name: 'Lamp' }
         };
