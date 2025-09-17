@@ -133,12 +133,12 @@ class PlatformRPG {
             bush: { tileX: 6, tileY: 2, width: 32, height: 16, name: 'Bush' },
 
             // Decorative Items
-            barrel: { tileX: 6, tileY: 1, width: 20, height: 20, name: 'Barrel' },
+            barrel: { tileX: 6, tileY: 1, width: 32, height: 32, name: 'Barrel' },
             crate: { tileX: 4, tileY: 1, width: 20, height: 20, name: 'Crate' },
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
 
             // Functional Items
-            well: { tileX: 1, tileY: 6, width: 64, height: 64, name: 'Well' },
+            well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
             signpost: { tileX: 11, tileY: 0, width: 16, height: 32, name: 'Signpost' },
             lamp: { tileX: 12, tileY: 0, width: 16, height: 32, name: 'Lamp' }
         };
@@ -845,11 +845,11 @@ class PlatformRPG {
         this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
 
         // Try to draw sprite on top
-        // Always extract 32x32 from tileset but render at custom size
+        // Extract the actual prop size from tileset and render at scaled size
         this.ctx.drawImage(
             tileset.image,
             sourceX, sourceY,
-            32, 32,  // Always extract 32x32 from tileset
+            propType.width, propType.height,  // Extract actual prop dimensions from tileset
             prop.x, prop.y,
             renderWidth, renderHeight
         );
