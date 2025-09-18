@@ -836,8 +836,11 @@ class PlatformRPG {
         const sourceX = propType.tileX * tileset.tileWidth;
         const sourceY = propType.tileY * tileset.tileHeight;
 
-        // Scale props to be more visible (2x scale, with exceptions)
-        const scale = prop.type === 'well' ? 1 : (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 : 2;
+        // Use individual prop scale if available, otherwise fallback to default
+        const scale = prop.scale !== undefined ? prop.scale :
+                     (prop.type === 'well' ? 1 :
+                     (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
+                     (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 2);
         const renderWidth = propType.width * scale;
         const renderHeight = propType.height * scale;
 
@@ -877,17 +880,24 @@ class PlatformRPG {
         }
     }
 
-    addProp(x, y, type, isObstacle = false) {
+    addProp(x, y, type, isObstacle = false, customScale = null) {
         const propType = this.propTypes[type];
         if (!propType) return;
 
-        const scale = type === 'well' ? 1 : (type === 'barrel' || type === 'crate') ? 1.2 : 2;
+        // Default scale values for different prop types
+        const defaultScale = type === 'well' ? 1 :
+                           (type === 'barrel' || type === 'crate') ? 1.2 :
+                           (type === 'smallPot' || type === 'mediumPot' || type === 'bigPot') ? 0.6 : 2;
+
+        const scale = customScale !== null ? customScale : defaultScale;
+
         const newProp = {
             id: this.nextPropId++,
             x: x,
             y: y,
             type: type,
             isObstacle: isObstacle,
+            scale: scale,
             width: propType.width * scale,
             height: propType.height * scale
         };
@@ -897,17 +907,19 @@ class PlatformRPG {
     }
 
     placeProp(mouseX, mouseY) {
-        // Get selected prop type and obstacle setting from UI
+        // Get selected prop type, obstacle setting, and scale from UI
         const propTypeSelect = document.getElementById('propTypeSelect');
         const obstacleCheck = document.getElementById('propObstacleCheck');
+        const scaleInput = document.getElementById('propScaleInput');
 
-        if (!propTypeSelect || !obstacleCheck) return;
+        if (!propTypeSelect || !obstacleCheck || !scaleInput) return;
 
         const propType = propTypeSelect.value;
         const isObstacle = obstacleCheck.checked;
+        const scale = parseFloat(scaleInput.value) || 1.0;
 
-        // Add the prop at mouse position
-        this.addProp(mouseX, mouseY, propType, isObstacle);
+        // Add the prop at mouse position with custom scale
+        this.addProp(mouseX, mouseY, propType, isObstacle, scale);
 
         // Exit placement mode
         this.propPlacementMode = false;
@@ -930,6 +942,13 @@ class PlatformRPG {
             document.getElementById('propX').value = this.selectedProp.x;
             document.getElementById('propY').value = this.selectedProp.y;
             document.getElementById('selectedPropObstacle').checked = this.selectedProp.isObstacle;
+
+            // Show current scale or default if not set
+            const currentScale = this.selectedProp.scale !== undefined ? this.selectedProp.scale :
+                               (this.selectedProp.type === 'well' ? 1 :
+                               (this.selectedProp.type === 'barrel' || this.selectedProp.type === 'crate') ? 1.2 :
+                               (this.selectedProp.type === 'smallPot' || this.selectedProp.type === 'mediumPot' || this.selectedProp.type === 'bigPot') ? 0.6 : 2);
+            document.getElementById('selectedPropScale').value = currentScale.toFixed(1);
         } else {
             propProperties.style.display = 'none';
         }
@@ -1028,6 +1047,19 @@ class PlatformRPG {
             btn.classList.toggle('danger', this.propPlacementMode);
         });
 
+        // Auto-update scale when prop type changes
+        document.getElementById('propTypeSelect').addEventListener('change', (e) => {
+            const propType = e.target.value;
+            const scaleInput = document.getElementById('propScaleInput');
+
+            // Set default scale based on prop type
+            const defaultScale = propType === 'well' ? 1.0 :
+                               (propType === 'barrel' || propType === 'crate') ? 1.2 :
+                               (propType === 'smallPot' || propType === 'mediumPot' || propType === 'bigPot') ? 0.6 : 2.0;
+
+            scaleInput.value = defaultScale.toFixed(1);
+        });
+
         document.getElementById('clearPropsBtn').addEventListener('click', () => {
             if (confirm('Clear all props? This cannot be undone.')) {
                 this.props = [];
@@ -1042,6 +1074,16 @@ class PlatformRPG {
                 this.selectedProp.x = parseInt(document.getElementById('propX').value);
                 this.selectedProp.y = parseInt(document.getElementById('propY').value);
                 this.selectedProp.isObstacle = document.getElementById('selectedPropObstacle').checked;
+
+                // Update scale and recalculate width/height
+                const newScale = parseFloat(document.getElementById('selectedPropScale').value) || 1.0;
+                this.selectedProp.scale = newScale;
+
+                const propType = this.propTypes[this.selectedProp.type];
+                if (propType) {
+                    this.selectedProp.width = propType.width * newScale;
+                    this.selectedProp.height = propType.height * newScale;
+                }
             }
         });
 
@@ -1070,8 +1112,11 @@ class PlatformRPG {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
 
-            // Check if mouse is within prop bounds (using same scale as rendering)
-            const scale = prop.type === 'well' ? 1 : (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 : 2;
+            // Check if mouse is within prop bounds (using actual prop scale)
+            const scale = prop.scale !== undefined ? prop.scale :
+                         (prop.type === 'well' ? 1 :
+                         (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
+                         (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 2);
             const renderWidth = propType.width * scale;
             const renderHeight = propType.height * scale;
 
@@ -1169,7 +1214,10 @@ class PlatformRPG {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
 
-            const scale = prop.type === 'well' ? 1 : (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 : 2;
+            const scale = prop.scale !== undefined ? prop.scale :
+                         (prop.type === 'well' ? 1 :
+                         (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
+                         (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 2);
             const renderWidth = propType.width * scale;
             const renderHeight = propType.height * scale;
 

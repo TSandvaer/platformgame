@@ -85,12 +85,13 @@
       "props": [
         {
           "id": 2,
-          "x": 594,
-          "y": 427,
+          "x": 658,
+          "y": 547,
           "type": "barrel",
           "isObstacle": true,
-          "width": 32,
-          "height": 32
+          "width": 34.8,
+          "height": 38.4,
+          "scale": 1.2
         },
         {
           "id": 3,
@@ -121,30 +122,33 @@
         },
         {
           "id": 6,
-          "x": 829,
-          "y": 517,
+          "x": 806,
+          "y": 546,
           "type": "mediumPot",
           "isObstacle": false,
-          "width": 40,
-          "height": 64
+          "width": 24,
+          "height": 38.4,
+          "scale": 1.2
         },
         {
           "id": 7,
-          "x": 770,
-          "y": 537,
+          "x": 764,
+          "y": 558,
           "type": "smallPot",
           "isObstacle": false,
-          "width": 38.8,
-          "height": 61
+          "width": 30,
+          "height": 27.599999999999998,
+          "scale": 1.2
         },
         {
           "id": 8,
-          "x": 881,
-          "y": 522,
+          "x": 842,
+          "y": 543,
           "type": "bigPot",
           "isObstacle": false,
-          "width": 38.8,
-          "height": 61
+          "width": 27.159999999999997,
+          "height": 42.699999999999996,
+          "scale": 1.4
         }
       ]
     }
