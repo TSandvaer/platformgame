@@ -45,7 +45,7 @@
           "id": 7,
           "x": 1136,
           "y": 585,
-          "width": 247,
+          "width": 1173,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "sandGrass"
@@ -54,7 +54,7 @@
           "id": 8,
           "x": 1136,
           "y": 617,
-          "width": 247,
+          "width": 1173,
           "height": 84,
           "color": "#4ECDC4",
           "spriteType": "sand"
