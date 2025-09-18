@@ -128,6 +128,11 @@ class PlatformRPG {
         this.dragScrollDirection = null;
         this.lastMousePosition = { x: 0, y: 0 };
 
+        // Camera mode system
+        this.cameraMode = 'free'; // 'free' or 'character'
+        this.freeCameraScrollTimer = null;
+        this.freeCameraScrollDirection = null;
+
         // Village Props types with their tileset coordinates and properties
         this.propTypes = {
             // Buildings & Structures
@@ -412,8 +417,10 @@ class PlatformRPG {
 
         this.canvas.addEventListener('mousemove', (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            this.mouseX = e.clientX - rect.left + this.camera.x;
-            this.mouseY = e.clientY - rect.top + this.camera.y;
+            const clientMouseX = e.clientX - rect.left;
+            const clientMouseY = e.clientY - rect.top;
+            this.mouseX = clientMouseX + this.camera.x;
+            this.mouseY = clientMouseY + this.camera.y;
 
             if (this.isDevelopmentMode) {
                 document.getElementById('coordinates').textContent =
@@ -421,6 +428,11 @@ class PlatformRPG {
 
                 this.updateCursor();
                 this.handlePlatformDrag(e);
+
+                // Handle free camera mode mouse edge scrolling
+                if (this.cameraMode === 'free' && !this.isDragging && !this.isDraggingProp && !this.isResizing) {
+                    this.handleFreeCameraScroll(clientMouseX, clientMouseY);
+                }
             }
         });
 
@@ -436,6 +448,11 @@ class PlatformRPG {
             }
         });
 
+        this.canvas.addEventListener('mouseleave', () => {
+            // Stop free camera scrolling when mouse leaves canvas
+            this.stopFreeCameraScroll();
+        });
+
         document.getElementById('devModeBtn').addEventListener('click', () => {
             this.setDevelopmentMode(true);
         });
@@ -446,6 +463,14 @@ class PlatformRPG {
 
         document.getElementById('toggleDashboardBtn').addEventListener('click', () => {
             this.toggleDashboard();
+        });
+
+        document.getElementById('cameraModeBtn').addEventListener('click', () => {
+            this.toggleCameraMode();
+        });
+
+        document.getElementById('focusPlayerBtn').addEventListener('click', () => {
+            this.focusPlayer();
         });
 
         window.addEventListener('resize', () => {
@@ -661,11 +686,18 @@ class PlatformRPG {
             return;
         }
 
-        // Only follow player in production mode (when actually playing the game)
-        // In development mode, let the camera stay where the user positioned it
-        if (!this.isDevelopmentMode) {
+        // Handle camera based on mode and game state
+        if (this.cameraMode === 'character') {
+            // Character mode: always follow player
             const targetX = this.player.x - this.canvas.width / 2;
             this.camera.x = Math.max(0, targetX);
+        } else if (this.cameraMode === 'free') {
+            // Free mode: only follow player in production mode
+            if (!this.isDevelopmentMode) {
+                const targetX = this.player.x - this.canvas.width / 2;
+                this.camera.x = Math.max(0, targetX);
+            }
+            // In development mode with free camera, camera stays manual
         }
     }
 
@@ -1347,6 +1379,80 @@ class PlatformRPG {
             this.dragScrollTimer = null;
         }
         this.dragScrollDirection = null;
+    }
+
+    handleFreeCameraScroll(clientMouseX, clientMouseY) {
+        // Only in development mode with free camera
+        if (!this.isDevelopmentMode || this.cameraMode !== 'free') {
+            this.stopFreeCameraScroll();
+            return;
+        }
+
+        const scrollZone = 80; // Pixels from edge to start scrolling
+        const canvasWidth = this.canvas.width;
+        let newDirection = null;
+
+        // Determine scroll direction based on mouse position
+        if (clientMouseX < scrollZone) {
+            newDirection = 'left';
+        } else if (clientMouseX > canvasWidth - scrollZone) {
+            newDirection = 'right';
+        }
+
+        // Start or update scrolling
+        if (newDirection !== this.freeCameraScrollDirection) {
+            this.stopFreeCameraScroll();
+            if (newDirection) {
+                this.startFreeCameraScroll(newDirection);
+            }
+        }
+    }
+
+    startFreeCameraScroll(direction) {
+        this.freeCameraScrollDirection = direction;
+        this.freeCameraScrollTimer = setInterval(() => {
+            const scrollSpeed = 6;
+
+            if (direction === 'left') {
+                const newCameraX = Math.max(0, this.camera.x - scrollSpeed);
+                this.camera.x = newCameraX;
+            } else if (direction === 'right') {
+                this.camera.x += scrollSpeed;
+            }
+
+            // Force render to show camera movement
+            this.render();
+        }, 30);
+    }
+
+    stopFreeCameraScroll() {
+        if (this.freeCameraScrollTimer) {
+            clearInterval(this.freeCameraScrollTimer);
+            this.freeCameraScrollTimer = null;
+        }
+        this.freeCameraScrollDirection = null;
+    }
+
+    toggleCameraMode() {
+        this.cameraMode = this.cameraMode === 'free' ? 'character' : 'free';
+        const btn = document.getElementById('cameraModeBtn');
+        btn.textContent = `Camera: ${this.cameraMode === 'free' ? 'Free Mode' : 'Character Mode'}`;
+
+        // Stop free camera scrolling when switching modes
+        this.stopFreeCameraScroll();
+
+        console.log('Camera mode switched to:', this.cameraMode);
+    }
+
+    focusPlayer() {
+        // Move camera to focus on player
+        const targetX = this.player.x - this.canvas.width / 2;
+        this.camera.x = Math.max(0, targetX);
+
+        // Force render to show immediate camera movement
+        this.render();
+
+        console.log('Camera focused on player at:', this.camera.x);
     }
 
     handlePlatformMouseUp(e) {
