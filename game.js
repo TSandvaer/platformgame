@@ -174,6 +174,9 @@ class PlatformRPG {
             // Lamps
             lamp: {tileX: 31.31, tileY: 0.19, width: 13, height: 18, name: 'Lamp' },
             lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted'},
+            // Vegetation
+            bush1: {tileX: 14.03,tileY: 17.84,width: 93,height: 40,name: 'bush1'},
+            tree1: {tileX: 21.56,tileY: 14.56,width: 124,height: 146,name: 'tree1'},
         };
 
         this.camera = {

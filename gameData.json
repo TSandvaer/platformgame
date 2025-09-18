@@ -282,6 +282,28 @@
           "width": 22.400000000000002,
           "height": 32,
           "zOrder": 9
+        },
+        {
+          "id": 23,
+          "x": 488,
+          "y": 524,
+          "type": "bush1",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 148.8,
+          "height": 64,
+          "zOrder": 1
+        },
+        {
+          "id": 24,
+          "x": 1287,
+          "y": 357,
+          "type": "tree1",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 198.4,
+          "height": 233.60000000000002,
+          "zOrder": 2
         }
       ]
     }
