@@ -130,9 +130,18 @@
         },
         {
           "id": 7,
-          "x": 1024,
-          "y": 523,
+          "x": 770,
+          "y": 537,
           "type": "smallPot",
+          "isObstacle": false,
+          "width": 38.8,
+          "height": 61
+        },
+        {
+          "id": 8,
+          "x": 881,
+          "y": 522,
+          "type": "bigPot",
           "isObstacle": false,
           "width": 38.8,
           "height": 61
