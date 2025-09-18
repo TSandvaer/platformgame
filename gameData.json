@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-17"
+    "lastModified": "2025-09-18"
   },
   "scenes": [
     {
@@ -109,6 +109,15 @@
           "isObstacle": false,
           "width": 64,
           "height": 64
+        },
+        {
+          "id": 5,
+          "x": 943,
+          "y": 549,
+          "type": "SmallPot",
+          "isObstacle": false,
+          "width": 32,
+          "height": 32
         }
       ]
     }

@@ -136,6 +136,7 @@ class PlatformRPG {
             barrel: { tileX: 6.05, tileY: 1, width: 29, height: 32, name: 'Barrel' },
             crate: { tileX: 4, tileY: 1, width: 32, height: 32, name: 'Crate' },
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
+            SmallPot: { tileX: 10.24, tileY: 1.08, width: 19.4, height: 30.5, name: 'SmallPot' },
 
             // Functional Items
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
@@ -836,14 +837,11 @@ class PlatformRPG {
         // Disable image smoothing for pixel-perfect rendering
         this.ctx.imageSmoothingEnabled = false;
 
-        // Debug: Always show colored rectangle so we can see the prop
-        this.ctx.fillStyle = prop.isObstacle ? '#FF4444' : '#44FF44';
-        this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
-
-        // Draw border
-        this.ctx.strokeStyle = '#000000';
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
+        // Show green background only for selected props
+        if (this.isDevelopmentMode && this.selectedProp && this.selectedProp.id === prop.id) {
+            this.ctx.fillStyle = '#44FF44';
+            this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
+        }
 
         // Try to draw sprite on top
         // Extract the actual prop size from tileset and render at scaled size
