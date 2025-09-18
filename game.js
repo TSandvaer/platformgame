@@ -120,6 +120,9 @@ class PlatformRPG {
         this.isDraggingProp = false;
         this.propDragOffset = { x: 0, y: 0 };
 
+        // Platform placement system
+        this.platformPlacementMode = false;
+
         // Village Props types with their tileset coordinates and properties
         this.propTypes = {
             // Buildings & Structures
@@ -1006,7 +1009,7 @@ class PlatformRPG {
 
     setupPlatformEditorListeners() {
         document.getElementById('addPlatform').addEventListener('click', () => {
-            this.addPlatform();
+            this.togglePlatformPlacement();
         });
 
         document.getElementById('savePlatforms').addEventListener('click', () => {
@@ -1104,6 +1107,12 @@ class PlatformRPG {
         // Handle prop placement mode
         if (this.propPlacementMode) {
             this.placeProp(mouseX, mouseY);
+            return;
+        }
+
+        // Handle platform placement mode
+        if (this.platformPlacementMode) {
+            this.placePlatform(mouseX, mouseY);
             return;
         }
 
@@ -1615,11 +1624,18 @@ class PlatformRPG {
         this.updatePlatformList();
     }
 
-    addPlatform() {
+    togglePlatformPlacement() {
+        this.platformPlacementMode = !this.platformPlacementMode;
+        const btn = document.getElementById('addPlatform');
+        btn.textContent = this.platformPlacementMode ? 'Cancel Placement' : 'Add Platform (Click on map)';
+        btn.classList.toggle('danger', this.platformPlacementMode);
+    }
+
+    addPlatform(x, y) {
         const newPlatform = {
             id: this.nextPlatformId++,
-            x: this.mouseX || 100,
-            y: this.mouseY || 100,
+            x: x,
+            y: y,
             width: 150,
             height: 20,
             color: '#4ECDC4',
@@ -1630,6 +1646,20 @@ class PlatformRPG {
         this.selectedPlatform = newPlatform;
         this.updatePlatformProperties();
         this.updatePlatformList();
+        return newPlatform;
+    }
+
+    placePlatform(mouseX, mouseY) {
+        // Add the platform at mouse position
+        this.addPlatform(mouseX, mouseY);
+
+        // Exit placement mode
+        this.platformPlacementMode = false;
+        const btn = document.getElementById('addPlatform');
+        if (btn) {
+            btn.textContent = 'Add Platform (Click on map)';
+            btn.classList.remove('danger');
+        }
     }
 
     async savePlatforms() {
