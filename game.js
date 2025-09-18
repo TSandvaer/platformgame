@@ -156,6 +156,10 @@ class PlatformRPG {
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
             signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost'},
             signText1: {tileX: 14.25,tileY: 1.13,width: 17,height: 7,name: 'signText1'},
+            signText2: {tileX: 14.25,tileY: 1.38,width: 16,height: 7,name: 'signText2'},
+            signText3: {tileX: 14.25,tileY: 1.63,width: 17,height: 6,name: 'signText3'},
+            signText4: {tileX: 16.19,tileY: 0.78,width: 20,height: 6,name: 'signText4'},
+            signText5: {tileX: 16.25,tileY: 1.06,width: 17,height: 7,name: 'signText5'},
             lamp: {tileX: 31.31, tileY: 0.19, width: 13, height: 18, name: 'Lamp' },
             lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted'},
         };
