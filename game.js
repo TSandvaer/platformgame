@@ -912,7 +912,7 @@ class PlatformRPG {
         const scale = prop.scale !== undefined ? prop.scale :
                      (prop.type === 'well' ? 1 :
                      (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
-                     (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 2);
+                     (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
         const renderWidth = propType.width * scale;
         const renderHeight = propType.height * scale;
 
@@ -959,7 +959,7 @@ class PlatformRPG {
         // Default scale values for different prop types
         const defaultScale = type === 'well' ? 1 :
                            (type === 'barrel' || type === 'crate') ? 1.2 :
-                           (type === 'smallPot' || type === 'mediumPot' || type === 'bigPot') ? 0.6 : 2;
+                           (type === 'smallPot' || type === 'mediumPot' || type === 'bigPot') ? 0.6 : 1.6;
 
         const scale = customScale !== null ? customScale : defaultScale;
 
@@ -1020,7 +1020,7 @@ class PlatformRPG {
             const currentScale = this.selectedProp.scale !== undefined ? this.selectedProp.scale :
                                (this.selectedProp.type === 'well' ? 1 :
                                (this.selectedProp.type === 'barrel' || this.selectedProp.type === 'crate') ? 1.2 :
-                               (this.selectedProp.type === 'smallPot' || this.selectedProp.type === 'mediumPot' || this.selectedProp.type === 'bigPot') ? 0.6 : 2);
+                               (this.selectedProp.type === 'smallPot' || this.selectedProp.type === 'mediumPot' || this.selectedProp.type === 'bigPot') ? 0.6 : 1.6);
             document.getElementById('selectedPropScale').value = currentScale.toFixed(1);
         } else {
             propProperties.style.display = 'none';
@@ -1128,7 +1128,7 @@ class PlatformRPG {
             // Set default scale based on prop type
             const defaultScale = propType === 'well' ? 1.0 :
                                (propType === 'barrel' || propType === 'crate') ? 1.2 :
-                               (propType === 'smallPot' || propType === 'mediumPot' || propType === 'bigPot') ? 0.6 : 2.0;
+                               (propType === 'smallPot' || propType === 'mediumPot' || propType === 'bigPot') ? 0.6 : 1.6;
 
             scaleInput.value = defaultScale.toFixed(1);
         });
@@ -1210,7 +1210,7 @@ class PlatformRPG {
             const scale = prop.scale !== undefined ? prop.scale :
                          (prop.type === 'well' ? 1 :
                          (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
-                         (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 2);
+                         (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
             const renderWidth = propType.width * scale;
             const renderHeight = propType.height * scale;
 
@@ -1566,7 +1566,7 @@ class PlatformRPG {
             const scale = prop.scale !== undefined ? prop.scale :
                          (prop.type === 'well' ? 1 :
                          (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
-                         (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 2);
+                         (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
             const renderWidth = propType.width * scale;
             const renderHeight = propType.height * scale;
 
