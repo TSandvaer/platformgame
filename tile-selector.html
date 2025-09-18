@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Tile Selector - Textures</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #555;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn.secondary {
+            background-color: #666;
+        }
+
+        .btn.secondary:hover {
+            background-color: #555;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .tileset-area {
+            flex: 1;
+            background-color: #2a2a2a;
+            border: 2px solid #555;
+            border-radius: 8px;
+            padding: 10px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .tileset-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tileset-image {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            cursor: crosshair;
+            border: 1px solid #666;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .tile-highlight {
+            position: absolute;
+            border: 2px solid #00ff00;
+            background-color: rgba(0, 255, 0, 0.2);
+            pointer-events: none;
+            display: none;
+        }
+
+        .info-panel {
+            width: 320px;
+            background-color: #333;
+            border: 2px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            height: fit-content;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #555;
+        }
+
+        .info-section:last-child {
+            border-bottom: none;
+        }
+
+        .info-section h3 {
+            margin: 0 0 10px 0;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+
+        .coord-display {
+            background-color: #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .coord-label {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .coord-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background-color: #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .copy-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .zoom-controls {
+            margin-bottom: 15px;
+        }
+
+        .zoom-btn {
+            background-color: #666;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin: 0 2px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .zoom-btn:hover {
+            background-color: #555;
+        }
+
+        .zoom-btn.active {
+            background-color: #4CAF50;
+        }
+
+        .grid-toggle {
+            margin-left: 20px;
+        }
+
+        .current-tile {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #666;
+        }
+
+        .code-output {
+            background-color: #1e1e1e;
+            border: 1px solid #666;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tile-info {
+            background-color: #2a2a2a;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .tile-preview {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #666;
+            image-rendering: pixelated;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Platform Tile Selector - textures_02_08_25.png</h1>
+        <div>
+            <a href="index.html" class="btn secondary">← Back to Game</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tileset-area">
+            <div class="zoom-controls">
+                <span style="color: #aaa; margin-right: 10px;">Zoom:</span>
+                <button class="zoom-btn" data-zoom="1">1x</button>
+                <button class="zoom-btn" data-zoom="2">2x</button>
+                <button class="zoom-btn active" data-zoom="3">3x</button>
+                <button class="zoom-btn" data-zoom="4">4x</button>
+                <button class="zoom-btn" data-zoom="6">6x</button>
+
+                <span class="grid-toggle">
+                    <label style="color: #aaa; margin-left: 20px;">
+                        <input type="checkbox" id="showGrid" checked> Show 16x16 Grid
+                    </label>
+                </span>
+            </div>
+
+            <div class="tileset-container">
+                <img id="tilesetImage" class="tileset-image" src="textures_02_08_25.png" alt="Platform Tileset">
+                <canvas id="gridOverlay" class="grid-overlay"></canvas>
+                <div id="tileHighlight" class="tile-highlight"></div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-section">
+                <h3>Instructions</h3>
+                <div class="instructions">
+                    1. Click on any tile in the tileset<br>
+                    2. The tileX and tileY coordinates will be displayed<br>
+                    3. Copy the code to update your platformSpriteTypes in game.js<br>
+                    4. Each tile is 16x16 pixels<br>
+                    5. Use the grid overlay to see tile boundaries
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Mouse Position</h3>
+                <div class="coord-display">
+                    <div class="coord-label">Pixel X: <span id="mouseX" class="coord-value">0</span></div>
+                    <div class="coord-label">Pixel Y: <span id="mouseY" class="coord-value">0</span></div>
+                    <div class="coord-label">Tile X: <span id="mouseTileX" class="coord-value">0</span></div>
+                    <div class="coord-label">Tile Y: <span id="mouseTileY" class="coord-value">0</span></div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Selected Tile</h3>
+                <div class="current-tile">
+                    <div class="coord-display">
+                        <div class="coord-label">tileX: <span id="selectedTileX" class="coord-value">-</span></div>
+                        <div class="coord-label">tileY: <span id="selectedTileY" class="coord-value">-</span></div>
+                    </div>
+                    <canvas id="tilePreview" class="tile-preview" width="32" height="32"></canvas>
+                    <button class="copy-btn" id="copyCoords">Copy Coordinates</button>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Game.js Code</h3>
+                <div class="code-output" id="codeOutput">
+                    Click on a tile to generate code...
+                </div>
+                <button class="copy-btn" id="copyCode">Copy Code</button>
+            </div>
+
+            <div class="info-section">
+                <h3>Existing Platform Types</h3>
+                <div class="tile-info">
+                    <strong>Current mappings:</strong><br>
+                    grass: tileX: 20, tileY: 22 ✓<br>
+                    cobblestone: tileX: 6, tileY: 1<br>
+                    dirt: tileX: 21, tileY: 22<br>
+                    <em>Use this tool to verify and find new tiles</em>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TileSelector {
+            constructor() {
+                this.tilesetImage = document.getElementById('tilesetImage');
+                this.gridOverlay = document.getElementById('gridOverlay');
+                this.tileHighlight = document.getElementById('tileHighlight');
+                this.tilePreview = document.getElementById('tilePreview');
+                this.tilePreviewCtx = this.tilePreview.getContext('2d');
+                this.currentZoom = 3;
+                this.tileSize = 16; // 16x16 pixel tiles
+                this.originalImageWidth = 0;
+                this.originalImageHeight = 0;
+                this.selectedTileX = -1;
+                this.selectedTileY = -1;
+
+                this.init();
+            }
+
+            init() {
+                this.tilesetImage.addEventListener('load', () => {
+                    this.originalImageWidth = this.tilesetImage.naturalWidth;
+                    this.originalImageHeight = this.tilesetImage.naturalHeight;
+                    this.updateImageSize();
+                    this.drawGrid();
+                });
+
+                this.tilesetImage.addEventListener('click', this.handleTileClick.bind(this));
+                this.tilesetImage.addEventListener('mousemove', this.handleMouseMove.bind(this));
+
+                // Zoom controls
+                document.querySelectorAll('.zoom-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const zoom = parseInt(btn.dataset.zoom);
+                        this.setZoom(zoom);
+
+                        // Update active button
+                        document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+
+                // Grid toggle
+                document.getElementById('showGrid').addEventListener('change', (e) => {
+                    this.gridOverlay.style.display = e.target.checked ? 'block' : 'none';
+                });
+
+                // Copy buttons
+                document.getElementById('copyCoords').addEventListener('click', this.copyCoordinates.bind(this));
+                document.getElementById('copyCode').addEventListener('click', this.copyCode.bind(this));
+
+                // If image is already loaded (cached)
+                if (this.tilesetImage.complete) {
+                    this.originalImageWidth = this.tilesetImage.naturalWidth;
+                    this.originalImageHeight = this.tilesetImage.naturalHeight;
+                    this.updateImageSize();
+                    this.drawGrid();
+                }
+            }
+
+            setZoom(zoom) {
+                this.currentZoom = zoom;
+                this.updateImageSize();
+                this.drawGrid();
+                this.updateTileHighlight();
+            }
+
+            updateImageSize() {
+                if (this.originalImageWidth && this.originalImageHeight) {
+                    const newWidth = this.originalImageWidth * this.currentZoom;
+                    const newHeight = this.originalImageHeight * this.currentZoom;
+
+                    this.tilesetImage.style.width = newWidth + 'px';
+                    this.tilesetImage.style.height = newHeight + 'px';
+
+                    this.gridOverlay.width = newWidth;
+                    this.gridOverlay.height = newHeight;
+                    this.gridOverlay.style.width = newWidth + 'px';
+                    this.gridOverlay.style.height = newHeight + 'px';
+                }
+            }
+
+            drawGrid() {
+                if (!this.originalImageWidth || !this.originalImageHeight) return;
+
+                const ctx = this.gridOverlay.getContext('2d');
+                ctx.clearRect(0, 0, this.gridOverlay.width, this.gridOverlay.height);
+
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 1;
+
+                const scaledTileSize = this.tileSize * this.currentZoom;
+                const tilesX = Math.ceil(this.originalImageWidth / this.tileSize);
+                const tilesY = Math.ceil(this.originalImageHeight / this.tileSize);
+
+                // Draw vertical lines
+                for (let x = 0; x <= tilesX; x++) {
+                    const xPos = x * scaledTileSize;
+                    ctx.beginPath();
+                    ctx.moveTo(xPos, 0);
+                    ctx.lineTo(xPos, this.gridOverlay.height);
+                    ctx.stroke();
+                }
+
+                // Draw horizontal lines
+                for (let y = 0; y <= tilesY; y++) {
+                    const yPos = y * scaledTileSize;
+                    ctx.beginPath();
+                    ctx.moveTo(0, yPos);
+                    ctx.lineTo(this.gridOverlay.width, yPos);
+                    ctx.stroke();
+                }
+            }
+
+            getImageCoordinates(clientX, clientY) {
+                const rect = this.tilesetImage.getBoundingClientRect();
+                const x = Math.floor((clientX - rect.left) / this.currentZoom);
+                const y = Math.floor((clientY - rect.top) / this.currentZoom);
+                return { x, y };
+            }
+
+            getTileCoordinates(pixelX, pixelY) {
+                const tileX = Math.floor(pixelX / this.tileSize);
+                const tileY = Math.floor(pixelY / this.tileSize);
+                return { tileX, tileY };
+            }
+
+            handleMouseMove(e) {
+                const coords = this.getImageCoordinates(e.clientX, e.clientY);
+                const tileCoords = this.getTileCoordinates(coords.x, coords.y);
+
+                // Update mouse position display
+                document.getElementById('mouseX').textContent = coords.x;
+                document.getElementById('mouseY').textContent = coords.y;
+                document.getElementById('mouseTileX').textContent = tileCoords.tileX;
+                document.getElementById('mouseTileY').textContent = tileCoords.tileY;
+            }
+
+            handleTileClick(e) {
+                const coords = this.getImageCoordinates(e.clientX, e.clientY);
+                const tileCoords = this.getTileCoordinates(coords.x, coords.y);
+
+                this.selectedTileX = tileCoords.tileX;
+                this.selectedTileY = tileCoords.tileY;
+
+                this.updateSelectedTile();
+                this.updateTileHighlight();
+                this.drawTilePreview();
+            }
+
+            updateSelectedTile() {
+                document.getElementById('selectedTileX').textContent = this.selectedTileX;
+                document.getElementById('selectedTileY').textContent = this.selectedTileY;
+
+                // Generate code for game.js
+                const code = this.generateGameCode(this.selectedTileX, this.selectedTileY);
+                document.getElementById('codeOutput').textContent = code;
+            }
+
+            updateTileHighlight() {
+                if (this.selectedTileX === -1 || this.selectedTileY === -1) {
+                    this.tileHighlight.style.display = 'none';
+                    return;
+                }
+
+                const scaledTileSize = this.tileSize * this.currentZoom;
+                const x = this.selectedTileX * scaledTileSize;
+                const y = this.selectedTileY * scaledTileSize;
+
+                this.tileHighlight.style.display = 'block';
+                this.tileHighlight.style.left = x + 'px';
+                this.tileHighlight.style.top = y + 'px';
+                this.tileHighlight.style.width = scaledTileSize + 'px';
+                this.tileHighlight.style.height = scaledTileSize + 'px';
+            }
+
+            drawTilePreview() {
+                if (this.selectedTileX === -1 || this.selectedTileY === -1) return;
+
+                // Clear preview
+                this.tilePreviewCtx.clearRect(0, 0, 32, 32);
+
+                // Draw the selected tile scaled up to 32x32
+                const sourceX = this.selectedTileX * this.tileSize;
+                const sourceY = this.selectedTileY * this.tileSize;
+
+                this.tilePreviewCtx.imageSmoothingEnabled = false;
+                this.tilePreviewCtx.drawImage(
+                    this.tilesetImage,
+                    sourceX, sourceY, this.tileSize, this.tileSize,
+                    0, 0, 32, 32
+                );
+            }
+
+            generateGameCode(tileX, tileY) {
+                return `// For game.js platformSpriteTypes:
+newTileType: {
+    tileset: 'tileset',
+    tileX: ${tileX},
+    tileY: ${tileY}
+},
+
+// Example usage in platformSpriteTypes:
+// Replace 'newTileType' with descriptive name like 'stone', 'wood', etc.
+// This tile is at coordinates (${tileX}, ${tileY}) in the tileset`;
+            }
+
+            copyCoordinates() {
+                if (this.selectedTileX !== -1 && this.selectedTileY !== -1) {
+                    const text = `tileX: ${this.selectedTileX}, tileY: ${this.selectedTileY}`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.showCopyFeedback('copyCoords');
+                    });
+                }
+            }
+
+            copyCode() {
+                const code = document.getElementById('codeOutput').textContent;
+                if (code && !code.includes('Click on a tile')) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        this.showCopyFeedback('copyCode');
+                    });
+                }
+            }
+
+            showCopyFeedback(buttonId) {
+                const btn = document.getElementById(buttonId);
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#4CAF50';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.backgroundColor = '#2196F3';
+                }, 1000);
+            }
+        }
+
+        // Initialize the tile selector when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TileSelector();
+        });
+    </script>
+</body>
+</html>
