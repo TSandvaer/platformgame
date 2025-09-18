@@ -198,6 +198,28 @@
           "scale": 1.5,
           "width": 25.5,
           "height": 10.5
+        },
+        {
+          "id": 13,
+          "x": 410,
+          "y": 515,
+          "type": "signPostDirectional",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 44.800000000000004,
+          "height": 70.4,
+          "zOrder": 1
+        },
+        {
+          "id": 14,
+          "x": 553,
+          "y": 497,
+          "type": "signPostMultidirectional",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 48,
+          "height": 91.2,
+          "zOrder": 2
         }
       ]
     }

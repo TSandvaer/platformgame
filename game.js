@@ -158,7 +158,9 @@ class PlatformRPG {
             smallPot: { tileX: 9.13, tileY: 1.34, width: 25, height: 23, name: 'bigPot'},
             // Functional Items
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
-            signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost'},
+            signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost'},      
+            signPostDirectional: {tileX: 12.06,tileY: 0.66,width: 28,height: 44,name: 'signpostDirectional'},
+            signPostMultidirectional: {tileX: 13.00,tileY: 0.25,width: 30,height: 57,name: 'signpostMultidirectional'},
             signText1: {tileX: 14.25,tileY: 1.13,width: 17,height: 7,name: 'signText1'},
             signText2: {tileX: 14.25,tileY: 1.38,width: 16,height: 7,name: 'signText2'},
             signText3: {tileX: 14.25,tileY: 1.63,width: 17,height: 6,name: 'signText3'},
