@@ -493,6 +493,11 @@ class PlatformRPG {
             this.canvas.height = window.innerHeight;
         });
 
+        // Add keyboard event listener for Delete key
+        window.addEventListener('keydown', (e) => {
+            this.handleKeyDown(e);
+        });
+
         this.setupPlatformEditorListeners();
     }
 
@@ -1544,6 +1549,45 @@ class PlatformRPG {
         const maxExistingZOrder = this.props.reduce((max, prop) =>
             Math.max(max, prop.zOrder || 0), 0);
         this.nextPropZOrder = Math.max(this.nextPropZOrder, maxExistingZOrder + 1);
+    }
+
+    handleKeyDown(e) {
+        // Only handle keys in development mode
+        if (!this.isDevelopmentMode) return;
+
+        // Handle Delete key
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            e.preventDefault(); // Prevent default browser behavior
+
+            if (this.selectedPlatform) {
+                // Delete selected platform
+                this.deleteSelectedPlatform();
+            } else if (this.selectedProp) {
+                // Delete selected prop
+                this.deleteSelectedProp();
+            }
+        }
+    }
+
+    deleteSelectedPlatform() {
+        if (!this.selectedPlatform) return;
+
+        this.platforms = this.platforms.filter(p => p.id !== this.selectedPlatform.id);
+        this.selectedPlatform = null;
+        this.updatePlatformProperties();
+        this.updatePlatformList();
+
+        console.log('Platform deleted via Delete key');
+    }
+
+    deleteSelectedProp() {
+        if (!this.selectedProp) return;
+
+        this.props = this.props.filter(prop => prop.id !== this.selectedProp.id);
+        this.selectedProp = null;
+        this.updatePropProperties();
+
+        console.log('Prop deleted via Delete key');
     }
 
     handlePlatformMouseUp(e) {
