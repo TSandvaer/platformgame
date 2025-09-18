@@ -11,8 +11,8 @@ class PlatformRPG {
         this.player = {
             x: 100,
             y: 400,
-            width: 35,
-            height: 47,
+            width: 44,  // 35 * 1.25 = 43.75, rounded to 44
+            height: 59, // 47 * 1.25 = 58.75, rounded to 59
             velocityX: 0,
             velocityY: 0,
             speed: 5,
@@ -794,11 +794,13 @@ class PlatformRPG {
 
         this.ctx.save();
 
-        // Make sprite render larger than collision box
-        const spriteRenderWidth = 256;
-        const spriteRenderHeight = 256;
+        // Make sprite render larger than collision box, scaled with player size
+        const baseSpriteSize = 256;
+        const playerScale = this.player.width / 35; // Scale based on original player width (35)
+        const spriteRenderWidth = baseSpriteSize * playerScale;
+        const spriteRenderHeight = baseSpriteSize * playerScale;
         const spriteOffsetX = (this.player.width - spriteRenderWidth) / 2;
-        const spriteOffsetY = this.player.height - spriteRenderHeight + 110; // Adjust to center character in collision box
+        const spriteOffsetY = this.player.height - spriteRenderHeight + (110 * playerScale); // Adjust to center character in collision box
 
         // Flip sprite horizontally if facing left
         if (this.player.facing === 'left') {
