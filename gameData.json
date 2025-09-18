@@ -34,8 +34,8 @@
         },
         {
           "id": 6,
-          "x": 516,
-          "y": 181,
+          "x": 571,
+          "y": 305,
           "width": 242,
           "height": 63,
           "color": "#4ECDC4",
@@ -61,8 +61,8 @@
         },
         {
           "id": 9,
-          "x": 516,
-          "y": 279,
+          "x": 867,
+          "y": 400,
           "width": 242,
           "height": 32,
           "color": "#4ECDC4",
@@ -76,6 +76,15 @@
           "height": 20,
           "color": "#4ECDC4",
           "spriteType": "lightWood"
+        },
+        {
+          "id": 11,
+          "x": 923,
+          "y": 500,
+          "width": 150,
+          "height": 20,
+          "color": "#4ECDC4",
+          "spriteType": "bricks"
         }
       ],
       "background": {
