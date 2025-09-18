@@ -34,8 +34,8 @@
         },
         {
           "id": 6,
-          "x": 571,
-          "y": 305,
+          "x": 161,
+          "y": 161,
           "width": 242,
           "height": 63,
           "color": "#4ECDC4",
@@ -158,6 +158,46 @@
           "width": 27.159999999999997,
           "height": 42.699999999999996,
           "scale": 1.4
+        },
+        {
+          "id": 9,
+          "x": 620,
+          "y": 426,
+          "type": "lampLighted",
+          "isObstacle": false,
+          "scale": 1.5,
+          "width": 19.5,
+          "height": 28.5
+        },
+        {
+          "id": 10,
+          "x": 662,
+          "y": 429,
+          "type": "lamp",
+          "isObstacle": false,
+          "scale": 1.5,
+          "width": 19.5,
+          "height": 27
+        },
+        {
+          "id": 11,
+          "x": 186,
+          "y": 514,
+          "type": "signpost",
+          "isObstacle": false,
+          "scale": 1.5,
+          "width": 48,
+          "height": 70.5
+        },
+        {
+          "id": 12,
+          "x": 198,
+          "y": 526,
+          "type": "signText1",
+          "isObstacle": false,
+          "scale": 1.5,
+          "width": 25.5,
+          "height": 10.5
         }
       ]
     }

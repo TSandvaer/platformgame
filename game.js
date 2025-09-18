@@ -151,17 +151,13 @@ class PlatformRPG {
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
             bigPot: { tileX: 10.24, tileY: 1.08, width: 19.4, height: 30.5, name: 'bigPot' },
             mediumPot: { tileX: 8.19, tileY: 1.00, width: 20, height: 32, name: 'mediumPot' },
-            smallPot: {
-            tileX: 9.13,
-            tileY: 1.34,
-            width: 25,
-            height: 23,
-            name: 'bigPot'
-            },
+            smallPot: { tileX: 9.13, tileY: 1.34, width: 25, height: 23, name: 'bigPot'},
             // Functional Items
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
-            signpost: { tileX: 11, tileY: 0, width: 16, height: 32, name: 'Signpost' },
-            lamp: { tileX: 12, tileY: 0, width: 16, height: 32, name: 'Lamp' }
+            signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost'},
+            signText1: {tileX: 14.25,tileY: 1.13,width: 17,height: 7,name: 'signText1'},
+            lamp: {tileX: 31.31, tileY: 0.19, width: 13, height: 18, name: 'Lamp' },
+            lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted'},
         };
 
         this.camera = {
