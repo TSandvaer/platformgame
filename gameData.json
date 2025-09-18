@@ -241,25 +241,47 @@
         },
         {
           "id": 19,
-          "x": 917,
-          "y": 483,
+          "x": 911,
+          "y": 484,
           "type": "signWall",
           "isObstacle": false,
           "scale": 1.6,
           "width": 113.60000000000001,
           "height": 104,
-          "zOrder": 1
+          "zOrder": -4
         },
         {
           "id": 20,
-          "x": 936,
-          "y": 502,
+          "x": 933,
+          "y": 508,
           "type": "signPaper1",
           "isObstacle": false,
           "scale": 1.6,
           "width": 20.8,
           "height": 25.6,
           "zOrder": 2
+        },
+        {
+          "id": 21,
+          "x": 961,
+          "y": 510,
+          "type": "signPaper2",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 20.8,
+          "height": 25.6,
+          "zOrder": 1
+        },
+        {
+          "id": 22,
+          "x": 989,
+          "y": 504,
+          "type": "signPaper4",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 22.400000000000002,
+          "height": 32,
+          "zOrder": 9
         }
       ]
     }

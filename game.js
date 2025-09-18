@@ -133,7 +133,7 @@ class PlatformRPG {
         this.lastMousePosition = { x: 0, y: 0 };
 
         // Camera mode system
-        this.cameraMode = 'free'; // 'free' or 'character'
+        this.cameraMode = 'character'; // 'free' or 'character'
         this.freeCameraScrollTimer = null;
         this.freeCameraScrollDirection = null;
 
