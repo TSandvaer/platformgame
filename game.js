@@ -115,6 +115,10 @@ class PlatformRPG {
         // Village Props system
         this.props = [];
         this.nextPropId = 1;
+        this.nextPropZOrder = 1;
+
+        // Initialize z-orders for any existing props
+        this.initializePropZOrders();
         this.selectedProp = null;
         this.propPlacementMode = false;
         this.isDraggingProp = false;
@@ -756,11 +760,14 @@ class PlatformRPG {
             this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
 
-        // Render obstacle props after player (in front of player)
+        // Render obstacle props after player (in front of player), sorted by z-order
         if (this.platformSprites.villageProps.image) {
-            this.props.filter(prop => prop.isObstacle).forEach(prop => {
-                this.drawProp(prop);
-            });
+            this.props
+                .filter(prop => prop.isObstacle)
+                .sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0))
+                .forEach(prop => {
+                    this.drawProp(prop);
+                });
         }
 
         this.ctx.restore();
@@ -872,10 +879,13 @@ class PlatformRPG {
     renderProps() {
         if (!this.platformSprites.villageProps.image) return;
 
-        // Render background props first (behind player)
-        this.props.filter(prop => !prop.isObstacle).forEach(prop => {
-            this.drawProp(prop);
-        });
+        // Render background props first (behind player), sorted by z-order (lowest first)
+        this.props
+            .filter(prop => !prop.isObstacle)
+            .sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0))
+            .forEach(prop => {
+                this.drawProp(prop);
+            });
 
         // Render obstacle props after player (will be handled in main render)
     }
@@ -953,7 +963,8 @@ class PlatformRPG {
             isObstacle: isObstacle,
             scale: scale,
             width: propType.width * scale,
-            height: propType.height * scale
+            height: propType.height * scale,
+            zOrder: this.nextPropZOrder++
         };
 
         this.props.push(newProp);
@@ -1148,6 +1159,18 @@ class PlatformRPG {
                 this.updatePropProperties();
             }
         });
+
+        document.getElementById('sendToBackground').addEventListener('click', () => {
+            if (this.selectedProp) {
+                this.sendPropToBackground(this.selectedProp);
+            }
+        });
+
+        document.getElementById('bringToFront').addEventListener('click', () => {
+            if (this.selectedProp) {
+                this.bringPropToFront(this.selectedProp);
+            }
+        });
     }
 
     handlePlatformMouseDown(e) {
@@ -1168,6 +1191,9 @@ class PlatformRPG {
         }
 
         // Check for prop clicks first (props should be selectable before platforms)
+        // Find all props under the mouse, then select the one with highest z-order
+        let propsUnderMouse = [];
+
         for (let prop of this.props) {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
@@ -1182,18 +1208,27 @@ class PlatformRPG {
 
             if (mouseX >= prop.x && mouseX <= prop.x + renderWidth &&
                 mouseY >= prop.y && mouseY <= prop.y + renderHeight) {
-                this.selectedProp = prop;
-                this.selectedPlatform = null;
-                this.isDraggingProp = true;
-                this.propDragOffset = {
-                    x: mouseX - prop.x,
-                    y: mouseY - prop.y
-                };
-                this.updatePropProperties();
-                this.updatePlatformProperties();
-                this.updatePlatformList();
-                return;
+                propsUnderMouse.push(prop);
             }
+        }
+
+        // If we found props under mouse, select the one with highest z-order (topmost)
+        if (propsUnderMouse.length > 0) {
+            const topProp = propsUnderMouse.reduce((highest, current) =>
+                (current.zOrder || 0) > (highest.zOrder || 0) ? current : highest
+            );
+
+            this.selectedProp = topProp;
+            this.selectedPlatform = null;
+            this.isDraggingProp = true;
+            this.propDragOffset = {
+                x: mouseX - topProp.x,
+                y: mouseY - topProp.y
+            };
+            this.updatePropProperties();
+            this.updatePlatformProperties();
+            this.updatePlatformList();
+            return;
         }
 
         for (let platform of this.platforms) {
@@ -1455,6 +1490,49 @@ class PlatformRPG {
         console.log('Camera focused on player at:', this.camera.x);
     }
 
+    sendPropToBackground(prop) {
+        // Get all z-orders, filtering out undefined/null values and converting to numbers
+        const zOrders = this.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
+
+        // Find the lowest z-order, defaulting to 0 if no valid z-orders exist
+        const minZOrder = zOrders.length > 0 ? Math.min(...zOrders) : 0;
+
+        // Set this prop's z-order to be lower than the minimum
+        prop.zOrder = minZOrder - 1;
+
+        console.log(`Sent prop ${prop.type} to background with z-order: ${prop.zOrder}`);
+    }
+
+    bringPropToFront(prop) {
+        // Get all z-orders, filtering out undefined/null values and converting to numbers
+        const zOrders = this.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
+
+        // Find the highest z-order, defaulting to 0 if no valid z-orders exist
+        const maxZOrder = zOrders.length > 0 ? Math.max(...zOrders) : 0;
+
+        // Set this prop's z-order to be higher than the maximum
+        prop.zOrder = maxZOrder + 1;
+
+        // Update the next z-order counter to be higher
+        this.nextPropZOrder = Math.max(this.nextPropZOrder, prop.zOrder + 1);
+
+        console.log(`Brought prop ${prop.type} to front with z-order: ${prop.zOrder}`);
+    }
+
+    initializePropZOrders() {
+        // Assign z-orders to any props that don't have them
+        this.props.forEach(prop => {
+            if (prop.zOrder === undefined || prop.zOrder === null || isNaN(prop.zOrder)) {
+                prop.zOrder = this.nextPropZOrder++;
+            }
+        });
+
+        // Update the next z-order counter to be higher than any existing z-order
+        const maxExistingZOrder = this.props.reduce((max, prop) =>
+            Math.max(max, prop.zOrder || 0), 0);
+        this.nextPropZOrder = Math.max(this.nextPropZOrder, maxExistingZOrder + 1);
+    }
+
     handlePlatformMouseUp(e) {
         this.isDragging = false;
         this.isDraggingProp = false;
@@ -1470,6 +1548,9 @@ class PlatformRPG {
         this.canvas.style.cursor = 'default';
 
         // Check if mouse is over any prop first (props have priority)
+        // Find all props under mouse, then check the topmost one
+        let propsUnderCursor = [];
+
         for (const prop of this.props) {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
@@ -1483,9 +1564,14 @@ class PlatformRPG {
 
             if (this.mouseX >= prop.x && this.mouseX <= prop.x + renderWidth &&
                 this.mouseY >= prop.y && this.mouseY <= prop.y + renderHeight) {
-                this.canvas.style.cursor = 'move';
-                return; // Exit early, don't check platforms
+                propsUnderCursor.push(prop);
             }
+        }
+
+        // If there are props under cursor, use move cursor for the topmost one
+        if (propsUnderCursor.length > 0) {
+            this.canvas.style.cursor = 'move';
+            return; // Exit early, don't check platforms
         }
 
         // Check if mouse is over any platform
