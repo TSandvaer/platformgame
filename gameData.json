@@ -118,6 +118,24 @@
           "isObstacle": false,
           "width": 32,
           "height": 32
+        },
+        {
+          "id": 6,
+          "x": 829,
+          "y": 517,
+          "type": "mediumPot",
+          "isObstacle": false,
+          "width": 40,
+          "height": 64
+        },
+        {
+          "id": 7,
+          "x": 1024,
+          "y": 523,
+          "type": "smallPot",
+          "isObstacle": false,
+          "width": 38.8,
+          "height": 61
         }
       ]
     }

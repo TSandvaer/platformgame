@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Editor - TX Village Props</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #555;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn.secondary {
+            background-color: #666;
+        }
+
+        .btn.secondary:hover {
+            background-color: #555;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .sprite-area {
+            flex: 1;
+            background-color: #2a2a2a;
+            border: 2px solid #555;
+            border-radius: 8px;
+            padding: 10px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .sprite-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .sprite-image {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            cursor: crosshair;
+            border: 1px solid #666;
+        }
+
+        .selection-overlay {
+            position: absolute;
+            border: 2px solid #00ff00;
+            background-color: rgba(0, 255, 0, 0.2);
+            pointer-events: none;
+            display: none;
+        }
+
+        .info-panel {
+            width: 300px;
+            background-color: #333;
+            border: 2px solid #555;
+            border-radius: 8px;
+            padding: 15px;
+            height: fit-content;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #555;
+        }
+
+        .info-section:last-child {
+            border-bottom: none;
+        }
+
+        .info-section h3 {
+            margin: 0 0 10px 0;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+
+        .coord-display {
+            background-color: #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .coord-label {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .coord-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background-color: #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .copy-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .zoom-controls {
+            margin-bottom: 15px;
+        }
+
+        .zoom-btn {
+            background-color: #666;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin: 0 2px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .zoom-btn:hover {
+            background-color: #555;
+        }
+
+        .zoom-btn.active {
+            background-color: #4CAF50;
+        }
+
+        .current-selection {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #666;
+        }
+
+        .code-output {
+            background-color: #1e1e1e;
+            border: 1px solid #666;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Sprite Editor - TX Village Props</h1>
+        <div>
+            <a href="index.html" class="btn secondary">← Back to Game</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sprite-area">
+            <div class="zoom-controls">
+                <span style="color: #aaa; margin-right: 10px;">Zoom:</span>
+                <button class="zoom-btn" data-zoom="1">1x</button>
+                <button class="zoom-btn active" data-zoom="2">2x</button>
+                <button class="zoom-btn" data-zoom="3">3x</button>
+                <button class="zoom-btn" data-zoom="4">4x</button>
+                <button class="zoom-btn" data-zoom="6">6x</button>
+            </div>
+
+            <div class="sprite-container">
+                <img id="spriteImage" class="sprite-image" src="sprites/Pixel Art Platformer/Texture/TX Village Props.png" alt="TX Village Props">
+                <div id="selectionOverlay" class="selection-overlay"></div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-section">
+                <h3>Instructions</h3>
+                <div class="instructions">
+                    1. Click and drag on the sprite to select an area<br>
+                    2. The coordinates and dimensions will be displayed below<br>
+                    3. Copy the values to update your game.js propTypes<br>
+                    4. Use different zoom levels for precision
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Mouse Position</h3>
+                <div class="coord-display">
+                    <div class="coord-label">X: <span id="mouseX" class="coord-value">0</span></div>
+                    <div class="coord-label">Y: <span id="mouseY" class="coord-value">0</span></div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Current Selection</h3>
+                <div class="current-selection">
+                    <div class="coord-display">
+                        <div class="coord-label">Top-Left X: <span id="selectionX" class="coord-value">-</span></div>
+                        <div class="coord-label">Top-Left Y: <span id="selectionY" class="coord-value">-</span></div>
+                        <div class="coord-label">Width: <span id="selectionWidth" class="coord-value">-</span></div>
+                        <div class="coord-label">Height: <span id="selectionHeight" class="coord-value">-</span></div>
+                    </div>
+                    <button class="copy-btn" id="copyCoords">Copy Coordinates</button>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Game.js Code</h3>
+                <div class="code-output" id="codeOutput">
+                    Select an area to generate code...
+                </div>
+                <button class="copy-btn" id="copyCode">Copy Code</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SpriteEditor {
+            constructor() {
+                this.spriteImage = document.getElementById('spriteImage');
+                this.selectionOverlay = document.getElementById('selectionOverlay');
+                this.isSelecting = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.currentZoom = 2;
+                this.originalImageWidth = 0;
+                this.originalImageHeight = 0;
+
+                this.init();
+            }
+
+            init() {
+                this.spriteImage.addEventListener('load', () => {
+                    this.originalImageWidth = this.spriteImage.naturalWidth;
+                    this.originalImageHeight = this.spriteImage.naturalHeight;
+                    this.updateImageSize();
+                });
+
+                this.spriteImage.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                this.spriteImage.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.spriteImage.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                this.spriteImage.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+
+                // Zoom controls
+                document.querySelectorAll('.zoom-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const zoom = parseInt(btn.dataset.zoom);
+                        this.setZoom(zoom);
+
+                        // Update active button
+                        document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+
+                // Copy buttons
+                document.getElementById('copyCoords').addEventListener('click', this.copyCoordinates.bind(this));
+                document.getElementById('copyCode').addEventListener('click', this.copyCode.bind(this));
+
+                // If image is already loaded (cached)
+                if (this.spriteImage.complete) {
+                    this.originalImageWidth = this.spriteImage.naturalWidth;
+                    this.originalImageHeight = this.spriteImage.naturalHeight;
+                    this.updateImageSize();
+                }
+            }
+
+            setZoom(zoom) {
+                this.currentZoom = zoom;
+                this.updateImageSize();
+            }
+
+            updateImageSize() {
+                if (this.originalImageWidth && this.originalImageHeight) {
+                    this.spriteImage.style.width = (this.originalImageWidth * this.currentZoom) + 'px';
+                    this.spriteImage.style.height = (this.originalImageHeight * this.currentZoom) + 'px';
+                }
+            }
+
+            getImageCoordinates(clientX, clientY) {
+                const rect = this.spriteImage.getBoundingClientRect();
+                const x = Math.floor((clientX - rect.left) / this.currentZoom);
+                const y = Math.floor((clientY - rect.top) / this.currentZoom);
+                return { x, y };
+            }
+
+            handleMouseDown(e) {
+                e.preventDefault();
+                const coords = this.getImageCoordinates(e.clientX, e.clientY);
+                this.startX = coords.x;
+                this.startY = coords.y;
+                this.isSelecting = true;
+
+                // Show overlay at start position
+                this.selectionOverlay.style.display = 'block';
+                this.updateOverlay(this.startX, this.startY, 0, 0);
+            }
+
+            handleMouseMove(e) {
+                const coords = this.getImageCoordinates(e.clientX, e.clientY);
+
+                // Update mouse position display
+                document.getElementById('mouseX').textContent = coords.x;
+                document.getElementById('mouseY').textContent = coords.y;
+
+                if (this.isSelecting) {
+                    const width = coords.x - this.startX;
+                    const height = coords.y - this.startY;
+                    this.updateOverlay(this.startX, this.startY, width, height);
+                }
+            }
+
+            handleMouseUp(e) {
+                if (this.isSelecting) {
+                    const coords = this.getImageCoordinates(e.clientX, e.clientY);
+                    const endX = coords.x;
+                    const endY = coords.y;
+
+                    // Calculate final selection bounds
+                    const x = Math.min(this.startX, endX);
+                    const y = Math.min(this.startY, endY);
+                    const width = Math.abs(endX - this.startX);
+                    const height = Math.abs(endY - this.startY);
+
+                    if (width > 0 && height > 0) {
+                        this.updateSelection(x, y, width, height);
+                        this.updateOverlay(x, y, width, height);
+                    } else {
+                        this.selectionOverlay.style.display = 'none';
+                    }
+                }
+                this.isSelecting = false;
+            }
+
+            handleMouseLeave(e) {
+                this.isSelecting = false;
+            }
+
+            updateOverlay(x, y, width, height) {
+                // Convert back to display coordinates
+                const displayX = x * this.currentZoom;
+                const displayY = y * this.currentZoom;
+                const displayWidth = width * this.currentZoom;
+                const displayHeight = height * this.currentZoom;
+
+                this.selectionOverlay.style.left = displayX + 'px';
+                this.selectionOverlay.style.top = displayY + 'px';
+                this.selectionOverlay.style.width = Math.abs(displayWidth) + 'px';
+                this.selectionOverlay.style.height = Math.abs(displayHeight) + 'px';
+            }
+
+            updateSelection(x, y, width, height) {
+                // Update coordinate display
+                document.getElementById('selectionX').textContent = x;
+                document.getElementById('selectionY').textContent = y;
+                document.getElementById('selectionWidth').textContent = width;
+                document.getElementById('selectionHeight').textContent = height;
+
+                // Generate code for game.js
+                const code = this.generateGameCode(x, y, width, height);
+                document.getElementById('codeOutput').textContent = code;
+            }
+
+            generateGameCode(x, y, width, height) {
+                // Calculate tileX and tileY based on 32x32 tile grid
+                const tileX = x / 32;
+                const tileY = y / 32;
+
+                return `// For game.js propTypes:
+propName: {
+    tileX: ${tileX.toFixed(2)},
+    tileY: ${tileY.toFixed(2)},
+    width: ${width},
+    height: ${height},
+    name: 'Prop Name'
+},
+
+// Original pixel coordinates:
+// X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}`;
+            }
+
+            copyCoordinates() {
+                const x = document.getElementById('selectionX').textContent;
+                const y = document.getElementById('selectionY').textContent;
+                const width = document.getElementById('selectionWidth').textContent;
+                const height = document.getElementById('selectionHeight').textContent;
+
+                if (x !== '-') {
+                    const text = `X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.showCopyFeedback('copyCoords');
+                    });
+                }
+            }
+
+            copyCode() {
+                const code = document.getElementById('codeOutput').textContent;
+                if (code && !code.includes('Select an area')) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        this.showCopyFeedback('copyCode');
+                    });
+                }
+            }
+
+            showCopyFeedback(buttonId) {
+                const btn = document.getElementById(buttonId);
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#4CAF50';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.backgroundColor = '#2196F3';
+                }, 1000);
+            }
+        }
+
+        // Initialize the sprite editor when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SpriteEditor();
+        });
+    </script>
+</body>
+</html>

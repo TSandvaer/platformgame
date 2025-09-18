@@ -136,8 +136,9 @@ class PlatformRPG {
             barrel: { tileX: 6.05, tileY: 1, width: 29, height: 32, name: 'Barrel' },
             crate: { tileX: 4, tileY: 1, width: 32, height: 32, name: 'Crate' },
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
-            SmallPot: { tileX: 10.24, tileY: 1.08, width: 19.4, height: 30.5, name: 'SmallPot' },
-
+            smallPot: { tileX: 10.24, tileY: 1.08, width: 19.4, height: 30.5, name: 'smallPot' },
+            mediumPot: { tileX: 8.19, tileY: 1.00, width: 20, height: 32, name: 'mediumPot'
+            },
             // Functional Items
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
             signpost: { tileX: 11, tileY: 0, width: 16, height: 32, name: 'Signpost' },
