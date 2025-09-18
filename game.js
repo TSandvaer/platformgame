@@ -79,8 +79,8 @@ class PlatformRPG {
             dryGrass: { tileset: 'tileset', tileX: 4, tileY: 2 }, // Yellowish grass
 
             // Wood textures (looking for wooden/brown planked textures)
-            lightWood: { tileset: 'tileset', tileX: 16, tileY: 10 }, // Light wood planks
-            darkWood: { tileset: 'tileset', tileX: 3, tileY: 10 }, // Dark wood planks
+            lightWood: { tileset: 'tileset',tileX: 16,tileY: 8}, // Light wood planks
+            darkWood: { tileset: 'tileset', tileX: 14, tileY: 8 }, // Dark wood planks
             plank: { tileset: 'tileset', tileX: 2, tileY: 10 }, // Wood plank texture
             log: { tileset: 'tileset', tileX: 4, tileY: 9 }, // Log texture
             bark: { tileset: 'tileset', tileX: 3, tileY: 9 }, // Bark texture
@@ -156,7 +156,7 @@ class PlatformRPG {
             bigPot: { tileX: 10.24, tileY: 1.08, width: 19.4, height: 30.5, name: 'bigPot' },
             mediumPot: { tileX: 8.19, tileY: 1.00, width: 20, height: 32, name: 'mediumPot' },
             smallPot: { tileX: 9.13, tileY: 1.34, width: 25, height: 23, name: 'bigPot'},
-            // Functional Items
+            // Signs 
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
             signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost'},      
             signPostDirectional: {tileX: 12.06,tileY: 0.66,width: 28,height: 44,name: 'signpostDirectional'},
@@ -166,6 +166,12 @@ class PlatformRPG {
             signText3: {tileX: 14.25,tileY: 1.63,width: 17,height: 6,name: 'signText3'},
             signText4: {tileX: 16.19,tileY: 0.78,width: 20,height: 6,name: 'signText4'},
             signText5: {tileX: 16.25,tileY: 1.06,width: 17,height: 7,name: 'signText5'},
+            signWall: {tileX: 5.84,tileY: 5.00,width: 71,height: 65,name: 'signWall'},
+            signPaper1: {tileX: 8.09,tileY: 5.16,width: 13,height: 16,name: 'signPaper1'},
+            signPaper2: {tileX: 8.09,tileY: 5.66,width: 13,height: 16,name: 'signPaper2'},
+            signPaper3: {tileX: 8.09,tileY: 6.16,width: 12,height: 16,name: 'signPaper3'},
+            signPaper4: {tileX: 8.56,tileY: 5.16,width: 14,height: 20,name: 'signPaper4'},
+            // Lamps
             lamp: {tileX: 31.31, tileY: 0.19, width: 13, height: 18, name: 'Lamp' },
             lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted'},
         };

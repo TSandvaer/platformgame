@@ -33,15 +33,6 @@
           "tileY": 0
         },
         {
-          "id": 6,
-          "x": 161,
-          "y": 161,
-          "width": 242,
-          "height": 63,
-          "color": "#4ECDC4",
-          "spriteType": "lava"
-        },
-        {
           "id": 7,
           "x": 1136,
           "y": 585,
@@ -61,30 +52,12 @@
         },
         {
           "id": 9,
-          "x": 867,
-          "y": 400,
-          "width": 242,
+          "x": 549,
+          "y": 335,
+          "width": 660,
           "height": 32,
           "color": "#4ECDC4",
-          "spriteType": "gold"
-        },
-        {
-          "id": 10,
-          "x": 516,
-          "y": 161,
-          "width": 242,
-          "height": 20,
-          "color": "#4ECDC4",
           "spriteType": "lightWood"
-        },
-        {
-          "id": 11,
-          "x": 923,
-          "y": 500,
-          "width": 150,
-          "height": 20,
-          "color": "#4ECDC4",
-          "spriteType": "bricks"
         }
       ],
       "background": {
@@ -94,8 +67,8 @@
       "props": [
         {
           "id": 2,
-          "x": 658,
-          "y": 547,
+          "x": 1057,
+          "y": 297,
           "type": "barrel",
           "isObstacle": true,
           "width": 34.8,
@@ -104,8 +77,8 @@
         },
         {
           "id": 3,
-          "x": 503,
-          "y": 483,
+          "x": 388,
+          "y": 470,
           "type": "crate",
           "isObstacle": true,
           "width": 32,
@@ -113,8 +86,8 @@
         },
         {
           "id": 4,
-          "x": 287,
-          "y": 491,
+          "x": 696,
+          "y": 492,
           "type": "well",
           "isObstacle": false,
           "width": 64,
@@ -131,8 +104,8 @@
         },
         {
           "id": 6,
-          "x": 806,
-          "y": 546,
+          "x": 886,
+          "y": 297,
           "type": "mediumPot",
           "isObstacle": false,
           "width": 24,
@@ -141,8 +114,8 @@
         },
         {
           "id": 7,
-          "x": 764,
-          "y": 558,
+          "x": 922,
+          "y": 310,
           "type": "smallPot",
           "isObstacle": false,
           "width": 30,
@@ -151,8 +124,8 @@
         },
         {
           "id": 8,
-          "x": 842,
-          "y": 543,
+          "x": 838,
+          "y": 294,
           "type": "bigPot",
           "isObstacle": false,
           "width": 27.159999999999997,
@@ -181,18 +154,19 @@
         },
         {
           "id": 11,
-          "x": 186,
-          "y": 514,
+          "x": 606,
+          "y": 265,
           "type": "signpost",
           "isObstacle": false,
           "scale": 1.5,
           "width": 48,
-          "height": 70.5
+          "height": 70.5,
+          "zOrder": -3
         },
         {
           "id": 12,
-          "x": 198,
-          "y": 526,
+          "x": 618,
+          "y": 277,
           "type": "signText1",
           "isObstacle": false,
           "scale": 1.5,
@@ -201,8 +175,8 @@
         },
         {
           "id": 13,
-          "x": 410,
-          "y": 515,
+          "x": 742,
+          "y": 264,
           "type": "signPostDirectional",
           "isObstacle": false,
           "scale": 1.6,
@@ -212,13 +186,79 @@
         },
         {
           "id": 14,
-          "x": 553,
-          "y": 497,
+          "x": 679,
+          "y": 244,
           "type": "signPostMultidirectional",
           "isObstacle": false,
           "scale": 1.6,
           "width": 48,
           "height": 91.2,
+          "zOrder": 2
+        },
+        {
+          "id": 15,
+          "x": 687,
+          "y": 260,
+          "type": "signText2",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 25.6,
+          "height": 11.200000000000001,
+          "zOrder": 3
+        },
+        {
+          "id": 16,
+          "x": 694,
+          "y": 286,
+          "type": "signText3",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 27.200000000000003,
+          "height": 9.600000000000001,
+          "zOrder": 7
+        },
+        {
+          "id": 17,
+          "x": 749,
+          "y": 279,
+          "type": "signText4",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 32,
+          "height": 9.600000000000001,
+          "zOrder": 6
+        },
+        {
+          "id": 18,
+          "x": 457,
+          "y": 390,
+          "type": "crate",
+          "isObstacle": true,
+          "scale": 1.2,
+          "width": 38.4,
+          "height": 38.4,
+          "zOrder": 8
+        },
+        {
+          "id": 19,
+          "x": 917,
+          "y": 483,
+          "type": "signWall",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 113.60000000000001,
+          "height": 104,
+          "zOrder": 1
+        },
+        {
+          "id": 20,
+          "x": 936,
+          "y": 502,
+          "type": "signPaper1",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 20.8,
+          "height": 25.6,
           "zOrder": 2
         }
       ]
