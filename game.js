@@ -66,17 +66,9 @@ class PlatformRPG {
         // Initialize platform system
         this.platformSystem = new PlatformSystem(this.ctx, this.platformSprites);
 
-        // Village Props system
-        this.props = [];
-        this.nextPropId = 1;
-        this.nextPropZOrder = 1;
-
-        // Initialize z-orders for any existing props
-        this.initializePropZOrders();
-        this.selectedProp = null;
-        this.propPlacementMode = false;
-        this.platformSystem.isDraggingProp = false;
-        this.propDragOffset = { x: 0, y: 0 };
+        // Initialize prop system
+        this.torchParticles = [];
+        this.propSystem = new PropSystem(this.ctx, this.platformSprites, this.torchParticles);
 
 
         // Camera scrolling during drag
@@ -89,52 +81,10 @@ class PlatformRPG {
         this.freeCameraScrollTimer = null;
         this.freeCameraScrollDirection = null;
 
-        // Prop animation system and torch particles
-        this.torchParticles = [];
-
-        // Village Props types with their tileset coordinates and properties
+        // Temporary prop types reference for backward compatibility
         this.propTypes = {
-            // Buildings & Structures
-            house: { tileX: 0, tileY: 6, width: 32, height: 32, name: 'House' },
-            tower: { tileX: 15, tileY: 0, width: 32, height: 32, name: 'Tower' },
-            windmill: { tileX: 15, tileY: 14, width: 64, height: 64, name: 'Windmill' },
-
-            // Trees & Nature
-            tree1: { tileX: 15, tileY: 8, width: 32, height: 32, name: 'Tree 1' },
-            tree2: { tileX: 16, tileY: 8, width: 32, height: 32, name: 'Tree 2' },
-            bush: { tileX: 6, tileY: 2, width: 32, height: 16, name: 'Bush' },
-
-            // Decorative Items
-            barrel: { tileX: 6.05, tileY: 1, width: 29, height: 32, name: 'Barrel' },
-            crate: { tileX: 4, tileY: 1, width: 32, height: 32, name: 'Crate' },
-            bigCrate: { tileX: 1.31,tileY: 0.59,width: 44,height: 45,name: 'bigCrate'},
-            fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
-            bigPot: { tileX: 10.24, tileY: 1.08, width: 19.4, height: 30.5, name: 'bigPot' },
-            mediumPot: { tileX: 8.19, tileY: 1.00, width: 20, height: 32, name: 'mediumPot' },
-            smallPot: { tileX: 9.13, tileY: 1.34, width: 25, height: 23, name: 'bigPot'},
-            well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
-            bucket: {tileX: 4.13,tileY: 7.19,width: 24,height: 27,name: 'bucket'},
-            // Signs 
-            signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost'},      
-            signPostDirectional: {tileX: 12.06,tileY: 0.66,width: 28,height: 44,name: 'signpostDirectional'},
-            signPostMultidirectional: {tileX: 13.00,tileY: 0.25,width: 30,height: 57,name: 'signpostMultidirectional'},
-            signText1: {tileX: 14.25,tileY: 1.13,width: 17,height: 7,name: 'signText1'},
-            signText2: {tileX: 14.25,tileY: 1.38,width: 16,height: 7,name: 'signText2'},
-            signText3: {tileX: 14.25,tileY: 1.63,width: 17,height: 6,name: 'signText3'},
-            signText4: {tileX: 16.19,tileY: 0.78,width: 20,height: 6,name: 'signText4'},
-            signText5: {tileX: 16.25,tileY: 1.06,width: 17,height: 7,name: 'signText5'},
-            signWall: {tileX: 5.84,tileY: 5.00,width: 71,height: 65,name: 'signWall'},
-            signPaper1: {tileX: 8.09,tileY: 5.16,width: 13,height: 16,name: 'signPaper1'},
-            signPaper2: {tileX: 8.09,tileY: 5.66,width: 13,height: 16,name: 'signPaper2'},
-            signPaper3: {tileX: 8.09,tileY: 6.16,width: 12,height: 16,name: 'signPaper3'},
-            signPaper4: {tileX: 8.56,tileY: 5.16,width: 14,height: 20,name: 'signPaper4'},
-            // Lamps
-            lamp: {tileX: 31.31, tileY: 0.19, width: 13, height: 18, name: 'Lamp' },
-            lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted'},
-            torch: {tileX: 20.38,tileY: 1.16,width: 8,height: 24, name: 'Torch', hasFlame: true },
-            // Vegetation
-            bush1: {tileX: 14.03,tileY: 17.84,width: 93,height: 40,name: 'bush1'},
-            tree1: {tileX: 21.56,tileY: 14.56,width: 124,height: 146,name: 'tree1'},
+            // Reference to prop system's types
+            ...this.propSystem.propTypes
         };
 
         this.camera = {
@@ -152,7 +102,7 @@ class PlatformRPG {
                 name: 'Tutorial',
                 description: 'Starting scene with basic platforms',
                 platforms: [...this.platformSystem.platforms],
-                props: [],
+                props: [...this.propSystem.props],
                 background: {
                     name: 'none',
                     layers: []
@@ -503,6 +453,7 @@ class PlatformRPG {
 
         if (isDev) {
             this.platformSystem.updatePlatformList();
+            this.propSystem.updatePropList();
         }
     }
 
@@ -630,44 +581,8 @@ class PlatformRPG {
                 }
             });
 
-            // Check collision with obstacle props - 4-sided collision
-            this.props.filter(prop => prop.isObstacle).forEach(prop => {
-                if (this.platformSystem.checkCollision(this.player, prop)) {
-                    // Calculate overlap on each side
-                    const overlapLeft = (this.player.x + this.player.width) - prop.x;
-                    const overlapRight = (prop.x + prop.width) - this.player.x;
-                    const overlapTop = (this.player.y + this.player.height) - prop.y;
-                    const overlapBottom = (prop.y + prop.height) - this.player.y;
-
-                    // Find the smallest overlap to determine collision side
-                    const minOverlapX = Math.min(overlapLeft, overlapRight);
-                    const minOverlapY = Math.min(overlapTop, overlapBottom);
-
-                    if (minOverlapX < minOverlapY) {
-                        // Horizontal collision (left or right side)
-                        if (overlapLeft < overlapRight) {
-                            // Colliding with left side of prop
-                            this.player.x = prop.x - this.player.width;
-                        } else {
-                            // Colliding with right side of prop
-                            this.player.x = prop.x + prop.width;
-                        }
-                        this.player.velocityX = 0;
-                    } else {
-                        // Vertical collision (top or bottom side)
-                        if (overlapTop < overlapBottom) {
-                            // Colliding with top side of prop (landing on it)
-                            this.player.y = prop.y - this.player.height;
-                            this.player.velocityY = 0;
-                            this.player.onGround = true;
-                        } else {
-                            // Colliding with bottom side of prop (hitting from below)
-                            this.player.y = prop.y + prop.height;
-                            this.player.velocityY = 0;
-                        }
-                    }
-                }
-            });
+            // Check collision with obstacle props
+            this.propSystem.checkPlayerPropCollisions(this.player);
 
             if (this.player.y > this.canvas.height) {
                 this.player.x = 100;
@@ -681,7 +596,7 @@ class PlatformRPG {
 
     updateCamera() {
         // Don't update camera automatically during drag operations
-        if (this.platformSystem.isDragging || this.platformSystem.isDraggingProp || this.platformSystem.isResizing) {
+        if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.platformSystem.isResizing) {
             return;
         }
 
@@ -710,7 +625,7 @@ class PlatformRPG {
         this.ctx.translate(-this.camera.x, -this.camera.y);
 
         // Debug: Log camera position during render
-        if (this.platformSystem.isDragging || this.platformSystem.isDraggingProp) {
+        if (this.platformSystem.isDragging || this.propSystem.isDraggingProp) {
             console.log('Rendering with camera position:', this.camera.x, this.camera.y);
         }
 
@@ -739,7 +654,7 @@ class PlatformRPG {
         });
 
         // Render props (background props first, then obstacle props)
-        this.renderProps();
+        this.propSystem.renderBackgroundProps(this.isDevelopmentMode);
 
         // Render player sprite or fallback to rectangle
         if (this.spritesLoaded && this.sprites[this.player.currentAnimation].image) {
@@ -757,11 +672,11 @@ class PlatformRPG {
 
         // Render obstacle props after player (in front of player), sorted by z-order
         if (this.platformSprites.villageProps.image) {
-            this.props
+            this.propSystem.props
                 .filter(prop => prop.isObstacle)
                 .sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0))
                 .forEach(prop => {
-                    this.drawProp(prop);
+                    this.propSystem.drawProp(prop, this.isDevelopmentMode);
                 });
         }
 
@@ -813,78 +728,8 @@ class PlatformRPG {
     }
 
 
-    renderProps() {
-        if (!this.platformSprites.villageProps.image) return;
-
-        // Render background props first (behind player), sorted by z-order (lowest first)
-        this.props
-            .filter(prop => !prop.isObstacle)
-            .sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0))
-            .forEach(prop => {
-                this.drawProp(prop);
-            });
-
-        // Render obstacle props after player (will be handled in main render)
-    }
-
-    drawProp(prop) {
-        const propType = this.propTypes[prop.type];
-        if (!propType) return;
-
-        const tileset = this.platformSprites.villageProps;
-        if (!tileset.image) return;
-
-        const sourceX = propType.tileX * tileset.tileWidth;
-        const sourceY = propType.tileY * tileset.tileHeight;
-
-        // Use individual prop scale if available, otherwise fallback to default
-        const scale = prop.scale !== undefined ? prop.scale :
-                     (prop.type === 'well' ? 1 :
-                     (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
-                     (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
-        const renderWidth = propType.width * scale;
-        const renderHeight = propType.height * scale;
-
-        // Disable image smoothing for pixel-perfect rendering
-        this.ctx.imageSmoothingEnabled = false;
-
-        // Show green background only for selected props
-        if (this.isDevelopmentMode && this.selectedProp && this.selectedProp.id === prop.id) {
-            this.ctx.fillStyle = '#44FF44';
-            this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
-        }
-
-        // Try to draw sprite on top
-        // Extract the actual prop size from tileset and render at scaled size
-        this.ctx.drawImage(
-            tileset.image,
-            sourceX, sourceY,
-            propType.width, propType.height,  // Extract actual prop dimensions from tileset
-            prop.x, prop.y,
-            renderWidth, renderHeight
-        );
-
-        // Re-enable image smoothing
-        this.ctx.imageSmoothingEnabled = true;
-
-        // Development mode: show prop boundaries
-        if (this.isDevelopmentMode) {
-            if (this.selectedProp && this.selectedProp.id === prop.id) {
-                this.ctx.strokeStyle = prop.isObstacle ? '#FF6B6B' : '#4ECDC4';
-                this.ctx.lineWidth = 2;
-                this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
-            } else {
-                this.ctx.strokeStyle = prop.isObstacle ? '#FF9999' : '#99D6CE';
-                this.ctx.lineWidth = 1;
-                this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
-            }
-        }
-
-        // Render flame animation if this is a torch prop (render last so it appears on top)
-        if (propType.hasFlame) {
-            this.renderTorchFlame(prop, renderWidth, renderHeight, scale);
-        }
-    }
+    // Prop rendering methods have been moved to propSystem
+    // Keep renderTorchFlame temporarily for backward compatibility
 
     renderTorchFlame(prop, renderWidth, renderHeight, scale) {
         if (!this.platformSprites.torchFlame || !this.platformSprites.torchFlame.image) return;
@@ -1009,6 +854,8 @@ class PlatformRPG {
         }
     }
 
+    // Prop management methods have been moved to propSystem
+    /* Keep for reference
     addProp(x, y, type, isObstacle = false, customScale = null) {
         const propType = this.propTypes[type];
         if (!propType) return;
@@ -1021,7 +868,7 @@ class PlatformRPG {
         const scale = customScale !== null ? customScale : defaultScale;
 
         const newProp = {
-            id: this.nextPropId++,
+            id: this.propSystem.nextPropId++,
             x: x,
             y: y,
             type: type,
@@ -1029,13 +876,15 @@ class PlatformRPG {
             scale: scale,
             width: propType.width * scale,
             height: propType.height * scale,
-            zOrder: this.nextPropZOrder++
+            zOrder: this.propSystem.nextPropZOrder++
         };
 
-        this.props.push(newProp);
+        this.propSystem.props.push(newProp);
         return newProp;
     }
+    */
 
+    /* Keep for reference
     placeProp(mouseX, mouseY) {
         // Get selected prop type, obstacle setting, and scale from UI
         const propTypeSelect = document.getElementById('propTypeSelect');
@@ -1052,37 +901,40 @@ class PlatformRPG {
         this.addProp(mouseX, mouseY, propType, isObstacle, scale);
 
         // Exit placement mode
-        this.propPlacementMode = false;
+        this.propSystem.propPlacementMode = false;
         const btn = document.getElementById('addPropBtn');
         if (btn) {
             btn.textContent = 'Add Prop (Click on map)';
             btn.classList.remove('danger');
         }
     }
+    */
 
+    /* Keep for reference
     updatePropProperties() {
         const propProperties = document.getElementById('propProperties');
         if (!propProperties) return;
 
-        if (this.selectedProp) {
+        if (this.propSystem.selectedProp) {
             propProperties.style.display = 'block';
 
-            const propType = this.propTypes[this.selectedProp.type];
-            document.getElementById('selectedPropType').textContent = propType ? propType.name : this.selectedProp.type;
-            document.getElementById('propX').value = this.selectedProp.x;
-            document.getElementById('propY').value = this.selectedProp.y;
-            document.getElementById('selectedPropObstacle').checked = this.selectedProp.isObstacle;
+            const propType = this.propTypes[this.propSystem.selectedProp.type];
+            document.getElementById('selectedPropType').textContent = propType ? propType.name : this.propSystem.selectedProp.type;
+            document.getElementById('propX').value = this.propSystem.selectedProp.x;
+            document.getElementById('propY').value = this.propSystem.selectedProp.y;
+            document.getElementById('selectedPropObstacle').checked = this.propSystem.selectedProp.isObstacle;
 
             // Show current scale or default if not set
-            const currentScale = this.selectedProp.scale !== undefined ? this.selectedProp.scale :
-                               (this.selectedProp.type === 'well' ? 1 :
-                               (this.selectedProp.type === 'barrel' || this.selectedProp.type === 'crate') ? 1.2 :
-                               (this.selectedProp.type === 'smallPot' || this.selectedProp.type === 'mediumPot' || this.selectedProp.type === 'bigPot') ? 0.6 : 1.6);
+            const currentScale = this.propSystem.selectedProp.scale !== undefined ? this.propSystem.selectedProp.scale :
+                               (this.propSystem.selectedProp.type === 'well' ? 1 :
+                               (this.propSystem.selectedProp.type === 'barrel' || this.propSystem.selectedProp.type === 'crate') ? 1.2 :
+                               (this.propSystem.selectedProp.type === 'smallPot' || this.propSystem.selectedProp.type === 'mediumPot' || this.propSystem.selectedProp.type === 'bigPot') ? 0.6 : 1.6);
             document.getElementById('selectedPropScale').value = currentScale.toFixed(1);
         } else {
             propProperties.style.display = 'none';
         }
     }
+    */
 
     renderDevInfo() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -1171,10 +1023,10 @@ class PlatformRPG {
 
         // Props controls
         document.getElementById('addPropBtn').addEventListener('click', () => {
-            this.propPlacementMode = !this.propPlacementMode;
+            this.propSystem.propPlacementMode = !this.propSystem.propPlacementMode;
             const btn = document.getElementById('addPropBtn');
-            btn.textContent = this.propPlacementMode ? 'Cancel Placement' : 'Add Prop (Click on map)';
-            btn.classList.toggle('danger', this.propPlacementMode);
+            btn.textContent = this.propSystem.propPlacementMode ? 'Cancel Placement' : 'Add Prop (Click on map)';
+            btn.classList.toggle('danger', this.propSystem.propPlacementMode);
         });
 
         // Auto-update scale when prop type changes
@@ -1192,48 +1044,49 @@ class PlatformRPG {
 
         document.getElementById('clearPropsBtn').addEventListener('click', () => {
             if (confirm('Clear all props? This cannot be undone.')) {
-                this.props = [];
-                this.selectedProp = null;
-                this.updatePropProperties();
+                this.propSystem.props = [];
+                this.propSystem.selectedProp = null;
+                this.propSystem.updatePropProperties();
             }
         });
 
         // Prop properties event listeners
         document.getElementById('updateProp').addEventListener('click', () => {
-            if (this.selectedProp) {
-                this.selectedProp.x = parseInt(document.getElementById('propX').value);
-                this.selectedProp.y = parseInt(document.getElementById('propY').value);
-                this.selectedProp.isObstacle = document.getElementById('selectedPropObstacle').checked;
+            if (this.propSystem.selectedProp) {
+                this.propSystem.selectedProp.x = parseInt(document.getElementById('propX').value);
+                this.propSystem.selectedProp.y = parseInt(document.getElementById('propY').value);
+                this.propSystem.selectedProp.isObstacle = document.getElementById('selectedPropObstacle').checked;
 
                 // Update scale and recalculate width/height
                 const newScale = parseFloat(document.getElementById('selectedPropScale').value) || 1.0;
-                this.selectedProp.scale = newScale;
+                this.propSystem.selectedProp.scale = newScale;
 
-                const propType = this.propTypes[this.selectedProp.type];
+                const propType = this.propTypes[this.propSystem.selectedProp.type];
                 if (propType) {
-                    this.selectedProp.width = propType.width * newScale;
-                    this.selectedProp.height = propType.height * newScale;
+                    this.propSystem.selectedProp.width = propType.width * newScale;
+                    this.propSystem.selectedProp.height = propType.height * newScale;
                 }
             }
         });
 
         document.getElementById('deleteProp').addEventListener('click', () => {
-            if (this.selectedProp && confirm('Delete this prop? This cannot be undone.')) {
-                this.props = this.props.filter(prop => prop.id !== this.selectedProp.id);
-                this.selectedProp = null;
-                this.updatePropProperties();
+            if (this.propSystem.selectedProp && confirm('Delete this prop? This cannot be undone.')) {
+                this.propSystem.props = this.propSystem.props.filter(prop => prop.id !== this.propSystem.selectedProp.id);
+                this.propSystem.selectedProp = null;
+                this.propSystem.updatePropProperties();
+                this.propSystem.updatePropList();
             }
         });
 
         document.getElementById('sendToBackground').addEventListener('click', () => {
-            if (this.selectedProp) {
-                this.sendPropToBackground(this.selectedProp);
+            if (this.propSystem.selectedProp) {
+                this.sendPropToBackground(this.propSystem.selectedProp);
             }
         });
 
         document.getElementById('bringToFront').addEventListener('click', () => {
-            if (this.selectedProp) {
-                this.bringPropToFront(this.selectedProp);
+            if (this.propSystem.selectedProp) {
+                this.bringPropToFront(this.propSystem.selectedProp);
             }
         });
     }
@@ -1244,8 +1097,8 @@ class PlatformRPG {
         const mouseY = e.clientY - rect.top + this.camera.y;
 
         // Handle prop placement mode
-        if (this.propPlacementMode) {
-            this.placeProp(mouseX, mouseY);
+        if (this.propSystem.propPlacementMode) {
+            this.propSystem.placeProp(mouseX, mouseY);
             return;
         }
 
@@ -1261,7 +1114,7 @@ class PlatformRPG {
         // Find all props under the mouse, then select the one with highest z-order
         let propsUnderMouse = [];
 
-        for (let prop of this.props) {
+        for (let prop of this.propSystem.props) {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
 
@@ -1285,14 +1138,15 @@ class PlatformRPG {
                 (current.zOrder || 0) > (highest.zOrder || 0) ? current : highest
             );
 
-            this.selectedProp = topProp;
+            this.propSystem.selectedProp = topProp;
             this.platformSystem.selectedPlatform = null;
-            this.isDraggingProp = true;
-            this.propDragOffset = {
+            this.propSystem.isDraggingProp = true;
+            this.propSystem.propDragOffset = {
                 x: mouseX - topProp.x,
                 y: mouseY - topProp.y
             };
-            this.updatePropProperties();
+            this.propSystem.updatePropProperties();
+            this.propSystem.updatePropList();
             this.platformSystem.updatePlatformProperties();
             this.platformSystem.updatePlatformList();
             return;
@@ -1322,10 +1176,11 @@ class PlatformRPG {
         }
 
         this.platformSystem.selectedPlatform = null;
-        this.selectedProp = null;
+        this.propSystem.selectedProp = null;
         this.platformSystem.updatePlatformProperties();
-        this.updatePropProperties();
+        this.propSystem.updatePropProperties();
         this.platformSystem.updatePlatformList();
+        this.propSystem.updatePropList();
     }
 
     handlePlatformDrag(e) {
@@ -1343,10 +1198,10 @@ class PlatformRPG {
         this.handleDragScrolling(clientMouseX, clientMouseY);
 
         // Handle prop dragging
-        if (this.isDraggingProp && this.selectedProp) {
-            this.selectedProp.x = mouseX - this.propDragOffset.x;
-            this.selectedProp.y = mouseY - this.propDragOffset.y;
-            this.updatePropProperties();
+        if (this.propSystem.isDraggingProp && this.propSystem.selectedProp) {
+            this.propSystem.selectedProp.x = mouseX - this.propSystem.propDragOffset.x;
+            this.propSystem.selectedProp.y = mouseY - this.propSystem.propDragOffset.y;
+            this.propSystem.updatePropProperties();
             return;
         }
 
@@ -1401,10 +1256,10 @@ class PlatformRPG {
                 newDirection = 'right';
                 console.log('Platform right edge near screen right, should scroll right');
             }
-        } else if (this.platformSystem.isDraggingProp && this.selectedProp) {
+        } else if (this.platformSystem.isDraggingProp && this.propSystem.selectedProp) {
             // Similar logic for props
-            const propScreenLeft = this.selectedProp.x - this.camera.x;
-            const propScreenRight = this.selectedProp.x + this.selectedProp.width - this.camera.x;
+            const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
+            const propScreenRight = this.propSystem.selectedProp.x + this.propSystem.selectedProp.width - this.camera.x;
 
             if (propScreenLeft < scrollTriggerZone) {
                 newDirection = 'left';
@@ -1449,9 +1304,9 @@ class PlatformRPG {
                     shouldContinue = true;
                     this.camera.x += scrollSpeed;
                 }
-            } else if (this.platformSystem.isDraggingProp && this.selectedProp) {
-                const propScreenLeft = this.selectedProp.x - this.camera.x;
-                const propScreenRight = this.selectedProp.x + this.selectedProp.width - this.camera.x;
+            } else if (this.platformSystem.isDraggingProp && this.propSystem.selectedProp) {
+                const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
+                const propScreenRight = this.propSystem.selectedProp.x + this.propSystem.selectedProp.width - this.camera.x;
 
                 if (direction === 'left' && propScreenLeft < scrollTriggerZone) {
                     shouldContinue = true;
@@ -1559,7 +1414,7 @@ class PlatformRPG {
 
     sendPropToBackground(prop) {
         // Get all z-orders, filtering out undefined/null values and converting to numbers
-        const zOrders = this.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
+        const zOrders = this.propSystem.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
 
         // Find the lowest z-order, defaulting to 0 if no valid z-orders exist
         const minZOrder = zOrders.length > 0 ? Math.min(...zOrders) : 0;
@@ -1572,7 +1427,7 @@ class PlatformRPG {
 
     bringPropToFront(prop) {
         // Get all z-orders, filtering out undefined/null values and converting to numbers
-        const zOrders = this.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
+        const zOrders = this.propSystem.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
 
         // Find the highest z-order, defaulting to 0 if no valid z-orders exist
         const maxZOrder = zOrders.length > 0 ? Math.max(...zOrders) : 0;
@@ -1581,24 +1436,26 @@ class PlatformRPG {
         prop.zOrder = maxZOrder + 1;
 
         // Update the next z-order counter to be higher
-        this.nextPropZOrder = Math.max(this.nextPropZOrder, prop.zOrder + 1);
+        this.propSystem.nextPropZOrder = Math.max(this.propSystem.nextPropZOrder, prop.zOrder + 1);
 
         console.log(`Brought prop ${prop.type} to front with z-order: ${prop.zOrder}`);
     }
 
+    /* Keep for reference - moved to propSystem
     initializePropZOrders() {
         // Assign z-orders to any props that don't have them
-        this.props.forEach(prop => {
+        this.propSystem.props.forEach(prop => {
             if (prop.zOrder === undefined || prop.zOrder === null || isNaN(prop.zOrder)) {
-                prop.zOrder = this.nextPropZOrder++;
+                prop.zOrder = this.propSystem.nextPropZOrder++;
             }
         });
 
         // Update the next z-order counter to be higher than any existing z-order
-        const maxExistingZOrder = this.props.reduce((max, prop) =>
+        const maxExistingZOrder = this.propSystem.props.reduce((max, prop) =>
             Math.max(max, prop.zOrder || 0), 0);
-        this.nextPropZOrder = Math.max(this.nextPropZOrder, maxExistingZOrder + 1);
+        this.propSystem.nextPropZOrder = Math.max(this.propSystem.nextPropZOrder, maxExistingZOrder + 1);
     }
+    */
 
     handleKeyDown(e) {
         // Only handle keys in development mode
@@ -1611,27 +1468,29 @@ class PlatformRPG {
             if (this.platformSystem.selectedPlatform) {
                 // Delete selected platform
                 this.platformSystem.deleteSelectedPlatform();
-            } else if (this.selectedProp) {
+            } else if (this.propSystem.selectedProp) {
                 // Delete selected prop
-                this.deleteSelectedProp();
+                this.propSystem.deleteSelectedProp();
             }
         }
     }
 
 
+    /* Keep for reference - moved to propSystem
     deleteSelectedProp() {
-        if (!this.selectedProp) return;
+        if (!this.propSystem.selectedProp) return;
 
-        this.props = this.props.filter(prop => prop.id !== this.selectedProp.id);
-        this.selectedProp = null;
+        this.propSystem.props = this.propSystem.props.filter(prop => prop.id !== this.propSystem.selectedProp.id);
+        this.propSystem.selectedProp = null;
         this.updatePropProperties();
 
         console.log('Prop deleted via Delete key');
     }
+    */
 
     handlePlatformMouseUp(e) {
         this.platformSystem.isDragging = false;
-        this.platformSystem.isDraggingProp = false;
+        this.propSystem.isDraggingProp = false;
         this.platformSystem.isResizing = false;
         this.platformSystem.resizeHandle = null;
 
@@ -1647,7 +1506,7 @@ class PlatformRPG {
         // Find all props under mouse, then check the topmost one
         let propsUnderCursor = [];
 
-        for (const prop of this.props) {
+        for (const prop of this.propSystem.props) {
             const propType = this.propTypes[prop.type];
             if (!propType) continue;
 
@@ -2055,7 +1914,7 @@ class PlatformRPG {
         // Update the current scene with the current platforms and props
         if (this.scenes.length > 0) {
             this.scenes[0].platforms = JSON.parse(JSON.stringify(this.platformSystem.platforms));
-            this.scenes[0].props = JSON.parse(JSON.stringify(this.props));
+            this.scenes[0].props = JSON.parse(JSON.stringify(this.propSystem.props));
 
             // Save to localStorage as backup
             localStorage.setItem('platformGame_scenes', JSON.stringify(this.scenes));
@@ -2125,8 +1984,8 @@ class PlatformRPG {
 
                 // Load props if they exist
                 if (this.scenes[0].props) {
-                    this.props = [...this.scenes[0].props];
-                    this.nextPropId = Math.max(...this.props.map(p => p.id || 0)) + 1;
+                    this.propSystem.props = [...this.scenes[0].props];
+                    this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
                 }
 
                 // Restore background if it exists
@@ -2174,8 +2033,8 @@ class PlatformRPG {
 
                 // Load props if they exist
                 if (this.scenes.length > 0 && this.scenes[0].props) {
-                    this.props = [...this.scenes[0].props];
-                    this.nextPropId = Math.max(...this.props.map(p => p.id || 0)) + 1;
+                    this.propSystem.props = [...this.scenes[0].props];
+                    this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
                 }
 
                 // Restore background if it exists
@@ -2200,7 +2059,7 @@ class PlatformRPG {
         // Update current scene with current platforms and props
         if (this.scenes.length > 0) {
             this.scenes[0].platforms = JSON.parse(JSON.stringify(this.platformSystem.platforms));
-            this.scenes[0].props = JSON.parse(JSON.stringify(this.props));
+            this.scenes[0].props = JSON.parse(JSON.stringify(this.propSystem.props));
         }
 
         const gameData = {

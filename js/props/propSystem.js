@@ -1,0 +1,206 @@
+class PropSystem {
+    constructor(ctx, platformSprites, torchParticles) {
+        this.data = new PropData();
+        this.renderer = new PropRenderer(ctx, platformSprites, torchParticles);
+        this.collisions = new PropCollisions();
+        this.manager = new PropManager(this.data);
+
+        // Initialize prop z-orders
+        this.data.initializePropZOrders();
+    }
+
+    // Data access methods
+    get props() {
+        return this.data.props;
+    }
+
+    set props(value) {
+        this.data.props = value;
+    }
+
+    get selectedProp() {
+        return this.data.selectedProp;
+    }
+
+    set selectedProp(value) {
+        this.data.selectedProp = value;
+    }
+
+    get propPlacementMode() {
+        return this.data.propPlacementMode;
+    }
+
+    set propPlacementMode(value) {
+        this.data.propPlacementMode = value;
+    }
+
+    get isDraggingProp() {
+        return this.data.isDraggingProp;
+    }
+
+    set isDraggingProp(value) {
+        this.data.isDraggingProp = value;
+    }
+
+    get propDragOffset() {
+        return this.data.propDragOffset;
+    }
+
+    set propDragOffset(value) {
+        this.data.propDragOffset = value;
+    }
+
+    get nextPropId() {
+        return this.data.nextPropId;
+    }
+
+    set nextPropId(value) {
+        this.data.nextPropId = value;
+    }
+
+    get nextPropZOrder() {
+        return this.data.nextPropZOrder;
+    }
+
+    set nextPropZOrder(value) {
+        this.data.nextPropZOrder = value;
+    }
+
+    get propTypes() {
+        return this.data.propTypes;
+    }
+
+    // Rendering methods
+    renderBackgroundProps(isDevelopmentMode) {
+        this.renderer.renderProps(
+            this.data.props,
+            this.data.propTypes,
+            isDevelopmentMode,
+            this.data.selectedProp,
+            false // Render non-obstacle props (background)
+        );
+    }
+
+    renderObstacleProps(isDevelopmentMode) {
+        this.renderer.renderProps(
+            this.data.props,
+            this.data.propTypes,
+            isDevelopmentMode,
+            this.data.selectedProp,
+            true // Render obstacle props (foreground)
+        );
+    }
+
+    drawProp(prop, isDevelopmentMode) {
+        this.renderer.drawProp(
+            prop,
+            this.data.propTypes,
+            isDevelopmentMode,
+            this.data.selectedProp
+        );
+    }
+
+    // Collision detection
+    checkPlayerPropCollisions(player) {
+        this.collisions.checkPlayerPropCollisions(
+            player,
+            this.data.props,
+            this.data.propTypes
+        );
+    }
+
+    // Prop management
+    addProp(type, x, y, isObstacle = false, scale = undefined) {
+        return this.data.addProp(type, x, y, isObstacle, scale);
+    }
+
+    deleteSelectedProp() {
+        this.data.deleteSelectedProp();
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    togglePropPlacement() {
+        this.manager.togglePropPlacement();
+    }
+
+    placeProp(mouseX, mouseY) {
+        this.manager.placeProp(mouseX, mouseY);
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    // Mouse event handling
+    handleMouseDown(mouseX, mouseY, platformSystem) {
+        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem);
+        if (result.handled) {
+            this.manager.updatePropProperties();
+            this.manager.updatePropList();
+        }
+        return result;
+    }
+
+    handleMouseMove(mouseX, mouseY) {
+        const moved = this.manager.handleMouseMove(mouseX, mouseY);
+        if (moved) {
+            this.manager.updatePropProperties();
+        }
+        return moved;
+    }
+
+    handleMouseUp() {
+        this.manager.handleMouseUp();
+    }
+
+    // UI updates
+    updatePropList() {
+        this.manager.updatePropList();
+    }
+
+    updatePropProperties() {
+        this.manager.updatePropProperties();
+    }
+
+    updateSelectedProp() {
+        this.manager.updateSelectedProp();
+    }
+
+    // Utility methods
+    isPointInProp(x, y, prop) {
+        return this.data.isPointInProp(x, y, prop);
+    }
+
+    getPropType(typeName) {
+        return this.data.getPropType(typeName);
+    }
+
+    // Z-order management
+    movePropToFront() {
+        this.manager.movePropToFront();
+    }
+
+    movePropToBack() {
+        this.manager.movePropToBack();
+    }
+
+    // State management
+    get currentPropType() {
+        return this.manager.currentPropType;
+    }
+
+    set currentPropType(value) {
+        this.manager.currentPropType = value;
+    }
+
+    get nextPropIsObstacle() {
+        return this.manager.nextPropIsObstacle;
+    }
+
+    set nextPropIsObstacle(value) {
+        this.manager.nextPropIsObstacle = value;
+    }
+
+    initializePropZOrders() {
+        this.data.initializePropZOrders();
+    }
+}
