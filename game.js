@@ -8,6 +8,10 @@ class PlatformRPG {
         this.canvas.width = window.innerWidth - (this.showDashboard ? 300 : 0);
         this.canvas.height = window.innerHeight;
 
+        // Delta time tracking for frame-rate independent animations
+        this.lastTime = 0;
+        this.deltaTime = 0;
+
         this.player = {
             x: 100,
             y: 400,
@@ -23,7 +27,7 @@ class PlatformRPG {
             currentAnimation: 'idle',
             frameIndex: 0,
             frameTimer: 0,
-            frameRate: 6,
+            frameRate: 150, // milliseconds per frame (was 6 frames @ 60fps = 100ms)
             isAttacking: false,
             attackTimer: 0,
             attackDuration: 24
@@ -621,8 +625,8 @@ class PlatformRPG {
     updatePlayerAnimation() {
         if (!this.spritesLoaded) return;
 
-        // Update frame animation
-        this.player.frameTimer++;
+        // Update frame animation using delta time
+        this.player.frameTimer += this.deltaTime;
         if (this.player.frameTimer >= this.player.frameRate) {
             this.player.frameTimer = 0;
             const sprite = this.sprites[this.player.currentAnimation];
@@ -2408,14 +2412,21 @@ class PlatformRPG {
         event.target.value = '';
     }
 
-    gameLoop() {
+    gameLoop(currentTime = 0) {
+        // Calculate delta time in milliseconds
+        this.deltaTime = currentTime - this.lastTime;
+        this.lastTime = currentTime;
+
+        // Cap delta time to prevent large jumps (e.g., when switching tabs)
+        if (this.deltaTime > 100) this.deltaTime = 16.67; // ~60fps fallback
+
         this.handleInput();
         this.updatePhysics();
         this.updatePlayerAnimation();
         this.updateCamera();
         this.render();
 
-        requestAnimationFrame(() => this.gameLoop());
+        requestAnimationFrame((time) => this.gameLoop(time));
     }
 }
 
