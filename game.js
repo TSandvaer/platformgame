@@ -152,12 +152,14 @@ class PlatformRPG {
             // Decorative Items
             barrel: { tileX: 6.05, tileY: 1, width: 29, height: 32, name: 'Barrel' },
             crate: { tileX: 4, tileY: 1, width: 32, height: 32, name: 'Crate' },
+            bigCrate: { tileX: 1.31,tileY: 0.59,width: 44,height: 45,name: 'bigCrate'},
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
             bigPot: { tileX: 10.24, tileY: 1.08, width: 19.4, height: 30.5, name: 'bigPot' },
             mediumPot: { tileX: 8.19, tileY: 1.00, width: 20, height: 32, name: 'mediumPot' },
             smallPot: { tileX: 9.13, tileY: 1.34, width: 25, height: 23, name: 'bigPot'},
-            // Signs 
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
+            bucket: {tileX: 4.13,tileY: 7.19,width: 24,height: 27,name: 'bucket'},
+            // Signs 
             signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost'},      
             signPostDirectional: {tileX: 12.06,tileY: 0.66,width: 28,height: 44,name: 'signpostDirectional'},
             signPostMultidirectional: {tileX: 13.00,tileY: 0.25,width: 30,height: 57,name: 'signpostMultidirectional'},
