@@ -338,6 +338,17 @@
           "width": 12.8,
           "height": 41.6,
           "zOrder": 1
+        },
+        {
+          "id": 28,
+          "x": 270,
+          "y": 481,
+          "type": "torch",
+          "isObstacle": false,
+          "scale": 2,
+          "width": 16,
+          "height": 52,
+          "zOrder": 1
         }
       ]
     }

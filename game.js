@@ -43,7 +43,8 @@ class PlatformRPG {
         // Platform sprites
         this.platformSprites = {
             tileset: { image: null, tileWidth: 16, tileHeight: 16 },
-            villageProps: { image: null, tileWidth: 32, tileHeight: 32 }
+            villageProps: { image: null, tileWidth: 32, tileHeight: 32 },
+            torchFlame: { image: null, frameWidth: 21, frameHeight: 21, totalFrames: 6 }
         };
         this.platformSpritesLoaded = false;
         this.loadPlatformSprites();
@@ -137,6 +138,9 @@ class PlatformRPG {
         this.freeCameraScrollTimer = null;
         this.freeCameraScrollDirection = null;
 
+        // Prop animation system and torch particles
+        this.torchParticles = [];
+
         // Village Props types with their tileset coordinates and properties
         this.propTypes = {
             // Buildings & Structures
@@ -176,7 +180,7 @@ class PlatformRPG {
             // Lamps
             lamp: {tileX: 31.31, tileY: 0.19, width: 13, height: 18, name: 'Lamp' },
             lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted'},
-            torch: {tileX: 20.38,tileY: 1.13,width: 8,height: 26,name: 'torch'},
+            torch: {tileX: 20.38,tileY: 1.16,width: 8,height: 24, name: 'Torch', hasFlame: true },
             // Vegetation
             bush1: {tileX: 14.03,tileY: 17.84,width: 93,height: 40,name: 'bush1'},
             tree1: {tileX: 21.56,tileY: 14.56,width: 124,height: 146,name: 'tree1'},
@@ -262,7 +266,7 @@ class PlatformRPG {
 
     loadPlatformSprites() {
         let loadedCount = 0;
-        const totalImages = 2;
+        const totalImages = 3;
 
         // Load ground tileset
         const groundImg = new Image();
@@ -291,6 +295,20 @@ class PlatformRPG {
         };
         propsImg.src = 'sprites/Pixel Art Platformer/Texture/TX Village Props.png';
         this.platformSprites.villageProps.image = propsImg;
+
+        // Load torch flame animation
+        const torchFlameImg = new Image();
+        torchFlameImg.onload = () => {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+                this.platformSpritesLoaded = true;
+            }
+        };
+        torchFlameImg.onerror = () => {
+            console.error('Failed to load torch flame sprite');
+        };
+        torchFlameImg.src = 'sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
+        this.platformSprites.torchFlame.image = torchFlameImg;
     }
 
     loadAvailableBackgrounds() {
@@ -962,6 +980,134 @@ class PlatformRPG {
                 this.ctx.lineWidth = 1;
                 this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
             }
+        }
+
+        // Render flame animation if this is a torch prop (render last so it appears on top)
+        if (propType.hasFlame) {
+            this.renderTorchFlame(prop, renderWidth, renderHeight, scale);
+        }
+    }
+
+    renderTorchFlame(prop, renderWidth, renderHeight, scale) {
+        if (!this.platformSprites.torchFlame || !this.platformSprites.torchFlame.image) return;
+
+        const flameSprite = this.platformSprites.torchFlame;
+        const currentTime = Date.now();
+
+        try {
+            // Enable image smoothing for smooth flame rendering
+            this.ctx.imageSmoothingEnabled = true;
+
+            // Calculate torch tip position
+            const torchCenterX = prop.x + (renderWidth / 2);
+            const torchTopY = prop.y;
+
+            // Natural flame animation - use individual 21x21 sprites for breathing effect
+            const frameIndex = Math.floor(currentTime / 150) % 4; // Use 4 frames for breathing cycle
+
+            // Back to 6x6 grid, but use different positions for breathing effect
+            const gridSize = 6;
+            const frameSize = Math.floor(128 / gridSize); // 21 pixels per frame
+
+            // Create breathing by using flames from different rows (different flame sizes)
+            const breathingSequence = [
+                { x: 0, y: 0 }, // Small flame
+                { x: 1, y: 0 }, // Medium flame
+                { x: 2, y: 0 }, // Large flame
+                { x: 1, y: 0 }  // Back to medium
+            ];
+
+            const currentFrame = breathingSequence[frameIndex];
+            const sourceX = currentFrame.x * frameSize;
+            const sourceY = currentFrame.y * frameSize;
+
+            // Larger flame size - taller and wider
+            const flameWidth = 65; // Wider (was 50)
+            const flameHeight = 110; // Much taller (was 85)
+
+            // Adjust position - fine-tuned positioning
+            const flameX = torchCenterX - 33.5; // 0.5px more left (was -33, now -33.5)
+            const flameY = torchTopY - 100.5; // 0.5px up (was -100, now -100.5)
+
+            // Save context state
+            this.ctx.save();
+
+            // Enable image smoothing for smooth flame
+            this.ctx.imageSmoothingEnabled = true;
+            this.ctx.imageSmoothingQuality = 'high';
+
+            // Enhanced glow effect for more dramatic flame
+            this.ctx.shadowColor = 'rgba(255, 120, 0, 0.9)';
+            this.ctx.shadowBlur = 25; // Larger glow
+            this.ctx.shadowOffsetX = 0;
+            this.ctx.shadowOffsetY = 0;
+
+            // Smoother, more natural fire colors with more blur
+            this.ctx.filter = 'hue-rotate(10deg) saturate(2.2) brightness(1.4) contrast(1.2) blur(1.2px)';
+
+            this.ctx.drawImage(
+                flameSprite.image,
+                sourceX, sourceY,
+                frameSize, frameSize,
+                flameX, flameY,
+                flameWidth, flameHeight
+            );
+
+            this.ctx.restore();
+
+            // Much fewer particles
+            if (Math.random() < 0.03) { // Only 3% chance - very rare particles
+                // Random side drift - either left or right
+                const sideDirection = Math.random() < 0.5 ? -1 : 1;
+                const horizontalDrift = sideDirection * (0.3 + Math.random() * 0.7); // 0.3 to 1.0 speed
+
+                this.torchParticles.push({
+                    x: torchCenterX + (Math.random() - 0.5) * 12, // Slightly wider start spread
+                    y: torchTopY - 15, // Start near torch tip
+                    vx: horizontalDrift, // Drift to one side
+                    vy: 0, // Start with no upward velocity
+                    life: 1.0,
+                    decay: 0.008, // Slow decay so they fall far
+                    size: 1 + Math.random(),
+                    brightness: 0.9 + Math.random() * 0.1
+                });
+            }
+
+            // Update and render falling spark particles
+            this.ctx.save();
+            for (let i = this.torchParticles.length - 1; i >= 0; i--) {
+                const particle = this.torchParticles[i];
+
+                // Simple falling physics
+                particle.x += particle.vx;
+                particle.y += particle.vy;
+                particle.vy += 0.15; // Strong gravity - particles fall down
+                particle.life -= particle.decay;
+
+                // Remove dead particles
+                if (particle.life <= 0) {
+                    this.torchParticles.splice(i, 1);
+                    continue;
+                }
+
+                // Simple spark rendering without glow
+                const alpha = particle.life;
+                const brightness = particle.brightness;
+
+                const red = Math.floor(255 * brightness * alpha);
+                const green = Math.floor(180 * brightness * alpha);
+                const blue = Math.floor(60 * brightness * alpha);
+
+                this.ctx.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+                this.ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+            }
+            this.ctx.restore();
+
+            // Re-enable image smoothing
+            this.ctx.imageSmoothingEnabled = true;
+
+        } catch (error) {
+            console.error('Error rendering torch flame:', error);
         }
     }
 
