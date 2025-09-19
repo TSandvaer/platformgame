@@ -144,13 +144,14 @@
         },
         {
           "id": 10,
-          "x": 662,
-          "y": 429,
+          "x": 621,
+          "y": 427,
           "type": "lamp",
           "isObstacle": false,
           "scale": 1.5,
           "width": 19.5,
-          "height": 27
+          "height": 27,
+          "zOrder": -5
         },
         {
           "id": 11,
@@ -326,6 +327,17 @@
           "width": 38.400000000000006,
           "height": 43.2,
           "zOrder": 2
+        },
+        {
+          "id": 27,
+          "x": 853,
+          "y": 493,
+          "type": "torch",
+          "isObstacle": false,
+          "scale": 1.6,
+          "width": 12.8,
+          "height": 41.6,
+          "zOrder": 1
         }
       ]
     }
