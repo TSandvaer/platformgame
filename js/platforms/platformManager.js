@@ -262,12 +262,27 @@ class PlatformManager {
             const widthInput = document.getElementById('platformWidth');
             const heightInput = document.getElementById('platformHeight');
             const spriteTypeInput = document.getElementById('platformSpriteType');
+            const positioningInput = document.getElementById('platformPositioning');
+            const relativeXInput = document.getElementById('platformRelativeX');
+            const relativeYInput = document.getElementById('platformRelativeY');
+            const relativeRow = document.getElementById('relativePositionRow');
 
             if (xInput) xInput.value = Math.round(this.platformData.selectedPlatform.x);
             if (yInput) yInput.value = Math.round(this.platformData.selectedPlatform.y);
             if (widthInput) widthInput.value = this.platformData.selectedPlatform.width;
             if (heightInput) heightInput.value = this.platformData.selectedPlatform.height;
             if (spriteTypeInput) spriteTypeInput.value = this.platformData.selectedPlatform.spriteType || 'color';
+
+            // Handle positioning properties
+            const positioning = this.platformData.selectedPlatform.positioning || 'absolute';
+            if (positioningInput) positioningInput.value = positioning;
+            if (relativeXInput) relativeXInput.value = this.platformData.selectedPlatform.relativeX || 0.5;
+            if (relativeYInput) relativeYInput.value = this.platformData.selectedPlatform.relativeY || 0.5;
+
+            // Show/hide relative position controls
+            if (relativeRow) {
+                relativeRow.style.display = positioning === 'screen-relative' ? 'block' : 'none';
+            }
         } else {
             propertiesDiv.style.display = 'none';
         }
@@ -281,12 +296,23 @@ class PlatformManager {
         const widthInput = document.getElementById('platformWidth');
         const heightInput = document.getElementById('platformHeight');
         const spriteTypeInput = document.getElementById('platformSpriteType');
+        const positioningInput = document.getElementById('platformPositioning');
+        const relativeXInput = document.getElementById('platformRelativeX');
+        const relativeYInput = document.getElementById('platformRelativeY');
 
         if (xInput) this.platformData.selectedPlatform.x = parseInt(xInput.value);
         if (yInput) this.platformData.selectedPlatform.y = parseInt(yInput.value);
         if (widthInput) this.platformData.selectedPlatform.width = parseInt(widthInput.value);
         if (heightInput) this.platformData.selectedPlatform.height = Math.min(32, Math.max(10, parseInt(heightInput.value)));
         if (spriteTypeInput) this.platformData.selectedPlatform.spriteType = spriteTypeInput.value;
+
+        // Handle positioning properties
+        if (positioningInput) this.platformData.selectedPlatform.positioning = positioningInput.value;
+        if (relativeXInput) this.platformData.selectedPlatform.relativeX = parseFloat(relativeXInput.value);
+        if (relativeYInput) this.platformData.selectedPlatform.relativeY = parseFloat(relativeYInput.value);
+
+        // Update relative position display
+        this.updatePlatformProperties();
 
         this.updatePlatformList();
     }

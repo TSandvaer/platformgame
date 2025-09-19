@@ -5,19 +5,55 @@ class PropRenderer {
         this.torchParticles = torchParticles;
     }
 
-    renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = []) {
+    renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = [], viewport) {
         if (!this.platformSprites.villageProps.image) return;
 
         // Filter props based on whether we're rendering obstacles or not
         const filteredProps = props.filter(prop => prop.isObstacle === renderObstacles);
 
+
         // Sort by z-order (lowest first)
         filteredProps.sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0));
 
-        // Render each prop
+        // Render each prop using actual positions
         filteredProps.forEach(prop => {
-            this.drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps);
+            // Get actual position based on positioning mode
+            const actualPos = this.getActualPosition(prop, viewport);
+            let renderProp = { ...prop, x: actualPos.x, y: actualPos.y };
+
+            // If rendering obstacles (which are now outside viewport transform),
+            // apply viewport transformation manually
+            if (renderObstacles && viewport) {
+                const screenX = actualPos.x * viewport.scaleX + viewport.offsetX;
+                const screenY = actualPos.y * viewport.scaleY + viewport.offsetY;
+                renderProp = { ...prop, x: screenX, y: screenY };
+
+            }
+
+            this.drawProp(renderProp, propTypes, isDevelopmentMode, selectedProp, selectedProps);
         });
+    }
+
+    // Get actual position based on positioning mode
+    getActualPosition(prop, viewport) {
+        // Safety check for viewport
+        if (!viewport) {
+            console.warn('Viewport not provided to getActualPosition, using raw coordinates');
+            return { x: prop.x, y: prop.y };
+        }
+
+        // Default to absolute positioning if not specified
+        const positioning = prop.positioning || 'absolute';
+
+        if (positioning === 'screen-relative') {
+            const relativeX = prop.relativeX || 0.5;
+            const relativeY = prop.relativeY || 0.5;
+            return {
+                x: relativeX * viewport.designWidth,
+                y: relativeY * viewport.designHeight
+            };
+        }
+        return { x: prop.x, y: prop.y };
     }
 
     drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps = []) {

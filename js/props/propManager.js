@@ -5,19 +5,24 @@ class PropManager {
         this.nextPropIsObstacle = false;
     }
 
-    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false) {
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport) {
         // Check if prop placement mode is active
         if (this.propData.propPlacementMode) {
             this.placeProp(mouseX, mouseY);
             return { handled: true, type: 'placement' };
         }
 
-        // Check for prop selection
+        // Check for prop selection using actual positions
         // Find all props under the mouse, then select the one with highest z-order
         let propsUnderMouse = [];
 
         for (let prop of this.propData.props) {
-            if (this.propData.isPointInProp(mouseX, mouseY, prop)) {
+            // Get actual position for mouse interaction
+            const actualPos = this.propData.getActualPosition(prop, viewport.designWidth, viewport.designHeight);
+            const renderProp = { ...prop, x: actualPos.x, y: actualPos.y };
+
+
+            if (this.propData.isPointInProp(mouseX, mouseY, renderProp)) {
                 propsUnderMouse.push(prop);
             }
         }
@@ -41,12 +46,13 @@ class PropManager {
                     this.propData.isDraggingMultiple = true;
                     this.propData.selectedProp = topProp; // Set as primary for UI
 
-                    // Calculate offsets for all selected props
+                    // Calculate offsets for all selected props using actual positions
                     this.propData.multiDragOffsets.clear();
                     this.propData.selectedProps.forEach(prop => {
+                        const actualPos = this.propData.getActualPosition(prop, viewport.designWidth, viewport.designHeight);
                         this.propData.multiDragOffsets.set(prop.id, {
-                            x: mouseX - prop.x,
-                            y: mouseY - prop.y
+                            x: mouseX - actualPos.x,
+                            y: mouseY - actualPos.y
                         });
                     });
                     return { handled: true, type: 'multi-drag', prop: topProp };
@@ -55,9 +61,12 @@ class PropManager {
                     this.propData.selectedProps = [topProp];
                     this.propData.selectedProp = topProp;
                     this.propData.isDraggingProp = true;
+
+                    // Calculate drag offset using actual position
+                    const actualPos = this.propData.getActualPosition(topProp, viewport.designWidth, viewport.designHeight);
                     this.propData.propDragOffset = {
-                        x: mouseX - topProp.x,
-                        y: mouseY - topProp.y
+                        x: mouseX - actualPos.x,
+                        y: mouseY - actualPos.y
                     };
                     return { handled: true, type: 'drag', prop: topProp };
                 }
@@ -70,14 +79,15 @@ class PropManager {
         return { handled: false };
     }
 
-    handleMouseMove(mouseX, mouseY) {
+    handleMouseMove(mouseX, mouseY, viewport) {
         if (this.propData.isDraggingMultiple) {
-            // Move all selected props
+            // Move all selected props using relative positioning
             this.propData.selectedProps.forEach(prop => {
                 const offset = this.propData.multiDragOffsets.get(prop.id);
                 if (offset) {
-                    prop.x = mouseX - offset.x;
-                    prop.y = mouseY - offset.y;
+                    const newX = mouseX - offset.x;
+                    const newY = mouseY - offset.y;
+                    this.propData.updateRelativePosition(prop, newX, newY, viewport.designWidth, viewport.designHeight);
                 }
             });
             return true;
@@ -86,18 +96,30 @@ class PropManager {
             const groupMembers = this.propData.getPropsInSameGroup(this.propData.selectedProp);
 
             if (groupMembers.length > 1) {
-                // Move all props in the group
-                const deltaX = mouseX - this.propData.propDragOffset.x - this.propData.selectedProp.x;
-                const deltaY = mouseY - this.propData.propDragOffset.y - this.propData.selectedProp.y;
+                // Move all props in the group using relative positioning
+                const newX = mouseX - this.propData.propDragOffset.x;
+                const newY = mouseY - this.propData.propDragOffset.y;
+
+                // Get current actual position to calculate delta
+                const currentActual = this.propData.getActualPosition(this.propData.selectedProp, viewport.designWidth, viewport.designHeight);
+                const deltaX = newX - currentActual.x;
+                const deltaY = newY - currentActual.y;
 
                 groupMembers.forEach(prop => {
-                    prop.x += deltaX;
-                    prop.y += deltaY;
+                    const propActual = this.propData.getActualPosition(prop, viewport.designWidth, viewport.designHeight);
+                    this.propData.updateRelativePosition(
+                        prop,
+                        propActual.x + deltaX,
+                        propActual.y + deltaY,
+                        viewport.designWidth,
+                        viewport.designHeight
+                    );
                 });
             } else {
-                // Move single prop
-                this.propData.selectedProp.x = mouseX - this.propData.propDragOffset.x;
-                this.propData.selectedProp.y = mouseY - this.propData.propDragOffset.y;
+                // Move single prop using relative positioning
+                const newX = mouseX - this.propData.propDragOffset.x;
+                const newY = mouseY - this.propData.propDragOffset.y;
+                this.propData.updateRelativePosition(this.propData.selectedProp, newX, newY, viewport.designWidth, viewport.designHeight);
             }
             return true;
         }

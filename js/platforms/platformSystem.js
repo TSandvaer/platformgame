@@ -40,16 +40,26 @@ class PlatformSystem {
     }
 
     // Rendering
-    renderPlatforms(isDevelopmentMode) {
+    renderPlatforms(isDevelopmentMode, viewport) {
         this.data.platforms.forEach(platform => {
             const isSelected = this.data.selectedPlatform && this.data.selectedPlatform.id === platform.id;
-            this.renderer.renderPlatform(platform, isDevelopmentMode, isSelected);
+
+            // Get actual position based on positioning mode
+            const actualPos = this.data.getActualPosition(platform, viewport.designWidth, viewport.designHeight);
+            const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
+
+            this.renderer.renderPlatform(renderPlatform, isDevelopmentMode, isSelected);
         });
     }
 
     // Collision detection
-    checkPlayerPlatformCollisions(player) {
-        this.collisions.checkPlayerPlatformCollisions(player, this.data.platforms);
+    checkPlayerPlatformCollisions(player, viewport) {
+        // Convert platforms to actual positions for collision detection
+        const actualPlatforms = this.data.platforms.map(platform => {
+            const actualPos = this.data.getActualPosition(platform, viewport.designWidth, viewport.designHeight);
+            return { ...platform, x: actualPos.x, y: actualPos.y };
+        });
+        this.collisions.checkPlayerPlatformCollisions(player, actualPlatforms);
     }
 
     checkCollision(rect1, rect2) {

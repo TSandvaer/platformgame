@@ -71,25 +71,27 @@ class PropSystem {
     }
 
     // Rendering methods
-    renderBackgroundProps(isDevelopmentMode) {
+    renderBackgroundProps(isDevelopmentMode, viewport) {
         this.renderer.renderProps(
             this.data.props,
             this.data.propTypes,
             isDevelopmentMode,
             this.data.selectedProp,
             false, // Render non-obstacle props (background)
-            this.data.selectedProps
+            this.data.selectedProps,
+            viewport
         );
     }
 
-    renderObstacleProps(isDevelopmentMode) {
+    renderObstacleProps(isDevelopmentMode, viewport) {
         this.renderer.renderProps(
             this.data.props,
             this.data.propTypes,
             isDevelopmentMode,
             this.data.selectedProp,
             true, // Render obstacle props (foreground)
-            this.data.selectedProps
+            this.data.selectedProps,
+            viewport
         );
     }
 
@@ -109,10 +111,16 @@ class PropSystem {
     }
 
     // Collision detection
-    checkPlayerPropCollisions(player) {
+    checkPlayerPropCollisions(player, viewport) {
+        // Convert props to actual positions for collision detection
+        const actualProps = this.data.props.map(prop => {
+            const actualPos = this.data.getActualPosition(prop, viewport.designWidth, viewport.designHeight);
+            return { ...prop, x: actualPos.x, y: actualPos.y };
+        });
+
         this.collisions.checkPlayerPropCollisions(
             player,
-            this.data.props,
+            actualProps,
             this.data.propTypes
         );
     }
@@ -139,8 +147,8 @@ class PropSystem {
     }
 
     // Mouse event handling
-    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false) {
-        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed);
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport) {
+        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed, viewport);
         if (result.handled) {
             this.manager.updatePropProperties();
             this.manager.updatePropList();
@@ -148,8 +156,8 @@ class PropSystem {
         return result;
     }
 
-    handleMouseMove(mouseX, mouseY) {
-        const moved = this.manager.handleMouseMove(mouseX, mouseY);
+    handleMouseMove(mouseX, mouseY, viewport) {
+        const moved = this.manager.handleMouseMove(mouseX, mouseY, viewport);
         if (moved) {
             this.manager.updatePropProperties();
         }

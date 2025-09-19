@@ -248,6 +248,39 @@
                     </div>
                 </div>
 
+                <div class="platform-editor" id="viewportEditor" style="display: none;">
+                    <h4>Resolution & Viewport Settings</h4>
+                    <div class="property-row">
+                        <span class="property-label">Scaling Mode:</span>
+                        <select id="viewportModeSelect" style="width: 120px;">
+                            <option value="fit">Fit (Letterbox)</option>
+                            <option value="stretch">Stretch</option>
+                            <option value="crop">Crop (Fill)</option>
+                            <option value="pixel-perfect">Pixel Perfect</option>
+                        </select>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Design Width:</span>
+                        <input type="number" id="designWidth" min="640" max="3840" step="1" value="1920" style="width: 80px;">
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Design Height:</span>
+                        <input type="number" id="designHeight" min="480" max="2160" step="1" value="1080" style="width: 80px;">
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Current Scale:</span>
+                        <span id="currentScale">1.0x</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Actual Size:</span>
+                        <span id="actualSize">1920x1080</span>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small" id="applyViewport">Apply Settings</button>
+                        <button class="btn small" id="resetViewport">Reset to Default</button>
+                    </div>
+                </div>
+
                 <div class="platform-editor" id="propsEditor" style="display: none;">
                     <h4>Village Props Editor</h4>
                     <div class="property-row">
@@ -384,6 +417,19 @@
                             <input type="number" id="platformWidth" min="10">
                             <span class="property-label">H:</span>
                             <input type="number" id="platformHeight" min="10" max="32">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Position Mode:</span>
+                            <select id="platformPositioning" style="width: 120px;">
+                                <option value="absolute">Absolute</option>
+                                <option value="screen-relative">Screen Relative</option>
+                            </select>
+                        </div>
+                        <div class="property-row" id="relativePositionRow" style="display: none;">
+                            <span class="property-label">Rel X:</span>
+                            <input type="number" id="platformRelativeX" min="0" max="1" step="0.01" style="width: 60px;">
+                            <span class="property-label">Rel Y:</span>
+                            <input type="number" id="platformRelativeY" min="0" max="1" step="0.01" style="width: 60px;">
                         </div>
                         <div class="property-row">
                             <span class="property-label">Type:</span>

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(ls:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(python3:*)",
+      "Bash(npx http-server:*)"
     ],
     "deny": [],
     "ask": []

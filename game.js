@@ -87,10 +87,26 @@ class PlatformRPG {
             ...this.propSystem.propTypes
         };
 
+        // Viewport and scaling system
+        this.viewport = {
+            designWidth: 1920,    // Target design resolution width
+            designHeight: 1080,   // Target design resolution height
+            actualWidth: window.innerWidth - (this.showDashboard ? 300 : 0),
+            actualHeight: window.innerHeight,
+            scaleX: 1,
+            scaleY: 1,
+            scale: 1,             // Uniform scale factor
+            offsetX: 0,           // Letterbox offset
+            offsetY: 0,           // Letterbox offset
+            mode: 'fit'           // 'fit', 'stretch', 'crop', 'pixel-perfect'
+        };
+
         this.camera = {
             x: 0,
             y: 0
         };
+
+        this.updateViewport();
 
         this.keys = {};
         this.mouseX = 0;
@@ -336,7 +352,41 @@ class PlatformRPG {
         this.loadBackground(backgroundName);
     }
 
+    applyViewportSettings() {
+        const modeSelect = document.getElementById('viewportModeSelect');
+        const designWidth = parseInt(document.getElementById('designWidth').value);
+        const designHeight = parseInt(document.getElementById('designHeight').value);
+
+        this.viewport.mode = modeSelect.value;
+        this.viewport.designWidth = designWidth;
+        this.viewport.designHeight = designHeight;
+
+        this.updateViewport();
+        this.updateViewportUI();
+    }
+
+    resetViewportSettings() {
+        this.viewport.mode = 'fit';
+        this.viewport.designWidth = 1920;
+        this.viewport.designHeight = 1080;
+
+        document.getElementById('viewportModeSelect').value = 'fit';
+        document.getElementById('designWidth').value = '1920';
+        document.getElementById('designHeight').value = '1080';
+
+        this.updateViewport();
+        this.updateViewportUI();
+    }
+
+    updateViewportUI() {
+        document.getElementById('currentScale').textContent = `${this.viewport.scale.toFixed(2)}x`;
+        document.getElementById('actualSize').textContent = `${this.viewport.actualWidth}x${this.viewport.actualHeight}`;
+    }
+
     renderBackground() {
+        // Reset any transforms to ensure clean slate
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         if (!this.currentBackground || !this.currentBackground.layers.length) {
             // Render a default sky color instead of transparent
             this.ctx.fillStyle = '#87CEEB'; // Sky blue
@@ -353,7 +403,11 @@ class PlatformRPG {
             // Calculate parallax offset for this layer
             // Layers closer to the back (lower index) move slower
             const parallaxSpeed = (index + 1) * 0.1; // 0.1, 0.2, 0.3, etc.
-            const parallaxOffset = this.camera.x * parallaxSpeed;
+            // Scale the camera offset by viewport scale to maintain consistent parallax
+            // Use safety fallback for viewport scale in case it's not initialized
+            const viewportScale = this.viewport?.scaleX || 1;
+            const scaledCameraX = this.camera.x * viewportScale;
+            const parallaxOffset = scaledCameraX * parallaxSpeed;
 
             // Calculate how many times we need to repeat the image to fill the screen
             const imageWidth = layer.naturalWidth;
@@ -367,13 +421,13 @@ class PlatformRPG {
             const startX = -parallaxOffset % scaledWidth;
             const tilesNeeded = Math.ceil((this.canvas.width + scaledWidth) / scaledWidth);
 
-            // Draw repeated background tiles
+            // Draw repeated background tiles - always fill entire canvas
             for (let i = 0; i < tilesNeeded; i++) {
                 const x = startX + (i * scaledWidth);
                 this.ctx.drawImage(
                     layer,
-                    x, 0,  // Position
-                    scaledWidth, this.canvas.height  // Size
+                    x, 0,  // Always start at Y=0 (top of canvas)
+                    scaledWidth, this.canvas.height  // Always fill full canvas height
                 );
             }
         });
@@ -383,6 +437,8 @@ class PlatformRPG {
         this.setupEventListeners();
         this.setDevelopmentMode(true); // Properly initialize development mode UI
         this.populateBackgroundDropdown();
+        this.updateViewport(); // Ensure viewport is properly initialized
+        this.updateViewportUI(); // Initialize viewport UI
         this.gameLoop();
         this.updateUI();
         this.loadGameDataFromFile();
@@ -452,8 +508,14 @@ class PlatformRPG {
             const rect = this.canvas.getBoundingClientRect();
             const clientMouseX = e.clientX - rect.left;
             const clientMouseY = e.clientY - rect.top;
-            this.mouseX = clientMouseX + this.camera.x;
-            this.mouseY = clientMouseY + this.camera.y;
+
+            // Convert screen coordinates to both coordinate systems
+            const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
+            const viewportCoords = this.screenToViewport(clientMouseX, clientMouseY);
+            this.mouseX = worldCoords.x;  // Keep world coordinates for backward compatibility
+            this.mouseY = worldCoords.y;
+            this.viewportMouseX = viewportCoords.x;  // Add viewport coordinates
+            this.viewportMouseY = viewportCoords.y;
 
             if (this.isDevelopmentMode) {
                 document.getElementById('coordinates').textContent =
@@ -509,6 +571,7 @@ class PlatformRPG {
         window.addEventListener('resize', () => {
             this.canvas.width = window.innerWidth - (this.showDashboard ? 300 : 0);
             this.canvas.height = window.innerHeight;
+            this.updateViewport();
         });
 
         // Add keyboard event listener for Delete key
@@ -536,6 +599,7 @@ class PlatformRPG {
         document.getElementById('coordinates').style.display = isDev ? 'block' : 'none';
         document.getElementById('platformEditor').style.display = isDev ? 'block' : 'none';
         document.getElementById('backgroundEditor').style.display = isDev ? 'block' : 'none';
+        document.getElementById('viewportEditor').style.display = isDev ? 'block' : 'none';
         document.getElementById('propsEditor').style.display = isDev ? 'block' : 'none';
 
         if (isDev) {
@@ -658,18 +722,11 @@ class PlatformRPG {
 
             this.player.onGround = false;
 
-            this.platformSystem.platforms.forEach(platform => {
-                if (this.platformSystem.checkCollision(this.player, platform)) {
-                    if (this.player.velocityY > 0 && this.player.y < platform.y) {
-                        this.player.y = platform.y - this.player.height;
-                        this.player.velocityY = 0;
-                        this.player.onGround = true;
-                    }
-                }
-            });
+            // Check collision with platforms using actual positions
+            this.platformSystem.checkPlayerPlatformCollisions(this.player, this.viewport);
 
             // Check collision with obstacle props
-            this.propSystem.checkPlayerPropCollisions(this.player);
+            this.propSystem.checkPlayerPropCollisions(this.player, this.viewport);
 
             if (this.player.y > this.canvas.height) {
                 this.player.x = 100;
@@ -702,11 +759,81 @@ class PlatformRPG {
         }
     }
 
+    updateViewport() {
+        this.viewport.actualWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
+        this.viewport.actualHeight = window.innerHeight;
+
+        // Calculate scale factors
+        const scaleX = this.viewport.actualWidth / this.viewport.designWidth;
+        const scaleY = this.viewport.actualHeight / this.viewport.designHeight;
+
+        switch (this.viewport.mode) {
+            case 'fit':
+                // Fit with aspect ratio preserved (letterbox/pillarbox)
+                this.viewport.scale = Math.min(scaleX, scaleY);
+                this.viewport.scaleX = this.viewport.scale;
+                this.viewport.scaleY = this.viewport.scale;
+                this.viewport.offsetX = (this.viewport.actualWidth - this.viewport.designWidth * this.viewport.scale) / 2;
+                this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2;
+                break;
+            case 'stretch':
+                // Stretch to fill entire viewport (may distort)
+                this.viewport.scaleX = scaleX;
+                this.viewport.scaleY = scaleY;
+                this.viewport.scale = Math.min(scaleX, scaleY); // For UI elements
+                this.viewport.offsetX = 0;
+                this.viewport.offsetY = 0;
+                break;
+            case 'crop':
+                // Crop to fill viewport (maintain aspect ratio, crop edges)
+                this.viewport.scale = Math.max(scaleX, scaleY);
+                this.viewport.scaleX = this.viewport.scale;
+                this.viewport.scaleY = this.viewport.scale;
+                this.viewport.offsetX = (this.viewport.actualWidth - this.viewport.designWidth * this.viewport.scale) / 2;
+                this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2;
+                break;
+            case 'pixel-perfect':
+                // Use integer scaling only
+                this.viewport.scale = Math.max(1, Math.floor(Math.min(scaleX, scaleY)));
+                this.viewport.scaleX = this.viewport.scale;
+                this.viewport.scaleY = this.viewport.scale;
+                this.viewport.offsetX = (this.viewport.actualWidth - this.viewport.designWidth * this.viewport.scale) / 2;
+                this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2;
+                break;
+        }
+    }
+
+    // Convert screen coordinates to world coordinates
+    screenToWorld(screenX, screenY) {
+        const worldX = (screenX - this.viewport.offsetX) / this.viewport.scaleX + this.camera.x;
+        const worldY = (screenY - this.viewport.offsetY) / this.viewport.scaleY + this.camera.y;
+        return { x: worldX, y: worldY };
+    }
+
+    // Convert world coordinates to screen coordinates
+    worldToScreen(worldX, worldY) {
+        const screenX = (worldX - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
+        const screenY = (worldY - this.camera.y) * this.viewport.scaleY + this.viewport.offsetY;
+        return { x: screenX, y: screenY };
+    }
+
+    // Convert screen coordinates to viewport coordinates (without camera offset)
+    screenToViewport(screenX, screenY) {
+        const viewportX = (screenX - this.viewport.offsetX) / this.viewport.scaleX;
+        const viewportY = (screenY - this.viewport.offsetY) / this.viewport.scaleY;
+        return { x: viewportX, y: viewportY };
+    }
+
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Render parallax background layers
+        // Render background first, before any scaling (fills entire window)
         this.renderBackground();
+
+        // Apply viewport scaling and offset
+        this.ctx.save();
+        this.ctx.translate(this.viewport.offsetX, this.viewport.offsetY);
+        this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
 
         this.ctx.save();
         this.ctx.translate(-this.camera.x, -this.camera.y);
@@ -716,32 +843,11 @@ class PlatformRPG {
             console.log('Rendering with camera position:', this.camera.x, this.camera.y);
         }
 
-        this.platformSystem.platforms.forEach(platform => {
-            // Render platform with sprite or color
-            if (platform.spriteType !== 'color' && this.platformSpritesLoaded && this.platformSprites.tileset.image) {
-                this.platformSystem.renderer.drawPlatformSprite(platform);
-            } else {
-                // Fallback to solid color
-                this.ctx.fillStyle = platform.color;
-                this.ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-            }
-
-            if (this.isDevelopmentMode) {
-                if (this.platformSystem.selectedPlatform && this.platformSystem.selectedPlatform.id === platform.id) {
-                    this.ctx.strokeStyle = '#FFD700';
-                    this.ctx.lineWidth = 3;
-                    this.ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
-                    this.drawResizeHandles(platform);
-                } else {
-                    this.ctx.strokeStyle = '#333';
-                    this.ctx.lineWidth = 1;
-                    this.ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
-                }
-            }
-        });
+        // Render platforms using the platform system
+        this.platformSystem.renderPlatforms(this.isDevelopmentMode, this.viewport);
 
         // Render props (background props first, then obstacle props)
-        this.propSystem.renderBackgroundProps(this.isDevelopmentMode);
+        this.propSystem.renderBackgroundProps(this.isDevelopmentMode, this.viewport);
 
         // Render player sprite or fallback to rectangle
         if (this.spritesLoaded && this.sprites[this.player.currentAnimation].image) {
@@ -757,16 +863,24 @@ class PlatformRPG {
             this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
 
-        // Render obstacle props after player (in front of player)
-        this.propSystem.renderObstacleProps(this.isDevelopmentMode);
-
         // Render all torch particles once per frame
         this.propSystem.renderParticles();
 
         this.ctx.restore();
 
+        // Restore viewport scaling as well for obstacle props
+        this.ctx.restore();
+
+        // Render obstacle props without any transformations (they use their own positioning)
+        this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport);
+
         if (this.isDevelopmentMode) {
+            // Apply viewport scaling for dev info
+            this.ctx.save();
+            this.ctx.translate(this.viewport.offsetX, this.viewport.offsetY);
+            this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
             this.renderDevInfo();
+            this.ctx.restore();
         }
     }
 
@@ -807,6 +921,9 @@ class PlatformRPG {
             );
         }
 
+        this.ctx.restore();
+
+        // Restore viewport scaling
         this.ctx.restore();
     }
 
@@ -1087,6 +1204,11 @@ class PlatformRPG {
             this.platformSystem.deleteSelectedPlatform();
         });
 
+        // Platform positioning controls
+        document.getElementById('platformPositioning').addEventListener('change', () => {
+            this.platformSystem.updateSelectedPlatform();
+        });
+
         document.getElementById('exportGameData').addEventListener('click', () => {
             this.exportGameData();
         });
@@ -1103,6 +1225,19 @@ class PlatformRPG {
         document.getElementById('applyBackground').addEventListener('click', () => {
             const selectedBackground = document.getElementById('backgroundSelect').value;
             this.setSceneBackground(selectedBackground);
+        });
+
+        // Viewport controls
+        document.getElementById('applyViewport').addEventListener('click', () => {
+            this.applyViewportSettings();
+        });
+
+        document.getElementById('resetViewport').addEventListener('click', () => {
+            this.resetViewportSettings();
+        });
+
+        document.getElementById('viewportModeSelect').addEventListener('change', () => {
+            this.applyViewportSettings();
         });
 
         // Props controls
@@ -1202,25 +1337,34 @@ class PlatformRPG {
 
     handlePlatformMouseDown(e) {
         const rect = this.canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left + this.camera.x;
-        const mouseY = e.clientY - rect.top + this.camera.y;
+        const clientMouseX = e.clientX - rect.left;
+        const clientMouseY = e.clientY - rect.top;
+
+        // Convert screen coordinates to both world coordinates (for platforms) and viewport coordinates (for props)
+        const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
+        const viewportCoords = this.screenToViewport(clientMouseX, clientMouseY);
+        const worldMouseX = worldCoords.x;
+        const worldMouseY = worldCoords.y;
+        const viewportMouseX = viewportCoords.x;
+        const viewportMouseY = viewportCoords.y;
 
         // Handle prop placement mode
         if (this.propSystem.propPlacementMode) {
-            this.propSystem.placeProp(mouseX, mouseY);
+            this.propSystem.placeProp(viewportMouseX, viewportMouseY);
             return;
         }
 
         // Handle platform placement mode
         if (this.platformSystem.platformPlacementMode) {
-            this.platformSystem.manager.placePlatform(mouseX, mouseY);
+            this.platformSystem.manager.placePlatform(worldMouseX, worldMouseY);
             this.platformSystem.updatePlatformProperties();
             this.platformSystem.updatePlatformList();
             return;
         }
 
+
         // Check for prop clicks first (props should be selectable before platforms)
-        const propResult = this.propSystem.handleMouseDown(mouseX, mouseY, this.platformSystem, e.ctrlKey);
+        const propResult = this.propSystem.handleMouseDown(viewportMouseX, viewportMouseY, this.platformSystem, e.ctrlKey, this.viewport);
         if (propResult.handled) {
             this.propSystem.updatePropProperties();
             this.propSystem.updatePropList();
@@ -1230,7 +1374,11 @@ class PlatformRPG {
         }
 
         for (let platform of this.platformSystem.platforms) {
-            const resizeHandle = this.platformSystem.getResizeHandle(platform, mouseX, mouseY);
+            // Get actual position for mouse interaction
+            const actualPos = this.platformSystem.data.getActualPosition(platform, this.viewport.designWidth, this.viewport.designHeight);
+            const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
+
+            const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
             if (resizeHandle) {
                 this.platformSystem.isResizing = true;
                 this.platformSystem.resizeHandle = resizeHandle;
@@ -1239,12 +1387,12 @@ class PlatformRPG {
                 return;
             }
 
-            if (this.platformSystem.isPointInPlatform(mouseX, mouseY, platform)) {
+            if (this.platformSystem.isPointInPlatform(worldMouseX, worldMouseY, renderPlatform)) {
                 this.platformSystem.isDragging = true;
                 this.platformSystem.selectedPlatform = platform;
                 this.platformSystem.dragOffset = {
-                    x: mouseX - platform.x,
-                    y: mouseY - platform.y
+                    x: worldMouseX - actualPos.x,
+                    y: worldMouseY - actualPos.y
                 };
                 this.platformSystem.updatePlatformProperties();
                 this.platformSystem.updatePlatformList();
@@ -1262,10 +1410,16 @@ class PlatformRPG {
 
     handlePlatformDrag(e) {
         const rect = this.canvas.getBoundingClientRect();
-        const clientMouseX = e.clientX - rect.left; // Mouse position relative to canvas (without camera offset)
+        const clientMouseX = e.clientX - rect.left;
         const clientMouseY = e.clientY - rect.top;
-        const mouseX = clientMouseX + this.camera.x; // World coordinates
-        const mouseY = clientMouseY + this.camera.y;
+
+        // Convert to both coordinate systems
+        const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
+        const viewportCoords = this.screenToViewport(clientMouseX, clientMouseY);
+        const worldMouseX = worldCoords.x;
+        const worldMouseY = worldCoords.y;
+        const viewportMouseX = viewportCoords.x;
+        const viewportMouseY = viewportCoords.y;
 
         // Store current mouse position for continuous scrolling
         this.lastMousePosition.x = clientMouseX;
@@ -1274,8 +1428,8 @@ class PlatformRPG {
         // Handle camera scrolling during drag operations
         this.handleDragScrolling(clientMouseX, clientMouseY);
 
-        // Handle prop dragging
-        const propMoved = this.propSystem.handleMouseMove(mouseX, mouseY);
+        // Handle prop dragging (use viewport coordinates)
+        const propMoved = this.propSystem.handleMouseMove(viewportMouseX, viewportMouseY, this.viewport);
         if (propMoved) {
             this.propSystem.updatePropProperties();
             return;
@@ -1284,21 +1438,27 @@ class PlatformRPG {
         if (!this.platformSystem.selectedPlatform) return;
 
         if (this.platformSystem.isDragging) {
-            // Calculate new position based on mouse
-            const newX = mouseX - this.platformSystem.dragOffset.x;
-            const newY = mouseY - this.platformSystem.dragOffset.y;
+            // Calculate new position based on mouse (use world coordinates)
+            const newX = worldMouseX - this.platformSystem.dragOffset.x;
+            const newY = worldMouseY - this.platformSystem.dragOffset.y;
 
             // Apply snapping
             const snappedPos = this.platformSystem.snapPlatformPosition(this.platformSystem.selectedPlatform, newX, newY);
 
-            this.platformSystem.selectedPlatform.x = snappedPos.x;
-            this.platformSystem.selectedPlatform.y = snappedPos.y;
+            // Update both absolute and relative positions
+            this.platformSystem.data.updateRelativePosition(
+                this.platformSystem.selectedPlatform,
+                snappedPos.x,
+                snappedPos.y,
+                this.viewport.designWidth,
+                this.viewport.designHeight
+            );
             this.platformSystem.updatePlatformProperties();
 
             // Force render during drag to show camera movement immediately
             this.render();
         } else if (this.platformSystem.isResizing) {
-            this.platformSystem.handlePlatformResize(mouseX, mouseY);
+            this.platformSystem.handlePlatformResize(worldMouseX, worldMouseY);
             this.platformSystem.updatePlatformProperties();
         }
     }
@@ -2034,16 +2194,20 @@ class PlatformRPG {
 
     async loadGameDataFromFile() {
         try {
+            console.log('🔄 Attempting to load gameData.json...');
             const response = await fetch('./gameData.json');
             if (response.ok) {
+                console.log('✅ gameData.json found, loading from JSON file');
                 const gameData = await response.json();
                 this.loadGameDataFromObject(gameData);
             } else {
+                console.log('❌ gameData.json response not ok, falling back to localStorage');
                 // Fallback to localStorage if JSON file not found
                 this.loadSavedData();
             }
         } catch (error) {
-            console.log('No gameData.json found, using default data');
+            console.log('❌ No gameData.json found, error:', error);
+            console.log('🔄 Falling back to localStorage');
             // Fallback to localStorage
             this.loadSavedData();
         }
@@ -2051,16 +2215,43 @@ class PlatformRPG {
 
     loadGameDataFromObject(gameData) {
         try {
+            console.log('📁 Loading game data from object');
             if (gameData.scenes && gameData.scenes.length > 0) {
                 this.scenes = gameData.scenes;
                 if (this.scenes[0].platforms) {
                     this.platformSystem.platforms = [...this.scenes[0].platforms];
+
+                    // Migrate platforms to ensure they have positioning properties
+                    this.platformSystem.platforms.forEach(platform => {
+                        if (!platform.positioning) {
+                            platform.positioning = 'absolute';
+                            platform.relativeX = 0.5;
+                            platform.relativeY = 0.5;
+                            console.log(`Migrated platform ${platform.id} to have positioning properties`);
+                        }
+                    });
+
                     this.platformSystem.nextPlatformId = Math.max(...this.platformSystem.platforms.map(p => p.id || 0)) + 1;
                 }
 
                 // Load props if they exist
                 if (this.scenes[0].props) {
                     this.propSystem.props = [...this.scenes[0].props];
+
+                    // Migrate props to ensure they have positioning properties
+                    let migratedCount = 0;
+                    this.propSystem.props.forEach(prop => {
+                        if (!prop.positioning) {
+                            prop.positioning = 'absolute';
+                            prop.relativeX = 0.5;
+                            prop.relativeY = 0.5;
+                            migratedCount++;
+                        }
+                    });
+                    if (migratedCount > 0) {
+                        console.log(`✅ Migrated ${migratedCount} props to have positioning properties`);
+                    }
+
                     this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
                 }
 
@@ -2104,12 +2295,38 @@ class PlatformRPG {
                 this.scenes = JSON.parse(savedScenes);
                 if (this.scenes.length > 0 && this.scenes[0].platforms) {
                     this.platformSystem.platforms = [...this.scenes[0].platforms];
+
+                    // Migrate platforms to ensure they have positioning properties
+                    this.platformSystem.platforms.forEach(platform => {
+                        if (!platform.positioning) {
+                            platform.positioning = 'absolute';
+                            platform.relativeX = 0.5;
+                            platform.relativeY = 0.5;
+                            console.log(`Migrated platform ${platform.id} to have positioning properties (localStorage)`);
+                        }
+                    });
+
                     this.platformSystem.nextPlatformId = Math.max(...this.platformSystem.platforms.map(p => p.id || 0)) + 1;
                 }
 
                 // Load props if they exist
                 if (this.scenes.length > 0 && this.scenes[0].props) {
                     this.propSystem.props = [...this.scenes[0].props];
+
+                    // Migrate props to ensure they have positioning properties
+                    let migratedCount = 0;
+                    this.propSystem.props.forEach(prop => {
+                        if (!prop.positioning) {
+                            prop.positioning = 'absolute';
+                            prop.relativeX = 0.5;
+                            prop.relativeY = 0.5;
+                            migratedCount++;
+                        }
+                    });
+                    if (migratedCount > 0) {
+                        console.log(`✅ Migrated ${migratedCount} props to have positioning properties (localStorage)`);
+                    }
+
                     this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
                 }
 

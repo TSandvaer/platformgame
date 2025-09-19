@@ -1,11 +1,11 @@
 class PlatformData {
     constructor() {
         this.platforms = [
-            { id: 0, x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color' },
-            { id: 1, x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color' },
-            { id: 2, x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4', spriteType: 'color' },
-            { id: 3, x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color' },
-            { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color' }
+            { id: 0, x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
+            { id: 1, x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
+            { id: 2, x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
+            { id: 3, x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
+            { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 }
         ];
         this.nextPlatformId = 5;
         this.selectedPlatform = null;
@@ -28,7 +28,10 @@ class PlatformData {
             width: 150,
             height: 20,
             color: '#4ECDC4',
-            spriteType: 'color'
+            spriteType: 'color',
+            positioning: 'absolute', // 'absolute', 'relative', 'screen-relative'
+            relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
+            relativeY: 0.5          // Relative position (0-1) for screen-relative mode
         };
 
         this.platforms.push(newPlatform);
@@ -74,5 +77,26 @@ class PlatformData {
                rect1.x + rect1.width > rect2.x &&
                rect1.y < rect2.y + rect2.height &&
                rect1.y + rect1.height > rect2.y;
+    }
+
+    // Convert screen-relative positioning to absolute coordinates
+    getActualPosition(platform, designWidth, designHeight) {
+        if (platform.positioning === 'screen-relative') {
+            return {
+                x: platform.relativeX * designWidth,
+                y: platform.relativeY * designHeight
+            };
+        }
+        return { x: platform.x, y: platform.y };
+    }
+
+    // Update relative coordinates when absolute position changes
+    updateRelativePosition(platform, newX, newY, designWidth, designHeight) {
+        if (platform.positioning === 'screen-relative') {
+            platform.relativeX = newX / designWidth;
+            platform.relativeY = newY / designHeight;
+        }
+        platform.x = newX;
+        platform.y = newY;
     }
 }

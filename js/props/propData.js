@@ -85,7 +85,10 @@ class PropData {
             x: x,
             y: y,
             isObstacle: isObstacle,
-            zOrder: this.nextPropZOrder++
+            zOrder: this.nextPropZOrder++,
+            positioning: 'absolute', // 'absolute', 'screen-relative'
+            relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
+            relativeY: 0.5          // Relative position (0-1) for screen-relative mode
         };
 
         // Add scale if provided
@@ -141,8 +144,11 @@ class PropData {
         const renderWidth = propType.width * scale;
         const renderHeight = propType.height * scale;
 
-        return x >= prop.x && x <= prop.x + renderWidth &&
-               y >= prop.y && y <= prop.y + renderHeight;
+        const isInside = x >= prop.x && x <= prop.x + renderWidth &&
+                        y >= prop.y && y <= prop.y + renderHeight;
+
+
+        return isInside;
     }
 
     // Z-order management
@@ -259,5 +265,31 @@ class PropData {
         this.props = this.props.filter(prop => !idsToDelete.includes(prop.id));
 
         this.clearMultiSelection();
+    }
+
+    // Convert screen-relative positioning to absolute coordinates
+    getActualPosition(prop, designWidth, designHeight) {
+        // Default to absolute positioning if not specified (for backward compatibility)
+        const positioning = prop.positioning || 'absolute';
+
+        if (positioning === 'screen-relative') {
+            const relativeX = prop.relativeX || 0.5;
+            const relativeY = prop.relativeY || 0.5;
+            return {
+                x: relativeX * designWidth,
+                y: relativeY * designHeight
+            };
+        }
+        return { x: prop.x, y: prop.y };
+    }
+
+    // Update relative coordinates when absolute position changes
+    updateRelativePosition(prop, newX, newY, designWidth, designHeight) {
+        if (prop.positioning === 'screen-relative') {
+            prop.relativeX = newX / designWidth;
+            prop.relativeY = newY / designHeight;
+        }
+        prop.x = newX;
+        prop.y = newY;
     }
 }
