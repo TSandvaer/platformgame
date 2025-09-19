@@ -77,7 +77,8 @@ class PropSystem {
             this.data.propTypes,
             isDevelopmentMode,
             this.data.selectedProp,
-            false // Render non-obstacle props (background)
+            false, // Render non-obstacle props (background)
+            this.data.selectedProps
         );
     }
 
@@ -87,7 +88,8 @@ class PropSystem {
             this.data.propTypes,
             isDevelopmentMode,
             this.data.selectedProp,
-            true // Render obstacle props (foreground)
+            true, // Render obstacle props (foreground)
+            this.data.selectedProps
         );
     }
 
@@ -101,7 +103,8 @@ class PropSystem {
             prop,
             this.data.propTypes,
             isDevelopmentMode,
-            this.data.selectedProp
+            this.data.selectedProp,
+            this.data.selectedProps
         );
     }
 
@@ -136,8 +139,8 @@ class PropSystem {
     }
 
     // Mouse event handling
-    handleMouseDown(mouseX, mouseY, platformSystem) {
-        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem);
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false) {
+        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed);
         if (result.handled) {
             this.manager.updatePropProperties();
             this.manager.updatePropList();
@@ -207,5 +210,68 @@ class PropSystem {
 
     initializePropZOrders() {
         this.data.initializePropZOrders();
+    }
+
+    // Multi-selection methods
+    addToSelection(prop) {
+        this.data.addToSelection(prop);
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    removeFromSelection(prop) {
+        this.data.removeFromSelection(prop);
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    clearMultiSelection() {
+        this.data.clearMultiSelection();
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    selectMultiple(props) {
+        this.data.selectMultiple(props);
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    toggleSelection(prop) {
+        this.data.toggleSelection(prop);
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    get selectedProps() {
+        return this.data.selectedProps;
+    }
+
+    // Grouping methods
+    groupSelectedProps() {
+        if (this.data.selectedProps.length < 2) return null;
+        const groupId = this.data.createGroup(this.data.selectedProps);
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+        return groupId;
+    }
+
+    ungroupSelectedProps() {
+        const groupsToUngroup = new Set();
+        this.data.selectedProps.forEach(prop => {
+            if (prop.groupId) {
+                groupsToUngroup.add(prop.groupId);
+            }
+        });
+
+        groupsToUngroup.forEach(groupId => this.data.ungroupProps(groupId));
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    deleteSelectedProps() {
+        this.data.deleteSelectedProps();
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
     }
 }

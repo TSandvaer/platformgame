@@ -5,7 +5,7 @@ class PropManager {
         this.nextPropIsObstacle = false;
     }
 
-    handleMouseDown(mouseX, mouseY, platformSystem) {
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false) {
         // Check if prop placement mode is active
         if (this.propData.propPlacementMode) {
             this.placeProp(mouseX, mouseY);
@@ -28,23 +28,77 @@ class PropManager {
                 (current.zOrder || 0) > (highest.zOrder || 0) ? current : highest
             );
 
-            this.propData.selectedProp = topProp;
             platformSystem.selectedPlatform = null;
-            this.propData.isDraggingProp = true;
-            this.propData.propDragOffset = {
-                x: mouseX - topProp.x,
-                y: mouseY - topProp.y
-            };
-            return { handled: true, type: 'drag', prop: topProp };
+
+            if (ctrlPressed) {
+                // Multi-selection mode - just toggle selection, don't start dragging
+                this.propData.toggleSelection(topProp);
+                return { handled: true, type: 'selection', prop: topProp };
+            } else {
+                // Check if clicked prop is already in multi-selection
+                if (this.propData.selectedProps.length > 1 && this.propData.selectedProps.includes(topProp)) {
+                    // Start dragging all selected props
+                    this.propData.isDraggingMultiple = true;
+                    this.propData.selectedProp = topProp; // Set as primary for UI
+
+                    // Calculate offsets for all selected props
+                    this.propData.multiDragOffsets.clear();
+                    this.propData.selectedProps.forEach(prop => {
+                        this.propData.multiDragOffsets.set(prop.id, {
+                            x: mouseX - prop.x,
+                            y: mouseY - prop.y
+                        });
+                    });
+                    return { handled: true, type: 'multi-drag', prop: topProp };
+                } else {
+                    // Single selection
+                    this.propData.selectedProps = [topProp];
+                    this.propData.selectedProp = topProp;
+                    this.propData.isDraggingProp = true;
+                    this.propData.propDragOffset = {
+                        x: mouseX - topProp.x,
+                        y: mouseY - topProp.y
+                    };
+                    return { handled: true, type: 'drag', prop: topProp };
+                }
+            }
+        } else if (!ctrlPressed) {
+            // Clicked on empty space - clear selection
+            this.propData.clearMultiSelection();
         }
 
         return { handled: false };
     }
 
     handleMouseMove(mouseX, mouseY) {
-        if (this.propData.isDraggingProp && this.propData.selectedProp) {
-            this.propData.selectedProp.x = mouseX - this.propData.propDragOffset.x;
-            this.propData.selectedProp.y = mouseY - this.propData.propDragOffset.y;
+        if (this.propData.isDraggingMultiple) {
+            // Move all selected props
+            this.propData.selectedProps.forEach(prop => {
+                const offset = this.propData.multiDragOffsets.get(prop.id);
+                if (offset) {
+                    prop.x = mouseX - offset.x;
+                    prop.y = mouseY - offset.y;
+                }
+            });
+            return true;
+        } else if (this.propData.isDraggingProp && this.propData.selectedProp) {
+            // Check if this prop is part of a group
+            const groupMembers = this.propData.getPropsInSameGroup(this.propData.selectedProp);
+
+            if (groupMembers.length > 1) {
+                // Move all props in the group
+                const deltaX = mouseX - this.propData.propDragOffset.x - this.propData.selectedProp.x;
+                const deltaY = mouseY - this.propData.propDragOffset.y - this.propData.selectedProp.y;
+
+                groupMembers.forEach(prop => {
+                    prop.x += deltaX;
+                    prop.y += deltaY;
+                });
+            } else {
+                // Move single prop
+                this.propData.selectedProp.x = mouseX - this.propData.propDragOffset.x;
+                this.propData.selectedProp.y = mouseY - this.propData.propDragOffset.y;
+            }
             return true;
         }
         return false;
@@ -52,6 +106,8 @@ class PropManager {
 
     handleMouseUp() {
         this.propData.isDraggingProp = false;
+        this.propData.isDraggingMultiple = false;
+        this.propData.multiDragOffsets.clear();
     }
 
     placeProp(mouseX, mouseY) {
@@ -93,10 +149,14 @@ class PropManager {
 
         listElement.innerHTML = this.propData.props.map(prop => {
             const propType = this.propData.getPropType(prop.type);
-            return `<div class="prop-item ${this.propData.selectedProp && this.propData.selectedProp.id === prop.id ? 'selected' : ''}"
+            const isSelected = this.propData.selectedProps.includes(prop);
+            const isPrimary = this.propData.selectedProp && this.propData.selectedProp.id === prop.id;
+            const groupInfo = prop.groupId ? ` [Group ${prop.groupId}]` : '';
+
+            return `<div class="prop-item ${isPrimary ? 'selected' : ''} ${isSelected ? 'multi-selected' : ''}"
                       data-prop-id="${prop.id}">
                     ${propType.name} (${Math.round(prop.x)}, ${Math.round(prop.y)})
-                    ${prop.isObstacle ? ' [Obstacle]' : ''}
+                    ${prop.isObstacle ? ' [Obstacle]' : ''}${groupInfo}
                     Z: ${prop.zOrder || 0}
                 </div>`;
         }).join('');

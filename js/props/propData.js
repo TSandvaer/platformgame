@@ -5,10 +5,17 @@ class PropData {
         this.nextPropZOrder = 1;
         this.selectedProp = null;
 
+        // Multi-selection and grouping
+        this.selectedProps = []; // Array of selected props
+        this.propGroups = new Map(); // Map of groupId -> array of prop IDs
+        this.nextGroupId = 1;
+
         // Prop placement system
         this.propPlacementMode = false;
         this.isDraggingProp = false;
+        this.isDraggingMultiple = false;
         this.propDragOffset = { x: 0, y: 0 };
+        this.multiDragOffsets = new Map(); // Map of propId -> offset for multi-drag
 
         // Prop types with their tileset coordinates and properties
         this.propTypes = {
@@ -153,5 +160,104 @@ class PropData {
         const tempZOrder = prop1.zOrder;
         prop1.zOrder = prop2.zOrder;
         prop2.zOrder = tempZOrder;
+    }
+
+    // Multi-selection methods
+    addToSelection(prop) {
+        if (!this.selectedProps.includes(prop)) {
+            this.selectedProps.push(prop);
+        }
+        this.selectedProp = prop; // Keep track of primary selection
+    }
+
+    removeFromSelection(prop) {
+        this.selectedProps = this.selectedProps.filter(p => p.id !== prop.id);
+        if (this.selectedProp === prop) {
+            this.selectedProp = this.selectedProps.length > 0 ? this.selectedProps[0] : null;
+        }
+    }
+
+    clearMultiSelection() {
+        this.selectedProps = [];
+        this.selectedProp = null;
+    }
+
+    selectMultiple(props) {
+        this.selectedProps = [...props];
+        this.selectedProp = props.length > 0 ? props[0] : null;
+    }
+
+    isSelected(prop) {
+        return this.selectedProps.includes(prop);
+    }
+
+    toggleSelection(prop) {
+        if (this.isSelected(prop)) {
+            this.removeFromSelection(prop);
+        } else {
+            this.addToSelection(prop);
+        }
+    }
+
+    // Grouping methods
+    createGroup(props) {
+        if (props.length < 2) return null;
+
+        const groupId = this.nextGroupId++;
+        const propIds = props.map(p => p.id);
+
+        // Add groupId to each prop
+        props.forEach(prop => {
+            prop.groupId = groupId;
+        });
+
+        this.propGroups.set(groupId, propIds);
+        return groupId;
+    }
+
+    ungroupProps(groupId) {
+        const propIds = this.propGroups.get(groupId);
+        if (propIds) {
+            // Remove groupId from props
+            propIds.forEach(propId => {
+                const prop = this.getPropById(propId);
+                if (prop) {
+                    delete prop.groupId;
+                }
+            });
+            this.propGroups.delete(groupId);
+        }
+    }
+
+    getGroupMembers(groupId) {
+        const propIds = this.propGroups.get(groupId);
+        if (!propIds) return [];
+        return propIds.map(id => this.getPropById(id)).filter(p => p);
+    }
+
+    getPropsInSameGroup(prop) {
+        if (!prop.groupId) return [prop];
+        return this.getGroupMembers(prop.groupId);
+    }
+
+    // Helper to delete multiple props
+    deleteSelectedProps() {
+        if (this.selectedProps.length === 0) return;
+
+        // Ungroup any grouped props first
+        const groupsToUngroup = new Set();
+        this.selectedProps.forEach(prop => {
+            if (prop.groupId) {
+                groupsToUngroup.add(prop.groupId);
+            }
+        });
+
+        groupsToUngroup.forEach(groupId => this.ungroupProps(groupId));
+
+        // Delete the props
+        const idsToDelete = this.selectedProps.map(p => p.id);
+        this.props = this.props.filter(prop => !idsToDelete.includes(prop.id));
+
+        this.clearMultiSelection();
     }
 }

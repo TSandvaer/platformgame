@@ -156,6 +156,22 @@
             color: white;
         }
 
+        .prop-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .prop-item.multi-selected {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .prop-item.selected.multi-selected {
+            background-color: #1976D2;
+            color: white;
+            font-weight: bold;
+        }
+
         .property-row {
             display: flex;
             align-items: center;
@@ -330,6 +346,16 @@
                         <div class="property-row">
                             <button class="btn small" id="sendToBackground">Send to Background</button>
                             <button class="btn small" id="bringToFront">Bring to Front</button>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="groupProps">Group Selected</button>
+                            <button class="btn small" id="ungroupProps">Ungroup</button>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small danger" id="deleteSelectedProps">Delete Selected</button>
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 5px;">
+                            Hold Ctrl+Click to multi-select props
                         </div>
                     </div>
                 </div>

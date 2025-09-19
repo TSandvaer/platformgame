@@ -5,7 +5,7 @@ class PropRenderer {
         this.torchParticles = torchParticles;
     }
 
-    renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false) {
+    renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = []) {
         if (!this.platformSprites.villageProps.image) return;
 
         // Filter props based on whether we're rendering obstacles or not
@@ -16,11 +16,11 @@ class PropRenderer {
 
         // Render each prop
         filteredProps.forEach(prop => {
-            this.drawProp(prop, propTypes, isDevelopmentMode, selectedProp);
+            this.drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps);
         });
     }
 
-    drawProp(prop, propTypes, isDevelopmentMode, selectedProp) {
+    drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps = []) {
         const propType = propTypes[prop.type];
         if (!propType) return;
 
@@ -41,10 +41,20 @@ class PropRenderer {
         // Disable image smoothing for pixel-perfect rendering
         this.ctx.imageSmoothingEnabled = false;
 
-        // Show green background only for selected props
-        if (isDevelopmentMode && selectedProp && selectedProp.id === prop.id) {
-            this.ctx.fillStyle = '#44FF44';
-            this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
+        // Show backgrounds for selected props in development mode
+        if (isDevelopmentMode) {
+            const isMultiSelected = selectedProps.some(p => p.id === prop.id);
+            const isPrimarySelected = selectedProp && selectedProp.id === prop.id;
+
+            if (isMultiSelected) {
+                // Multi-selected props get blue background
+                this.ctx.fillStyle = isPrimarySelected ? '#4444FF' : '#6666DD';
+                this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
+            } else if (isPrimarySelected) {
+                // Single selected prop gets green background
+                this.ctx.fillStyle = '#44FF44';
+                this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
+            }
         }
 
         // Draw the prop sprite
@@ -61,11 +71,30 @@ class PropRenderer {
 
         // Development mode: show prop boundaries
         if (isDevelopmentMode) {
-            if (selectedProp && selectedProp.id === prop.id) {
+            const isMultiSelected = selectedProps.some(p => p.id === prop.id);
+            const isPrimarySelected = selectedProp && selectedProp.id === prop.id;
+
+            if (isMultiSelected) {
+                // Multi-selected props get thicker blue borders
+                this.ctx.strokeStyle = isPrimarySelected ? '#0066FF' : '#3399FF';
+                this.ctx.lineWidth = isPrimarySelected ? 3 : 2;
+                this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
+
+                // Add group indicator if prop is grouped
+                if (prop.groupId) {
+                    this.ctx.strokeStyle = '#FF9900';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.strokeRect(prop.x - 2, prop.y - 2, renderWidth + 4, renderHeight + 4);
+                    this.ctx.setLineDash([]);
+                }
+            } else if (isPrimarySelected) {
+                // Single selected prop gets thick green border
                 this.ctx.strokeStyle = prop.isObstacle ? '#FF6B6B' : '#4ECDC4';
                 this.ctx.lineWidth = 2;
                 this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
             } else {
+                // Unselected props get thin borders
                 this.ctx.strokeStyle = prop.isObstacle ? '#FF9999' : '#99D6CE';
                 this.ctx.lineWidth = 1;
                 this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);

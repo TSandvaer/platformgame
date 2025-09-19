@@ -1086,6 +1086,31 @@ class PlatformRPG {
                 this.bringPropToFront(this.propSystem.selectedProp);
             }
         });
+
+        // Multi-selection and grouping event listeners
+        document.getElementById('groupProps').addEventListener('click', () => {
+            const groupId = this.propSystem.groupSelectedProps();
+            if (groupId) {
+                console.log(`Created group ${groupId} with ${this.propSystem.selectedProps.length} props`);
+            } else {
+                alert('Select at least 2 props to create a group');
+            }
+        });
+
+        document.getElementById('ungroupProps').addEventListener('click', () => {
+            this.propSystem.ungroupSelectedProps();
+            console.log('Ungrouped selected props');
+        });
+
+        document.getElementById('deleteSelectedProps').addEventListener('click', () => {
+            if (this.propSystem.selectedProps.length > 0) {
+                if (confirm(`Delete ${this.propSystem.selectedProps.length} selected props?`)) {
+                    this.propSystem.deleteSelectedProps();
+                }
+            } else {
+                alert('No props selected');
+            }
+        });
     }
 
     handlePlatformMouseDown(e) {
@@ -1108,40 +1133,8 @@ class PlatformRPG {
         }
 
         // Check for prop clicks first (props should be selectable before platforms)
-        // Find all props under the mouse, then select the one with highest z-order
-        let propsUnderMouse = [];
-
-        for (let prop of this.propSystem.props) {
-            const propType = this.propTypes[prop.type];
-            if (!propType) continue;
-
-            // Check if mouse is within prop bounds (using actual prop scale)
-            const scale = prop.scale !== undefined ? prop.scale :
-                         (prop.type === 'well' ? 1 :
-                         (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
-                         (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
-            const renderWidth = propType.width * scale;
-            const renderHeight = propType.height * scale;
-
-            if (mouseX >= prop.x && mouseX <= prop.x + renderWidth &&
-                mouseY >= prop.y && mouseY <= prop.y + renderHeight) {
-                propsUnderMouse.push(prop);
-            }
-        }
-
-        // If we found props under mouse, select the one with highest z-order (topmost)
-        if (propsUnderMouse.length > 0) {
-            const topProp = propsUnderMouse.reduce((highest, current) =>
-                (current.zOrder || 0) > (highest.zOrder || 0) ? current : highest
-            );
-
-            this.propSystem.selectedProp = topProp;
-            this.platformSystem.selectedPlatform = null;
-            this.propSystem.isDraggingProp = true;
-            this.propSystem.propDragOffset = {
-                x: mouseX - topProp.x,
-                y: mouseY - topProp.y
-            };
+        const propResult = this.propSystem.handleMouseDown(mouseX, mouseY, this.platformSystem, e.ctrlKey);
+        if (propResult.handled) {
             this.propSystem.updatePropProperties();
             this.propSystem.updatePropList();
             this.platformSystem.updatePlatformProperties();
@@ -1173,7 +1166,7 @@ class PlatformRPG {
         }
 
         this.platformSystem.selectedPlatform = null;
-        this.propSystem.selectedProp = null;
+        this.propSystem.clearMultiSelection();
         this.platformSystem.updatePlatformProperties();
         this.propSystem.updatePropProperties();
         this.platformSystem.updatePlatformList();
@@ -1195,9 +1188,8 @@ class PlatformRPG {
         this.handleDragScrolling(clientMouseX, clientMouseY);
 
         // Handle prop dragging
-        if (this.propSystem.isDraggingProp && this.propSystem.selectedProp) {
-            this.propSystem.selectedProp.x = mouseX - this.propSystem.propDragOffset.x;
-            this.propSystem.selectedProp.y = mouseY - this.propSystem.propDragOffset.y;
+        const propMoved = this.propSystem.handleMouseMove(mouseX, mouseY);
+        if (propMoved) {
             this.propSystem.updatePropProperties();
             return;
         }
@@ -1226,7 +1218,7 @@ class PlatformRPG {
 
     handleDragScrolling(clientMouseX, clientMouseY) {
         // Only scroll if we're actually dragging something
-        if (!this.platformSystem.isDragging && !this.platformSystem.isDraggingProp && !this.platformSystem.isResizing) {
+        if (!this.platformSystem.isDragging && !this.propSystem.isDraggingProp && !this.propSystem.isDraggingMultiple && !this.platformSystem.isResizing) {
             this.stopDragScrolling();
             return;
         }
