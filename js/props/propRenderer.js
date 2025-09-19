@@ -102,14 +102,13 @@ class PropRenderer {
             const framePadding = (spriteSheetSize - (frameSize * gridSize)) / gridSize; // Calculate padding
             const frameSizeWithPadding = frameSize + framePadding;
 
-            // Create smooth, slow flickering animation
-            const animationSpeed = 180; // Slower animation for smoother effect
-            // Use fewer, similar frames for subtle flicker
+            // Create very subtle, natural flickering animation
+            const animationSpeed = 150; // Medium speed for natural flicker
+            // Use very similar frames for minimal variation
             const animationFrames = [
-             7, 8, 13, 14, 8, 9,     // Mix of medium frames
-             15, 14, 20, 21, 14, 15, // More medium frames
-            8, 9, 14, 15, 21, 20,   // Repeat some for consistency
-            13, 14, 8, 7, 14, 13    // Loop back smoothly
+                13, 14, 13, 14, 13, 14,  // Subtle back and forth
+                19, 20, 19, 14, 13, 14,  // Slight variation
+                13, 19, 20, 19, 14, 13   // Return to start
             ];
             const frameIndex = Math.floor(currentTime / animationSpeed) % animationFrames.length;
             const currentFrameIndex = animationFrames[frameIndex];
@@ -162,18 +161,17 @@ class PropRenderer {
     }
 
     addTorchParticles(x, y, scale) {
-        // Add new particles occasionally for falling sparks
-        if (Math.random() < 0.03) { // 3% chance per frame
-            // Create a spark that pops up then falls
-            const sideDirection = Math.random() < 0.5 ? -1 : 1;
+        // Add new particles very rarely for subtle effect
+        if (Math.random() < 0.008) { // Very rare - 0.8% chance
+            // Create a tiny spark that gently falls
             this.torchParticles.push({
-                x: x + (Math.random() - 0.5) * 10 * scale,
-                y: y + 5, // Start slightly below flame position
-                vx: sideDirection * (Math.random() * 0.8) * scale, // Side drift
-                vy: -(Math.random() * 1.5 + 0.5), // Pop upward initially
+                x: x + (Math.random() - 0.5) * 4 * scale, // Close to flame
+                y: y + 10, // Start below flame
+                vx: (Math.random() - 0.5) * 0.2, // Very slight drift
+                vy: 0, // No initial upward velocity
                 life: 1.0,
-                size: 1.2,
-                fadeStart: 0.8 // Start fading at 80% life
+                size: 0.8, // Tiny particle
+                fadeStart: 0.8
             });
         }
     }
@@ -183,12 +181,12 @@ class PropRenderer {
         for (let i = this.torchParticles.length - 1; i >= 0; i--) {
             const particle = this.torchParticles[i];
 
-            // Update particle physics - sparks rise then fall
+            // Update particle physics - sparks fall slowly
             particle.x += particle.vx;
             particle.y += particle.vy;
-            particle.life -= 0.0005; // Super slow decay - live for ~2000 frames
-            particle.vy += 0.1; // Gravity effect
-            particle.vx *= 0.998; // Very minimal air resistance
+            particle.life -= 0.0003; // Extremely slow decay for long fall
+            particle.vy += 0.05; // Very gentle gravity - slow fall
+            particle.vx *= 0.999; // Almost no air resistance
 
             // Remove particles only when they fall way off screen
             if (particle.life <= 0 || particle.y > window.innerHeight + 500) {
@@ -196,22 +194,22 @@ class PropRenderer {
                 continue;
             }
 
-            // Calculate opacity based on life
+            // Calculate opacity - very subtle particles
             let opacity;
-            if (particle.life > 0.3) {
-                opacity = 0.8; // Stay bright for most of life
+            if (particle.life > 0.5) {
+                opacity = 0.4; // Dim particles
             } else {
-                // Only fade out in the last 30% of life
-                opacity = 0.8 * (particle.life / 0.3);
+                // Fade out in the last 50% of life
+                opacity = 0.4 * (particle.life / 0.5);
             }
 
-            // Color changes from bright yellow-orange to deep red as it cools
-            const hue = 35 - (1 - particle.life) * 25; // Start orange, end deep red
-            const lightness = 50 + particle.life * 20; // Gets darker as it cools
+            // Subtle orange glow color
+            const hue = 30; // Orange
+            const lightness = 60; // Not too bright
 
-            this.ctx.fillStyle = `hsla(${hue}, 100%, ${lightness}%, ${opacity})`;
+            this.ctx.fillStyle = `hsla(${hue}, 80%, ${lightness}%, ${opacity})`;
 
-            // Draw as small square pixel
+            // Draw as tiny pixel
             const size = particle.size;
             this.ctx.fillRect(Math.floor(particle.x), Math.floor(particle.y), size, size);
         }
