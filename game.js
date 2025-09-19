@@ -19,8 +19,8 @@ class PlatformRPG {
             height: 59, // 47 * 1.25 = 58.75, rounded to 59
             velocityX: 0,
             velocityY: 0,
-            speed: 2,
-            jumpPower: -9,
+            speed: 5,
+            jumpPower: -15,
             onGround: false,
             color: '#FF6B6B',
             facing: 'right',
@@ -106,7 +106,7 @@ class PlatformRPG {
             gem: { tileset: 'tileset', tileX: 4, tileY: 5 } // Gem-like
         };
 
-        this.gravity = 0.3;
+        this.gravity = 0.8;
         this.friction = 0.8;
 
         this.platforms = [
@@ -573,23 +573,26 @@ class PlatformRPG {
 
     handleInput() {
         if (this.isDevelopmentMode) {
+            // Use delta time for framerate-independent movement (60fps = 16.67ms baseline)
+            const moveMultiplier = this.deltaTime / 16.67;
             let isMoving = false;
+
             if (this.keys['arrowleft'] || this.keys['a']) {
-                this.player.x -= this.player.speed;
+                this.player.x -= this.player.speed * moveMultiplier;
                 this.player.facing = 'left';
                 isMoving = true;
             }
             if (this.keys['arrowright'] || this.keys['d']) {
-                this.player.x += this.player.speed;
+                this.player.x += this.player.speed * moveMultiplier;
                 this.player.facing = 'right';
                 isMoving = true;
             }
             if (this.keys['arrowup'] || this.keys['w']) {
-                this.player.y -= this.player.speed;
+                this.player.y -= this.player.speed * moveMultiplier;
                 isMoving = true;
             }
             if (this.keys['arrowdown'] || this.keys['s']) {
-                this.player.y += this.player.speed;
+                this.player.y += this.player.speed * moveMultiplier;
                 isMoving = true;
             }
             this.setPlayerAnimation(isMoving ? 'walk' : 'idle');
@@ -663,10 +666,13 @@ class PlatformRPG {
 
     updatePhysics() {
         if (!this.isDevelopmentMode) {
-            this.player.velocityY += this.gravity;
+            // Use delta time for framerate-independent physics (60fps = 16.67ms baseline)
+            const physicsMultiplier = this.deltaTime / 16.67;
 
-            this.player.x += this.player.velocityX;
-            this.player.y += this.player.velocityY;
+            this.player.velocityY += this.gravity * physicsMultiplier;
+
+            this.player.x += this.player.velocityX * physicsMultiplier;
+            this.player.y += this.player.velocityY * physicsMultiplier;
 
             this.player.onGround = false;
 
