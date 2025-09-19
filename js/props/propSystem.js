@@ -83,7 +83,7 @@ class PropSystem {
         );
     }
 
-    renderObstacleProps(isDevelopmentMode, viewport) {
+    renderObstacleProps(isDevelopmentMode, viewport, camera) {
         this.renderer.renderProps(
             this.data.props,
             this.data.propTypes,
@@ -91,13 +91,14 @@ class PropSystem {
             this.data.selectedProp,
             true, // Render obstacle props (foreground)
             this.data.selectedProps,
-            viewport
+            viewport,
+            camera
         );
     }
 
     // Render all torch particles - call this once per frame after rendering props
-    renderParticles() {
-        this.renderer.renderAllParticles();
+    renderParticles(viewport, camera) {
+        this.renderer.renderAllParticles(viewport, camera);
     }
 
     drawProp(prop, isDevelopmentMode) {
@@ -147,8 +148,8 @@ class PropSystem {
     }
 
     // Mouse event handling
-    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport) {
-        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed, viewport);
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport, camera) {
+        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed, viewport, camera);
         if (result.handled) {
             this.manager.updatePropProperties();
             this.manager.updatePropList();
@@ -156,8 +157,8 @@ class PropSystem {
         return result;
     }
 
-    handleMouseMove(mouseX, mouseY, viewport) {
-        const moved = this.manager.handleMouseMove(mouseX, mouseY, viewport);
+    handleMouseMove(mouseX, mouseY, viewport, camera) {
+        const moved = this.manager.handleMouseMove(mouseX, mouseY, viewport, camera);
         if (moved) {
             this.manager.updatePropProperties();
         }

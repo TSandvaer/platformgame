@@ -5,7 +5,7 @@ class PropManager {
         this.nextPropIsObstacle = false;
     }
 
-    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport) {
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport, camera) {
         // Check if prop placement mode is active
         if (this.propData.propPlacementMode) {
             this.placeProp(mouseX, mouseY);
@@ -21,8 +21,16 @@ class PropManager {
             const actualPos = this.propData.getActualPosition(prop, viewport.designWidth, viewport.designHeight);
             const renderProp = { ...prop, x: actualPos.x, y: actualPos.y };
 
+            // Mouse coordinates are in world space
+            // Props are stored in world coordinates
+            // We need to test in the same coordinate space
+            let testX = mouseX;
+            let testY = mouseY;
 
-            if (this.propData.isPointInProp(mouseX, mouseY, renderProp)) {
+            // All props use world coordinates for hit testing
+            // The rendering transformation is handled separately
+
+            if (this.propData.isPointInProp(testX, testY, renderProp)) {
                 propsUnderMouse.push(prop);
             }
         }
@@ -79,12 +87,13 @@ class PropManager {
         return { handled: false };
     }
 
-    handleMouseMove(mouseX, mouseY, viewport) {
+    handleMouseMove(mouseX, mouseY, viewport, camera) {
         if (this.propData.isDraggingMultiple) {
             // Move all selected props using relative positioning
             this.propData.selectedProps.forEach(prop => {
                 const offset = this.propData.multiDragOffsets.get(prop.id);
                 if (offset) {
+                    // All props use world coordinates
                     const newX = mouseX - offset.x;
                     const newY = mouseY - offset.y;
                     this.propData.updateRelativePosition(prop, newX, newY, viewport.designWidth, viewport.designHeight);
@@ -96,7 +105,7 @@ class PropManager {
             const groupMembers = this.propData.getPropsInSameGroup(this.propData.selectedProp);
 
             if (groupMembers.length > 1) {
-                // Move all props in the group using relative positioning
+                // All props use world coordinates
                 const newX = mouseX - this.propData.propDragOffset.x;
                 const newY = mouseY - this.propData.propDragOffset.y;
 
@@ -116,7 +125,7 @@ class PropManager {
                     );
                 });
             } else {
-                // Move single prop using relative positioning
+                // All props use world coordinates
                 const newX = mouseX - this.propData.propDragOffset.x;
                 const newY = mouseY - this.propData.propDragOffset.y;
                 this.propData.updateRelativePosition(this.propData.selectedProp, newX, newY, viewport.designWidth, viewport.designHeight);

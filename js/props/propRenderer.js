@@ -5,7 +5,7 @@ class PropRenderer {
         this.torchParticles = torchParticles;
     }
 
-    renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = [], viewport) {
+    renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = [], viewport, camera) {
         if (!this.platformSprites.villageProps.image) return;
 
         // Filter props based on whether we're rendering obstacles or not
@@ -21,13 +21,13 @@ class PropRenderer {
             const actualPos = this.getActualPosition(prop, viewport);
             let renderProp = { ...prop, x: actualPos.x, y: actualPos.y };
 
-            // If rendering obstacles (which are now outside viewport transform),
-            // apply viewport transformation manually
-            if (renderObstacles && viewport) {
-                const screenX = actualPos.x * viewport.scaleX + viewport.offsetX;
-                const screenY = actualPos.y * viewport.scaleY + viewport.offsetY;
+            // If rendering obstacles (which are outside all transforms),
+            // apply full transformation manually
+            if (renderObstacles && viewport && camera) {
+                // Convert world to screen coordinates
+                const screenX = (actualPos.x - camera.x) * viewport.scaleX + viewport.offsetX;
+                const screenY = (actualPos.y - camera.y) * viewport.scaleY + viewport.offsetY;
                 renderProp = { ...prop, x: screenX, y: screenY };
-
             }
 
             this.drawProp(renderProp, propTypes, isDevelopmentMode, selectedProp, selectedProps);
@@ -242,7 +242,7 @@ class PropRenderer {
         }
     }
 
-    updateAndRenderParticles() {
+    updateAndRenderParticles(viewport, camera) {
         // Update and render particles
         for (let i = this.torchParticles.length - 1; i >= 0; i--) {
             const particle = this.torchParticles[i];
@@ -282,9 +282,18 @@ class PropRenderer {
 
             this.ctx.fillStyle = `hsla(${hue}, 100%, ${lightness}%, ${opacity})`;
 
+            // Apply camera and viewport transformation to particle position
+            let renderX = particle.x;
+            let renderY = particle.y;
+            if (viewport && camera) {
+                // Convert world to screen coordinates
+                renderX = (particle.x - camera.x) * viewport.scaleX + viewport.offsetX;
+                renderY = (particle.y - camera.y) * viewport.scaleY + viewport.offsetY;
+            }
+
             // Draw as glowing ember
             const size = particle.size;
-            this.ctx.fillRect(Math.floor(particle.x), Math.floor(particle.y), size, size);
+            this.ctx.fillRect(Math.floor(renderX), Math.floor(renderY), size, size);
 
             // Restore context
             this.ctx.restore();
@@ -292,7 +301,7 @@ class PropRenderer {
     }
 
     // Call this once per frame after all props have been rendered
-    renderAllParticles() {
-        this.updateAndRenderParticles();
+    renderAllParticles(viewport, camera) {
+        this.updateAndRenderParticles(viewport, camera);
     }
 }

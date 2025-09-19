@@ -863,16 +863,17 @@ class PlatformRPG {
             this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
 
-        // Render all torch particles once per frame
-        this.propSystem.renderParticles();
-
         this.ctx.restore();
 
         // Restore viewport scaling as well for obstacle props
         this.ctx.restore();
 
-        // Render obstacle props without any transformations (they use their own positioning)
-        this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport);
+        // Render obstacle props after removing transformations
+        // They need special handling for proper coordinate transformation
+        this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport, this.camera);
+
+        // Render torch particles after obstacle props (they need the same transformation)
+        this.propSystem.renderParticles(this.viewport, this.camera);
 
         if (this.isDevelopmentMode) {
             // Apply viewport scaling for dev info
@@ -1364,7 +1365,8 @@ class PlatformRPG {
 
 
         // Check for prop clicks first (props should be selectable before platforms)
-        const propResult = this.propSystem.handleMouseDown(viewportMouseX, viewportMouseY, this.platformSystem, e.ctrlKey, this.viewport);
+        // Pass both world and viewport coordinates for proper handling
+        const propResult = this.propSystem.handleMouseDown(worldMouseX, worldMouseY, this.platformSystem, e.ctrlKey, this.viewport, this.camera);
         if (propResult.handled) {
             this.propSystem.updatePropProperties();
             this.propSystem.updatePropList();
@@ -1428,8 +1430,8 @@ class PlatformRPG {
         // Handle camera scrolling during drag operations
         this.handleDragScrolling(clientMouseX, clientMouseY);
 
-        // Handle prop dragging (use viewport coordinates)
-        const propMoved = this.propSystem.handleMouseMove(viewportMouseX, viewportMouseY, this.viewport);
+        // Handle prop dragging (use world coordinates and pass camera)
+        const propMoved = this.propSystem.handleMouseMove(worldMouseX, worldMouseY, this.viewport, this.camera);
         if (propMoved) {
             this.propSystem.updatePropProperties();
             return;
