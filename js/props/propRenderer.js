@@ -190,17 +190,18 @@ class PropRenderer {
     }
 
     addTorchParticles(x, y, scale) {
-        // Add new particles very rarely for subtle effect
-        if (Math.random() < 0.008) { // Very rare - 0.8% chance
-            // Create a tiny spark that gently falls
+        // Add fewer particles that are more impactful
+        if (Math.random() < 0.015) { // 1.5% chance - fewer particles
+            // Create glowing sparks that rise from the flame tip then fall
             this.torchParticles.push({
-                x: x + (Math.random() - 0.5) * 4 * scale, // Close to flame
-                y: y + 10, // Start below flame
-                vx: (Math.random() - 0.5) * 0.2, // Very slight drift
-                vy: 0, // No initial upward velocity
+                x: x + (Math.random() - 0.5) * 6 * scale, // Tighter spread from flame
+                y: y, // Start right at flame tip
+                vx: (Math.random() - 0.5) * 0.3 * scale, // Slower horizontal drift
+                vy: -(Math.random() * 0.8 + 0.2), // Slower initial upward velocity
                 life: 1.0,
-                size: 0.8, // Tiny particle
-                fadeStart: 0.8
+                maxLife: 1.0, // Track original life for glow calculation
+                size: 1.2 + Math.random() * 0.3, // Consistent size
+                glowIntensity: 1.0 // Start with full glow
             });
         }
     }
@@ -210,37 +211,47 @@ class PropRenderer {
         for (let i = this.torchParticles.length - 1; i >= 0; i--) {
             const particle = this.torchParticles[i];
 
-            // Update particle physics - sparks fall slowly
+            // Update particle physics - slower movement
             particle.x += particle.vx;
             particle.y += particle.vy;
-            particle.life -= 0.0003; // Extremely slow decay for long fall
-            particle.vy += 0.05; // Very gentle gravity - slow fall
-            particle.vx *= 0.999; // Almost no air resistance
+            particle.life -= 0.003; // Much slower decay - particles live longer
+            particle.vy += 0.06; // Gentler gravity
+            particle.vx *= 0.995; // Less air resistance
 
-            // Remove particles only when they fall way off screen
-            if (particle.life <= 0 || particle.y > window.innerHeight + 500) {
+            // Remove particles when they die or fall way off screen
+            if (particle.life <= 0 || particle.y > window.innerHeight + 300) {
                 this.torchParticles.splice(i, 1);
                 continue;
             }
 
-            // Calculate opacity - very subtle particles
-            let opacity;
-            if (particle.life > 0.5) {
-                opacity = 0.4; // Dim particles
-            } else {
-                // Fade out in the last 50% of life
-                opacity = 0.4 * (particle.life / 0.5);
+            // Calculate glow intensity - bright at start, fade gradually
+            const lifeRatio = particle.life / particle.maxLife;
+            particle.glowIntensity = lifeRatio;
+
+            // Opacity starts high and fades to almost nothing at ground
+            const opacity = Math.max(0.1, lifeRatio * 0.9);
+
+            // Color progression: bright yellow-orange to dim red
+            const hue = 45 - (1 - lifeRatio) * 25; // Yellow to red-orange
+            const lightness = 70 + lifeRatio * 20; // Bright to dim
+
+            // Save context for glow effect
+            this.ctx.save();
+
+            // Add glow effect when particles are fresh
+            if (particle.glowIntensity > 0.5) {
+                this.ctx.shadowColor = `hsla(${hue}, 100%, 60%, ${particle.glowIntensity * 0.8})`;
+                this.ctx.shadowBlur = 4 + particle.glowIntensity * 6;
             }
 
-            // Subtle orange glow color
-            const hue = 30; // Orange
-            const lightness = 60; // Not too bright
+            this.ctx.fillStyle = `hsla(${hue}, 100%, ${lightness}%, ${opacity})`;
 
-            this.ctx.fillStyle = `hsla(${hue}, 80%, ${lightness}%, ${opacity})`;
-
-            // Draw as tiny pixel
+            // Draw as glowing ember
             const size = particle.size;
             this.ctx.fillRect(Math.floor(particle.x), Math.floor(particle.y), size, size);
+
+            // Restore context
+            this.ctx.restore();
         }
     }
 
