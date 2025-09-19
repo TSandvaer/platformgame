@@ -208,10 +208,13 @@ class PlatformRPG {
     }
 
     loadAvailableBackgrounds() {
-        // For now, manually define available backgrounds
-        // In a real system, this would scan the backgrounds folder
+        // Available backgrounds found in the backgrounds folder
         this.availableBackgrounds = [
             'none',
+            'DarkForest',
+            'Mountains1',
+            'Mountains2',
+            'MountainWaterfall',
             'The Dawn'
         ];
     }
@@ -227,27 +230,89 @@ class PlatformRPG {
             return;
         }
 
-        // Load background layers
+        // Load background layers based on background type
         const background = {
             name: backgroundName,
             layers: [],
             layersLoaded: 0,
-            totalLayers: 8 // Assuming 8 layers based on folder structure
+            totalLayers: 0
         };
 
-        for (let i = 1; i <= 8; i++) {
-            const img = new Image();
-            const imagePath = `backgrounds/${backgroundName}/${backgroundName}/Layers/${i}.png`;
+        let layerPaths = [];
 
+        // Define layer paths for each background type
+        switch (backgroundName) {
+            case 'DarkForest':
+                layerPaths = [
+                    'backgrounds/DarkForest/layers/sky.png',
+                    'backgrounds/DarkForest/layers/clouds_1.png',
+                    'backgrounds/DarkForest/layers/clouds_2.png',
+                    'backgrounds/DarkForest/layers/rocks.png',
+                    'backgrounds/DarkForest/layers/ground_3.png',
+                    'backgrounds/DarkForest/layers/ground_2.png',
+                    'backgrounds/DarkForest/layers/ground_1.png',
+                    'backgrounds/DarkForest/layers/plant.png'
+                ];
+                break;
+            case 'Mountains1':
+                layerPaths = [
+                    'backgrounds/Mountains1/layers/sky.png',
+                    'backgrounds/Mountains1/layers/clouds_4.png',
+                    'backgrounds/Mountains1/layers/clouds_3.png',
+                    'backgrounds/Mountains1/layers/clouds_2.png',
+                    'backgrounds/Mountains1/layers/clouds_1.png',
+                    'backgrounds/Mountains1/layers/rocks_2.png',
+                    'backgrounds/Mountains1/layers/rocks_1.png'
+                ];
+                break;
+            case 'Mountains2':
+                layerPaths = [
+                    'backgrounds/Mountains2/layers/sky.png',
+                    'backgrounds/Mountains2/layers/clouds_3.png',
+                    'backgrounds/Mountains2/layers/clouds_2.png',
+                    'backgrounds/Mountains2/layers/clouds_1.png',
+                    'backgrounds/Mountains2/layers/birds.png',
+                    'backgrounds/Mountains2/layers/rocks_3.png',
+                    'backgrounds/Mountains2/layers/rocks_2.png',
+                    'backgrounds/Mountains2/layers/rocks_1.png',
+                    'backgrounds/Mountains2/layers/pines.png'
+                ];
+                break;
+            case 'MountainWaterfall':
+                layerPaths = [
+                    'backgrounds/MountainWaterfall/layers/sky.png',
+                    'backgrounds/MountainWaterfall/layers/clouds_2.png',
+                    'backgrounds/MountainWaterfall/layers/clouds_1.png',
+                    'backgrounds/MountainWaterfall/layers/rocks.png',
+                    'backgrounds/MountainWaterfall/layers/ground.png'
+                ];
+                break;
+            case 'The Dawn':
+                layerPaths = [];
+                for (let i = 1; i <= 8; i++) {
+                    layerPaths.push(`backgrounds/The Dawn/The Dawn/Layers/${i}.png`);
+                }
+                break;
+            default:
+                console.warn(`Unknown background: ${backgroundName}`);
+                return;
+        }
+
+        background.totalLayers = layerPaths.length;
+
+        // Load each layer
+        layerPaths.forEach((path, index) => {
+            const img = new Image();
             img.onload = () => {
                 background.layersLoaded++;
+                console.log(`Loaded background layer ${index + 1}/${background.totalLayers} for ${backgroundName}`);
             };
             img.onerror = (error) => {
-                console.warn(`Failed to load background layer ${i} for "${backgroundName}"`);
+                console.warn(`Failed to load background layer: ${path}`);
             };
-            img.src = imagePath;
+            img.src = path;
             background.layers.push(img);
-        }
+        });
 
         this.backgrounds[backgroundName] = background;
         this.currentBackground = background;
@@ -317,9 +382,31 @@ class PlatformRPG {
     init() {
         this.setupEventListeners();
         this.setDevelopmentMode(true); // Properly initialize development mode UI
+        this.populateBackgroundDropdown();
         this.gameLoop();
         this.updateUI();
         this.loadGameDataFromFile();
+    }
+
+    populateBackgroundDropdown() {
+        const backgroundSelect = document.getElementById('backgroundSelect');
+        if (!backgroundSelect) return;
+
+        // Clear existing options except "none"
+        backgroundSelect.innerHTML = '<option value="none">None</option>';
+
+        // Add all available backgrounds
+        this.availableBackgrounds.slice(1).forEach(backgroundName => {
+            const option = document.createElement('option');
+            option.value = backgroundName;
+            option.textContent = this.formatBackgroundName(backgroundName);
+            backgroundSelect.appendChild(option);
+        });
+    }
+
+    formatBackgroundName(name) {
+        // Convert camelCase to readable format
+        return name.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
     }
 
     setupEventListeners() {
