@@ -88,36 +88,47 @@ class PropRenderer {
             // Enable image smoothing for smooth flame rendering
             this.ctx.imageSmoothingEnabled = true;
 
-            // Calculate torch tip position
+            // Calculate torch tip position (torch is scaled, so adjust accordingly)
             const torchCenterX = prop.x + (renderWidth / 2);
+            // The torch flame should be at the very top of the torch
             const torchTopY = prop.y;
 
-            // Natural flame animation - use individual 21x21 sprites for breathing effect
-            const frameIndex = Math.floor(currentTime / 150) % 4; // Use 4 frames for breathing cycle
-
-            // Back to 6x6 grid
+            // Animated flame using the sprite sheet
+            // The sprite sheet is 128x128 pixels with 36 frames (6x6 grid)
+            // Each frame is approximately 21x21 pixels with small gaps
+            const spriteSheetSize = 128;
             const gridSize = 6;
-            const frameSize = Math.floor(128 / gridSize); // 21 pixels per frame
+            const frameSize = 21; // Actual frame size
+            const framePadding = (spriteSheetSize - (frameSize * gridSize)) / gridSize; // Calculate padding
+            const frameSizeWithPadding = frameSize + framePadding;
 
-            // Create breathing by using flames from different rows
-            const breathingSequence = [
-                { x: 0, y: 0 }, // Small flame
-                { x: 1, y: 0 }, // Medium flame
-                { x: 2, y: 0 }, // Large flame
-                { x: 1, y: 0 }  // Back to medium
+            // Create smooth, slow flickering animation
+            const animationSpeed = 180; // Slower animation for smoother effect
+            // Use fewer, similar frames for subtle flicker
+            const animationFrames = [
+             7, 8, 13, 14, 8, 9,     // Mix of medium frames
+             15, 14, 20, 21, 14, 15, // More medium frames
+            8, 9, 14, 15, 21, 20,   // Repeat some for consistency
+            13, 14, 8, 7, 14, 13    // Loop back smoothly
             ];
+            const frameIndex = Math.floor(currentTime / animationSpeed) % animationFrames.length;
+            const currentFrameIndex = animationFrames[frameIndex];
 
-            const currentFrame = breathingSequence[frameIndex];
-            const sourceX = currentFrame.x * frameSize;
-            const sourceY = currentFrame.y * frameSize;
+            // Calculate position in sprite sheet
+            const col = currentFrameIndex % gridSize;
+            const row = Math.floor(currentFrameIndex / gridSize);
 
-            // Larger flame size
-            const flameWidth = 65;
-            const flameHeight = 110;
+            const sourceX = col * frameSizeWithPadding;
+            const sourceY = row * frameSizeWithPadding;
 
-            // Adjust position
-            const flameX = torchCenterX - 33.5;
-            const flameY = torchTopY - 100.5;
+            // Scale flame size based on torch scale
+            const flameScale = scale * 1.0; // Normal scale
+            const flameWidth = 16 * flameScale; // Smaller width
+            const flameHeight = 24 * flameScale; // Smaller height
+
+            // Position flame at the very top of the torch
+            const flameX = torchCenterX - (flameWidth / 2);
+            const flameY = torchTopY - (flameHeight * 0.85); // Flame sits on top of torch
 
             // Save context state
             this.ctx.save();
@@ -130,11 +141,11 @@ class PropRenderer {
             this.ctx.shadowColor = 'rgba(255, 100, 0, 0.6)';
             this.ctx.shadowBlur = 15;
 
-            // Draw flame sprite
+            // Draw flame sprite (21x21 source frame)
             this.ctx.drawImage(
                 flameSprite.image,
                 sourceX, sourceY,
-                frameSize, frameSize,
+                frameSize, frameSize,  // 21x21 source
                 flameX, flameY,
                 flameWidth, flameHeight
             );
@@ -142,25 +153,27 @@ class PropRenderer {
             // Restore context state
             this.ctx.restore();
 
-            // Add flame particles
-            this.addTorchParticles(torchCenterX, torchTopY);
-            this.updateAndRenderParticles();
+            // Add flame particles at the top of the flame
+            this.addTorchParticles(torchCenterX, flameY, flameScale);
 
         } catch (error) {
             console.error('Error rendering torch flame:', error);
         }
     }
 
-    addTorchParticles(x, y) {
-        // Add new particles occasionally
-        if (Math.random() < 0.3) {
+    addTorchParticles(x, y, scale) {
+        // Add new particles occasionally for falling sparks
+        if (Math.random() < 0.03) { // 3% chance per frame
+            // Create a spark that pops up then falls
+            const sideDirection = Math.random() < 0.5 ? -1 : 1;
             this.torchParticles.push({
-                x: x + (Math.random() - 0.5) * 10,
-                y: y - 80,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: -Math.random() * 1.5 - 0.5,
+                x: x + (Math.random() - 0.5) * 10 * scale,
+                y: y + 5, // Start slightly below flame position
+                vx: sideDirection * (Math.random() * 0.8) * scale, // Side drift
+                vy: -(Math.random() * 1.5 + 0.5), // Pop upward initially
                 life: 1.0,
-                size: Math.random() * 3 + 1
+                size: 1.2,
+                fadeStart: 0.8 // Start fading at 80% life
             });
         }
     }
@@ -170,25 +183,42 @@ class PropRenderer {
         for (let i = this.torchParticles.length - 1; i >= 0; i--) {
             const particle = this.torchParticles[i];
 
-            // Update particle
+            // Update particle physics - sparks rise then fall
             particle.x += particle.vx;
             particle.y += particle.vy;
-            particle.life -= 0.02;
-            particle.vy -= 0.05; // Float upward
+            particle.life -= 0.0005; // Super slow decay - live for ~2000 frames
+            particle.vy += 0.1; // Gravity effect
+            particle.vx *= 0.998; // Very minimal air resistance
 
-            // Remove dead particles
-            if (particle.life <= 0) {
+            // Remove particles only when they fall way off screen
+            if (particle.life <= 0 || particle.y > window.innerHeight + 500) {
                 this.torchParticles.splice(i, 1);
                 continue;
             }
 
-            // Render particle
-            const opacity = particle.life * 0.6;
-            const hue = 30 + (1 - particle.life) * 30; // Orange to red
-            this.ctx.fillStyle = `hsla(${hue}, 100%, 50%, ${opacity})`;
-            this.ctx.beginPath();
-            this.ctx.arc(particle.x, particle.y, particle.size * particle.life, 0, Math.PI * 2);
-            this.ctx.fill();
+            // Calculate opacity based on life
+            let opacity;
+            if (particle.life > 0.3) {
+                opacity = 0.8; // Stay bright for most of life
+            } else {
+                // Only fade out in the last 30% of life
+                opacity = 0.8 * (particle.life / 0.3);
+            }
+
+            // Color changes from bright yellow-orange to deep red as it cools
+            const hue = 35 - (1 - particle.life) * 25; // Start orange, end deep red
+            const lightness = 50 + particle.life * 20; // Gets darker as it cools
+
+            this.ctx.fillStyle = `hsla(${hue}, 100%, ${lightness}%, ${opacity})`;
+
+            // Draw as small square pixel
+            const size = particle.size;
+            this.ctx.fillRect(Math.floor(particle.x), Math.floor(particle.y), size, size);
         }
+    }
+
+    // Call this once per frame after all props have been rendered
+    renderAllParticles() {
+        this.updateAndRenderParticles();
     }
 }

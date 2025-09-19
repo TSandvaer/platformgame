@@ -670,15 +670,11 @@ class PlatformRPG {
             this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
         }
 
-        // Render obstacle props after player (in front of player), sorted by z-order
-        if (this.platformSprites.villageProps.image) {
-            this.propSystem.props
-                .filter(prop => prop.isObstacle)
-                .sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0))
-                .forEach(prop => {
-                    this.propSystem.drawProp(prop, this.isDevelopmentMode);
-                });
-        }
+        // Render obstacle props after player (in front of player)
+        this.propSystem.renderObstacleProps(this.isDevelopmentMode);
+
+        // Render all torch particles once per frame
+        this.propSystem.renderParticles();
 
         this.ctx.restore();
 
@@ -729,8 +725,8 @@ class PlatformRPG {
 
 
     // Prop rendering methods have been moved to propSystem
-    // Keep renderTorchFlame temporarily for backward compatibility
 
+    /* Old renderTorchFlame - now handled by propSystem
     renderTorchFlame(prop, renderWidth, renderHeight, scale) {
         if (!this.platformSprites.torchFlame || !this.platformSprites.torchFlame.image) return;
 
@@ -853,6 +849,7 @@ class PlatformRPG {
             console.error('Error rendering torch flame:', error);
         }
     }
+    */
 
     // Prop management methods have been moved to propSystem
     /* Keep for reference

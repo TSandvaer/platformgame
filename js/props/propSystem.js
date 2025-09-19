@@ -91,6 +91,11 @@ class PropSystem {
         );
     }
 
+    // Render all torch particles - call this once per frame after rendering props
+    renderParticles() {
+        this.renderer.renderAllParticles();
+    }
+
     drawProp(prop, isDevelopmentMode) {
         this.renderer.drawProp(
             prop,
