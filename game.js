@@ -443,7 +443,8 @@ class PlatformRPG {
 
             // Handle space key for jump (one-time trigger)
             if (e.key === ' ' && this.player.onGround && !this.isDevelopmentMode && !this.player.spaceKeyPressed) {
-                this.player.velocityY = this.player.jumpPower;
+                const jumpPower = this.keys['shift'] ? -17 : this.player.jumpPower;
+                this.player.velocityY = jumpPower;
                 this.player.onGround = false;
                 this.player.spaceKeyPressed = true;
                 e.preventDefault(); // Prevent page scrolling
@@ -575,35 +576,37 @@ class PlatformRPG {
         if (this.isDevelopmentMode) {
             // Use delta time for framerate-independent movement (60fps = 16.67ms baseline)
             const moveMultiplier = this.deltaTime / 16.67;
+            const speedMultiplier = (this.keys['shift']) ? 1.5 : 1.0;
             let isMoving = false;
 
             if (this.keys['arrowleft'] || this.keys['a']) {
-                this.player.x -= this.player.speed * moveMultiplier;
+                this.player.x -= this.player.speed * moveMultiplier * speedMultiplier;
                 this.player.facing = 'left';
                 isMoving = true;
             }
             if (this.keys['arrowright'] || this.keys['d']) {
-                this.player.x += this.player.speed * moveMultiplier;
+                this.player.x += this.player.speed * moveMultiplier * speedMultiplier;
                 this.player.facing = 'right';
                 isMoving = true;
             }
             if (this.keys['arrowup'] || this.keys['w']) {
-                this.player.y -= this.player.speed * moveMultiplier;
+                this.player.y -= this.player.speed * moveMultiplier * speedMultiplier;
                 isMoving = true;
             }
             if (this.keys['arrowdown'] || this.keys['s']) {
-                this.player.y += this.player.speed * moveMultiplier;
+                this.player.y += this.player.speed * moveMultiplier * speedMultiplier;
                 isMoving = true;
             }
             this.setPlayerAnimation(isMoving ? 'walk' : 'idle');
         } else {
+            const speedMultiplier = (this.keys['shift']) ? 1.5 : 1.0;
             let isMoving = false;
             if (this.keys['arrowleft'] || this.keys['a']) {
-                this.player.velocityX = -this.player.speed;
+                this.player.velocityX = -this.player.speed * speedMultiplier;
                 this.player.facing = 'left';
                 isMoving = true;
             } else if (this.keys['arrowright'] || this.keys['d']) {
-                this.player.velocityX = this.player.speed;
+                this.player.velocityX = this.player.speed * speedMultiplier;
                 this.player.facing = 'right';
                 isMoving = true;
             } else {
