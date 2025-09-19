@@ -15,11 +15,12 @@
           "x": 3,
           "y": 585,
           "width": 1133,
-          "height": 32,
+          "height": 33,
           "color": "#4ECDC4",
           "spriteType": "grass",
           "tileX": 1,
-          "tileY": 0
+          "tileY": 0,
+          "isGroundPlatform": true
         },
         {
           "id": 5,
@@ -30,7 +31,8 @@
           "color": "#4ECDC4",
           "spriteType": "dirt",
           "tileX": 1,
-          "tileY": 0
+          "tileY": 0,
+          "isGroundPlatform": true
         },
         {
           "id": 7,
