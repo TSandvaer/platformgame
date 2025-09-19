@@ -19,8 +19,8 @@ class PlatformRPG {
             height: 59, // 47 * 1.25 = 58.75, rounded to 59
             velocityX: 0,
             velocityY: 0,
-            speed: 5,
-            jumpPower: -15,
+            speed: 2,
+            jumpPower: -9,
             onGround: false,
             color: '#FF6B6B',
             facing: 'right',
@@ -30,7 +30,8 @@ class PlatformRPG {
             frameRate: 150, // milliseconds per frame (was 6 frames @ 60fps = 100ms)
             isAttacking: false,
             attackTimer: 0,
-            attackDuration: 24
+            attackDuration: 600,
+            spaceKeyPressed: false
         };
 
         this.sprites = {
@@ -105,7 +106,7 @@ class PlatformRPG {
             gem: { tileset: 'tileset', tileX: 4, tileY: 5 } // Gem-like
         };
 
-        this.gravity = 0.8;
+        this.gravity = 0.3;
         this.friction = 0.8;
 
         this.platforms = [
@@ -440,6 +441,14 @@ class PlatformRPG {
                 this.handlePlayerAttack();
             }
 
+            // Handle space key for jump (one-time trigger)
+            if (e.key === ' ' && this.player.onGround && !this.isDevelopmentMode && !this.player.spaceKeyPressed) {
+                this.player.velocityY = this.player.jumpPower;
+                this.player.onGround = false;
+                this.player.spaceKeyPressed = true;
+                e.preventDefault(); // Prevent page scrolling
+            }
+
             // Prevent browser shortcuts when Ctrl is held down with other keys
             if (e.ctrlKey && (e.key === ' ' || e.key === 'Space')) {
                 e.preventDefault(); // Specifically prevent Ctrl+Space
@@ -448,6 +457,11 @@ class PlatformRPG {
 
         window.addEventListener('keyup', (e) => {
             this.keys[e.key.toLowerCase()] = false;
+
+            // Reset space key flag when released
+            if (e.key === ' ') {
+                this.player.spaceKeyPressed = false;
+            }
 
             // Prevent browser shortcuts for Control key
             if (e.key === 'Control') {
@@ -593,15 +607,11 @@ class PlatformRPG {
                 this.player.velocityX *= this.friction;
             }
 
-            if (this.keys[' '] && this.player.onGround) {
-                this.player.velocityY = this.player.jumpPower;
-                this.player.onGround = false;
-            }
 
             // Set animation based on movement and ground state
             if (!this.player.onGround) {
                 this.setPlayerAnimation('idle'); // Could be jump animation if you have one
-            } else if (isMoving && Math.abs(this.player.velocityX) > 0.5) {
+            } else if (isMoving || Math.abs(this.player.velocityX) > 0.5) {
                 this.setPlayerAnimation('walk');
             } else {
                 this.setPlayerAnimation('idle');
@@ -635,7 +645,7 @@ class PlatformRPG {
 
         // Handle attack timing - check this after frame updates
         if (this.player.isAttacking) {
-            this.player.attackTimer++;
+            this.player.attackTimer += this.deltaTime;
             if (this.player.attackTimer >= this.player.attackDuration) {
                 this.player.isAttacking = false;
                 this.player.attackTimer = 0;
