@@ -19,8 +19,8 @@ class PlatformRPG {
             height: 59, // 47 * 1.25 = 58.75, rounded to 59
             velocityX: 0,
             velocityY: 0,
-            speed: 5,
-            jumpPower: -15,
+            speed: 5.5,
+            jumpPower: -14,
             onGround: false,
             color: '#FF6B6B',
             facing: 'right',
@@ -30,7 +30,7 @@ class PlatformRPG {
             frameRate: 150, // milliseconds per frame (was 6 frames @ 60fps = 100ms)
             isAttacking: false,
             attackTimer: 0,
-            attackDuration: 600,
+            attackDuration: 545,
             spaceKeyPressed: false
         };
 
