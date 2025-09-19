@@ -39,16 +39,16 @@
           "width": 1173,
           "height": 32,
           "color": "#4ECDC4",
-          "spriteType": "sandGrass"
+          "spriteType": "grass"
         },
         {
           "id": 8,
           "x": 1136,
           "y": 617,
           "width": 1173,
-          "height": 84,
+          "height": 126,
           "color": "#4ECDC4",
-          "spriteType": "sand"
+          "spriteType": "dirt"
         },
         {
           "id": 9,
@@ -57,7 +57,7 @@
           "width": 660,
           "height": 32,
           "color": "#4ECDC4",
-          "spriteType": "lightWood"
+          "spriteType": "grass"
         }
       ],
       "background": {
