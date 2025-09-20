@@ -336,15 +336,15 @@
         },
         {
           "id": 24,
-          "x": 1309.1080602302925,
-          "y": 157.17714791851193,
+          "x": 1309,
+          "y": 299,
           "type": "tree1",
           "isObstacle": false,
           "zOrder": 2,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 3
+          "sizeMultiplier": 2
         },
         {
           "id": 25,

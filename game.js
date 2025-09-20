@@ -467,7 +467,15 @@ class PlatformRPG {
 
     setupEventListeners() {
         window.addEventListener('keydown', (e) => {
-            this.keys[e.key.toLowerCase()] = true;
+            // Don't register arrow keys for player movement if we're nudging props
+            const isArrowKey = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
+            const isNudgingProp = this.isDevelopmentMode &&
+                                  (this.propSystem.selectedProp ||
+                                   (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0));
+
+            if (!(isArrowKey && isNudgingProp)) {
+                this.keys[e.key.toLowerCase()] = true;
+            }
 
             // Handle Ctrl key for attack
             if (e.key === 'Control' && !this.player.isAttacking) {
@@ -617,26 +625,53 @@ class PlatformRPG {
 
     handleInput() {
         if (this.isDevelopmentMode) {
+            // Check if we're nudging a prop - if so, don't move the player
+            const isNudgingProp = this.propSystem.selectedProp ||
+                                 (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0);
+
             // Use delta time for framerate-independent movement (60fps = 16.67ms baseline)
             const moveMultiplier = this.deltaTime / 16.67;
             const speedMultiplier = (this.keys['shift']) ? 1.5 : 1.0;
             let isMoving = false;
 
-            if (this.keys['arrowleft'] || this.keys['a']) {
+            // Don't use arrow keys for player movement if nudging props
+            if (!isNudgingProp) {
+                if (this.keys['arrowleft']) {
+                    this.player.x -= this.player.speed * moveMultiplier * speedMultiplier;
+                    this.player.facing = 'left';
+                    isMoving = true;
+                }
+                if (this.keys['arrowright']) {
+                    this.player.x += this.player.speed * moveMultiplier * speedMultiplier;
+                    this.player.facing = 'right';
+                    isMoving = true;
+                }
+                if (this.keys['arrowup']) {
+                    this.player.y -= this.player.speed * moveMultiplier * speedMultiplier;
+                    isMoving = true;
+                }
+                if (this.keys['arrowdown']) {
+                    this.player.y += this.player.speed * moveMultiplier * speedMultiplier;
+                    isMoving = true;
+                }
+            }
+
+            // WASD still works for player movement regardless of prop selection
+            if (this.keys['a']) {
                 this.player.x -= this.player.speed * moveMultiplier * speedMultiplier;
                 this.player.facing = 'left';
                 isMoving = true;
             }
-            if (this.keys['arrowright'] || this.keys['d']) {
+            if (this.keys['d']) {
                 this.player.x += this.player.speed * moveMultiplier * speedMultiplier;
                 this.player.facing = 'right';
                 isMoving = true;
             }
-            if (this.keys['arrowup'] || this.keys['w']) {
+            if (this.keys['w']) {
                 this.player.y -= this.player.speed * moveMultiplier * speedMultiplier;
                 isMoving = true;
             }
-            if (this.keys['arrowdown'] || this.keys['s']) {
+            if (this.keys['s']) {
                 this.player.y += this.player.speed * moveMultiplier * speedMultiplier;
                 isMoving = true;
             }
@@ -1706,6 +1741,74 @@ class PlatformRPG {
             } else if (this.propSystem.selectedProp) {
                 // Delete selected prop
                 this.propSystem.deleteSelectedProp();
+            }
+        }
+
+        // Handle arrow keys for nudging selected props
+        if (this.propSystem.selectedProp || (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0)) {
+            let nudgeX = 0;
+            let nudgeY = 0;
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                    nudgeX = -1;
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    nudgeX = 1;
+                    e.preventDefault();
+                    break;
+                case 'ArrowUp':
+                    nudgeY = -1;
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    nudgeY = 1;
+                    e.preventDefault();
+                    break;
+            }
+
+            if (nudgeX !== 0 || nudgeY !== 0) {
+                // Check if Shift is held for larger movement (10px)
+                const moveAmount = e.shiftKey ? 10 : 1;
+                nudgeX *= moveAmount;
+                nudgeY *= moveAmount;
+
+                // Move selected props
+                if (this.propSystem.selectedProps.length > 0) {
+                    // Multi-selection nudge
+                    this.propSystem.selectedProps.forEach(prop => {
+                        prop.x += nudgeX;
+                        prop.y += nudgeY;
+                        // Update relative position if needed
+                        if (prop.positioning === 'screen-relative' && this.viewport) {
+                            this.propSystem.updateRelativePosition(
+                                prop,
+                                prop.x,
+                                prop.y,
+                                this.viewport.designWidth,
+                                this.viewport.designHeight
+                            );
+                        }
+                    });
+                } else if (this.propSystem.selectedProp) {
+                    // Single prop nudge
+                    this.propSystem.selectedProp.x += nudgeX;
+                    this.propSystem.selectedProp.y += nudgeY;
+                    // Update relative position if needed
+                    if (this.propSystem.selectedProp.positioning === 'screen-relative' && this.viewport) {
+                        this.propSystem.updateRelativePosition(
+                            this.propSystem.selectedProp,
+                            this.propSystem.selectedProp.x,
+                            this.propSystem.selectedProp.y,
+                            this.viewport.designWidth,
+                            this.viewport.designHeight
+                        );
+                    }
+                }
+
+                // Update the properties panel if visible
+                this.propSystem.updatePropProperties();
             }
         }
     }
