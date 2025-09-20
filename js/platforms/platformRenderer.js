@@ -118,33 +118,48 @@ class PlatformRenderer {
         // Draw tiled sprite
         for (let tileY = 0; tileY < tilesY; tileY++) {
             for (let tileX = 0; tileX < tilesX; tileX++) {
-                // Use Math.floor to ensure pixel-perfect positioning (display size)
-                const drawX = Math.floor(platform.x + (tileX * displayTileWidth));
-                const drawY = Math.floor(platform.y + (tileY * displayTileHeight));
+                // Calculate position without flooring to prevent gaps
+                const drawX = platform.x + (tileX * displayTileWidth);
+                const drawY = platform.y + (tileY * displayTileHeight);
 
                 // Calculate the width and height to draw (handle partial tiles at edges)
-                const drawWidth = Math.min(displayTileWidth, platform.width - (tileX * displayTileWidth));
-                const drawHeight = Math.min(displayTileHeight, platform.height - (tileY * displayTileHeight));
+                const remainingWidth = platform.width - (tileX * displayTileWidth);
+                const remainingHeight = platform.height - (tileY * displayTileHeight);
+
+                // Use a small overlap only for non-edge tiles to prevent seams
+                const isEdgeTileX = (tileX === tilesX - 1) || remainingWidth <= displayTileWidth;
+                const isEdgeTileY = (tileY === tilesY - 1) || remainingHeight <= displayTileHeight;
+
+                const overlapX = isEdgeTileX ? 0 : 0.5;
+                const overlapY = isEdgeTileY ? 0 : 0.5;
+
+                const drawWidth = Math.min(displayTileWidth + overlapX, remainingWidth);
+                const drawHeight = Math.min(displayTileHeight + overlapY, remainingHeight);
 
                 // Only draw if the tile would be visible
                 if (drawWidth > 0 && drawHeight > 0) {
                     // Use source dimensions for reading from texture, display dimensions for rendering
-                    const sourceX = spriteInfo.tileX * sourceTileWidth;
-                    const sourceY = spriteInfo.tileY * sourceTileHeight;
+                    // Add an inset to the source to prevent bleeding from adjacent tiles
+                    // Larger inset needed for tiles that have strong color differences with neighbors
+                    const sourceInset = 0.5; // Half pixel inset to ensure no bleeding
+                    const sourceX = spriteInfo.tileX * sourceTileWidth + sourceInset;
+                    const sourceY = spriteInfo.tileY * sourceTileHeight + sourceInset;
+                    const sourceW = sourceTileWidth - (sourceInset * 2);
+                    const sourceH = sourceTileHeight - (sourceInset * 2);
 
                     this.ctx.drawImage(
                         tileset.image,
-                        sourceX, sourceY, // Source position (16x16 coordinates)
-                        sourceTileWidth, sourceTileHeight, // Source size (always full 16x16 tile)
-                        drawX, drawY, // Destination position
-                        drawWidth, drawHeight // Destination size (32x32 scaled up)
+                        sourceX, sourceY, // Source position with tiny inset
+                        sourceW, sourceH, // Source size slightly reduced to avoid bleeding
+                        Math.round(drawX), Math.round(drawY), // Round destination position to avoid sub-pixel rendering
+                        Math.ceil(drawWidth), Math.ceil(drawHeight) // Ceiling to ensure full coverage
                     );
                 }
             }
         }
 
-        // Re-enable image smoothing for other rendering
-        this.ctx.imageSmoothingEnabled = true;
+        // Keep image smoothing disabled for crisp pixel art
+        // Note: Re-enabling is handled by other renderers if needed
     }
 
     drawResizeHandles(platform) {

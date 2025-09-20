@@ -888,6 +888,9 @@ class PlatformRPG {
         this.ctx.save();
         this.ctx.translate(-this.camera.x, -this.camera.y);
 
+        // Disable image smoothing for crisp pixel art rendering
+        this.ctx.imageSmoothingEnabled = false;
+
         // Debug: Log camera position during render
         if (this.platformSystem.isDragging || this.propSystem.isDraggingProp) {
             console.log('Rendering with camera position:', this.camera.x, this.camera.y);
