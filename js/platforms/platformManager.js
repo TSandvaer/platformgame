@@ -121,7 +121,8 @@ class PlatformManager {
         if (!this.platformData.selectedPlatform || !this.platformData.resizeHandle) return;
 
         const platform = this.platformData.selectedPlatform;
-        const tileHeight = 16; // Platform tile height
+        const tileWidth = 32; // Display tile width
+        const tileHeight = 32; // Display tile height
         const minSize = tileHeight; // Minimum size should be at least one tile
         let newX = platform.x;
         let newY = platform.y;
@@ -165,6 +166,14 @@ class PlatformManager {
                 newWidth = Math.max(minSize, mouseX - platform.x);
                 break;
         }
+
+        // Snap dimensions to tile boundaries to ensure complete tiles
+        newWidth = Math.round(newWidth / tileWidth) * tileWidth;
+        newHeight = Math.round(newHeight / tileHeight) * tileHeight;
+
+        // Ensure minimum size (at least one tile)
+        newWidth = Math.max(tileWidth, newWidth);
+        newHeight = Math.max(tileHeight, newHeight);
 
         // Apply snapping for new position (if position changed)
         if (newX !== platform.x || newY !== platform.y) {

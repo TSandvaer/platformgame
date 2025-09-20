@@ -2250,7 +2250,8 @@ class PlatformRPG {
         if (!this.platformSystem.selectedPlatform || !this.platformSystem.resizeHandle) return;
 
         const platform = this.platformSystem.selectedPlatform;
-        const tileHeight = 16; // Platform tile height
+        const tileWidth = 32; // Display tile width
+        const tileHeight = 32; // Display tile height
         const minSize = tileHeight; // Minimum size should be at least one tile
         let newX = platform.x;
         let newY = platform.y;
@@ -2294,6 +2295,14 @@ class PlatformRPG {
                 newHeight = Math.max(minSize, mouseY - platform.y);
                 break;
         }
+
+        // Snap dimensions to tile boundaries to ensure complete tiles
+        newWidth = Math.round(newWidth / tileWidth) * tileWidth;
+        newHeight = Math.round(newHeight / tileHeight) * tileHeight;
+
+        // Ensure minimum size (at least one tile)
+        newWidth = Math.max(tileWidth, newWidth);
+        newHeight = Math.max(tileHeight, newHeight);
 
         // Apply snapping to the calculated dimensions
         const snapped = this.snapResizePosition(platform, newX, newY, newWidth, newHeight, this.platformSystem.resizeHandle);
