@@ -236,15 +236,20 @@ class PlatformRPG {
     }
 
     loadBackground(backgroundName) {
+        console.log('🎨 loadBackground called with:', backgroundName);
         if (backgroundName === 'none' || !backgroundName) {
             this.currentBackground = null;
+            console.log('🚫 Setting background to null (none)');
             return;
         }
 
         if (this.backgrounds[backgroundName]) {
             this.currentBackground = this.backgrounds[backgroundName];
+            console.log('✅ Background already loaded, using cached:', backgroundName);
             return;
         }
+
+        console.log('📥 Loading new background:', backgroundName);
 
         // Load background layers based on background type
         const background = {
@@ -2487,6 +2492,9 @@ class PlatformRPG {
                 if (this.scenes[0].props) {
                     this.propSystem.props = [...this.scenes[0].props];
 
+                    // Initialize groups from loaded props
+                    this.propSystem.data.initializeGroupsFromProps();
+
                     // Migrate props to ensure they have positioning properties and convert scale to sizeMultiplier
                     let migratedCount = 0;
                     let scaleConvertCount = 0;
@@ -2521,6 +2529,7 @@ class PlatformRPG {
 
                 // Restore background if it exists
                 if (this.scenes[0].background && this.scenes[0].background.name && this.scenes[0].background.name !== 'none') {
+                    console.log('🎨 Loading background:', this.scenes[0].background.name);
                     this.loadBackground(this.scenes[0].background.name);
 
                     // Update the UI dropdown to match the loaded background (with small delay for DOM)
@@ -2528,8 +2537,11 @@ class PlatformRPG {
                         const backgroundSelect = document.getElementById('backgroundSelect');
                         if (backgroundSelect) {
                             backgroundSelect.value = this.scenes[0].background.name;
+                            console.log('📝 Set dropdown to:', this.scenes[0].background.name);
                         }
                     }, 100);
+                } else {
+                    console.log('⚠️ No background found in scene data');
                 }
             }
 
@@ -2576,6 +2588,9 @@ class PlatformRPG {
                 // Load props if they exist
                 if (this.scenes.length > 0 && this.scenes[0].props) {
                     this.propSystem.props = [...this.scenes[0].props];
+
+                    // Initialize groups from loaded props
+                    this.propSystem.data.initializeGroupsFromProps();
 
                     // Migrate props to ensure they have positioning properties and convert scale to sizeMultiplier
                     let migratedCount = 0;

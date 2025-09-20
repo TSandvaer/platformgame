@@ -283,7 +283,33 @@ class PropData {
 
     getPropsInSameGroup(prop) {
         if (!prop.groupId) return [prop];
-        return this.getGroupMembers(prop.groupId);
+        // Use direct filtering instead of the Map, as Map might not be initialized for loaded groups
+        return this.props.filter(p => p.groupId === prop.groupId);
+    }
+
+    // Initialize groups from loaded props (called after loading from JSON)
+    initializeGroupsFromProps() {
+        this.propGroups.clear();
+        const groupMap = new Map(); // temp map to collect prop IDs by group
+
+        this.props.forEach(prop => {
+            if (prop.groupId) {
+                if (!groupMap.has(prop.groupId)) {
+                    groupMap.set(prop.groupId, []);
+                }
+                groupMap.get(prop.groupId).push(prop.id);
+
+                // Update nextGroupId to avoid conflicts
+                this.nextGroupId = Math.max(this.nextGroupId, prop.groupId + 1);
+            }
+        });
+
+        // Transfer to propGroups Map
+        groupMap.forEach((propIds, groupId) => {
+            this.propGroups.set(groupId, propIds);
+        });
+
+        console.log(`Initialized ${this.propGroups.size} groups from loaded props`);
     }
 
     // Helper to delete multiple props
