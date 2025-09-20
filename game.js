@@ -1474,6 +1474,11 @@ class PlatformRPG {
                     x: worldMouseX - actualPos.x,
                     y: worldMouseY - actualPos.y
                 };
+                // Track initial position for movement direction detection
+                this.platformSystem.initialDragPosition = {
+                    x: platform.x,
+                    y: platform.y
+                };
                 this.platformSystem.updatePlatformProperties();
                 this.platformSystem.updatePlatformList();
                 return;
@@ -1577,13 +1582,33 @@ class PlatformRPG {
 
             console.log('Platform screen bounds:', platformScreenLeft, 'to', platformScreenRight, 'Canvas width:', canvasWidth);
 
-            // Check if platform left edge is near left screen edge
-            if (platformScreenLeft < scrollTriggerZone) {
+            // Check which edges are near screen edges
+            const leftEdgeNearScreen = platformScreenLeft < scrollTriggerZone;
+            const rightEdgeNearScreen = platformScreenRight > canvasWidth - scrollTriggerZone;
+
+            // Calculate movement direction by comparing current position with initial position
+            const movementDeltaX = this.platformSystem.selectedPlatform.x - (this.platformSystem.initialDragPosition?.x || this.platformSystem.selectedPlatform.x);
+            const isMovingRight = movementDeltaX > 2; // Small threshold to avoid jitter
+            const isMovingLeft = movementDeltaX < -2;
+
+            // If both edges are near screen edges (long platform), choose based on movement direction
+            if (leftEdgeNearScreen && rightEdgeNearScreen) {
+                if (isMovingRight) {
+                    newDirection = 'right';
+                    console.log('Long platform: Moving right, scroll right');
+                } else if (isMovingLeft) {
+                    newDirection = 'left';
+                    console.log('Long platform: Moving left, scroll left');
+                }
+                // If not moving much, don't scroll
+            }
+            // If only left edge is near screen edge and moving left
+            else if (leftEdgeNearScreen && (isMovingLeft || !isMovingRight)) {
                 newDirection = 'left';
                 console.log('Platform left edge near screen left, should scroll left');
             }
-            // Check if platform right edge is near right screen edge
-            else if (platformScreenRight > canvasWidth - scrollTriggerZone) {
+            // If only right edge is near screen edge and moving right
+            else if (rightEdgeNearScreen && (isMovingRight || !isMovingLeft)) {
                 newDirection = 'right';
                 console.log('Platform right edge near screen right, should scroll right');
             }
@@ -2076,6 +2101,7 @@ class PlatformRPG {
         this.platformSystem.isDragging = false;
         this.platformSystem.isResizing = false;
         this.platformSystem.resizeHandle = null;
+        this.platformSystem.initialDragPosition = null; // Clear movement tracking
 
         // Handle prop mouse up (includes single and multi-selection dragging)
         this.propSystem.handleMouseUp(e.ctrlKey, this.viewport);
