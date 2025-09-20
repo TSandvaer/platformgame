@@ -802,6 +802,84 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0
+        },
+        {
+          "id": 70,
+          "type": "table",
+          "x": 2043.444641275465,
+          "y": 542.2515500442871,
+          "isObstacle": false,
+          "zOrder": 3,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 71,
+          "type": "chair",
+          "x": 2008.4322409211693,
+          "y": 530.6465899025686,
+          "isObstacle": false,
+          "zOrder": 4,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 72,
+          "type": "wine",
+          "x": 2067.2533215234726,
+          "y": 515.0416297608504,
+          "isObstacle": false,
+          "zOrder": -10,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 73,
+          "type": "apple",
+          "x": 2089.2909726292337,
+          "y": 528.945969884854,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 74,
+          "type": "mug",
+          "x": 2107.6381825495173,
+          "y": 526.3950398582817,
+          "isObstacle": false,
+          "zOrder": 2,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 75,
+          "type": "cake",
+          "x": 2127.195312753237,
+          "y": 530.6465899025686,
+          "isObstacle": false,
+          "zOrder": 3,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
         }
       ]
     }

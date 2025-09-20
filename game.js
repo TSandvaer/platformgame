@@ -1429,7 +1429,7 @@ class PlatformRPG {
 
         // Handle prop placement mode
         if (this.propSystem.propPlacementMode) {
-            this.propSystem.placeProp(viewportMouseX, viewportMouseY);
+            this.propSystem.placeProp(worldMouseX, worldMouseY);
             return;
         }
 
