@@ -1728,9 +1728,11 @@ class PlatformRPG {
 
     handlePlatformMouseUp(e) {
         this.platformSystem.isDragging = false;
-        this.propSystem.isDraggingProp = false;
         this.platformSystem.isResizing = false;
         this.platformSystem.resizeHandle = null;
+
+        // Handle prop mouse up (includes single and multi-selection dragging)
+        this.propSystem.handleMouseUp();
 
         // Stop camera scrolling when drag ends
         this.stopDragScrolling();
