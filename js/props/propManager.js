@@ -1,8 +1,6 @@
 class PropManager {
     constructor(propData) {
         this.propData = propData;
-        this.currentPropType = 'barrel';
-        this.nextPropIsObstacle = false;
     }
 
     handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport, camera) {
@@ -142,14 +140,25 @@ class PropManager {
     }
 
     placeProp(mouseX, mouseY) {
-        // Default size multiplier is 1.0
-        const sizeMultiplier = 1.0;
+        // Get prop type, obstacle setting, and size from UI
+        const propTypeSelect = document.getElementById('propTypeSelect');
+        const obstacleCheck = document.getElementById('propObstacleCheck');
+        const sizeInput = document.getElementById('propSizeInput');
+
+        if (!propTypeSelect || !obstacleCheck || !sizeInput) {
+            console.error('UI elements not found for prop placement');
+            return;
+        }
+
+        const propType = propTypeSelect.value;
+        const isObstacle = obstacleCheck.checked;
+        const sizeMultiplier = parseFloat(sizeInput.value) || 1.0;
 
         this.propData.addProp(
-            this.currentPropType,
+            propType,
             mouseX,
             mouseY,
-            this.nextPropIsObstacle,
+            isObstacle,
             sizeMultiplier
         );
 
@@ -164,7 +173,7 @@ class PropManager {
     }
 
     updatePlacementButton() {
-        const btn = document.getElementById('addProp');
+        const btn = document.getElementById('addPropBtn');
         if (btn) {
             btn.textContent = this.propData.propPlacementMode ? 'Cancel Placement' : 'Add Prop (Click on map)';
             btn.classList.toggle('danger', this.propData.propPlacementMode);
