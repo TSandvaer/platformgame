@@ -85,7 +85,7 @@
         {
           "id": 2,
           "x": 1092.2272002671264,
-          "y": 296.74186125978906,
+          "y": 297.59217126864644,
           "type": "barrel",
           "isObstacle": true,
           "positioning": "absolute",
@@ -776,6 +776,32 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": -1.5730735163861824
+        },
+        {
+          "id": 66,
+          "type": "barrel",
+          "x": 1593.2781621389508,
+          "y": 546.8024800708591,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.2,
+          "rotation": 0
+        },
+        {
+          "id": 67,
+          "type": "boardFenceComplete",
+          "x": 1813.8972542072631,
+          "y": 525.1434898139947,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
         }
       ]
     }

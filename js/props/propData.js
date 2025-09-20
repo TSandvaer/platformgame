@@ -61,6 +61,12 @@ class PropData {
             axe: { tileX: 10.97, tileY: 3.50, width: 39, height: 15, name: 'Axe' },
             hoe: { tileX: 10.97, tileY: 4.00, width: 51, height: 13, name: 'Hoe' },
             hammer: { tileX: 11.00, tileY: 4.47, width: 33, height: 15, name: 'Hammer' },
+            table: { tileX: 9.81, tileY: 6.09, width: 74, height: 30, name: 'Table' },
+            chair: { tileX: 12.28, tileY: 5.84, width: 23, height: 38, name: 'Chair' },
+            wine: { tileX: 10.31, tileY: 5.41, width: 7, height: 20, name: 'Wine' },
+            apple: { tileX: 10.66, tileY: 5.34, width: 7, height: 9, name: 'Apple' },
+            mug: { tileX: 10.66, tileY: 5.69, width: 10, height: 11, name: 'Mug' },
+            cake: { tileX: 11.06, tileY: 5.75, width: 17, height: 8, name: 'Cake' },
 
             // Signs
             signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost' },
