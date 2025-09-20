@@ -266,7 +266,15 @@
                 <div class="code-output" id="codeOutput">
                     Select an area to generate code...
                 </div>
-                <button class="copy-btn" id="copyCode">Copy Code</button>
+                <button class="copy-btn" id="copyCode">Copy Game.js Code</button>
+            </div>
+
+            <div class="info-section">
+                <h3>Index.html Dropdown Code</h3>
+                <div class="code-output" id="htmlCodeOutput" style="background: #0a0a0a; border: 1px solid #333;">
+                    Select an area to generate HTML code...
+                </div>
+                <button class="copy-btn" id="copyHtmlCode">Copy HTML Code</button>
             </div>
         </div>
     </div>
@@ -313,6 +321,7 @@
                 // Copy buttons
                 document.getElementById('copyCoords').addEventListener('click', this.copyCoordinates.bind(this));
                 document.getElementById('copyCode').addEventListener('click', this.copyCode.bind(this));
+                document.getElementById('copyHtmlCode').addEventListener('click', this.copyHtmlCode.bind(this));
 
                 // Apply name button
                 document.getElementById('applyName').addEventListener('click', () => {
@@ -441,6 +450,10 @@
                 // Generate code for game.js
                 const code = this.generateGameCode(x, y, width, height);
                 document.getElementById('codeOutput').textContent = code;
+
+                // Generate HTML dropdown code
+                const htmlCode = this.generateHtmlCode();
+                document.getElementById('htmlCodeOutput').textContent = htmlCode;
             }
 
             generateGameCode(x, y, width, height) {
@@ -450,9 +463,10 @@
 
                 // Get prop name from input or use default
                 const propNameInput = document.getElementById('propNameInput');
-                const propName = propNameInput ? propNameInput.value.trim() : '';
-                const propKey = propName || 'propName';
-                const displayName = propName ? this.formatDisplayName(propName) : 'Prop Name';
+                const rawName = propNameInput ? propNameInput.value.trim() : '';
+                // Remove spaces and ensure valid JavaScript property name
+                const propKey = this.sanitizePropName(rawName) || 'propName';
+                const displayName = rawName ? this.formatDisplayName(rawName) : 'Prop Name';
 
                 return `// For game.js propTypes:
 ${propKey}: {
@@ -467,13 +481,97 @@ ${propKey}: {
 // X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}`;
             }
 
+            sanitizePropName(name) {
+                if (!name) return '';
+
+                // Remove spaces and special characters, keep only letters, numbers, and underscores
+                let sanitized = name.replace(/[\s-]/g, '')  // Remove spaces and hyphens
+                                   .replace(/[^a-zA-Z0-9_]/g, ''); // Remove other special chars
+
+                // Ensure it starts with a letter (required for JavaScript property names)
+                if (sanitized && /^[0-9]/.test(sanitized)) {
+                    sanitized = 'prop' + sanitized;
+                }
+
+                // Convert to camelCase if it had spaces
+                if (name.includes(' ') || name.includes('-')) {
+                    sanitized = name.split(/[\s-]+/)
+                        .map((word, index) => {
+                            if (index === 0) {
+                                return word.toLowerCase();
+                            }
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                        })
+                        .join('')
+                        .replace(/[^a-zA-Z0-9_]/g, '');
+                }
+
+                return sanitized;
+            }
+
             formatDisplayName(name) {
                 // Convert camelCase to Title Case
                 // e.g., woodenPole -> Wooden Pole, torch -> Torch
+                // Also handle space-separated input: "wooden pole" -> "Wooden Pole"
+                if (name.includes(' ')) {
+                    // If already has spaces, just capitalize each word
+                    return name.split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                }
+                // Handle camelCase
                 return name
                     .replace(/([A-Z])/g, ' $1')
                     .replace(/^./, str => str.toUpperCase())
                     .trim();
+            }
+
+            generateHtmlCode() {
+                // Get prop name from input or use default
+                const propNameInput = document.getElementById('propNameInput');
+                const rawName = propNameInput ? propNameInput.value.trim() : '';
+                // Remove spaces and ensure valid JavaScript property name
+                const propKey = this.sanitizePropName(rawName) || 'propName';
+                const displayName = rawName ? this.formatDisplayName(rawName) : 'Prop Name';
+
+                // Determine which category this prop belongs to
+                const category = this.determinePropCategory(propKey);
+
+                return `<!-- Add to index.html in the appropriate <optgroup> section -->
+<!-- Category: ${category} -->
+<option value="${propKey}">${displayName}</option>
+
+<!-- Full example with optgroup:
+<optgroup label="${category}">
+    <option value="${propKey}">${displayName}</option>
+</optgroup> -->`;
+            }
+
+            determinePropCategory(propName) {
+                const name = propName.toLowerCase();
+
+                if (name.includes('house') || name.includes('tower') || name.includes('windmill') || name.includes('building'))
+                    return 'Buildings';
+                if (name.includes('tree') || name.includes('bush') || name.includes('plant') || name.includes('flower'))
+                    return 'Trees & Nature';
+                if (name.includes('barrel') || name.includes('crate') || name.includes('box') || name.includes('chest'))
+                    return 'Containers';
+                if (name.includes('fence') || name.includes('wall') || name.includes('gate'))
+                    return 'Fences & Walls';
+                if (name.includes('sign') || name.includes('post'))
+                    return 'Signs';
+                if (name.includes('lamp') || name.includes('torch') || name.includes('light') || name.includes('lantern'))
+                    return 'Lighting';
+                if (name.includes('pot') || name.includes('vase') || name.includes('jar'))
+                    return 'Pottery';
+                if (name.includes('well') || name.includes('fountain') || name.includes('water'))
+                    return 'Water Features';
+                if (name.includes('bench') || name.includes('chair') || name.includes('table') || name.includes('furniture'))
+                    return 'Furniture';
+                if (name.includes('pole') || name.includes('beam') || name.includes('wood'))
+                    return 'Structures';
+
+                return 'Decorative';
             }
 
             copyCoordinates() {
@@ -495,6 +593,15 @@ ${propKey}: {
                 if (code && !code.includes('Select an area')) {
                     navigator.clipboard.writeText(code).then(() => {
                         this.showCopyFeedback('copyCode');
+                    });
+                }
+            }
+
+            copyHtmlCode() {
+                const code = document.getElementById('htmlCodeOutput').textContent;
+                if (code && !code.includes('Select an area')) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        this.showCopyFeedback('copyHtmlCode');
                     });
                 }
             }
