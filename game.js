@@ -929,19 +929,13 @@ class PlatformRPG {
         this.propSystem.renderParticles(this.viewport, this.camera);
 
         if (this.isDevelopmentMode) {
-            // Apply viewport scaling for dev info
+            // Apply viewport scaling for dev rendering
             this.ctx.save();
             this.ctx.translate(this.viewport.offsetX, this.viewport.offsetY);
             this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
-            this.renderDevInfo();
 
-            // Draw cyan line at bottom of scene for visual reference
-            this.ctx.strokeStyle = '#00FFFF'; // Cyan color
-            this.ctx.lineWidth = 2;
-            this.ctx.beginPath();
-            this.ctx.moveTo(0, this.viewport.designHeight);
-            this.ctx.lineTo(this.viewport.designWidth, this.viewport.designHeight);
-            this.ctx.stroke();
+            // Draw yellow and black striped police barrier at bottom of scene
+            this.renderPoliceBarrier();
 
             // Render drag selection rectangle
             this.renderDragSelection();
@@ -1203,18 +1197,6 @@ class PlatformRPG {
     }
     */
 
-    renderDevInfo() {
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(10, this.canvas.height - 100, 200, 80);
-
-        this.ctx.fillStyle = 'white';
-        this.ctx.font = '12px Arial';
-        this.ctx.fillText(`Player X: ${Math.round(this.player.x)}`, 20, this.canvas.height - 80);
-        this.ctx.fillText(`Player Y: ${Math.round(this.player.y)}`, 20, this.canvas.height - 65);
-        this.ctx.fillText(`Camera X: ${Math.round(this.camera.x)}`, 20, this.canvas.height - 50);
-        this.ctx.fillText(`On Ground: ${this.player.onGround}`, 20, this.canvas.height - 35);
-        this.ctx.fillText(`Velocity Y: ${Math.round(this.player.velocityY)}`, 20, this.canvas.height - 20);
-    }
 
     updateUI() {
         document.getElementById('scenesList').innerHTML = this.scenes.map(scene =>
@@ -1898,6 +1880,56 @@ class PlatformRPG {
 
         // Reset line dash
         this.ctx.setLineDash([]);
+
+        this.ctx.restore();
+    }
+
+    renderPoliceBarrier() {
+        const y = this.viewport.designHeight;
+        const stripeWidth = 40; // Width of each diagonal stripe
+        const barrierHeight = 12; // Height of the barrier
+
+        // Apply camera transformation for world coordinates
+        this.ctx.save();
+        this.ctx.translate(-this.camera.x, -this.camera.y);
+
+        // Draw the barrier background (slightly above the bottom line)
+        this.ctx.fillStyle = '#000000'; // Black background
+        this.ctx.fillRect(0, y - barrierHeight, this.viewport.designWidth, barrierHeight);
+
+        // Draw diagonal yellow stripes
+        this.ctx.fillStyle = '#FFFF00'; // Bright yellow
+
+        // Calculate how many stripes we need to cover the width
+        const totalWidth = this.viewport.designWidth;
+        const numStripes = Math.ceil(totalWidth / stripeWidth) + 2; // Extra stripes for offset
+
+        for (let i = 0; i < numStripes; i++) {
+            // Create diagonal stripes by drawing angled rectangles
+            this.ctx.save();
+
+            // Position for this stripe
+            const xStart = (i * stripeWidth) - stripeWidth; // Start a bit left to ensure coverage
+
+            // Create diagonal stripe path
+            this.ctx.beginPath();
+            this.ctx.moveTo(xStart, y - barrierHeight);
+            this.ctx.lineTo(xStart + stripeWidth/2, y - barrierHeight);
+            this.ctx.lineTo(xStart + stripeWidth, y);
+            this.ctx.lineTo(xStart + stripeWidth/2, y);
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            this.ctx.restore();
+        }
+
+        // Add a thin black border line at the very bottom
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, y);
+        this.ctx.lineTo(this.viewport.designWidth, y);
+        this.ctx.stroke();
 
         this.ctx.restore();
     }
