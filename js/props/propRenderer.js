@@ -144,6 +144,11 @@ class PropRenderer {
         if (propType.hasFlame) {
             this.renderTorchFlame(prop, renderWidth, renderHeight, scale);
         }
+
+        // Render glow effect if this is a lamp prop
+        if (propType.hasGlow) {
+            this.renderLampGlow(prop, renderWidth, renderHeight, viewportScale);
+        }
     }
 
     renderTorchFlame(prop, renderWidth, renderHeight, scale) {
@@ -226,6 +231,82 @@ class PropRenderer {
         } catch (error) {
             console.error('Error rendering torch flame:', error);
         }
+    }
+
+    renderLampGlow(prop, renderWidth, renderHeight, viewportScale) {
+        const currentTime = Date.now();
+
+        // Save context state
+        this.ctx.save();
+
+        // Calculate lamp center position
+        const lampCenterX = prop.x + (renderWidth / 2);
+        const lampCenterY = prop.y + (renderHeight / 2);
+
+        // Create subtle flickering effect with multiple sine waves for organic movement
+        const flicker1 = Math.sin(currentTime * 0.003) * 0.05;
+        const flicker2 = Math.sin(currentTime * 0.007) * 0.03;
+        const flicker3 = Math.sin(currentTime * 0.011) * 0.02;
+        const flickerIntensity = 1 + flicker1 + flicker2 + flicker3;
+
+        // Create smaller pulsing glow radius
+        const baseGlowRadius = 25 * viewportScale;
+        const glowRadius = baseGlowRadius * flickerIntensity;
+
+        // Create more subtle glow layers for depth
+        const glowLayers = [
+            { radius: glowRadius * 2.0, opacity: 0.02, color: '255, 200, 100' },
+            { radius: glowRadius * 1.5, opacity: 0.03, color: '255, 210, 120' },
+            { radius: glowRadius * 1.0, opacity: 0.05, color: '255, 220, 140' },
+            { radius: glowRadius * 0.7, opacity: 0.08, color: '255, 230, 160' },
+            { radius: glowRadius * 0.4, opacity: 0.12, color: '255, 240, 180' }
+        ];
+
+        // Set composite operation for additive blending
+        this.ctx.globalCompositeOperation = 'lighter';
+
+        // Draw each glow layer
+        glowLayers.forEach(layer => {
+            const gradient = this.ctx.createRadialGradient(
+                lampCenterX, lampCenterY, 0,
+                lampCenterX, lampCenterY, layer.radius
+            );
+
+            gradient.addColorStop(0, `rgba(${layer.color}, ${layer.opacity * flickerIntensity})`);
+            gradient.addColorStop(0.4, `rgba(${layer.color}, ${layer.opacity * flickerIntensity * 0.5})`);
+            gradient.addColorStop(0.7, `rgba(${layer.color}, ${layer.opacity * flickerIntensity * 0.2})`);
+            gradient.addColorStop(1, 'rgba(255, 200, 100, 0)');
+
+            this.ctx.fillStyle = gradient;
+            this.ctx.fillRect(
+                lampCenterX - layer.radius,
+                lampCenterY - layer.radius,
+                layer.radius * 2,
+                layer.radius * 2
+            );
+        });
+
+        // Add a subtle core glow
+        const coreGradient = this.ctx.createRadialGradient(
+            lampCenterX, lampCenterY, 0,
+            lampCenterX, lampCenterY, renderWidth * 0.6
+        );
+
+        coreGradient.addColorStop(0, `rgba(255, 255, 220, ${0.3 * flickerIntensity})`);
+        coreGradient.addColorStop(0.3, `rgba(255, 250, 200, ${0.2 * flickerIntensity})`);
+        coreGradient.addColorStop(0.6, `rgba(255, 240, 180, ${0.1 * flickerIntensity})`);
+        coreGradient.addColorStop(1, 'rgba(255, 230, 160, 0)');
+
+        this.ctx.fillStyle = coreGradient;
+        this.ctx.fillRect(
+            lampCenterX - renderWidth,
+            lampCenterY - renderHeight,
+            renderWidth * 2,
+            renderHeight * 2
+        );
+
+        // Restore context state
+        this.ctx.restore();
     }
 
     addTorchParticles(x, y, scale) {

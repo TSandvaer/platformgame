@@ -57,7 +57,7 @@ class PropData {
 
             // Lamps
             lamp: { tileX: 31.31, tileY: 0.19, width: 13, height: 18, name: 'Lamp' },
-            lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted' },
+            lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted', hasGlow: true },
             torch: { tileX: 20.38, tileY: 1.16, width: 8, height: 24, name: 'Torch', hasFlame: true },
 
             // Vegetation
