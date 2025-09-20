@@ -778,7 +778,7 @@ class PlatformRPG {
             // Check collision with obstacle props
             this.propSystem.checkPlayerPropCollisions(this.player, this.viewport);
 
-            if (this.player.y > this.canvas.height) {
+            if (this.player.y > this.viewport.designHeight) {
                 this.player.x = 100;
                 this.player.y = 400;
                 this.player.velocityX = 0;
