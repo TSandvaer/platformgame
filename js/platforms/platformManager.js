@@ -175,6 +175,9 @@ class PlatformManager {
                 break;
         }
 
+        // Store original values before snapping for Y position adjustment
+        const originalNewHeight = newHeight;
+
         // Snap dimensions to tile boundaries to ensure complete tiles
         newWidth = Math.round(newWidth / tileWidth) * tileWidth;
         newHeight = Math.round(newHeight / tileHeight) * tileHeight;
@@ -182,6 +185,15 @@ class PlatformManager {
         // Ensure minimum size (at least one tile)
         newWidth = Math.max(tileWidth, newWidth);
         newHeight = Math.max(tileHeight, newHeight);
+
+        // Adjust Y position for top edge resizing when height was snapped
+        if ((this.platformData.resizeHandle === 'n' ||
+             this.platformData.resizeHandle === 'ne' ||
+             this.platformData.resizeHandle === 'nw') &&
+            newHeight !== originalNewHeight) {
+            const heightDifference = newHeight - originalNewHeight;
+            newY = newY - heightDifference;
+        }
 
         // Apply snapping for new position (if position changed)
         if (newX !== platform.x || newY !== platform.y) {
