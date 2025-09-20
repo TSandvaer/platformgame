@@ -23,7 +23,8 @@ class PropData {
             house: { tileX: 0, tileY: 6, width: 32, height: 32, name: 'House' },
             tower: { tileX: 15, tileY: 0, width: 32, height: 32, name: 'Tower' },
             windmill: { tileX: 15, tileY: 14, width: 64, height: 64, name: 'Windmill' },
-
+            woodenPole: {tileX: 29.41,tileY: 0.94,width: 15,height: 100,name: 'woodenPole'},
+            woodenPoleArm: {tileX: 30.53,tileY: 1.16,width: 32,height: 24,name: 'woodenPoleArm'},
             // Trees & Nature
             tree1: { tileX: 15, tileY: 8, width: 32, height: 32, name: 'Tree 1' },
             tree2: { tileX: 16, tileY: 8, width: 32, height: 32, name: 'Tree 2' },
