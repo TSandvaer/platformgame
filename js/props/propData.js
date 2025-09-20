@@ -27,6 +27,8 @@ class PropData {
             woodenPoleArm: {tileX: 30.53,tileY: 1.16,width: 32,height: 24,name: 'woodenPoleArm'},
             // Fences & Walls
             fencePole1: {tileX: 1.09,tileY: 2.94,width: 8,height: 35,name: 'Fence Pole1'},
+            fencePole2: {tileX: 1.69,tileY: 2.91,width: 7,height: 36,name: 'Fence Pole2'},
+            fencePole3: { tileX: 2.16, tileY: 2.94, width: 9, height: 35, name: 'Fence Pole3' },
             // Trees & Nature
             tree1: { tileX: 15, tileY: 8, width: 32, height: 32, name: 'Tree 1' },
             tree2: { tileX: 16, tileY: 8, width: 32, height: 32, name: 'Tree 2' },

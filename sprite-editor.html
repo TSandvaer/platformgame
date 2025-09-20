@@ -262,11 +262,11 @@
             </div>
 
             <div class="info-section">
-                <h3>Game.js Code</h3>
+                <h3>PropData.js Code</h3>
                 <div class="code-output" id="codeOutput">
                     Select an area to generate code...
                 </div>
-                <button class="copy-btn" id="copyCode">Copy Game.js Code</button>
+                <button class="copy-btn" id="copyCode">Copy PropData.js Code</button>
             </div>
 
             <div class="info-section">
@@ -468,7 +468,13 @@
                 const propKey = this.sanitizePropName(rawName) || 'propName';
                 const displayName = rawName ? this.formatDisplayName(rawName) : 'Prop Name';
 
-                return `// For game.js propTypes:
+                // Generate single-line format for propData.js
+                const singleLine = `${propKey}: { tileX: ${tileX.toFixed(2)}, tileY: ${tileY.toFixed(2)}, width: ${width}, height: ${height}, name: '${displayName}' },`;
+
+                return `// For propData.js propTypes (single line):
+${singleLine}
+
+// Formatted version (for reference):
 ${propKey}: {
     tileX: ${tileX.toFixed(2)},
     tileY: ${tileY.toFixed(2)},
