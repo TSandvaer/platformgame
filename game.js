@@ -934,6 +934,15 @@ class PlatformRPG {
             this.ctx.translate(this.viewport.offsetX, this.viewport.offsetY);
             this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
             this.renderDevInfo();
+
+            // Draw cyan line at bottom of scene for visual reference
+            this.ctx.strokeStyle = '#00FFFF'; // Cyan color
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, this.viewport.designHeight);
+            this.ctx.lineTo(this.viewport.designWidth, this.viewport.designHeight);
+            this.ctx.stroke();
+
             this.ctx.restore();
 
             // Render feedback messages (copy/paste notifications) on top of everything
@@ -1528,11 +1537,25 @@ class PlatformRPG {
             // Apply snapping
             const snappedPos = this.platformSystem.snapPlatformPosition(this.platformSystem.selectedPlatform, newX, newY);
 
+            // Apply boundary constraints - prevent platform from going outside scene bounds
+            const platform = this.platformSystem.selectedPlatform;
+            const leftEdge = 0;
+            const bottomEdge = this.viewport.designHeight;
+
+            // Platform left edge should not go beyond scene left edge
+            const minX = leftEdge;
+            const constrainedX = Math.max(snappedPos.x, minX);
+
+            // Platform bottom should align exactly with scene bottom (cyan line)
+            const maxY = bottomEdge - platform.height;
+            const constrainedY = Math.min(snappedPos.y, maxY);
+
+
             // Update both absolute and relative positions
             this.platformSystem.data.updateRelativePosition(
                 this.platformSystem.selectedPlatform,
-                snappedPos.x,
-                snappedPos.y,
+                constrainedX,
+                constrainedY,
                 this.viewport.designWidth,
                 this.viewport.designHeight
             );

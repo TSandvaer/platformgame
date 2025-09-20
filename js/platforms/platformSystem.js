@@ -91,8 +91,8 @@ class PlatformSystem {
         return result;
     }
 
-    handleMouseMove(mouseX, mouseY) {
-        const moved = this.manager.handleMouseMove(mouseX, mouseY);
+    handleMouseMove(mouseX, mouseY, viewport) {
+        const moved = this.manager.handleMouseMove(mouseX, mouseY, viewport);
         if (moved) {
             this.manager.updatePlatformProperties();
         }

@@ -34,7 +34,7 @@ class PlatformManager {
         return { handled: false };
     }
 
-    handleMouseMove(mouseX, mouseY) {
+    handleMouseMove(mouseX, mouseY, viewport) {
         if (!this.platformData.selectedPlatform) return false;
 
         if (this.platformData.isDragging) {
@@ -45,8 +45,16 @@ class PlatformManager {
             // Apply snapping
             const snappedPos = this.snapPlatformPosition(this.platformData.selectedPlatform, newX, newY);
 
+            // Apply boundary constraints - prevent platform from going below bottom edge
+            const platform = this.platformData.selectedPlatform;
+            let constrainedY = snappedPos.y;
+            if (viewport) {
+                const bottomEdge = viewport.designHeight;
+                constrainedY = Math.min(snappedPos.y, bottomEdge - platform.height);
+            }
+
             this.platformData.selectedPlatform.x = snappedPos.x;
-            this.platformData.selectedPlatform.y = snappedPos.y;
+            this.platformData.selectedPlatform.y = constrainedY;
             return true;
         } else if (this.platformData.isResizing) {
             this.handlePlatformResize(mouseX, mouseY);
