@@ -259,7 +259,29 @@ class PropSystem {
     // Grouping methods
     groupSelectedProps() {
         if (this.data.selectedProps.length < 2) return null;
-        const groupId = this.data.createGroup(this.data.selectedProps);
+
+        // Expand selection to include all group members
+        const expandedSelection = this.data.expandSelectionToFullGroups(this.data.selectedProps);
+
+        // Collect all unique group IDs from the expanded selection
+        const existingGroupIds = new Set();
+        expandedSelection.forEach(prop => {
+            if (prop.groupId) {
+                existingGroupIds.add(prop.groupId);
+            }
+        });
+
+        // Ungroup all existing groups that will be merged
+        existingGroupIds.forEach(groupId => {
+            this.data.ungroupProps(groupId);
+        });
+
+        // Create new group with all props from the expanded selection
+        const groupId = this.data.createGroup(expandedSelection);
+
+        // Update the selection to include all props in the new group
+        this.data.selectedProps = expandedSelection;
+
         this.manager.updatePropProperties();
         this.manager.updatePropList();
         return groupId;
