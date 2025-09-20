@@ -121,7 +121,8 @@ class PlatformManager {
         if (!this.platformData.selectedPlatform || !this.platformData.resizeHandle) return;
 
         const platform = this.platformData.selectedPlatform;
-        const minSize = 20;
+        const tileHeight = 16; // Platform tile height
+        const minSize = tileHeight; // Minimum size should be at least one tile
         let newX = platform.x;
         let newY = platform.y;
         let newWidth = platform.width;
