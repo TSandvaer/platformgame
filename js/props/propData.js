@@ -107,7 +107,8 @@ class PropData {
             positioning: 'absolute', // 'absolute', 'screen-relative'
             relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
             relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
-            sizeMultiplier: sizeMultiplier  // Resolution-independent size multiplier
+            sizeMultiplier: sizeMultiplier,  // Resolution-independent size multiplier
+            rotation: 0             // Rotation angle in radians
         };
 
         this.props.push(newProp);
@@ -155,9 +156,34 @@ class PropData {
         const renderWidth = propType.width * sizeMultiplier;
         const renderHeight = propType.height * sizeMultiplier;
 
+        // If prop has rotation, transform the point to local coordinates
+        if (prop.rotation && prop.rotation !== 0) {
+            // Get prop center
+            const centerX = prop.x + renderWidth / 2;
+            const centerY = prop.y + renderHeight / 2;
+
+            // Translate point to origin (relative to prop center)
+            const translatedX = x - centerX;
+            const translatedY = y - centerY;
+
+            // Rotate point back (negative rotation to "unrotate" the point)
+            const cos = Math.cos(-prop.rotation);
+            const sin = Math.sin(-prop.rotation);
+            const rotatedX = translatedX * cos - translatedY * sin;
+            const rotatedY = translatedX * sin + translatedY * cos;
+
+            // Translate back to prop coordinates
+            const localX = rotatedX + centerX;
+            const localY = rotatedY + centerY;
+
+            // Check if the unrotated point is inside the prop bounds
+            return localX >= prop.x && localX <= prop.x + renderWidth &&
+                   localY >= prop.y && localY <= prop.y + renderHeight;
+        }
+
+        // No rotation - use simple bounds check
         const isInside = x >= prop.x && x <= prop.x + renderWidth &&
                         y >= prop.y && y <= prop.y + renderHeight;
-
 
         return isInside;
     }

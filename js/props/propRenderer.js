@@ -77,6 +77,19 @@ class PropRenderer {
         // Disable image smoothing for pixel-perfect rendering
         this.ctx.imageSmoothingEnabled = false;
 
+        // Save context state for rotation
+        this.ctx.save();
+
+        // Apply rotation if prop has rotation value
+        if (prop.rotation && prop.rotation !== 0) {
+            // Translate to prop center, rotate, then translate back
+            const centerX = prop.x + renderWidth / 2;
+            const centerY = prop.y + renderHeight / 2;
+            this.ctx.translate(centerX, centerY);
+            this.ctx.rotate(prop.rotation);
+            this.ctx.translate(-centerX, -centerY);
+        }
+
         // Show backgrounds for selected props in development mode
         if (isDevelopmentMode) {
             const isMultiSelected = selectedProps.some(p => p.id === prop.id);
@@ -102,10 +115,7 @@ class PropRenderer {
             renderWidth, renderHeight
         );
 
-        // Re-enable image smoothing
-        this.ctx.imageSmoothingEnabled = true;
-
-        // Development mode: show prop boundaries
+        // Development mode: show prop boundaries (while still in rotation context)
         if (isDevelopmentMode) {
             const isMultiSelected = selectedProps.some(p => p.id === prop.id);
             const isPrimarySelected = selectedProp && selectedProp.id === prop.id;
@@ -136,6 +146,12 @@ class PropRenderer {
                 this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
             }
         }
+
+        // Restore context state (removes rotation)
+        this.ctx.restore();
+
+        // Re-enable image smoothing
+        this.ctx.imageSmoothingEnabled = true;
 
         // Render flame animation if this is a torch prop
         if (propType.hasFlame) {

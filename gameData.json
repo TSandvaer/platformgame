@@ -445,14 +445,15 @@
         {
           "id": 34,
           "type": "fencePole3",
-          "x": 1290.770593445527,
-          "y": 532.3472099202835,
+          "x": 265.29672276350766,
+          "y": 348.68024800708594,
           "isObstacle": false,
           "zOrder": 2,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "rotation": -1.3860053144375553
         },
         {
           "id": 35,

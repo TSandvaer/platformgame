@@ -1398,7 +1398,7 @@ class PlatformRPG {
 
         // Check for prop clicks first (props should be selectable before platforms)
         // Pass both world and viewport coordinates for proper handling
-        const propResult = this.propSystem.handleMouseDown(worldMouseX, worldMouseY, this.platformSystem, e.ctrlKey, this.viewport, this.camera);
+        const propResult = this.propSystem.handleMouseDown(worldMouseX, worldMouseY, this.platformSystem, e.ctrlKey, e.shiftKey, this.viewport, this.camera);
         if (propResult.handled) {
             this.propSystem.updatePropProperties();
             this.propSystem.updatePropList();

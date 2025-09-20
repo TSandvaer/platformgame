@@ -1,9 +1,12 @@
 class PropManager {
     constructor(propData) {
         this.propData = propData;
+        this.isRotatingProp = false;
+        this.rotationStartY = 0;
+        this.rotationStartAngle = 0;
     }
 
-    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport, camera) {
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, shiftPressed = false, viewport, camera) {
         // Check if prop placement mode is active
         if (this.propData.propPlacementMode) {
             this.placeProp(mouseX, mouseY);
@@ -41,7 +44,15 @@ class PropManager {
 
             platformSystem.selectedPlatform = null;
 
-            if (ctrlPressed) {
+            if (shiftPressed) {
+                // Rotation mode - select and start rotating
+                this.propData.selectedProps = [topProp];
+                this.propData.selectedProp = topProp;
+                this.isRotatingProp = true;
+                this.rotationStartY = mouseY;
+                this.rotationStartAngle = topProp.rotation || 0;
+                return { handled: true, type: 'rotation', prop: topProp };
+            } else if (ctrlPressed) {
                 // Multi-selection mode - just toggle selection, don't start dragging
                 this.propData.toggleSelection(topProp);
                 return { handled: true, type: 'selection', prop: topProp };
@@ -86,7 +97,26 @@ class PropManager {
     }
 
     handleMouseMove(mouseX, mouseY, viewport, camera) {
-        if (this.propData.isDraggingMultiple) {
+        if (this.isRotatingProp && this.propData.selectedProp) {
+            // Calculate rotation based on vertical mouse movement
+            const deltaY = mouseY - this.rotationStartY;
+            const rotationSpeed = 0.01; // Radians per pixel
+            const newRotation = this.rotationStartAngle + (deltaY * rotationSpeed);
+
+            // Update rotation for selected prop(s)
+            if (this.propData.selectedProps.length > 1) {
+                // Rotate all selected props
+                this.propData.selectedProps.forEach(prop => {
+                    prop.rotation = newRotation;
+                });
+            } else {
+                // Rotate single prop
+                this.propData.selectedProp.rotation = newRotation;
+            }
+
+            this.updatePropProperties();
+            return true;
+        } else if (this.propData.isDraggingMultiple) {
             // Move all selected props using relative positioning
             this.propData.selectedProps.forEach(prop => {
                 const offset = this.propData.multiDragOffsets.get(prop.id);
@@ -137,6 +167,7 @@ class PropManager {
         this.propData.isDraggingProp = false;
         this.propData.isDraggingMultiple = false;
         this.propData.multiDragOffsets.clear();
+        this.isRotatingProp = false;
     }
 
     placeProp(mouseX, mouseY) {
@@ -219,6 +250,7 @@ class PropManager {
             const xInput = document.getElementById('propX');
             const yInput = document.getElementById('propY');
             const sizeInput = document.getElementById('propSize');
+            const rotationInput = document.getElementById('propRotation');
             const isObstacleInput = document.getElementById('propIsObstacle');
             const typeSelect = document.getElementById('propTypeSelect');
             const zOrderDisplay = document.getElementById('propZOrder');
@@ -229,6 +261,11 @@ class PropManager {
                 sizeInput.value = this.propData.selectedProp.sizeMultiplier !== undefined ?
                     this.propData.selectedProp.sizeMultiplier :
                     1.0;
+            }
+            if (rotationInput) {
+                // Convert radians to degrees for display
+                const rotation = this.propData.selectedProp.rotation || 0;
+                rotationInput.value = (rotation * 180 / Math.PI).toFixed(1);
             }
             if (isObstacleInput) isObstacleInput.checked = this.propData.selectedProp.isObstacle;
             if (typeSelect) typeSelect.value = this.propData.selectedProp.type;
@@ -244,12 +281,17 @@ class PropManager {
         const xInput = document.getElementById('propX');
         const yInput = document.getElementById('propY');
         const sizeInput = document.getElementById('propSize');
+        const rotationInput = document.getElementById('propRotation');
         const isObstacleInput = document.getElementById('propIsObstacle');
         const typeSelect = document.getElementById('propTypeSelect');
 
         if (xInput) this.propData.selectedProp.x = parseInt(xInput.value);
         if (yInput) this.propData.selectedProp.y = parseInt(yInput.value);
         if (sizeInput) this.propData.selectedProp.sizeMultiplier = parseFloat(sizeInput.value);
+        if (rotationInput) {
+            // Convert degrees to radians for storage
+            this.propData.selectedProp.rotation = parseFloat(rotationInput.value) * Math.PI / 180;
+        }
         if (isObstacleInput) this.propData.selectedProp.isObstacle = isObstacleInput.checked;
         if (typeSelect) this.propData.selectedProp.type = typeSelect.value;
 
