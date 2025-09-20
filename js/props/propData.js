@@ -287,6 +287,40 @@ class PropData {
         return this.props.filter(p => p.groupId === prop.groupId);
     }
 
+    // Helper to expand selection to include all group members
+    expandSelectionToFullGroups(selectedProps) {
+        const expandedSet = new Set();
+
+        selectedProps.forEach(prop => {
+            if (prop.groupId) {
+                // If prop is grouped, add all props in the group
+                const groupMembers = this.getPropsInSameGroup(prop);
+                groupMembers.forEach(member => expandedSet.add(member));
+            } else {
+                // Non-grouped prop, just add it
+                expandedSet.add(prop);
+            }
+        });
+
+        return Array.from(expandedSet);
+    }
+
+    // Helper to group props by their groupId
+    groupPropsByGroup(props) {
+        const groupMap = new Map();
+        const ungroupedIndex = { current: -1 }; // Use object to track unique indices for ungrouped
+
+        props.forEach(prop => {
+            const key = prop.groupId || `ungrouped_${ungroupedIndex.current--}`;
+            if (!groupMap.has(key)) {
+                groupMap.set(key, []);
+            }
+            groupMap.get(key).push(prop);
+        });
+
+        return Array.from(groupMap.values());
+    }
+
     // Initialize groups from loaded props (called after loading from JSON)
     initializeGroupsFromProps() {
         this.propGroups.clear();
@@ -363,18 +397,38 @@ class PropData {
     copySelectedProps() {
         if (this.selectedProps.length === 0) return false;
 
-        // Clear clipboard and copy selected props
+        // Clear clipboard
         this.clipboard = [];
+
+        // Expand selection to include all grouped props
+        const propsToCopy = new Set();
+        this.selectedProps.forEach(prop => {
+            if (prop.groupId) {
+                // If prop is grouped, add all props in the group
+                const groupMembers = this.getPropsInSameGroup(prop);
+                groupMembers.forEach(member => propsToCopy.add(member));
+            } else {
+                // Non-grouped prop, just add it
+                propsToCopy.add(prop);
+            }
+        });
+
+        // Convert Set to Array for easier processing
+        const propsArray = Array.from(propsToCopy);
 
         // Calculate center point for relative positioning on paste
         let minX = Infinity, minY = Infinity;
-        this.selectedProps.forEach(prop => {
+        propsArray.forEach(prop => {
             minX = Math.min(minX, prop.x);
             minY = Math.min(minY, prop.y);
         });
 
-        // Deep copy each selected prop with relative positions
-        this.selectedProps.forEach(prop => {
+        // Track old groupIds to new groupIds mapping for pasting
+        const groupIdMap = new Map();
+        let tempGroupId = 1000; // Temporary high number to avoid conflicts
+
+        // Deep copy each prop with relative positions
+        propsArray.forEach(prop => {
             const copiedProp = {
                 type: prop.type,
                 x: prop.x - minX, // Store relative to top-left of selection
@@ -403,6 +457,9 @@ class PropData {
         // Clear selection
         this.clearMultiSelection();
 
+        // Map old group IDs to new ones to preserve grouping
+        const groupIdMap = new Map();
+
         // Create new props from clipboard
         this.clipboard.forEach(clipProp => {
             const newProp = {
@@ -419,12 +476,31 @@ class PropData {
                 rotation: clipProp.rotation
             };
 
+            // Handle grouping - create new group IDs for pasted groups
+            if (clipProp.groupId) {
+                if (!groupIdMap.has(clipProp.groupId)) {
+                    groupIdMap.set(clipProp.groupId, this.nextGroupId++);
+                }
+                newProp.groupId = groupIdMap.get(clipProp.groupId);
+            }
+
             // Add to props array
             this.props.push(newProp);
             pastedProps.push(newProp);
 
             // Add to selection
             this.selectedProps.push(newProp);
+        });
+
+        // Update propGroups Map for newly created groups
+        groupIdMap.forEach((newGroupId, oldGroupId) => {
+            const groupMembers = pastedProps
+                .filter(prop => prop.groupId === newGroupId)
+                .map(prop => prop.id);
+
+            if (groupMembers.length > 0) {
+                this.propGroups.set(newGroupId, groupMembers);
+            }
         });
 
         // Set the first pasted prop as primary selection
@@ -440,121 +516,216 @@ class PropData {
     alignPropsLeft() {
         if (this.selectedProps.length < 2) return;
 
-        // Find the leftmost position
+        // Expand selection to include all group members
+        const expandedSelection = this.expandSelectionToFullGroups(this.selectedProps);
+
+        // Group props by their groupId (ungrouped props get their own "group")
+        const groups = this.groupPropsByGroup(expandedSelection);
+
+        // Find the leftmost edge among all groups
         let minX = Infinity;
-        this.selectedProps.forEach(prop => {
-            minX = Math.min(minX, prop.x);
+        groups.forEach(group => {
+            const groupMinX = Math.min(...group.map(prop => prop.x));
+            minX = Math.min(minX, groupMinX);
         });
 
-        // Align all selected props to this left edge
-        this.selectedProps.forEach(prop => {
-            prop.x = minX;
+        // Align each group to the leftmost edge
+        groups.forEach(group => {
+            const groupMinX = Math.min(...group.map(prop => prop.x));
+            const offset = minX - groupMinX;
+
+            // Move all props in the group by the same offset
+            group.forEach(prop => {
+                prop.x += offset;
+            });
         });
 
-        console.log(`Aligned ${this.selectedProps.length} props to left edge at x=${minX}`);
+        console.log(`Aligned ${groups.length} groups to left edge at x=${minX}`);
     }
 
     alignPropsRight() {
         if (this.selectedProps.length < 2) return;
 
-        // Find the rightmost position (need to consider prop width)
+        // Expand selection to include all group members
+        const expandedSelection = this.expandSelectionToFullGroups(this.selectedProps);
+
+        // Group props by their groupId
+        const groups = this.groupPropsByGroup(expandedSelection);
+
+        // Find the rightmost edge among all groups
         let maxRight = -Infinity;
-        this.selectedProps.forEach(prop => {
-            const propType = this.propTypes[prop.type];
-            if (propType) {
-                const sizeMultiplier = prop.sizeMultiplier || 1.0;
-                const propWidth = propType.width * sizeMultiplier;
-                maxRight = Math.max(maxRight, prop.x + propWidth);
-            }
+        groups.forEach(group => {
+            const groupMaxRight = Math.max(...group.map(prop => {
+                const propType = this.propTypes[prop.type];
+                if (propType) {
+                    const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                    const propWidth = propType.width * sizeMultiplier;
+                    return prop.x + propWidth;
+                }
+                return prop.x;
+            }));
+            maxRight = Math.max(maxRight, groupMaxRight);
         });
 
-        // Align all selected props to this right edge
-        this.selectedProps.forEach(prop => {
-            const propType = this.propTypes[prop.type];
-            if (propType) {
-                const sizeMultiplier = prop.sizeMultiplier || 1.0;
-                const propWidth = propType.width * sizeMultiplier;
-                prop.x = maxRight - propWidth;
-            }
+        // Align each group to the rightmost edge
+        groups.forEach(group => {
+            const groupMaxRight = Math.max(...group.map(prop => {
+                const propType = this.propTypes[prop.type];
+                if (propType) {
+                    const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                    const propWidth = propType.width * sizeMultiplier;
+                    return prop.x + propWidth;
+                }
+                return prop.x;
+            }));
+            const offset = maxRight - groupMaxRight;
+
+            // Move all props in the group by the same offset
+            group.forEach(prop => {
+                prop.x += offset;
+            });
         });
 
-        console.log(`Aligned ${this.selectedProps.length} props to right edge at x=${maxRight}`);
+        console.log(`Aligned ${groups.length} groups to right edge at x=${maxRight}`);
     }
 
     alignPropsCenter() {
         if (this.selectedProps.length < 2) return;
 
-        // Find the center position of all props
+        // Expand selection to include all group members
+        const expandedSelection = this.expandSelectionToFullGroups(this.selectedProps);
+
+        // Group props by their groupId
+        const groups = this.groupPropsByGroup(expandedSelection);
+
+        // Find the average center position of all groups
         let totalCenterX = 0;
-        let validProps = 0;
+        groups.forEach(group => {
+            let groupMinX = Infinity;
+            let groupMaxX = -Infinity;
 
-        this.selectedProps.forEach(prop => {
-            const propType = this.propTypes[prop.type];
-            if (propType) {
-                const sizeMultiplier = prop.sizeMultiplier || 1.0;
-                const propWidth = propType.width * sizeMultiplier;
-                totalCenterX += prop.x + propWidth / 2;
-                validProps++;
-            }
+            group.forEach(prop => {
+                const propType = this.propTypes[prop.type];
+                if (propType) {
+                    const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                    const propWidth = propType.width * sizeMultiplier;
+                    groupMinX = Math.min(groupMinX, prop.x);
+                    groupMaxX = Math.max(groupMaxX, prop.x + propWidth);
+                } else {
+                    groupMinX = Math.min(groupMinX, prop.x);
+                    groupMaxX = Math.max(groupMaxX, prop.x);
+                }
+            });
+
+            const groupCenterX = (groupMinX + groupMaxX) / 2;
+            totalCenterX += groupCenterX;
         });
 
-        if (validProps === 0) return;
-        const averageCenterX = totalCenterX / validProps;
+        const targetCenterX = totalCenterX / groups.length;
 
-        // Align all selected props to this center
-        this.selectedProps.forEach(prop => {
-            const propType = this.propTypes[prop.type];
-            if (propType) {
-                const sizeMultiplier = prop.sizeMultiplier || 1.0;
-                const propWidth = propType.width * sizeMultiplier;
-                prop.x = averageCenterX - propWidth / 2;
-            }
+        // Align each group's center to the target center
+        groups.forEach(group => {
+            let groupMinX = Infinity;
+            let groupMaxX = -Infinity;
+
+            group.forEach(prop => {
+                const propType = this.propTypes[prop.type];
+                if (propType) {
+                    const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                    const propWidth = propType.width * sizeMultiplier;
+                    groupMinX = Math.min(groupMinX, prop.x);
+                    groupMaxX = Math.max(groupMaxX, prop.x + propWidth);
+                } else {
+                    groupMinX = Math.min(groupMinX, prop.x);
+                    groupMaxX = Math.max(groupMaxX, prop.x);
+                }
+            });
+
+            const groupCenterX = (groupMinX + groupMaxX) / 2;
+            const offset = targetCenterX - groupCenterX;
+
+            // Move all props in the group by the same offset
+            group.forEach(prop => {
+                prop.x += offset;
+            });
         });
 
-        console.log(`Aligned ${this.selectedProps.length} props to center at x=${averageCenterX}`);
+        console.log(`Aligned ${groups.length} groups to center at x=${targetCenterX}`);
     }
 
     alignPropsTop() {
         if (this.selectedProps.length < 2) return;
 
-        // Find the topmost position
+        // Expand selection to include all group members
+        const expandedSelection = this.expandSelectionToFullGroups(this.selectedProps);
+
+        // Group props by their groupId
+        const groups = this.groupPropsByGroup(expandedSelection);
+
+        // Find the topmost edge among all groups
         let minY = Infinity;
-        this.selectedProps.forEach(prop => {
-            minY = Math.min(minY, prop.y);
+        groups.forEach(group => {
+            const groupMinY = Math.min(...group.map(prop => prop.y));
+            minY = Math.min(minY, groupMinY);
         });
 
-        // Align all selected props to this top edge
-        this.selectedProps.forEach(prop => {
-            prop.y = minY;
+        // Align each group to the topmost edge
+        groups.forEach(group => {
+            const groupMinY = Math.min(...group.map(prop => prop.y));
+            const offset = minY - groupMinY;
+
+            // Move all props in the group by the same offset
+            group.forEach(prop => {
+                prop.y += offset;
+            });
         });
 
-        console.log(`Aligned ${this.selectedProps.length} props to top edge at y=${minY}`);
+        console.log(`Aligned ${groups.length} groups to top edge at y=${minY}`);
     }
 
     alignPropsBottom() {
         if (this.selectedProps.length < 2) return;
 
-        // Find the bottommost position (need to consider prop height)
+        // Expand selection to include all group members
+        const expandedSelection = this.expandSelectionToFullGroups(this.selectedProps);
+
+        // Group props by their groupId
+        const groups = this.groupPropsByGroup(expandedSelection);
+
+        // Find the bottommost edge among all groups
         let maxBottom = -Infinity;
-        this.selectedProps.forEach(prop => {
-            const propType = this.propTypes[prop.type];
-            if (propType) {
-                const sizeMultiplier = prop.sizeMultiplier || 1.0;
-                const propHeight = propType.height * sizeMultiplier;
-                maxBottom = Math.max(maxBottom, prop.y + propHeight);
-            }
+        groups.forEach(group => {
+            const groupMaxBottom = Math.max(...group.map(prop => {
+                const propType = this.propTypes[prop.type];
+                if (propType) {
+                    const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                    const propHeight = propType.height * sizeMultiplier;
+                    return prop.y + propHeight;
+                }
+                return prop.y;
+            }));
+            maxBottom = Math.max(maxBottom, groupMaxBottom);
         });
 
-        // Align all selected props to this bottom edge
-        this.selectedProps.forEach(prop => {
-            const propType = this.propTypes[prop.type];
-            if (propType) {
-                const sizeMultiplier = prop.sizeMultiplier || 1.0;
-                const propHeight = propType.height * sizeMultiplier;
-                prop.y = maxBottom - propHeight;
-            }
+        // Align each group to the bottommost edge
+        groups.forEach(group => {
+            const groupMaxBottom = Math.max(...group.map(prop => {
+                const propType = this.propTypes[prop.type];
+                if (propType) {
+                    const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                    const propHeight = propType.height * sizeMultiplier;
+                    return prop.y + propHeight;
+                }
+                return prop.y;
+            }));
+            const offset = maxBottom - groupMaxBottom;
+
+            // Move all props in the group by the same offset
+            group.forEach(prop => {
+                prop.y += offset;
+            });
         });
 
-        console.log(`Aligned ${this.selectedProps.length} props to bottom edge at y=${maxBottom}`);
+        console.log(`Aligned ${groups.length} groups to bottom edge at y=${maxBottom}`);
     }
 }

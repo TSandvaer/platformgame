@@ -533,8 +533,8 @@
         {
           "id": 46,
           "type": "fencePoleSpiked",
-          "x": 1380.903454384411,
-          "y": 533.1975199291406,
+          "x": 1383.454384410983,
+          "y": 530.6465899025686,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -547,8 +547,8 @@
         {
           "id": 47,
           "type": "fenceBoardShort",
-          "x": 1396.209034543844,
-          "y": 545.1018600531443,
+          "x": 1398.759964570416,
+          "y": 542.5509300265722,
           "isObstacle": false,
           "zOrder": -8,
           "positioning": "absolute",
@@ -561,8 +561,8 @@
         {
           "id": 48,
           "type": "fenceBoardShort",
-          "x": 1396.209034543844,
-          "y": 562.9583702391495,
+          "x": 1398.759964570416,
+          "y": 560.4074402125775,
           "isObstacle": false,
           "zOrder": -9,
           "positioning": "absolute",
@@ -571,6 +571,48 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 1
+        },
+        {
+          "id": 49,
+          "type": "fencePoleSpiked",
+          "x": 1416.6164747564217,
+          "y": 530.6465899025686,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "groupId": 2
+        },
+        {
+          "id": 50,
+          "type": "fenceBoardShort",
+          "x": 1431.9220549158547,
+          "y": 542.5509300265722,
+          "isObstacle": false,
+          "zOrder": 2,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "groupId": 2
+        },
+        {
+          "id": 51,
+          "type": "fenceBoardShort",
+          "x": 1431.9220549158547,
+          "y": 560.4074402125775,
+          "isObstacle": false,
+          "zOrder": 3,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "groupId": 2
         }
       ]
     }
