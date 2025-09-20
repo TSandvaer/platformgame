@@ -253,6 +253,15 @@
             </div>
 
             <div class="info-section">
+                <h3>Prop Name</h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="propNameInput" placeholder="Enter prop name (e.g., torch)" style="flex: 1; padding: 8px; border: 1px solid #444; background: #1a1a1a; color: #fff; border-radius: 4px;">
+                    <button class="copy-btn" id="applyName" style="padding: 8px 15px;">Apply</button>
+                </div>
+                <div style="margin-top: 8px; color: #888; font-size: 12px;">This will update both the property key and display name</div>
+            </div>
+
+            <div class="info-section">
                 <h3>Game.js Code</h3>
                 <div class="code-output" id="codeOutput">
                     Select an area to generate code...
@@ -304,6 +313,31 @@
                 // Copy buttons
                 document.getElementById('copyCoords').addEventListener('click', this.copyCoordinates.bind(this));
                 document.getElementById('copyCode').addEventListener('click', this.copyCode.bind(this));
+
+                // Apply name button
+                document.getElementById('applyName').addEventListener('click', () => {
+                    // Regenerate code with new name
+                    const x = document.getElementById('selectionX').textContent;
+                    const y = document.getElementById('selectionY').textContent;
+                    const width = document.getElementById('selectionWidth').textContent;
+                    const height = document.getElementById('selectionHeight').textContent;
+
+                    if (x !== '-') {
+                        this.updateSelection(parseInt(x), parseInt(y), parseInt(width), parseInt(height));
+                    }
+                });
+
+                // Update code when prop name changes
+                document.getElementById('propNameInput').addEventListener('input', () => {
+                    const x = document.getElementById('selectionX').textContent;
+                    const y = document.getElementById('selectionY').textContent;
+                    const width = document.getElementById('selectionWidth').textContent;
+                    const height = document.getElementById('selectionHeight').textContent;
+
+                    if (x !== '-') {
+                        this.updateSelection(parseInt(x), parseInt(y), parseInt(width), parseInt(height));
+                    }
+                });
 
                 // If image is already loaded (cached)
                 if (this.spriteImage.complete) {
@@ -414,17 +448,32 @@
                 const tileX = x / 32;
                 const tileY = y / 32;
 
+                // Get prop name from input or use default
+                const propNameInput = document.getElementById('propNameInput');
+                const propName = propNameInput ? propNameInput.value.trim() : '';
+                const propKey = propName || 'propName';
+                const displayName = propName ? this.formatDisplayName(propName) : 'Prop Name';
+
                 return `// For game.js propTypes:
-propName: {
+${propKey}: {
     tileX: ${tileX.toFixed(2)},
     tileY: ${tileY.toFixed(2)},
     width: ${width},
     height: ${height},
-    name: 'Prop Name'
+    name: '${displayName}'
 },
 
 // Original pixel coordinates:
 // X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}`;
+            }
+
+            formatDisplayName(name) {
+                // Convert camelCase to Title Case
+                // e.g., woodenPole -> Wooden Pole, torch -> Torch
+                return name
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase())
+                    .trim();
             }
 
             copyCoordinates() {
