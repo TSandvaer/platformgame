@@ -1289,8 +1289,8 @@ class PlatformRPG {
             const propType = e.target.value;
             const sizeInput = document.getElementById('propSizeInput');
 
-            // Set default size based on prop type (all default to 1.0 now)
-            const defaultSize = 1.0;
+            // Set default size based on prop type (all default to 1.5 now)
+            const defaultSize = 1.5;
 
             sizeInput.value = defaultSize.toFixed(1);
         });

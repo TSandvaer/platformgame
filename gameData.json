@@ -417,6 +417,42 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5
+        },
+        {
+          "id": 32,
+          "type": "fencePole1",
+          "x": 1176.251550044287,
+          "y": 533.9521700620018,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5
+        },
+        {
+          "id": 33,
+          "type": "fencePole2",
+          "x": 1223.596102745793,
+          "y": 533.1975199291409,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5
+        },
+        {
+          "id": 34,
+          "type": "fencePole3",
+          "x": 1267.8122232063774,
+          "y": 533.1975199291409,
+          "isObstacle": false,
+          "zOrder": 2,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5
         }
       ]
     }
