@@ -5,6 +5,7 @@ class PlatformRPG {
         this.isDevelopmentMode = true;
         this.showDashboard = true;
 
+        // Use viewport height for consistent sizing across browsers
         this.canvas.width = window.innerWidth - (this.showDashboard ? 300 : 0);
         this.canvas.height = window.innerHeight;
 
@@ -90,7 +91,7 @@ class PlatformRPG {
         // Viewport and scaling system
         this.viewport = {
             designWidth: 1920,    // Target design resolution width
-            designHeight: 1080,   // Target design resolution height
+            designHeight: window.innerHeight,   // Match actual window height for consistent scene boundary
             actualWidth: window.innerWidth - (this.showDashboard ? 300 : 0),
             actualHeight: window.innerHeight,
             scaleX: 1,
@@ -636,6 +637,8 @@ class PlatformRPG {
         const dashboard = document.getElementById('dashboard');
         dashboard.classList.toggle('hidden', !this.showDashboard);
         this.canvas.width = window.innerWidth - (this.showDashboard ? 300 : 0);
+        this.canvas.height = window.innerHeight;
+        this.updateViewport();
     }
 
     handleInput() {
@@ -812,6 +815,7 @@ class PlatformRPG {
     updateViewport() {
         this.viewport.actualWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
         this.viewport.actualHeight = window.innerHeight;
+        this.viewport.designHeight = window.innerHeight; // Keep design height in sync with actual height
 
         // Calculate scale factors
         const scaleX = this.viewport.actualWidth / this.viewport.designWidth;
@@ -1885,6 +1889,7 @@ class PlatformRPG {
     }
 
     renderPoliceBarrier() {
+        // Draw barrier at the scene boundary, which now matches the browser window bottom
         const y = this.viewport.designHeight;
         const stripeWidth = 40; // Width of each diagonal stripe
         const barrierHeight = 12; // Height of the barrier
