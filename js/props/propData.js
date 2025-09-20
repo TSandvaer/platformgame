@@ -28,6 +28,7 @@ class PropData {
             windmill: { tileX: 15, tileY: 14, width: 64, height: 64, name: 'Windmill' },
             woodenPole: {tileX: 29.41,tileY: 0.94,width: 15,height: 100,name: 'woodenPole'},
             woodenPoleArm: {tileX: 30.53,tileY: 1.16,width: 32,height: 24,name: 'woodenPoleArm'},
+            bannerPole: { tileX: 17.78, tileY: 7.16, width: 48, height: 91, name: 'Banner Pole' },
             // Fences & Walls
             fenceNail: { tileX: 2.56, tileY: 3.41, width: 5, height: 6, name: 'Fence Nail' },
             fencePole1: {tileX: 1.09,tileY: 2.94,width: 8,height: 35,name: 'Fence Pole1'},
@@ -67,7 +68,18 @@ class PropData {
             apple: { tileX: 10.66, tileY: 5.34, width: 7, height: 9, name: 'Apple' },
             mug: { tileX: 10.66, tileY: 5.69, width: 10, height: 11, name: 'Mug' },
             cake: { tileX: 11.06, tileY: 5.75, width: 17, height: 8, name: 'Cake' },
-
+            graveStone1: { tileX: 13.94, tileY: 5.19, width: 35, height: 27, name: 'Grave Stone1' },
+            graveStone2: { tileX: 15.94, tileY: 4.50, width: 37, height: 49, name: 'Grave Stone2' },
+            cart: { tileX: 1.00, tileY: 9.59, width: 96, height: 40, name: 'Cart' },
+            cartWheel: { tileX: 3.97, tileY: 8.97, width: 33, height: 34, name: 'Cart Wheel' },
+            hayStack1: { tileX: 5.97, tileY: 7.88, width: 64, height: 37, name: 'Hay Stack1' },
+            hayStack2: { tileX: 8.84, tileY: 8.06, width: 43, height: 31, name: 'Hay Stack2' },
+            bonFire: { tileX: 11.03, tileY: 8.22, width: 63, height: 26, name: 'Bon Fire' },
+            sackClosed: { tileX: 14.09, tileY: 6.88, width: 27, height: 38, name: 'Sack Closed' },
+            sackOpen: { tileX: 16.03, tileY: 6.84, width: 27, height: 38, name: 'Sack Open' },
+            banner: { tileX: 20.03, tileY: 7.06, width: 29, height: 60, name: 'Banner' },
+            scareCrow: { tileX: 21.97, tileY: 7.16, width: 65, height: 91, name: 'Scare Crow' },
+            trainingTargetDoll: { tileX: 24.25, tileY: 7.88, width: 48, height: 68, name: 'Training Target Doll' },
             // Signs
             signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost' },
             signPostDirectional: { tileX: 12.06, tileY: 0.66, width: 28, height: 44, name: 'signpostDirectional' },
@@ -91,6 +103,9 @@ class PropData {
             // Vegetation
             bush1: { tileX: 14.03, tileY: 17.84, width: 93, height: 40, name: 'bush1' },
             tree1: { tileX: 21.56, tileY: 14.56, width: 124, height: 146, name: 'tree1' },
+            flower1: { tileX: 27.16, tileY: 8.16, width: 22, height: 59, name: 'Flower1' },
+            flower2: { tileX: 28.06, tileY: 8.00, width: 28, height: 64, name: 'Flower2' },
+            flower3: { tileX: 29.03, tileY: 8.09, width: 29, height: 61, name: 'Flower3' },
         };
     }
 
