@@ -1926,8 +1926,11 @@ class PlatformRPG {
 
                 // Move selected props
                 if (this.propSystem.selectedProps.length > 0) {
-                    // Multi-selection nudge
-                    this.propSystem.selectedProps.forEach(prop => {
+                    // Expand selection to include all group members
+                    const expandedSelection = this.propSystem.data.expandSelectionToFullGroups(this.propSystem.selectedProps);
+
+                    // Multi-selection nudge for all props in groups
+                    expandedSelection.forEach(prop => {
                         prop.x += nudgeX;
                         prop.y += nudgeY;
                         // Update relative position if needed
@@ -1942,19 +1945,25 @@ class PlatformRPG {
                         }
                     });
                 } else if (this.propSystem.selectedProp) {
-                    // Single prop nudge
-                    this.propSystem.selectedProp.x += nudgeX;
-                    this.propSystem.selectedProp.y += nudgeY;
-                    // Update relative position if needed
-                    if (this.propSystem.selectedProp.positioning === 'screen-relative' && this.viewport) {
-                        this.propSystem.updateRelativePosition(
-                            this.propSystem.selectedProp,
-                            this.propSystem.selectedProp.x,
-                            this.propSystem.selectedProp.y,
-                            this.viewport.designWidth,
-                            this.viewport.designHeight
-                        );
-                    }
+                    // Single prop nudge - but check if it's grouped
+                    const propsToMove = this.propSystem.selectedProp.groupId ?
+                        this.propSystem.data.getPropsInSameGroup(this.propSystem.selectedProp) :
+                        [this.propSystem.selectedProp];
+
+                    propsToMove.forEach(prop => {
+                        prop.x += nudgeX;
+                        prop.y += nudgeY;
+                        // Update relative position if needed
+                        if (prop.positioning === 'screen-relative' && this.viewport) {
+                            this.propSystem.updateRelativePosition(
+                                prop,
+                                prop.x,
+                                prop.y,
+                                this.viewport.designWidth,
+                                this.viewport.designHeight
+                            );
+                        }
+                    });
                 }
 
                 // Update the properties panel if visible

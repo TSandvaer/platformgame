@@ -59,19 +59,26 @@ class PropManager {
             } else {
                 // Check if clicked prop is already in multi-selection
                 if (this.propData.selectedProps.length > 1 && this.propData.selectedProps.includes(topProp)) {
-                    // Start dragging all selected props
+                    // Expand selection to include all group members
+                    const expandedSelection = this.propData.expandSelectionToFullGroups(this.propData.selectedProps);
+
+                    // Start dragging all selected props (including full groups)
                     this.propData.isDraggingMultiple = true;
                     this.propData.selectedProp = topProp; // Set as primary for UI
 
-                    // Calculate offsets for all selected props using actual positions
+                    // Calculate offsets for all props in expanded selection
                     this.propData.multiDragOffsets.clear();
-                    this.propData.selectedProps.forEach(prop => {
+                    expandedSelection.forEach(prop => {
                         const actualPos = this.propData.getActualPosition(prop, viewport.designWidth, viewport.designHeight);
                         this.propData.multiDragOffsets.set(prop.id, {
                             x: mouseX - actualPos.x,
                             y: mouseY - actualPos.y
                         });
                     });
+
+                    // Store the expanded selection for dragging
+                    this.propData.dragSelection = expandedSelection;
+
                     return { handled: true, type: 'multi-drag', prop: topProp };
                 } else {
                     // Single selection
@@ -117,8 +124,11 @@ class PropManager {
             this.updatePropProperties();
             return true;
         } else if (this.propData.isDraggingMultiple) {
-            // Move all selected props using relative positioning
-            this.propData.selectedProps.forEach(prop => {
+            // Use the expanded selection (stored during drag start) or fall back to selected props
+            const propsToMove = this.propData.dragSelection || this.propData.selectedProps;
+
+            // Move all props in expanded selection using relative positioning
+            propsToMove.forEach(prop => {
                 const offset = this.propData.multiDragOffsets.get(prop.id);
                 if (offset) {
                     // All props use world coordinates
@@ -167,6 +177,7 @@ class PropManager {
         this.propData.isDraggingProp = false;
         this.propData.isDraggingMultiple = false;
         this.propData.multiDragOffsets.clear();
+        this.propData.dragSelection = null; // Clear the expanded selection
         this.isRotatingProp = false;
     }
 
