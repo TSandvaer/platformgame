@@ -1838,9 +1838,9 @@ class PlatformRPG {
             if (this.platformSystem.selectedPlatform) {
                 // Delete selected platform
                 this.platformSystem.deleteSelectedPlatform();
-            } else if (this.propSystem.selectedProp) {
-                // Delete selected prop
-                this.propSystem.deleteSelectedProp();
+            } else if (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0) {
+                // Delete all selected props (handles both single and multiple selection)
+                this.propSystem.deleteSelectedProps();
             }
         }
 
