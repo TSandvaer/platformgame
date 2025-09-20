@@ -30,7 +30,7 @@ class PropRenderer {
                 renderProp = { ...prop, x: screenX, y: screenY };
             }
 
-            this.drawProp(renderProp, propTypes, isDevelopmentMode, selectedProp, selectedProps);
+            this.drawProp(renderProp, propTypes, isDevelopmentMode, selectedProp, selectedProps, renderObstacles ? viewport : null);
         });
     }
 
@@ -56,7 +56,7 @@ class PropRenderer {
         return { x: prop.x, y: prop.y };
     }
 
-    drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps = []) {
+    drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps = [], viewport = null) {
         const propType = propTypes[prop.type];
         if (!propType) return;
 
@@ -71,8 +71,11 @@ class PropRenderer {
                      (prop.type === 'well' ? 1 :
                      (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
                      (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
-        const renderWidth = propType.width * scale;
-        const renderHeight = propType.height * scale;
+
+        // Apply viewport scaling if this is an obstacle prop (rendered outside transforms)
+        const viewportScale = viewport ? viewport.scaleX : 1;
+        const renderWidth = propType.width * scale * viewportScale;
+        const renderHeight = propType.height * scale * viewportScale;
 
         // Disable image smoothing for pixel-perfect rendering
         this.ctx.imageSmoothingEnabled = false;
@@ -291,8 +294,8 @@ class PropRenderer {
                 renderY = (particle.y - camera.y) * viewport.scaleY + viewport.offsetY;
             }
 
-            // Draw as glowing ember
-            const size = particle.size;
+            // Draw as glowing ember, scaled by viewport
+            const size = particle.size * (viewport ? viewport.scaleX : 1);
             this.ctx.fillRect(Math.floor(renderX), Math.floor(renderY), size, size);
 
             // Restore context
