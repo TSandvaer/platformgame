@@ -477,10 +477,16 @@ class PlatformRPG {
                 this.keys[e.key.toLowerCase()] = true;
             }
 
-            // Handle Ctrl key for attack
+            // Handle Ctrl key for attack (but not in development mode with props selected)
             if (e.key === 'Control' && !this.player.isAttacking) {
-                e.preventDefault(); // Prevent browser shortcuts like Ctrl+Space
-                this.handlePlayerAttack();
+                // Don't attack if in development mode and props are selected (Ctrl is used for multi-selection)
+                const hasSelectedProps = this.isDevelopmentMode &&
+                    (this.propSystem.selectedProp || (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0));
+
+                if (!hasSelectedProps) {
+                    e.preventDefault(); // Prevent browser shortcuts like Ctrl+Space
+                    this.handlePlayerAttack();
+                }
             }
 
             // Handle space key for jump (one-time trigger)
@@ -516,6 +522,10 @@ class PlatformRPG {
             const rect = this.canvas.getBoundingClientRect();
             const clientMouseX = e.clientX - rect.left;
             const clientMouseY = e.clientY - rect.top;
+
+            // Store client mouse position for copy/paste
+            this.lastMouseX = clientMouseX;
+            this.lastMouseY = clientMouseY;
 
             // Convert screen coordinates to both coordinate systems
             const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
@@ -917,6 +927,9 @@ class PlatformRPG {
             this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
             this.renderDevInfo();
             this.ctx.restore();
+
+            // Render feedback messages (copy/paste notifications) on top of everything
+            this.renderFeedbackMessages();
         }
     }
 
@@ -1727,9 +1740,96 @@ class PlatformRPG {
     }
     */
 
+    showCopyPasteFeedback(text, prop) {
+        if (!prop) return;
+
+        // Create a temporary feedback object to display
+        if (!this.feedbackMessages) {
+            this.feedbackMessages = [];
+        }
+
+        // Add feedback message with position and lifetime
+        this.feedbackMessages.push({
+            text: text,
+            x: prop.x,
+            y: prop.y - 20, // Above the prop
+            lifetime: 120, // frames to display (about 2 seconds at 60fps)
+            opacity: 1.0
+        });
+    }
+
+    renderFeedbackMessages() {
+        if (!this.feedbackMessages || this.feedbackMessages.length === 0) return;
+
+        this.ctx.save();
+
+        // Process each feedback message
+        for (let i = this.feedbackMessages.length - 1; i >= 0; i--) {
+            const msg = this.feedbackMessages[i];
+
+            // Update lifetime and fade out
+            msg.lifetime--;
+            msg.y -= 0.3; // Float upward more slowly
+            msg.opacity = Math.min(1.0, msg.lifetime / 60); // Fade out in last second
+
+            // Remove expired messages
+            if (msg.lifetime <= 0) {
+                this.feedbackMessages.splice(i, 1);
+                continue;
+            }
+
+            // Convert world coordinates to screen coordinates
+            const screenX = (msg.x - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
+            const screenY = (msg.y - this.camera.y) * this.viewport.scaleY + this.viewport.offsetY;
+
+            // Draw background
+            this.ctx.globalAlpha = msg.opacity * 0.8;
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(screenX - 30, screenY - 10, 60, 20);
+
+            // Draw text
+            this.ctx.globalAlpha = msg.opacity;
+            this.ctx.fillStyle = '#4ECDC4';
+            this.ctx.font = 'bold 14px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(msg.text, screenX, screenY);
+        }
+
+        this.ctx.restore();
+    }
+
     handleKeyDown(e) {
         // Only handle keys in development mode
         if (!this.isDevelopmentMode) return;
+
+        // Handle Copy (Ctrl+C)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+            e.preventDefault();
+            if (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0) {
+                if (this.propSystem.data.copySelectedProps()) {
+                    // Show visual feedback
+                    this.showCopyPasteFeedback('Copied!', this.propSystem.selectedProp);
+                    console.log('Props copied to clipboard');
+                }
+            }
+        }
+
+        // Handle Paste (Ctrl+V)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+            e.preventDefault();
+            if (this.propSystem.data.clipboard && this.propSystem.data.clipboard.length > 0) {
+                // Use current mouse position (already in world coordinates)
+                const pastedProps = this.propSystem.data.pasteProps(this.mouseX, this.mouseY);
+                if (pastedProps.length > 0) {
+                    this.propSystem.updatePropList();
+                    this.propSystem.updatePropProperties();
+                    // Show visual feedback at paste location
+                    this.showCopyPasteFeedback('Pasted!', pastedProps[0]);
+                    console.log(`Pasted ${pastedProps.length} prop(s)`);
+                }
+            }
+        }
 
         // Handle Delete key
         if (e.key === 'Delete' || e.key === 'Backspace') {

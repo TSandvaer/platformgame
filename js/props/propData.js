@@ -17,6 +17,9 @@ class PropData {
         this.propDragOffset = { x: 0, y: 0 };
         this.multiDragOffsets = new Map(); // Map of propId -> offset for multi-drag
 
+        // Clipboard for copy/paste
+        this.clipboard = []; // Array of copied prop data
+
         // Prop types with their tileset coordinates and properties
         this.propTypes = {
             // Buildings & Structures
@@ -328,5 +331,82 @@ class PropData {
         }
         prop.x = newX;
         prop.y = newY;
+    }
+
+    // Copy selected props to clipboard
+    copySelectedProps() {
+        if (this.selectedProps.length === 0) return false;
+
+        // Clear clipboard and copy selected props
+        this.clipboard = [];
+
+        // Calculate center point for relative positioning on paste
+        let minX = Infinity, minY = Infinity;
+        this.selectedProps.forEach(prop => {
+            minX = Math.min(minX, prop.x);
+            minY = Math.min(minY, prop.y);
+        });
+
+        // Deep copy each selected prop with relative positions
+        this.selectedProps.forEach(prop => {
+            const copiedProp = {
+                type: prop.type,
+                x: prop.x - minX, // Store relative to top-left of selection
+                y: prop.y - minY,
+                isObstacle: prop.isObstacle,
+                positioning: prop.positioning,
+                relativeX: prop.relativeX,
+                relativeY: prop.relativeY,
+                sizeMultiplier: prop.sizeMultiplier || 1.0,
+                rotation: prop.rotation || 0,
+                groupId: prop.groupId // Preserve grouping
+            };
+            this.clipboard.push(copiedProp);
+        });
+
+        console.log(`Copied ${this.clipboard.length} prop(s) to clipboard`);
+        return true;
+    }
+
+    // Paste props from clipboard at specified position
+    pasteProps(mouseX, mouseY) {
+        if (this.clipboard.length === 0) return [];
+
+        const pastedProps = [];
+
+        // Clear selection
+        this.clearMultiSelection();
+
+        // Create new props from clipboard
+        this.clipboard.forEach(clipProp => {
+            const newProp = {
+                id: this.nextPropId++,
+                type: clipProp.type,
+                x: mouseX + clipProp.x,
+                y: mouseY + clipProp.y,
+                isObstacle: clipProp.isObstacle,
+                zOrder: this.nextPropZOrder++,
+                positioning: clipProp.positioning,
+                relativeX: clipProp.relativeX,
+                relativeY: clipProp.relativeY,
+                sizeMultiplier: clipProp.sizeMultiplier,
+                rotation: clipProp.rotation
+            };
+
+            // Add to props array
+            this.props.push(newProp);
+            pastedProps.push(newProp);
+
+            // Add to selection
+            this.selectedProps.push(newProp);
+        });
+
+        // Set the first pasted prop as primary selection
+        if (pastedProps.length > 0) {
+            this.selectedProp = pastedProps[0];
+        }
+
+        console.log(`Pasted ${pastedProps.length} prop(s)`);
+        return pastedProps;
     }
 }

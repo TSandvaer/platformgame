@@ -336,7 +336,7 @@
         },
         {
           "id": 24,
-          "x": 1309,
+          "x": 1341,
           "y": 299,
           "type": "tree1",
           "isObstacle": false,
@@ -443,19 +443,6 @@
           "sizeMultiplier": 1.5
         },
         {
-          "id": 34,
-          "type": "fencePole3",
-          "x": 265.29672276350766,
-          "y": 348.68024800708594,
-          "isObstacle": false,
-          "zOrder": 2,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": -1.3860053144375553
-        },
-        {
           "id": 35,
           "type": "fenceBoard1",
           "x": 1175.9787422497786,
@@ -490,6 +477,58 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5
+        },
+        {
+          "id": 41,
+          "type": "fenceBoard1",
+          "x": 1243.1532329495128,
+          "y": 533.1975199291408,
+          "isObstacle": false,
+          "zOrder": 4,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 42,
+          "type": "fenceBoard2",
+          "x": 1245.7041629760852,
+          "y": 547.6527900797164,
+          "isObstacle": false,
+          "zOrder": 5,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 43,
+          "type": "fenceBoard3",
+          "x": 1242.3029229406554,
+          "y": 563.808680248007,
+          "isObstacle": false,
+          "zOrder": 6,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 45,
+          "type": "fencePole3",
+          "x": 1299.2736935341009,
+          "y": 531.496899911426,
+          "isObstacle": false,
+          "zOrder": -7,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
         }
       ]
     }
