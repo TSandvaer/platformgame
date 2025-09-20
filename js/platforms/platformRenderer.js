@@ -166,7 +166,7 @@ class PlatformRenderer {
         const handleSize = 8;
         this.ctx.fillStyle = '#FFD700';
 
-        // Draw corner handles
+        // Draw corner handles - positioned exactly at platform corners
         const handles = [
             { x: platform.x, y: platform.y },                                        // Top-left
             { x: platform.x + platform.width, y: platform.y },                      // Top-right
@@ -178,7 +178,7 @@ class PlatformRenderer {
             this.ctx.fillRect(handle.x - handleSize/2, handle.y - handleSize/2, handleSize, handleSize);
         });
 
-        // Draw edge handles
+        // Draw edge handles - positioned exactly at platform edge centers
         const edgeHandles = [
             { x: platform.x + platform.width/2, y: platform.y },                    // Top
             { x: platform.x + platform.width/2, y: platform.y + platform.height },  // Bottom
