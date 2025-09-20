@@ -711,6 +711,71 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6
+        },
+        {
+          "id": 59,
+          "type": "toolRackFrame",
+          "x": 1647.050487156776,
+          "y": 534.3472099202834,
+          "isObstacle": false,
+          "zOrder": 11,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 62,
+          "type": "sword1",
+          "x": 1644,
+          "y": 548.7006200177148,
+          "isObstacle": false,
+          "zOrder": 14,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.6,
+          "rotation": -1.5730735163861824
+        },
+        {
+          "id": 63,
+          "type": "sword2",
+          "x": 1662.8503100088576,
+          "y": 550.2993799822852,
+          "isObstacle": false,
+          "zOrder": 15,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.6,
+          "rotation": -1.5730735163861824
+        },
+        {
+          "id": 64,
+          "type": "spear",
+          "x": 1656.4038972542073,
+          "y": 533.4968999114261,
+          "isObstacle": false,
+          "zOrder": 16,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": -1.5730735163861829
+        },
+        {
+          "id": 65,
+          "type": "hoe",
+          "x": 1685.3144375553586,
+          "y": 538.4490699734279,
+          "isObstacle": false,
+          "zOrder": 17,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": -1.5730735163861824
         }
       ]
     }
