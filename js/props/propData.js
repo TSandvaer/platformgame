@@ -38,6 +38,7 @@ class PropData {
             fenceBoard3: { tileX: 2.81, tileY: 3.66, width: 43, height: 13, name: 'Fence Board3' },
             fencePoleSpiked: { tileX: 5.31, tileY: 2.94, width: 13, height: 36, name: 'Fence Pole Spiked' },
             fenceBoardShort: { tileX: 6.28, tileY: 3.34, width: 15, height: 10, name: 'Fence Board Short' },
+            boardFenceComplete: { tileX: 14.13, tileY: 2.75, width: 87, height: 41, name: 'Board Fence Complete' },
             // Trees & Nature
             tree1: { tileX: 15, tileY: 8, width: 32, height: 32, name: 'Tree 1' },
             tree2: { tileX: 16, tileY: 8, width: 32, height: 32, name: 'Tree 2' },

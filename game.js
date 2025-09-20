@@ -976,9 +976,6 @@ class PlatformRPG {
         }
 
         this.ctx.restore();
-
-        // Restore viewport scaling
-        this.ctx.restore();
     }
 
 
