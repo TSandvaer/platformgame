@@ -71,6 +71,10 @@ class PlatformRPG {
         this.torchParticles = [];
         this.propSystem = new PropSystem(this.ctx, this.platformSprites, this.torchParticles);
 
+        // Initialize mouse handlers (will be set after viewport and camera are ready)
+        this.platformMouseHandler = null;
+        this.propsMouseHandler = null;
+
 
         // Camera scrolling during drag
         this.dragScrollTimer = null;
@@ -108,6 +112,21 @@ class PlatformRPG {
         };
 
         this.updateViewport();
+
+        // Initialize mouse handlers after viewport and camera are ready
+        this.platformMouseHandler = new PlatformMouseHandler(
+            this.platformSystem,
+            this.viewport,
+            this.camera,
+            this.canvas
+        );
+        this.propsMouseHandler = new PropsMouseHandler(
+            this.propSystem,
+            this.propSystem.manager,
+            this.platformSystem,
+            this.viewport,
+            this.camera
+        );
 
         this.keys = {};
         this.mouseX = 0;
@@ -1347,13 +1366,13 @@ class PlatformRPG {
 
         document.getElementById('sendToBackground').addEventListener('click', () => {
             if (this.propSystem.selectedProp) {
-                this.sendPropToBackground(this.propSystem.selectedProp);
+                this.propsMouseHandler.sendPropToBackground(this.propSystem.selectedProp);
             }
         });
 
         document.getElementById('bringToFront').addEventListener('click', () => {
             if (this.propSystem.selectedProp) {
-                this.bringPropToFront(this.propSystem.selectedProp);
+                this.propsMouseHandler.bringPropToFront(this.propSystem.selectedProp);
             }
         });
 
@@ -1443,8 +1462,7 @@ class PlatformRPG {
 
 
         // Check for prop clicks first (props should be selectable before platforms)
-        // Pass both world and viewport coordinates for proper handling
-        const propResult = this.propSystem.handleMouseDown(worldMouseX, worldMouseY, this.platformSystem, e.ctrlKey, e.shiftKey, this.viewport, this.camera);
+        const propResult = this.propsMouseHandler.handleMouseDown(worldMouseX, worldMouseY, e.ctrlKey, e.shiftKey);
         if (propResult.handled) {
             this.propSystem.updatePropProperties();
             this.propSystem.updatePropList();
@@ -1453,44 +1471,13 @@ class PlatformRPG {
             return;
         }
 
-        for (let platform of this.platformSystem.platforms) {
-            // Get actual position for mouse interaction
-            const actualPos = this.platformSystem.data.getActualPosition(platform, this.viewport.designWidth, this.viewport.designHeight);
-            const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
-
-            const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
-            if (resizeHandle) {
-                this.platformSystem.isResizing = true;
-                this.platformSystem.resizeHandle = resizeHandle;
-                this.platformSystem.selectedPlatform = platform;
-                this.platformSystem.updatePlatformProperties();
-                return;
-            }
-
-            if (this.platformSystem.isPointInPlatform(worldMouseX, worldMouseY, renderPlatform)) {
-                this.platformSystem.isDragging = true;
-                this.platformSystem.selectedPlatform = platform;
-                this.platformSystem.dragOffset = {
-                    x: worldMouseX - actualPos.x,
-                    y: worldMouseY - actualPos.y
-                };
-                // Track initial position for movement direction detection
-                this.platformSystem.initialDragPosition = {
-                    x: platform.x,
-                    y: platform.y
-                };
-                this.platformSystem.updatePlatformProperties();
-                this.platformSystem.updatePlatformList();
-                return;
-            }
+        // Handle platform clicks using the platform mouse handler
+        const platformHandled = this.platformMouseHandler.handleMouseDown(e, this.propSystem, worldMouseX, worldMouseY);
+        if (platformHandled) {
+            return;
         }
 
         // No platform was clicked - start drag selection for props
-        this.platformSystem.selectedPlatform = null;
-        this.platformSystem.updatePlatformProperties();
-        this.platformSystem.updatePlatformList();
-
-        // Start drag selection if no platform was selected
         this.propSystem.data.startDragSelection(worldMouseX, worldMouseY);
     }
 
@@ -1514,52 +1501,18 @@ class PlatformRPG {
         // Handle camera scrolling during drag operations
         this.handleDragScrolling(clientMouseX, clientMouseY);
 
-        // Handle prop dragging (use world coordinates and pass camera)
-        const propMoved = this.propSystem.handleMouseMove(worldMouseX, worldMouseY, this.viewport, this.camera);
+        // Handle prop dragging using the props mouse handler
+        const propMoved = this.propsMouseHandler.handleMouseMove(worldMouseX, worldMouseY);
         if (propMoved) {
             this.propSystem.updatePropProperties();
             return;
         }
 
-        if (!this.platformSystem.selectedPlatform) return;
-
-        if (this.platformSystem.isDragging) {
-            // Calculate new position based on mouse (use world coordinates)
-            const newX = worldMouseX - this.platformSystem.dragOffset.x;
-            const newY = worldMouseY - this.platformSystem.dragOffset.y;
-
-            // Apply snapping
-            const snappedPos = this.platformSystem.snapPlatformPosition(this.platformSystem.selectedPlatform, newX, newY);
-
-            // Apply boundary constraints - prevent platform from going outside scene bounds
-            const platform = this.platformSystem.selectedPlatform;
-            const leftEdge = 0;
-            const bottomEdge = this.canvas.height;
-
-            // Platform left edge should not go beyond scene left edge
-            const minX = leftEdge;
-            const constrainedX = Math.max(snappedPos.x, minX);
-
-            // Platform bottom should align exactly with scene bottom (cyan line)
-            const maxY = bottomEdge - platform.height;
-            const constrainedY = Math.min(snappedPos.y, maxY);
-
-
-            // Update both absolute and relative positions
-            this.platformSystem.data.updateRelativePosition(
-                this.platformSystem.selectedPlatform,
-                constrainedX,
-                constrainedY,
-                this.viewport.designWidth,
-                this.viewport.designHeight
-            );
-            this.platformSystem.updatePlatformProperties();
-
+        // Handle platform dragging using the platform mouse handler
+        const platformMoved = this.platformMouseHandler.handleMouseMove(worldMouseX, worldMouseY);
+        if (platformMoved) {
             // Force render during drag to show camera movement immediately
             this.render();
-        } else if (this.platformSystem.isResizing) {
-            this.platformSystem.handlePlatformResize(worldMouseX, worldMouseY);
-            this.platformSystem.updatePlatformProperties();
         }
     }
 
@@ -1782,34 +1735,6 @@ class PlatformRPG {
         console.log('Camera focused on player at:', this.camera.x);
     }
 
-    sendPropToBackground(prop) {
-        // Get all z-orders, filtering out undefined/null values and converting to numbers
-        const zOrders = this.propSystem.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
-
-        // Find the lowest z-order, defaulting to 0 if no valid z-orders exist
-        const minZOrder = zOrders.length > 0 ? Math.min(...zOrders) : 0;
-
-        // Set this prop's z-order to be lower than the minimum
-        prop.zOrder = minZOrder - 1;
-
-        console.log(`Sent prop ${prop.type} to background with z-order: ${prop.zOrder}`);
-    }
-
-    bringPropToFront(prop) {
-        // Get all z-orders, filtering out undefined/null values and converting to numbers
-        const zOrders = this.propSystem.props.map(p => p.zOrder || 0).filter(z => !isNaN(z));
-
-        // Find the highest z-order, defaulting to 0 if no valid z-orders exist
-        const maxZOrder = zOrders.length > 0 ? Math.max(...zOrders) : 0;
-
-        // Set this prop's z-order to be higher than the maximum
-        prop.zOrder = maxZOrder + 1;
-
-        // Update the next z-order counter to be higher
-        this.propSystem.nextPropZOrder = Math.max(this.propSystem.nextPropZOrder, prop.zOrder + 1);
-
-        console.log(`Brought prop ${prop.type} to front with z-order: ${prop.zOrder}`);
-    }
 
     /* Keep for reference - moved to propSystem
     initializePropZOrders() {
@@ -2098,13 +2023,11 @@ class PlatformRPG {
     */
 
     handlePlatformMouseUp(e) {
-        this.platformSystem.isDragging = false;
-        this.platformSystem.isResizing = false;
-        this.platformSystem.resizeHandle = null;
-        this.platformSystem.initialDragPosition = null; // Clear movement tracking
+        // Handle platform mouse up using the platform mouse handler
+        this.platformMouseHandler.handleMouseUp();
 
-        // Handle prop mouse up (includes single and multi-selection dragging)
-        this.propSystem.handleMouseUp(e.ctrlKey, this.viewport);
+        // Handle prop mouse up using the props mouse handler
+        this.propsMouseHandler.handleMouseUp(e.ctrlKey);
 
         // Stop camera scrolling when drag ends
         this.stopDragScrolling();
