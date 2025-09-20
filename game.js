@@ -1539,17 +1539,24 @@ class PlatformRPG {
                 newDirection = 'right';
                 console.log('Platform right edge near screen right, should scroll right');
             }
-        } else if (this.platformSystem.isDraggingProp && this.propSystem.selectedProp) {
-            // Similar logic for props
-            const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
-            const propScreenRight = this.propSystem.selectedProp.x + this.propSystem.selectedProp.width - this.camera.x;
+        } else if ((this.propSystem.isDraggingProp || this.propSystem.isDraggingMultiple) && this.propSystem.selectedProp) {
+            // Similar logic for props - need to calculate prop dimensions
+            const propType = this.propSystem.getPropType(this.propSystem.selectedProp.type);
+            if (propType) {
+                const sizeMultiplier = this.propSystem.selectedProp.sizeMultiplier || 1.0;
+                const propWidth = propType.width * sizeMultiplier;
+                const propHeight = propType.height * sizeMultiplier;
 
-            if (propScreenLeft < scrollTriggerZone) {
-                newDirection = 'left';
-                console.log('Prop left edge near screen left, should scroll left');
-            } else if (propScreenRight > canvasWidth - scrollTriggerZone) {
-                newDirection = 'right';
-                console.log('Prop right edge near screen right, should scroll right');
+                const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
+                const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.camera.x;
+
+                if (propScreenLeft < scrollTriggerZone) {
+                    newDirection = 'left';
+                    console.log('Prop left edge near screen left, should scroll left');
+                } else if (propScreenRight > canvasWidth - scrollTriggerZone) {
+                    newDirection = 'right';
+                    console.log('Prop right edge near screen right, should scroll right');
+                }
             }
         }
 
@@ -1587,17 +1594,24 @@ class PlatformRPG {
                     shouldContinue = true;
                     this.camera.x += scrollSpeed;
                 }
-            } else if (this.platformSystem.isDraggingProp && this.propSystem.selectedProp) {
-                const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
-                const propScreenRight = this.propSystem.selectedProp.x + this.propSystem.selectedProp.width - this.camera.x;
+            } else if ((this.propSystem.isDraggingProp || this.propSystem.isDraggingMultiple) && this.propSystem.selectedProp) {
+                // Calculate prop dimensions
+                const propType = this.propSystem.getPropType(this.propSystem.selectedProp.type);
+                if (propType) {
+                    const sizeMultiplier = this.propSystem.selectedProp.sizeMultiplier || 1.0;
+                    const propWidth = propType.width * sizeMultiplier;
 
-                if (direction === 'left' && propScreenLeft < scrollTriggerZone) {
-                    shouldContinue = true;
-                    const newCameraX = Math.max(0, this.camera.x - scrollSpeed);
-                    this.camera.x = newCameraX;
-                } else if (direction === 'right' && propScreenRight > canvasWidth - scrollTriggerZone) {
-                    shouldContinue = true;
-                    this.camera.x += scrollSpeed;
+                    const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
+                    const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.camera.x;
+
+                    if (direction === 'left' && propScreenLeft < scrollTriggerZone) {
+                        shouldContinue = true;
+                        const newCameraX = Math.max(0, this.camera.x - scrollSpeed);
+                        this.camera.x = newCameraX;
+                    } else if (direction === 'right' && propScreenRight > canvasWidth - scrollTriggerZone) {
+                        shouldContinue = true;
+                        this.camera.x += scrollSpeed;
+                    }
                 }
             }
 
