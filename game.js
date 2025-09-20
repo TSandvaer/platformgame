@@ -91,7 +91,7 @@ class PlatformRPG {
         // Viewport and scaling system
         this.viewport = {
             designWidth: 1920,    // Target design resolution width
-            designHeight: window.innerHeight,   // Match actual window height for consistent scene boundary
+            designHeight: 1080,   // Fixed design resolution height for proper scaling
             actualWidth: window.innerWidth - (this.showDashboard ? 300 : 0),
             actualHeight: window.innerHeight,
             scaleX: 1,
@@ -815,7 +815,6 @@ class PlatformRPG {
     updateViewport() {
         this.viewport.actualWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
         this.viewport.actualHeight = window.innerHeight;
-        this.viewport.designHeight = window.innerHeight; // Keep design height in sync with actual height
 
         // Calculate scale factors
         const scaleX = this.viewport.actualWidth / this.viewport.designWidth;
@@ -938,13 +937,13 @@ class PlatformRPG {
             this.ctx.translate(this.viewport.offsetX, this.viewport.offsetY);
             this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
 
-            // Draw yellow and black striped police barrier at bottom of scene
-            this.renderPoliceBarrier();
-
             // Render drag selection rectangle
             this.renderDragSelection();
 
             this.ctx.restore();
+
+            // Draw yellow and black striped police barrier at bottom of scene (in screen coordinates)
+            this.renderPoliceBarrier();
 
             // Render feedback messages (copy/paste notifications) on top of everything
             this.renderFeedbackMessages();
@@ -1530,7 +1529,7 @@ class PlatformRPG {
             // Apply boundary constraints - prevent platform from going outside scene bounds
             const platform = this.platformSystem.selectedPlatform;
             const leftEdge = 0;
-            const bottomEdge = this.viewport.designHeight;
+            const bottomEdge = this.canvas.height;
 
             // Platform left edge should not go beyond scene left edge
             const minX = leftEdge;
@@ -1889,25 +1888,23 @@ class PlatformRPG {
     }
 
     renderPoliceBarrier() {
-        // Draw barrier at the scene boundary, which now matches the browser window bottom
-        const y = this.viewport.designHeight;
+        // Draw barrier at the actual canvas bottom in screen coordinates
         const stripeWidth = 40; // Width of each diagonal stripe
         const barrierHeight = 12; // Height of the barrier
+        const canvasBottom = this.canvas.height;
 
-        // Apply camera transformation for world coordinates
+        // Draw directly in screen coordinates (no camera transform)
         this.ctx.save();
-        this.ctx.translate(-this.camera.x, -this.camera.y);
 
-        // Draw the barrier background (slightly above the bottom line)
+        // Draw the barrier background at canvas bottom
         this.ctx.fillStyle = '#000000'; // Black background
-        this.ctx.fillRect(0, y - barrierHeight, this.viewport.designWidth, barrierHeight);
+        this.ctx.fillRect(0, canvasBottom - barrierHeight, this.canvas.width, barrierHeight);
 
         // Draw diagonal yellow stripes
         this.ctx.fillStyle = '#FFFF00'; // Bright yellow
 
         // Calculate how many stripes we need to cover the width
-        const totalWidth = this.viewport.designWidth;
-        const numStripes = Math.ceil(totalWidth / stripeWidth) + 2; // Extra stripes for offset
+        const numStripes = Math.ceil(this.canvas.width / stripeWidth) + 2; // Extra stripes for offset
 
         for (let i = 0; i < numStripes; i++) {
             // Create diagonal stripes by drawing angled rectangles
@@ -1918,10 +1915,10 @@ class PlatformRPG {
 
             // Create diagonal stripe path
             this.ctx.beginPath();
-            this.ctx.moveTo(xStart, y - barrierHeight);
-            this.ctx.lineTo(xStart + stripeWidth/2, y - barrierHeight);
-            this.ctx.lineTo(xStart + stripeWidth, y);
-            this.ctx.lineTo(xStart + stripeWidth/2, y);
+            this.ctx.moveTo(xStart, canvasBottom - barrierHeight);
+            this.ctx.lineTo(xStart + stripeWidth/2, canvasBottom - barrierHeight);
+            this.ctx.lineTo(xStart + stripeWidth, canvasBottom);
+            this.ctx.lineTo(xStart + stripeWidth/2, canvasBottom);
             this.ctx.closePath();
             this.ctx.fill();
 
@@ -1932,8 +1929,8 @@ class PlatformRPG {
         this.ctx.strokeStyle = '#000000';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
-        this.ctx.moveTo(0, y);
-        this.ctx.lineTo(this.viewport.designWidth, y);
+        this.ctx.moveTo(0, canvasBottom);
+        this.ctx.lineTo(this.canvas.width, canvasBottom);
         this.ctx.stroke();
 
         this.ctx.restore();
