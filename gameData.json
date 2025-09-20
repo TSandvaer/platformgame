@@ -267,7 +267,7 @@
           "x": 458,
           "y": 389,
           "type": "crate",
-          "isObstacle": false,
+          "isObstacle": true,
           "zOrder": 8,
           "positioning": "absolute",
           "relativeX": 0.5,
