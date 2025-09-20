@@ -245,6 +245,13 @@ class PropManager {
         const propertiesDiv = document.getElementById('propProperties');
         if (!propertiesDiv) return;
 
+        // Show/hide alignment controls based on selection count
+        const alignmentControls = document.getElementById('alignmentControls');
+        if (alignmentControls) {
+            // Show alignment controls only when 2 or more props are selected
+            alignmentControls.style.display = this.propData.selectedProps.length >= 2 ? 'flex' : 'none';
+        }
+
         if (this.propData.selectedProp) {
             propertiesDiv.style.display = 'block';
             const xInput = document.getElementById('propX');

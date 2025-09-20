@@ -1379,6 +1379,37 @@ class PlatformRPG {
                 alert('No props selected');
             }
         });
+
+        // Alignment button event listeners
+        document.getElementById('alignLeft').addEventListener('click', () => {
+            this.propSystem.data.alignPropsLeft();
+            this.propSystem.updatePropProperties();
+            this.propSystem.updatePropList();
+        });
+
+        document.getElementById('alignCenter').addEventListener('click', () => {
+            this.propSystem.data.alignPropsCenter();
+            this.propSystem.updatePropProperties();
+            this.propSystem.updatePropList();
+        });
+
+        document.getElementById('alignRight').addEventListener('click', () => {
+            this.propSystem.data.alignPropsRight();
+            this.propSystem.updatePropProperties();
+            this.propSystem.updatePropList();
+        });
+
+        document.getElementById('alignTop').addEventListener('click', () => {
+            this.propSystem.data.alignPropsTop();
+            this.propSystem.updatePropProperties();
+            this.propSystem.updatePropList();
+        });
+
+        document.getElementById('alignBottom').addEventListener('click', () => {
+            this.propSystem.data.alignPropsBottom();
+            this.propSystem.updatePropProperties();
+            this.propSystem.updatePropList();
+        });
     }
 
     handlePlatformMouseDown(e) {

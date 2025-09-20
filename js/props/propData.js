@@ -409,4 +409,126 @@ class PropData {
         console.log(`Pasted ${pastedProps.length} prop(s)`);
         return pastedProps;
     }
+
+    // Alignment methods for multiple selected props
+    alignPropsLeft() {
+        if (this.selectedProps.length < 2) return;
+
+        // Find the leftmost position
+        let minX = Infinity;
+        this.selectedProps.forEach(prop => {
+            minX = Math.min(minX, prop.x);
+        });
+
+        // Align all selected props to this left edge
+        this.selectedProps.forEach(prop => {
+            prop.x = minX;
+        });
+
+        console.log(`Aligned ${this.selectedProps.length} props to left edge at x=${minX}`);
+    }
+
+    alignPropsRight() {
+        if (this.selectedProps.length < 2) return;
+
+        // Find the rightmost position (need to consider prop width)
+        let maxRight = -Infinity;
+        this.selectedProps.forEach(prop => {
+            const propType = this.propTypes[prop.type];
+            if (propType) {
+                const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                const propWidth = propType.width * sizeMultiplier;
+                maxRight = Math.max(maxRight, prop.x + propWidth);
+            }
+        });
+
+        // Align all selected props to this right edge
+        this.selectedProps.forEach(prop => {
+            const propType = this.propTypes[prop.type];
+            if (propType) {
+                const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                const propWidth = propType.width * sizeMultiplier;
+                prop.x = maxRight - propWidth;
+            }
+        });
+
+        console.log(`Aligned ${this.selectedProps.length} props to right edge at x=${maxRight}`);
+    }
+
+    alignPropsCenter() {
+        if (this.selectedProps.length < 2) return;
+
+        // Find the center position of all props
+        let totalCenterX = 0;
+        let validProps = 0;
+
+        this.selectedProps.forEach(prop => {
+            const propType = this.propTypes[prop.type];
+            if (propType) {
+                const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                const propWidth = propType.width * sizeMultiplier;
+                totalCenterX += prop.x + propWidth / 2;
+                validProps++;
+            }
+        });
+
+        if (validProps === 0) return;
+        const averageCenterX = totalCenterX / validProps;
+
+        // Align all selected props to this center
+        this.selectedProps.forEach(prop => {
+            const propType = this.propTypes[prop.type];
+            if (propType) {
+                const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                const propWidth = propType.width * sizeMultiplier;
+                prop.x = averageCenterX - propWidth / 2;
+            }
+        });
+
+        console.log(`Aligned ${this.selectedProps.length} props to center at x=${averageCenterX}`);
+    }
+
+    alignPropsTop() {
+        if (this.selectedProps.length < 2) return;
+
+        // Find the topmost position
+        let minY = Infinity;
+        this.selectedProps.forEach(prop => {
+            minY = Math.min(minY, prop.y);
+        });
+
+        // Align all selected props to this top edge
+        this.selectedProps.forEach(prop => {
+            prop.y = minY;
+        });
+
+        console.log(`Aligned ${this.selectedProps.length} props to top edge at y=${minY}`);
+    }
+
+    alignPropsBottom() {
+        if (this.selectedProps.length < 2) return;
+
+        // Find the bottommost position (need to consider prop height)
+        let maxBottom = -Infinity;
+        this.selectedProps.forEach(prop => {
+            const propType = this.propTypes[prop.type];
+            if (propType) {
+                const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                const propHeight = propType.height * sizeMultiplier;
+                maxBottom = Math.max(maxBottom, prop.y + propHeight);
+            }
+        });
+
+        // Align all selected props to this bottom edge
+        this.selectedProps.forEach(prop => {
+            const propType = this.propTypes[prop.type];
+            if (propType) {
+                const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                const propHeight = propType.height * sizeMultiplier;
+                prop.y = maxBottom - propHeight;
+            }
+        });
+
+        console.log(`Aligned ${this.selectedProps.length} props to bottom edge at y=${maxBottom}`);
+    }
 }

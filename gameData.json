@@ -541,7 +541,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "groupId": 1
         },
         {
           "id": 47,
@@ -554,20 +555,22 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "groupId": 1
         },
         {
           "id": 48,
           "type": "fenceBoardShort",
-          "x": 1404.207982306695,
-          "y": 565.5093002657219,
+          "x": 1404.712134632418,
+          "y": 564.6589902568644,
           "isObstacle": false,
-          "zOrder": 3,
+          "zOrder": -9,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "groupId": 1
         }
       ]
     }
