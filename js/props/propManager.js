@@ -142,17 +142,15 @@ class PropManager {
     }
 
     placeProp(mouseX, mouseY) {
-        const scale = this.currentPropType === 'well' ? 1 :
-                     (this.currentPropType === 'barrel' || this.currentPropType === 'crate') ? 1.2 :
-                     (this.currentPropType === 'smallPot' || this.currentPropType === 'mediumPot' || this.currentPropType === 'bigPot') ? 0.6 :
-                     1.6;
+        // Default size multiplier is 1.0
+        const sizeMultiplier = 1.0;
 
         this.propData.addProp(
             this.currentPropType,
             mouseX,
             mouseY,
             this.nextPropIsObstacle,
-            scale
+            sizeMultiplier
         );
 
         // Exit placement mode
@@ -211,17 +209,17 @@ class PropManager {
             propertiesDiv.style.display = 'block';
             const xInput = document.getElementById('propX');
             const yInput = document.getElementById('propY');
-            const scaleInput = document.getElementById('propScale');
+            const sizeInput = document.getElementById('propSize');
             const isObstacleInput = document.getElementById('propIsObstacle');
             const typeSelect = document.getElementById('propTypeSelect');
             const zOrderDisplay = document.getElementById('propZOrder');
 
             if (xInput) xInput.value = Math.round(this.propData.selectedProp.x);
             if (yInput) yInput.value = Math.round(this.propData.selectedProp.y);
-            if (scaleInput) {
-                scaleInput.value = this.propData.selectedProp.scale !== undefined ?
-                    this.propData.selectedProp.scale :
-                    this.getDefaultScale(this.propData.selectedProp.type);
+            if (sizeInput) {
+                sizeInput.value = this.propData.selectedProp.sizeMultiplier !== undefined ?
+                    this.propData.selectedProp.sizeMultiplier :
+                    1.0;
             }
             if (isObstacleInput) isObstacleInput.checked = this.propData.selectedProp.isObstacle;
             if (typeSelect) typeSelect.value = this.propData.selectedProp.type;
@@ -236,25 +234,19 @@ class PropManager {
 
         const xInput = document.getElementById('propX');
         const yInput = document.getElementById('propY');
-        const scaleInput = document.getElementById('propScale');
+        const sizeInput = document.getElementById('propSize');
         const isObstacleInput = document.getElementById('propIsObstacle');
         const typeSelect = document.getElementById('propTypeSelect');
 
         if (xInput) this.propData.selectedProp.x = parseInt(xInput.value);
         if (yInput) this.propData.selectedProp.y = parseInt(yInput.value);
-        if (scaleInput) this.propData.selectedProp.scale = parseFloat(scaleInput.value);
+        if (sizeInput) this.propData.selectedProp.sizeMultiplier = parseFloat(sizeInput.value);
         if (isObstacleInput) this.propData.selectedProp.isObstacle = isObstacleInput.checked;
         if (typeSelect) this.propData.selectedProp.type = typeSelect.value;
 
         this.updatePropList();
     }
 
-    getDefaultScale(propType) {
-        if (propType === 'well') return 1;
-        if (propType === 'barrel' || propType === 'crate') return 1.2;
-        if (propType === 'smallPot' || propType === 'mediumPot' || propType === 'bigPot') return 0.6;
-        return 1.6;
-    }
 
     // Z-order management UI
     movePropToFront() {

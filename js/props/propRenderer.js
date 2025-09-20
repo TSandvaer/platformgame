@@ -66,16 +66,13 @@ class PropRenderer {
         const sourceX = propType.tileX * tileset.tileWidth;
         const sourceY = propType.tileY * tileset.tileHeight;
 
-        // Use individual prop scale if available, otherwise fallback to default
-        const scale = prop.scale !== undefined ? prop.scale :
-                     (prop.type === 'well' ? 1 :
-                     (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
-                     (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
+        // Use sizeMultiplier for resolution-independent sizing
+        const sizeMultiplier = prop.sizeMultiplier !== undefined ? prop.sizeMultiplier : 1.0;
 
         // Apply viewport scaling if this is an obstacle prop (rendered outside transforms)
         const viewportScale = viewport ? viewport.scaleX : 1;
-        const renderWidth = propType.width * scale * viewportScale;
-        const renderHeight = propType.height * scale * viewportScale;
+        const renderWidth = propType.width * sizeMultiplier * viewportScale;
+        const renderHeight = propType.height * sizeMultiplier * viewportScale;
 
         // Disable image smoothing for pixel-perfect rendering
         this.ctx.imageSmoothingEnabled = false;
@@ -142,7 +139,8 @@ class PropRenderer {
 
         // Render flame animation if this is a torch prop
         if (propType.hasFlame) {
-            this.renderTorchFlame(prop, renderWidth, renderHeight, scale);
+            const flameScale = prop.sizeMultiplier !== undefined ? prop.sizeMultiplier : 1.0;
+            this.renderTorchFlame(prop, renderWidth, renderHeight, flameScale);
         }
 
         // Render glow effect if this is a lamp prop
@@ -151,7 +149,7 @@ class PropRenderer {
         }
     }
 
-    renderTorchFlame(prop, renderWidth, renderHeight, scale) {
+    renderTorchFlame(prop, renderWidth, renderHeight, flameScale) {
         if (!this.platformSprites.torchFlame || !this.platformSprites.torchFlame.image) return;
 
         const flameSprite = this.platformSprites.torchFlame;
@@ -194,9 +192,9 @@ class PropRenderer {
             const sourceY = row * frameSizeWithPadding;
 
             // Scale flame size based on torch scale
-            const flameScale = scale * 1.0; // Normal scale
-            const flameWidth = 16 * flameScale; // Smaller width
-            const flameHeight = 24 * flameScale; // Smaller height
+            const flameSizeScale = flameScale * 1.0; // Normal scale
+            const flameWidth = 16 * flameSizeScale; // Smaller width
+            const flameHeight = 24 * flameSizeScale; // Smaller height
 
             // Position flame at the very top of the torch
             const flameX = torchCenterX - (flameWidth / 2);
@@ -226,7 +224,7 @@ class PropRenderer {
             this.ctx.restore();
 
             // Add flame particles at the top of the flame
-            this.addTorchParticles(torchCenterX, flameY, flameScale);
+            this.addTorchParticles(torchCenterX, flameY, flameSizeScale);
 
         } catch (error) {
             console.error('Error rendering torch flame:', error);

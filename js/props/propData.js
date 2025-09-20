@@ -76,7 +76,7 @@ class PropData {
         });
     }
 
-    addProp(type, x, y, isObstacle = false, scale = undefined) {
+    addProp(type, x, y, isObstacle = false, sizeMultiplier = 1.0) {
         const propType = this.propTypes[type];
         if (!propType) return null;
 
@@ -89,13 +89,9 @@ class PropData {
             zOrder: this.nextPropZOrder++,
             positioning: 'absolute', // 'absolute', 'screen-relative'
             relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
-            relativeY: 0.5          // Relative position (0-1) for screen-relative mode
+            relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
+            sizeMultiplier: sizeMultiplier  // Resolution-independent size multiplier
         };
-
-        // Add scale if provided
-        if (scale !== undefined) {
-            newProp.scale = scale;
-        }
 
         this.props.push(newProp);
         this.selectedProp = newProp;
@@ -138,12 +134,9 @@ class PropData {
         const propType = this.propTypes[prop.type];
         if (!propType) return false;
 
-        const scale = prop.scale !== undefined ? prop.scale :
-                     (prop.type === 'well' ? 1 :
-                     (prop.type === 'barrel' || prop.type === 'crate') ? 1.2 :
-                     (prop.type === 'smallPot' || prop.type === 'mediumPot' || prop.type === 'bigPot') ? 0.6 : 1.6);
-        const renderWidth = propType.width * scale;
-        const renderHeight = propType.height * scale;
+        const sizeMultiplier = prop.sizeMultiplier !== undefined ? prop.sizeMultiplier : 1.0;
+        const renderWidth = propType.width * sizeMultiplier;
+        const renderHeight = propType.height * sizeMultiplier;
 
         const isInside = x >= prop.x && x <= prop.x + renderWidth &&
                         y >= prop.y && y <= prop.y + renderHeight;

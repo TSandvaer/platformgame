@@ -1091,16 +1091,16 @@ class PlatformRPG {
         // Get selected prop type, obstacle setting, and scale from UI
         const propTypeSelect = document.getElementById('propTypeSelect');
         const obstacleCheck = document.getElementById('propObstacleCheck');
-        const scaleInput = document.getElementById('propScaleInput');
+        const sizeInput = document.getElementById('propSizeInput');
 
-        if (!propTypeSelect || !obstacleCheck || !scaleInput) return;
+        if (!propTypeSelect || !obstacleCheck || !sizeInput) return;
 
         const propType = propTypeSelect.value;
         const isObstacle = obstacleCheck.checked;
-        const scale = parseFloat(scaleInput.value) || 1.0;
+        const sizeMultiplier = parseFloat(sizeInput.value) || 1.0;
 
-        // Add the prop at mouse position with custom scale
-        this.addProp(mouseX, mouseY, propType, isObstacle, scale);
+        // Add the prop at mouse position with custom size
+        this.addProp(mouseX, mouseY, propType, isObstacle, sizeMultiplier);
 
         // Exit placement mode
         this.propSystem.propPlacementMode = false;
@@ -1249,17 +1249,15 @@ class PlatformRPG {
             btn.classList.toggle('danger', this.propSystem.propPlacementMode);
         });
 
-        // Auto-update scale when prop type changes
+        // Auto-update size when prop type changes
         document.getElementById('propTypeSelect').addEventListener('change', (e) => {
             const propType = e.target.value;
-            const scaleInput = document.getElementById('propScaleInput');
+            const sizeInput = document.getElementById('propSizeInput');
 
-            // Set default scale based on prop type
-            const defaultScale = propType === 'well' ? 1.0 :
-                               (propType === 'barrel' || propType === 'crate') ? 1.2 :
-                               (propType === 'smallPot' || propType === 'mediumPot' || propType === 'bigPot') ? 0.6 : 1.6;
+            // Set default size based on prop type (all default to 1.0 now)
+            const defaultSize = 1.0;
 
-            scaleInput.value = defaultScale.toFixed(1);
+            sizeInput.value = defaultSize.toFixed(1);
         });
 
         document.getElementById('clearPropsBtn').addEventListener('click', () => {
@@ -1277,15 +1275,14 @@ class PlatformRPG {
                 this.propSystem.selectedProp.y = parseInt(document.getElementById('propY').value);
                 this.propSystem.selectedProp.isObstacle = document.getElementById('selectedPropObstacle').checked;
 
-                // Update scale and recalculate width/height
-                const newScale = parseFloat(document.getElementById('selectedPropScale').value) || 1.0;
-                this.propSystem.selectedProp.scale = newScale;
+                // Update size multiplier
+                const newSize = parseFloat(document.getElementById('propSize').value) || 1.0;
+                this.propSystem.selectedProp.sizeMultiplier = newSize;
 
-                const propType = this.propTypes[this.propSystem.selectedProp.type];
-                if (propType) {
-                    this.propSystem.selectedProp.width = propType.width * newScale;
-                    this.propSystem.selectedProp.height = propType.height * newScale;
-                }
+                // Remove old width/height properties as they're calculated from sizeMultiplier now
+                delete this.propSystem.selectedProp.width;
+                delete this.propSystem.selectedProp.height;
+                delete this.propSystem.selectedProp.scale;
             }
         });
 
@@ -2242,8 +2239,9 @@ class PlatformRPG {
                 if (this.scenes[0].props) {
                     this.propSystem.props = [...this.scenes[0].props];
 
-                    // Migrate props to ensure they have positioning properties
+                    // Migrate props to ensure they have positioning properties and convert scale to sizeMultiplier
                     let migratedCount = 0;
+                    let scaleConvertCount = 0;
                     this.propSystem.props.forEach(prop => {
                         if (!prop.positioning) {
                             prop.positioning = 'absolute';
@@ -2251,9 +2249,23 @@ class PlatformRPG {
                             prop.relativeY = 0.5;
                             migratedCount++;
                         }
+
+                        // Migrate scale to sizeMultiplier
+                        if (prop.scale !== undefined && prop.sizeMultiplier === undefined) {
+                            prop.sizeMultiplier = prop.scale;
+                            delete prop.scale;
+                            scaleConvertCount++;
+                        }
+
+                        // Remove old width/height properties as they're calculated from sizeMultiplier now
+                        delete prop.width;
+                        delete prop.height;
                     });
                     if (migratedCount > 0) {
                         console.log(`✅ Migrated ${migratedCount} props to have positioning properties`);
+                    }
+                    if (scaleConvertCount > 0) {
+                        console.log(`✅ Converted ${scaleConvertCount} props from scale to sizeMultiplier`);
                     }
 
                     this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
@@ -2317,8 +2329,9 @@ class PlatformRPG {
                 if (this.scenes.length > 0 && this.scenes[0].props) {
                     this.propSystem.props = [...this.scenes[0].props];
 
-                    // Migrate props to ensure they have positioning properties
+                    // Migrate props to ensure they have positioning properties and convert scale to sizeMultiplier
                     let migratedCount = 0;
+                    let scaleConvertCount = 0;
                     this.propSystem.props.forEach(prop => {
                         if (!prop.positioning) {
                             prop.positioning = 'absolute';
@@ -2326,9 +2339,23 @@ class PlatformRPG {
                             prop.relativeY = 0.5;
                             migratedCount++;
                         }
+
+                        // Migrate scale to sizeMultiplier
+                        if (prop.scale !== undefined && prop.sizeMultiplier === undefined) {
+                            prop.sizeMultiplier = prop.scale;
+                            delete prop.scale;
+                            scaleConvertCount++;
+                        }
+
+                        // Remove old width/height properties as they're calculated from sizeMultiplier now
+                        delete prop.width;
+                        delete prop.height;
                     });
                     if (migratedCount > 0) {
                         console.log(`✅ Migrated ${migratedCount} props to have positioning properties (localStorage)`);
+                    }
+                    if (scaleConvertCount > 0) {
+                        console.log(`✅ Converted ${scaleConvertCount} props from scale to sizeMultiplier (localStorage)`);
                     }
 
                     this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
