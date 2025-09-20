@@ -70,6 +70,14 @@ class PropSystem {
         return this.data.propTypes;
     }
 
+    get isDragSelecting() {
+        return this.data.isDragSelecting;
+    }
+
+    get dragSelectionRect() {
+        return this.data.getDragSelectionRect();
+    }
+
     // Rendering methods
     renderBackgroundProps(isDevelopmentMode, viewport) {
         this.renderer.renderProps(
@@ -165,8 +173,8 @@ class PropSystem {
         return moved;
     }
 
-    handleMouseUp() {
-        this.manager.handleMouseUp();
+    handleMouseUp(ctrlPressed = false, viewport) {
+        return this.manager.handleMouseUp(ctrlPressed, viewport);
     }
 
     // UI updates

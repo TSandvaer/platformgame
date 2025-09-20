@@ -943,6 +943,9 @@ class PlatformRPG {
             this.ctx.lineTo(this.viewport.designWidth, this.viewport.designHeight);
             this.ctx.stroke();
 
+            // Render drag selection rectangle
+            this.renderDragSelection();
+
             this.ctx.restore();
 
             // Render feedback messages (copy/paste notifications) on top of everything
@@ -1492,12 +1495,13 @@ class PlatformRPG {
             }
         }
 
+        // No platform was clicked - start drag selection for props
         this.platformSystem.selectedPlatform = null;
-        this.propSystem.clearMultiSelection();
         this.platformSystem.updatePlatformProperties();
-        this.propSystem.updatePropProperties();
         this.platformSystem.updatePlatformList();
-        this.propSystem.updatePropList();
+
+        // Start drag selection if no platform was selected
+        this.propSystem.data.startDragSelection(worldMouseX, worldMouseY);
     }
 
     handlePlatformDrag(e) {
@@ -1872,6 +1876,32 @@ class PlatformRPG {
         this.ctx.restore();
     }
 
+    renderDragSelection() {
+        if (!this.propSystem.isDragSelecting) return;
+
+        const rect = this.propSystem.dragSelectionRect;
+        if (!rect) return;
+
+        // Apply camera transformation for world coordinates
+        this.ctx.save();
+        this.ctx.translate(-this.camera.x, -this.camera.y);
+
+        // Draw selection rectangle
+        this.ctx.strokeStyle = '#0099FF'; // Blue selection color
+        this.ctx.fillStyle = 'rgba(0, 153, 255, 0.1)'; // Semi-transparent blue fill
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([5, 5]); // Dashed line
+
+        // Fill and stroke the rectangle
+        this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+        this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+        // Reset line dash
+        this.ctx.setLineDash([]);
+
+        this.ctx.restore();
+    }
+
     handleKeyDown(e) {
         // Only handle keys in development mode
         if (!this.isDevelopmentMode) return;
@@ -2014,7 +2044,7 @@ class PlatformRPG {
         this.platformSystem.resizeHandle = null;
 
         // Handle prop mouse up (includes single and multi-selection dragging)
-        this.propSystem.handleMouseUp();
+        this.propSystem.handleMouseUp(e.ctrlKey, this.viewport);
 
         // Stop camera scrolling when drag ends
         this.stopDragScrolling();

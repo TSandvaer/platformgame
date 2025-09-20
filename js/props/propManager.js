@@ -95,16 +95,24 @@ class PropManager {
                     return { handled: true, type: 'drag', prop: topProp };
                 }
             }
-        } else if (!ctrlPressed) {
-            // Clicked on empty space - clear selection
-            this.propData.clearMultiSelection();
+        } else {
+            // Clicked on empty space - clear selection but don't start drag selection yet
+            if (!ctrlPressed) {
+                // Clear selection unless Ctrl is held
+                this.propData.clearMultiSelection();
+            }
+            // Don't start drag selection immediately - let platforms have a chance to be selected
         }
 
         return { handled: false };
     }
 
     handleMouseMove(mouseX, mouseY, viewport, camera) {
-        if (this.isRotatingProp && this.propData.selectedProp) {
+        if (this.propData.isDragSelecting) {
+            // Update drag selection rectangle
+            this.propData.updateDragSelection(mouseX, mouseY);
+            return true;
+        } else if (this.isRotatingProp && this.propData.selectedProp) {
             // Calculate rotation based on vertical mouse movement
             const deltaY = mouseY - this.rotationStartY;
             const rotationSpeed = 0.01; // Radians per pixel
@@ -173,12 +181,21 @@ class PropManager {
         return false;
     }
 
-    handleMouseUp() {
+    handleMouseUp(ctrlPressed = false, viewport) {
+        if (this.propData.isDragSelecting) {
+            // Complete drag selection
+            const selectedProps = this.propData.finishDragSelection(viewport, ctrlPressed);
+            this.updatePropProperties();
+            this.updatePropList();
+            return { handled: true, type: 'drag-selection-complete', props: selectedProps };
+        }
+
         this.propData.isDraggingProp = false;
         this.propData.isDraggingMultiple = false;
         this.propData.multiDragOffsets.clear();
         this.propData.dragSelection = null; // Clear the expanded selection
         this.isRotatingProp = false;
+        return { handled: false };
     }
 
     placeProp(mouseX, mouseY) {

@@ -17,6 +17,11 @@ class PropData {
         this.propDragOffset = { x: 0, y: 0 };
         this.multiDragOffsets = new Map(); // Map of propId -> offset for multi-drag
 
+        // Drag selection system
+        this.isDragSelecting = false;
+        this.dragSelectionStart = { x: 0, y: 0 };
+        this.dragSelectionEnd = { x: 0, y: 0 };
+
         // Clipboard for copy/paste
         this.clipboard = []; // Array of copied prop data
 
@@ -785,5 +790,89 @@ class PropData {
         });
 
         console.log(`Aligned ${groups.length} groups to bottom edge at y=${maxBottom}`);
+    }
+
+    // Drag selection methods
+    startDragSelection(startX, startY) {
+        this.isDragSelecting = true;
+        this.dragSelectionStart = { x: startX, y: startY };
+        this.dragSelectionEnd = { x: startX, y: startY };
+    }
+
+    updateDragSelection(endX, endY) {
+        if (!this.isDragSelecting) return;
+        this.dragSelectionEnd = { x: endX, y: endY };
+    }
+
+    finishDragSelection(viewport, addToSelection = false) {
+        if (!this.isDragSelecting) return;
+
+        const rect = this.getDragSelectionRect();
+        const selectedProps = this.getPropsInRect(rect, viewport);
+
+        if (!addToSelection) {
+            this.clearMultiSelection();
+        }
+
+        selectedProps.forEach(prop => {
+            if (!addToSelection || !this.isSelected(prop)) {
+                this.addToSelection(prop);
+            }
+        });
+
+        this.isDragSelecting = false;
+        return selectedProps;
+    }
+
+    cancelDragSelection() {
+        this.isDragSelecting = false;
+    }
+
+    getDragSelectionRect() {
+        if (!this.isDragSelecting) return null;
+
+        const minX = Math.min(this.dragSelectionStart.x, this.dragSelectionEnd.x);
+        const maxX = Math.max(this.dragSelectionStart.x, this.dragSelectionEnd.x);
+        const minY = Math.min(this.dragSelectionStart.y, this.dragSelectionEnd.y);
+        const maxY = Math.max(this.dragSelectionStart.y, this.dragSelectionEnd.y);
+
+        return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+    }
+
+    getPropsInRect(rect, viewport) {
+        if (!rect) return [];
+
+        const propsInRect = [];
+
+        for (let prop of this.props) {
+            // Get actual position for the prop
+            const actualPos = this.getActualPosition(prop, viewport.designWidth, viewport.designHeight);
+            const propType = this.propTypes[prop.type];
+
+            if (propType) {
+                const sizeMultiplier = prop.sizeMultiplier || 1.0;
+                const propWidth = propType.width * sizeMultiplier;
+                const propHeight = propType.height * sizeMultiplier;
+
+                // Check if prop rectangle intersects with selection rectangle
+                const propLeft = actualPos.x;
+                const propRight = actualPos.x + propWidth;
+                const propTop = actualPos.y;
+                const propBottom = actualPos.y + propHeight;
+
+                const rectLeft = rect.x;
+                const rectRight = rect.x + rect.width;
+                const rectTop = rect.y;
+                const rectBottom = rect.y + rect.height;
+
+                // Check for intersection
+                if (propLeft < rectRight && propRight > rectLeft &&
+                    propTop < rectBottom && propBottom > rectTop) {
+                    propsInRect.push(prop);
+                }
+            }
+        }
+
+        return propsInRect;
     }
 }
