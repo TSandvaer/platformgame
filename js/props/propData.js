@@ -26,9 +26,15 @@ class PropData {
             woodenPole: {tileX: 29.41,tileY: 0.94,width: 15,height: 100,name: 'woodenPole'},
             woodenPoleArm: {tileX: 30.53,tileY: 1.16,width: 32,height: 24,name: 'woodenPoleArm'},
             // Fences & Walls
+            fenceNail: { tileX: 2.56, tileY: 3.41, width: 5, height: 6, name: 'Fence Nail' },
             fencePole1: {tileX: 1.09,tileY: 2.94,width: 8,height: 35,name: 'Fence Pole1'},
             fencePole2: {tileX: 1.69,tileY: 2.91,width: 7,height: 36,name: 'Fence Pole2'},
             fencePole3: { tileX: 2.16, tileY: 2.94, width: 9, height: 35, name: 'Fence Pole3' },
+            fenceBoard1: { tileX: 2.81, tileY: 2.97, width: 43, height: 11, name: 'Fence Board1' },
+            fenceBoard2: { tileX: 2.81, tileY: 3.31, width: 42, height: 11, name: 'Fence Board2' },
+            fenceBoard3: { tileX: 2.81, tileY: 3.66, width: 43, height: 13, name: 'Fence Board3' },
+            fencePoleSpiked: { tileX: 5.31, tileY: 2.94, width: 13, height: 36, name: 'Fence Pole Spiked' },
+            fenceBoardShort: { tileX: 6.28, tileY: 3.34, width: 15, height: 10, name: 'Fence Board Short' },
             // Trees & Nature
             tree1: { tileX: 15, tileY: 8, width: 32, height: 32, name: 'Tree 1' },
             tree2: { tileX: 16, tileY: 8, width: 32, height: 32, name: 'Tree 2' },
@@ -44,6 +50,13 @@ class PropData {
             smallPot: { tileX: 9.13, tileY: 1.34, width: 25, height: 23, name: 'smallPot' },
             well: { tileX: 1, tileY: 5.1, width: 90, height: 95, name: 'Well' },
             bucket: { tileX: 4.13, tileY: 7.19, width: 24, height: 27, name: 'bucket' },
+            toolRackFrame: { tileX: 7.91, tileY: 2.94, width: 70, height: 35, name: 'Tool Rack Frame' },
+            sword1: { tileX: 10.97, tileY: 2.13, width: 38, height: 11, name: 'Sword1' },
+            sword2: { tileX: 10.97, tileY: 2.59, width: 37, height: 10, name: 'Sword2' },
+            spear: { tileX: 10.94, tileY: 3.13, width: 65, height: 9, name: 'Spear' },
+            axe: { tileX: 10.97, tileY: 3.50, width: 39, height: 15, name: 'Axe' },
+            hoe: { tileX: 10.97, tileY: 4.00, width: 51, height: 13, name: 'Hoe' },
+            hammer: { tileX: 11.00, tileY: 4.47, width: 33, height: 15, name: 'Hammer' },
 
             // Signs
             signpost: { tileX: 15.00, tileY: 0.53, width: 32, height: 47, name: 'Signpost' },
