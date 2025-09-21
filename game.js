@@ -663,6 +663,14 @@ class PlatformRPG {
             this.toggleDashboard();
         });
 
+        // Prevent the toggle dashboard button from being triggered by space key
+        document.getElementById('toggleDashboardBtn').addEventListener('keydown', (e) => {
+            if (e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+
         document.getElementById('cameraModeBtn').addEventListener('click', () => {
             this.toggleCameraMode();
         });
