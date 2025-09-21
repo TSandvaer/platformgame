@@ -622,17 +622,48 @@ class SceneManager {
         if (targetSceneId && !isNaN(targetSceneId)) {
             const sceneIndex = parseInt(targetSceneId) - 1;
             if (sceneIndex >= 0 && sceneIndex < scenes.length) {
-                const playerStartX = prompt('Player start X position in target scene:', '100');
-                const playerStartY = prompt('Player start Y position in target scene:', '100');
+                const targetScene = scenes[sceneIndex];
 
-                if (playerStartX !== null && playerStartY !== null) {
+                // Ask user whether to use scene start point or custom coordinates
+                const destinationType = prompt(
+                    `Choose destination type:\n\n` +
+                    `1. Use scene start point (${targetScene.settings.playerStartX}, ${targetScene.settings.playerStartY})\n` +
+                    `2. Use custom coordinates\n\n` +
+                    `Enter choice (1 or 2):`
+                );
+
+                let playerStartX, playerStartY;
+
+                if (destinationType === '1') {
+                    // Use scene's start point
+                    playerStartX = targetScene.settings.playerStartX;
+                    playerStartY = targetScene.settings.playerStartY;
+
                     this.addTransitionZone(
                         x, y, width, height,
-                        scenes[sceneIndex].id,
-                        parseInt(playerStartX),
-                        parseInt(playerStartY)
+                        targetScene.id,
+                        playerStartX,
+                        playerStartY
                     );
                     this.updateSceneUI();
+
+                } else if (destinationType === '2') {
+                    // Use custom coordinates
+                    const customX = prompt('Player start X position in target scene:', targetScene.settings.playerStartX.toString());
+                    const customY = prompt('Player start Y position in target scene:', targetScene.settings.playerStartY.toString());
+
+                    if (customX !== null && customY !== null) {
+                        this.addTransitionZone(
+                            x, y, width, height,
+                            targetScene.id,
+                            parseInt(customX),
+                            parseInt(customY)
+                        );
+                        this.updateSceneUI();
+                    }
+                } else {
+                    // Invalid choice, do nothing
+                    console.log('Invalid choice for destination type');
                 }
             }
         }
