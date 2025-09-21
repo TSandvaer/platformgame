@@ -66,9 +66,9 @@
         },
         {
           "id": 9,
-          "x": 524.3410097431356,
+          "x": 475.3232949512843,
           "y": 630.3346852607835,
-          "width": 657.6354799781125,
+          "width": 704,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "grass",
@@ -84,18 +84,6 @@
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "bricks",
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5
-        },
-        {
-          "id": 11,
-          "x": 1127.511071744907,
-          "y": 524,
-          "width": 160,
-          "height": 32,
-          "color": "#4ECDC4",
-          "spriteType": "dirt",
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5
@@ -994,6 +982,19 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 85,
+          "type": "crate",
+          "x": 261.8954827280779,
+          "y": 814.6501328609389,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1,
           "rotation": 0
         }
       ]
