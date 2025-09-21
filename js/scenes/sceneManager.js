@@ -140,10 +140,21 @@ class SceneManager {
             this.game.player.velocityY = 0;
         }
 
-        // Update camera to follow player
+        // Update camera to follow player - set position directly for immediate transition
         if (this.game.camera && this.game.player) {
-            this.game.camera.targetX = this.game.player.x;
-            this.game.camera.targetY = this.game.player.y;
+            // Force viewport update to ensure correct dimensions after scene change
+            this.game.updateViewport();
+
+            // Use viewport dimensions for proper camera positioning
+            const visibleWorldWidth = this.game.canvas.width / this.game.viewport.scaleX;
+            const visibleWorldHeight = this.game.canvas.height / this.game.viewport.scaleY;
+
+            // Calculate camera position to center on player in world coordinates
+            const targetX = this.game.player.x - visibleWorldWidth / 2;
+            const targetY = this.game.player.y - visibleWorldHeight / 2;
+
+            // Apply camera boundary constraints immediately
+            this.game.applyCameraBoundaryConstraints(targetX, targetY);
         }
 
         // Update UI

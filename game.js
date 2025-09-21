@@ -1041,12 +1041,13 @@ class PlatformRPG {
         let minCameraX, maxCameraX;
         const sceneWidth = bounds.right - bounds.left;
 
-        if (visibleWorldWidth > sceneWidth * 1.5) {
-            // Only apply expanded bounds if visible area is significantly larger than scene (50% larger)
-            // This helps with very small scenes on large screens
+        if (visibleWorldWidth > sceneWidth && (bounds.right - visibleWorldWidth) < bounds.left) {
+            // Only apply expanded bounds when visible area is larger than scene AND standard constraints would lock camera
+            // This specifically targets laptop scaling issues where camera gets locked
             const excessWidth = visibleWorldWidth - sceneWidth;
-            minCameraX = bounds.left - (excessWidth * 0.3); // Allow 30% of excess on left
-            maxCameraX = bounds.right - visibleWorldWidth + (excessWidth * 0.3); // Allow 30% of excess on right
+            // Allow camera to move to follow player while keeping scene visible
+            minCameraX = bounds.left - (excessWidth * 0.3);
+            maxCameraX = bounds.left + (excessWidth * 0.3);
         } else {
             // Standard camera constraints for normal cases
             minCameraX = bounds.left;
@@ -1072,6 +1073,14 @@ class PlatformRPG {
         // Apply constraints
         this.camera.x = Math.max(minCameraX, Math.min(maxCameraX, targetX));
         this.camera.y = Math.max(minCameraY, Math.min(maxCameraY, targetY));
+
+        // Special handling for hidden dashboard: force camera to left boundary to eliminate gaps
+        if (!this.showDashboard) {
+            // When dashboard is hidden, ensure camera doesn't create gaps on the left
+            this.camera.x = Math.max(this.camera.x, bounds.left);
+            // Also ensure viewport offset is 0 for proper alignment
+            this.viewport.offsetX = 0;
+        }
 
         // Debug logging for camera constraints (can be removed for production)
         // console.log('🎥 Camera constrained:', { target: { x: targetX, y: targetY }, actual: { x: this.camera.x, y: this.camera.y } });
@@ -1133,12 +1142,12 @@ class PlatformRPG {
                 this.viewport.scaleX = this.viewport.scale;
                 this.viewport.scaleY = this.viewport.scale;
 
-                // Align to left in production mode when dashboard is hidden, center otherwise
-                if (!this.isDevelopmentMode && !this.showDashboard) {
+                // Align to left when dashboard is hidden (both dev and production), center otherwise
+                if (!this.showDashboard) {
                     this.viewport.offsetX = 0; // Align to left (no gap on left side)
                     this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2; // Center vertically
                 } else {
-                    // Default centering behavior
+                    // Default centering behavior when dashboard is visible
                     this.viewport.offsetX = (this.viewport.actualWidth - this.viewport.designWidth * this.viewport.scale) / 2;
                     this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2;
                 }
