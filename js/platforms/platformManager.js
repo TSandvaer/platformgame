@@ -68,6 +68,7 @@ class PlatformManager {
         this.platformData.isDragging = false;
         this.platformData.isResizing = false;
         this.platformData.resizeHandle = null;
+        this.platformData.resizeStartState = null;
     }
 
     placePlatform(mouseX, mouseY) {
@@ -95,32 +96,46 @@ class PlatformManager {
     getResizeHandle(platform, mouseX, mouseY) {
         const handleSize = 8;
 
-        // Check corners first (higher priority)
-        const corners = {
-            nw: { x: platform.x, y: platform.y },
-            ne: { x: platform.x + platform.width, y: platform.y },
-            sw: { x: platform.x, y: platform.y + platform.height },
-            se: { x: platform.x + platform.width, y: platform.y + platform.height }
-        };
-
-        for (let [handle, corner] of Object.entries(corners)) {
-            if (Math.abs(mouseX - corner.x) <= handleSize && Math.abs(mouseY - corner.y) <= handleSize) {
-                return handle;
-            }
+        // Check corners first (higher priority) - using same zones as edges
+        // Top-left corner (outside platform)
+        if (mouseX >= platform.x - handleSize && mouseX < platform.x &&
+            mouseY >= platform.y - handleSize && mouseY < platform.y) {
+            return 'nw';
+        }
+        // Top-right corner (outside platform)
+        if (mouseX > platform.x + platform.width && mouseX <= platform.x + platform.width + handleSize &&
+            mouseY >= platform.y - handleSize && mouseY < platform.y) {
+            return 'ne';
+        }
+        // Bottom-left corner (outside platform)
+        if (mouseX >= platform.x - handleSize && mouseX < platform.x &&
+            mouseY > platform.y + platform.height && mouseY <= platform.y + platform.height + handleSize) {
+            return 'sw';
+        }
+        // Bottom-right corner (outside platform)
+        if (mouseX > platform.x + platform.width && mouseX <= platform.x + platform.width + handleSize &&
+            mouseY > platform.y + platform.height && mouseY <= platform.y + platform.height + handleSize) {
+            return 'se';
         }
 
-        // Check edges if not on corners
-        const isNearLeft = mouseX >= platform.x - handleSize && mouseX <= platform.x + handleSize;
-        const isNearRight = mouseX >= platform.x + platform.width - handleSize && mouseX <= platform.x + platform.width + handleSize;
-        const isNearTop = mouseY >= platform.y - handleSize && mouseY <= platform.y + handleSize;
-        const isNearBottom = mouseY >= platform.y + platform.height - handleSize && mouseY <= platform.y + platform.height + handleSize;
-        const isInHorizontalBounds = mouseX >= platform.x && mouseX <= platform.x + platform.width;
-        const isInVerticalBounds = mouseY >= platform.y && mouseY <= platform.y + platform.height;
+        // Check edges if not on corners - left/right zones include platform edge
+        // Left edge: from 8 pixels left of platform to 4 pixels inside (to include yellow square)
+        const leftZoneMinX = platform.x - handleSize;
+        const leftZoneMaxX = platform.x + 4;  // Include part of the yellow square area
+        const isNearLeft = mouseX >= leftZoneMinX && mouseX <= leftZoneMaxX &&
+                          mouseY >= platform.y && mouseY <= platform.y + platform.height;
 
-        if (isNearTop && isInHorizontalBounds) return 'n';
-        if (isNearBottom && isInHorizontalBounds) return 's';
-        if (isNearLeft && isInVerticalBounds) return 'w';
-        if (isNearRight && isInVerticalBounds) return 'e';
+        const isNearRight = mouseX >= platform.x + platform.width - 4 && mouseX <= platform.x + platform.width + handleSize &&
+                           mouseY >= platform.y && mouseY <= platform.y + platform.height;
+        const isNearTop = mouseY >= platform.y - handleSize && mouseY < platform.y &&
+                         mouseX >= platform.x && mouseX <= platform.x + platform.width;
+        const isNearBottom = mouseY > platform.y + platform.height && mouseY <= platform.y + platform.height + handleSize &&
+                            mouseX >= platform.x && mouseX <= platform.x + platform.width;
+
+        if (isNearTop) return 'n';
+        if (isNearBottom) return 's';
+        if (isNearLeft) return 'w';
+        if (isNearRight) return 'e';
 
         return null;
     }
@@ -128,7 +143,15 @@ class PlatformManager {
     handlePlatformResize(mouseX, mouseY) {
         if (!this.platformData.selectedPlatform || !this.platformData.resizeHandle) return;
 
-        const platform = this.platformData.selectedPlatform;
+        // Use the resize start state if available (contains the actual rendered position)
+        const resizeState = this.platformData.resizeStartState;
+        const platform = resizeState ?
+            { ...this.platformData.selectedPlatform,
+              x: resizeState.x,
+              y: resizeState.y,
+              width: resizeState.width,
+              height: resizeState.height } :
+            this.platformData.selectedPlatform;
         const tileWidth = 32; // Display tile width
         const tileHeight = 32; // Display tile height
         const minSize = tileHeight; // Minimum size should be at least one tile
@@ -202,11 +225,11 @@ class PlatformManager {
             newY = snappedPos.y;
         }
 
-        // Update platform dimensions
-        platform.x = newX;
-        platform.y = newY;
-        platform.width = newWidth;
-        platform.height = newHeight;
+        // Update the actual selected platform with new dimensions
+        this.platformData.selectedPlatform.x = newX;
+        this.platformData.selectedPlatform.y = newY;
+        this.platformData.selectedPlatform.width = newWidth;
+        this.platformData.selectedPlatform.height = newHeight;
     }
 
     snapPlatformPosition(platform, newX, newY, skipSelf = false) {

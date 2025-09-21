@@ -2037,6 +2037,12 @@ class PlatformRPG {
         // Default cursor
         this.canvas.style.cursor = 'default';
 
+        // Recalculate world coordinates to ensure consistency with mouse handlers
+        const worldCoords = this.screenToWorld(this.lastMouseX, this.lastMouseY);
+        const worldMouseX = worldCoords.x;
+        const worldMouseY = worldCoords.y;
+
+
         // Check if mouse is over any prop first (props have priority)
         // Find all props under mouse, then check the topmost one
         let propsUnderCursor = [];
@@ -2052,8 +2058,8 @@ class PlatformRPG {
             const renderWidth = propType.width * scale;
             const renderHeight = propType.height * scale;
 
-            if (this.mouseX >= prop.x && this.mouseX <= prop.x + renderWidth &&
-                this.mouseY >= prop.y && this.mouseY <= prop.y + renderHeight) {
+            if (worldMouseX >= prop.x && worldMouseX <= prop.x + renderWidth &&
+                worldMouseY >= prop.y && worldMouseY <= prop.y + renderHeight) {
                 propsUnderCursor.push(prop);
             }
         }
@@ -2064,33 +2070,42 @@ class PlatformRPG {
             return; // Exit early, don't check platforms
         }
 
-        // Check if mouse is over any platform
+        // Check if mouse is over any platform or resize handle
         for (const platform of this.platformSystem.platforms) {
-            if (this.mouseX >= platform.x && this.mouseX <= platform.x + platform.width &&
-                this.mouseY >= platform.y && this.mouseY <= platform.y + platform.height) {
+            // Get actual position for mouse interaction (same as platformMouseHandler)
+            const actualPos = this.platformSystem.data.getActualPosition(platform, this.viewport.designWidth, this.viewport.designHeight);
+            const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
 
-                // Check if mouse is near corners (resize handles)
-                const cornerSize = 8; // Size of corner resize area
-                const isNearLeft = this.mouseX <= platform.x + cornerSize;
-                const isNearRight = this.mouseX >= platform.x + platform.width - cornerSize;
-                const isNearTop = this.mouseY <= platform.y + cornerSize;
-                const isNearBottom = this.mouseY >= platform.y + platform.height - cornerSize;
 
-                if (isNearLeft || isNearRight || isNearTop || isNearBottom) {
-                    // Resize cursors for corners
-                    if ((isNearLeft && isNearTop) || (isNearRight && isNearBottom)) {
+            // Check for resize handle first
+            const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
+
+            if (resizeHandle) {
+                // Set appropriate cursor based on resize handle
+                switch (resizeHandle) {
+                    case 'nw':
+                    case 'se':
                         this.canvas.style.cursor = 'nw-resize';
-                    } else if ((isNearRight && isNearTop) || (isNearLeft && isNearBottom)) {
+                        break;
+                    case 'ne':
+                    case 'sw':
                         this.canvas.style.cursor = 'ne-resize';
-                    } else if (isNearLeft || isNearRight) {
+                        break;
+                    case 'w':
+                    case 'e':
                         this.canvas.style.cursor = 'ew-resize';
-                    } else if (isNearTop || isNearBottom) {
+                        break;
+                    case 'n':
+                    case 's':
                         this.canvas.style.cursor = 'ns-resize';
-                    }
-                } else {
-                    // Move cursor for platform body
-                    this.canvas.style.cursor = 'move';
+                        break;
                 }
+                break; // Stop checking other platforms
+            }
+
+            // Check if mouse is inside platform area
+            if (this.platformSystem.isPointInPlatform(worldMouseX, worldMouseY, renderPlatform)) {
+                this.canvas.style.cursor = 'move';
                 break; // Stop checking other platforms once we find one
             }
         }
@@ -2098,189 +2113,6 @@ class PlatformRPG {
 
     // Platform-related methods have been moved to platformSystem
 
-    snapPlatformPosition(platform, newX, newY) {
-        const snapDistance = 10; // Pixels within which to snap
-        let snappedX = newX;
-        let snappedY = newY;
-
-        // Check against all other platforms
-        for (const otherPlatform of this.platformSystem.platforms) {
-            if (otherPlatform.id === platform.id) continue; // Skip self
-
-            // Horizontal snapping (left/right edges)
-            // Left edge of moving platform to right edge of other platform
-            if (Math.abs(newX - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                snappedX = otherPlatform.x + otherPlatform.width;
-            }
-            // Right edge of moving platform to left edge of other platform
-            else if (Math.abs((newX + platform.width) - otherPlatform.x) <= snapDistance) {
-                snappedX = otherPlatform.x - platform.width;
-            }
-            // Left edges align
-            else if (Math.abs(newX - otherPlatform.x) <= snapDistance) {
-                snappedX = otherPlatform.x;
-            }
-            // Right edges align
-            else if (Math.abs((newX + platform.width) - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                snappedX = otherPlatform.x + otherPlatform.width - platform.width;
-            }
-
-            // Vertical snapping (top/bottom edges)
-            // Top edge of moving platform to bottom edge of other platform
-            if (Math.abs(newY - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                snappedY = otherPlatform.y + otherPlatform.height;
-            }
-            // Bottom edge of moving platform to top edge of other platform
-            else if (Math.abs((newY + platform.height) - otherPlatform.y) <= snapDistance) {
-                snappedY = otherPlatform.y - platform.height;
-            }
-            // Top edges align
-            else if (Math.abs(newY - otherPlatform.y) <= snapDistance) {
-                snappedY = otherPlatform.y;
-            }
-            // Bottom edges align
-            else if (Math.abs((newY + platform.height) - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                snappedY = otherPlatform.y + otherPlatform.height - platform.height;
-            }
-        }
-
-        return { x: snappedX, y: snappedY };
-    }
-
-    snapResizePosition(platform, newX, newY, newWidth, newHeight, resizeHandle) {
-        const snapDistance = 10; // Pixels within which to snap
-        let snappedX = newX;
-        let snappedY = newY;
-        let snappedWidth = newWidth;
-        let snappedHeight = newHeight;
-
-        // Check against all other platforms
-        for (const otherPlatform of this.platformSystem.platforms) {
-            if (otherPlatform.id === platform.id) continue; // Skip self
-
-            // Snap based on resize handle type
-            switch (resizeHandle) {
-                case 'w': // Left edge resize
-                    // Snap left edge to right edge of other platform
-                    if (Math.abs(newX - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                        snappedX = otherPlatform.x + otherPlatform.width;
-                        snappedWidth = platform.x + platform.width - snappedX;
-                    }
-                    // Snap left edge to left edge of other platform
-                    else if (Math.abs(newX - otherPlatform.x) <= snapDistance) {
-                        snappedX = otherPlatform.x;
-                        snappedWidth = platform.x + platform.width - snappedX;
-                    }
-                    break;
-
-                case 'e': // Right edge resize
-                    // Snap right edge to left edge of other platform
-                    if (Math.abs((newX + newWidth) - otherPlatform.x) <= snapDistance) {
-                        snappedWidth = otherPlatform.x - newX;
-                    }
-                    // Snap right edge to right edge of other platform
-                    else if (Math.abs((newX + newWidth) - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                        snappedWidth = (otherPlatform.x + otherPlatform.width) - newX;
-                    }
-                    break;
-
-                case 'n': // Top edge resize
-                    // Snap top edge to bottom edge of other platform
-                    if (Math.abs(newY - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                        snappedY = otherPlatform.y + otherPlatform.height;
-                        snappedHeight = platform.y + platform.height - snappedY;
-                    }
-                    // Snap top edge to top edge of other platform
-                    else if (Math.abs(newY - otherPlatform.y) <= snapDistance) {
-                        snappedY = otherPlatform.y;
-                        snappedHeight = platform.y + platform.height - snappedY;
-                    }
-                    break;
-
-                case 's': // Bottom edge resize
-                    // Snap bottom edge to top edge of other platform
-                    if (Math.abs((newY + newHeight) - otherPlatform.y) <= snapDistance) {
-                        snappedHeight = otherPlatform.y - newY;
-                    }
-                    // Snap bottom edge to bottom edge of other platform
-                    else if (Math.abs((newY + newHeight) - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                        snappedHeight = (otherPlatform.y + otherPlatform.height) - newY;
-                    }
-                    break;
-
-                // Corner resize handles can snap both dimensions
-                case 'nw': // Top-left corner
-                    // Snap left edge
-                    if (Math.abs(newX - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                        snappedX = otherPlatform.x + otherPlatform.width;
-                        snappedWidth = platform.x + platform.width - snappedX;
-                    } else if (Math.abs(newX - otherPlatform.x) <= snapDistance) {
-                        snappedX = otherPlatform.x;
-                        snappedWidth = platform.x + platform.width - snappedX;
-                    }
-                    // Snap top edge
-                    if (Math.abs(newY - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                        snappedY = otherPlatform.y + otherPlatform.height;
-                        snappedHeight = platform.y + platform.height - snappedY;
-                    } else if (Math.abs(newY - otherPlatform.y) <= snapDistance) {
-                        snappedY = otherPlatform.y;
-                        snappedHeight = platform.y + platform.height - snappedY;
-                    }
-                    break;
-
-                case 'ne': // Top-right corner
-                    // Snap right edge
-                    if (Math.abs((newX + newWidth) - otherPlatform.x) <= snapDistance) {
-                        snappedWidth = otherPlatform.x - newX;
-                    } else if (Math.abs((newX + newWidth) - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                        snappedWidth = (otherPlatform.x + otherPlatform.width) - newX;
-                    }
-                    // Snap top edge
-                    if (Math.abs(newY - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                        snappedY = otherPlatform.y + otherPlatform.height;
-                        snappedHeight = platform.y + platform.height - snappedY;
-                    } else if (Math.abs(newY - otherPlatform.y) <= snapDistance) {
-                        snappedY = otherPlatform.y;
-                        snappedHeight = platform.y + platform.height - snappedY;
-                    }
-                    break;
-
-                case 'sw': // Bottom-left corner
-                    // Snap left edge
-                    if (Math.abs(newX - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                        snappedX = otherPlatform.x + otherPlatform.width;
-                        snappedWidth = platform.x + platform.width - snappedX;
-                    } else if (Math.abs(newX - otherPlatform.x) <= snapDistance) {
-                        snappedX = otherPlatform.x;
-                        snappedWidth = platform.x + platform.width - snappedX;
-                    }
-                    // Snap bottom edge
-                    if (Math.abs((newY + newHeight) - otherPlatform.y) <= snapDistance) {
-                        snappedHeight = otherPlatform.y - newY;
-                    } else if (Math.abs((newY + newHeight) - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                        snappedHeight = (otherPlatform.y + otherPlatform.height) - newY;
-                    }
-                    break;
-
-                case 'se': // Bottom-right corner
-                    // Snap right edge
-                    if (Math.abs((newX + newWidth) - otherPlatform.x) <= snapDistance) {
-                        snappedWidth = otherPlatform.x - newX;
-                    } else if (Math.abs((newX + newWidth) - (otherPlatform.x + otherPlatform.width)) <= snapDistance) {
-                        snappedWidth = (otherPlatform.x + otherPlatform.width) - newX;
-                    }
-                    // Snap bottom edge
-                    if (Math.abs((newY + newHeight) - otherPlatform.y) <= snapDistance) {
-                        snappedHeight = otherPlatform.y - newY;
-                    } else if (Math.abs((newY + newHeight) - (otherPlatform.y + otherPlatform.height)) <= snapDistance) {
-                        snappedHeight = (otherPlatform.y + otherPlatform.height) - newY;
-                    }
-                    break;
-            }
-        }
-
-        return { x: snappedX, y: snappedY, width: snappedWidth, height: snappedHeight };
-    }
 
 
 

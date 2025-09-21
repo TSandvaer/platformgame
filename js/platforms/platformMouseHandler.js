@@ -22,10 +22,20 @@ class PlatformMouseHandler {
             const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
 
             const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
+
+
             if (resizeHandle) {
                 this.platformSystem.isResizing = true;
                 this.platformSystem.resizeHandle = resizeHandle;
                 this.platformSystem.selectedPlatform = platform;
+                // Store the initial position and dimensions for resize calculations
+                this.platformSystem.resizeStartState = {
+                    x: renderPlatform.x,
+                    y: renderPlatform.y,
+                    width: renderPlatform.width,
+                    height: renderPlatform.height,
+                    originalPlatform: platform
+                };
                 this.platformSystem.updatePlatformProperties();
                 return true;
             }
@@ -104,6 +114,7 @@ class PlatformMouseHandler {
         this.platformSystem.isDragging = false;
         this.platformSystem.isResizing = false;
         this.platformSystem.resizeHandle = null;
+        this.platformSystem.resizeStartState = null; // Clear resize start state
         this.platformSystem.initialDragPosition = null; // Clear movement tracking
     }
 

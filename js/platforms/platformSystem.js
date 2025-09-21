@@ -165,4 +165,12 @@ class PlatformSystem {
     set resizeHandle(value) {
         this.data.resizeHandle = value;
     }
+
+    get resizeStartState() {
+        return this.data.resizeStartState;
+    }
+
+    set resizeStartState(value) {
+        this.data.resizeStartState = value;
+    }
 }

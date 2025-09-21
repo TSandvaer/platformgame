@@ -18,6 +18,7 @@ class PlatformData {
         this.isResizing = false;
         this.dragOffset = { x: 0, y: 0 };
         this.resizeHandle = null;
+        this.resizeStartState = null;
     }
 
     addPlatform(x, y) {
