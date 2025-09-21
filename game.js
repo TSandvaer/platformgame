@@ -2,6 +2,9 @@ class PlatformRPG {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+
+        // Make canvas focusable for key events
+        this.canvas.tabIndex = 0;
         this.isDevelopmentMode = true;
         this.showDashboard = true;
 
@@ -565,8 +568,8 @@ class PlatformRPG {
                 }
             }
 
-            // Handle space key for jump (one-time trigger)
-            if (e.key === ' ' && this.player.onGround && !this.isDevelopmentMode && !this.player.spaceKeyPressed) {
+            // Handle space key for jump (one-time trigger) - works in both development and production modes
+            if (e.key === ' ' && this.player.onGround && !this.player.spaceKeyPressed) {
                 const jumpPower = this.keys['shift'] ? -17 : this.player.jumpPower;
                 this.player.velocityY = jumpPower;
                 this.player.onGround = false;
@@ -756,6 +759,9 @@ class PlatformRPG {
         this.viewport.designHeight = 1080;
 
         this.updateViewport();
+
+        // Reset space key state to prevent it from getting stuck
+        this.player.spaceKeyPressed = false;
 
         // Ensure canvas maintains focus for key events
         this.canvas.focus();
