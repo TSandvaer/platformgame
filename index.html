@@ -373,12 +373,63 @@
             80% { opacity: 1; transform: scale(1.1); }
             100% { opacity: 0; transform: scale(0.8); }
         }
+
+        /* Context Menu Styles */
+        .context-menu {
+            position: fixed;
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 6px;
+            padding: 4px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            min-width: 180px;
+        }
+
+        .context-menu-item {
+            padding: 8px 16px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .context-menu-item:hover {
+            background-color: #555;
+        }
+
+        .context-menu-item:active {
+            background-color: #666;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background-color: #666;
+            margin: 4px 0;
+        }
     </style>
 </head>
 <body>
     <!-- Scene Saved Overlay -->
     <div class="scene-saved-overlay" id="sceneSavedOverlay">
         <div class="scene-saved-text">Scene Saved!</div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="copyCoordinates">
+            📋 Copy Coordinates
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="addPlatformHere" style="opacity: 0.5; cursor: not-allowed;">
+            🟦 Add Platform Here
+        </div>
+        <div class="context-menu-item" id="addPropHere" style="opacity: 0.5; cursor: not-allowed;">
+            🎯 Add Prop Here
+        </div>
     </div>
 
     <div class="container">

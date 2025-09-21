@@ -638,6 +638,14 @@ class PlatformRPG {
             this.stopFreeCameraScroll();
         });
 
+        // Right-click context menu
+        this.canvas.addEventListener('contextmenu', (e) => {
+            if (this.isDevelopmentMode) {
+                e.preventDefault(); // Prevent default browser context menu
+                this.showContextMenu(e);
+            }
+        });
+
         document.getElementById('devModeBtn').addEventListener('click', () => {
             this.setDevelopmentMode(true);
         });
@@ -1564,6 +1572,9 @@ class PlatformRPG {
             this.propSystem.updatePropProperties();
             this.propSystem.updatePropList();
         });
+
+        // Context menu event listeners
+        this.setupContextMenuListeners();
     }
 
     setupSceneEditorListeners() {
@@ -2655,6 +2666,146 @@ class PlatformRPG {
 
         // Reset the file input
         event.target.value = '';
+    }
+
+    // Context Menu Methods
+    setupContextMenuListeners() {
+        // Store context menu coordinates
+        this.contextMenuCoords = { x: 0, y: 0 };
+
+        // Copy coordinates action
+        document.getElementById('copyCoordinates').addEventListener('click', () => {
+            this.copyCoordinatesToClipboard();
+            this.hideContextMenu();
+        });
+
+        // Hide context menu on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.context-menu')) {
+                this.hideContextMenu();
+            }
+        });
+
+        // Hide context menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideContextMenu();
+            }
+        });
+    }
+
+    showContextMenu(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const clientMouseX = e.clientX - rect.left;
+        const clientMouseY = e.clientY - rect.top;
+        const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
+
+        // Store coordinates for use by menu actions
+        this.contextMenuCoords = {
+            x: Math.round(worldCoords.x),
+            y: Math.round(worldCoords.y),
+            screenX: e.clientX,
+            screenY: e.clientY
+        };
+
+        const contextMenu = document.getElementById('contextMenu');
+
+        // Position the menu at the mouse location
+        contextMenu.style.left = `${e.clientX}px`;
+        contextMenu.style.top = `${e.clientY}px`;
+        contextMenu.style.display = 'block';
+
+        // Adjust position if menu would go off screen
+        const menuRect = contextMenu.getBoundingClientRect();
+        if (menuRect.right > window.innerWidth) {
+            contextMenu.style.left = `${e.clientX - menuRect.width}px`;
+        }
+        if (menuRect.bottom > window.innerHeight) {
+            contextMenu.style.top = `${e.clientY - menuRect.height}px`;
+        }
+    }
+
+    hideContextMenu() {
+        const contextMenu = document.getElementById('contextMenu');
+        contextMenu.style.display = 'none';
+    }
+
+    copyCoordinatesToClipboard() {
+        const coordsText = `${this.contextMenuCoords.x}, ${this.contextMenuCoords.y}`;
+
+        // Try modern clipboard API first
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(coordsText).then(() => {
+                console.log('📋 Coordinates copied to clipboard:', coordsText);
+                this.showTemporaryMessage(`Copied: ${coordsText}`);
+            }).catch(err => {
+                console.error('Failed to copy to clipboard:', err);
+                this.fallbackCopyToClipboard(coordsText);
+            });
+        } else {
+            // Fallback for older browsers or non-secure contexts
+            this.fallbackCopyToClipboard(coordsText);
+        }
+    }
+
+    fallbackCopyToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            console.log('📋 Coordinates copied to clipboard (fallback):', text);
+            this.showTemporaryMessage(`Copied: ${text}`);
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+            this.showTemporaryMessage('Copy failed - coordinates: ' + text);
+        }
+
+        document.body.removeChild(textArea);
+    }
+
+    showTemporaryMessage(message) {
+        // Create a temporary message element
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = message;
+        messageDiv.style.cssText = `
+            position: fixed;
+            left: ${this.contextMenuCoords.screenX + 10}px;
+            top: ${this.contextMenuCoords.screenY - 30}px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #ccc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 1001;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        `;
+
+        document.body.appendChild(messageDiv);
+
+        // Fade in
+        setTimeout(() => {
+            messageDiv.style.opacity = '1';
+        }, 10);
+
+        // Fade out and remove after 1.5 seconds
+        setTimeout(() => {
+            messageDiv.style.opacity = '0';
+            setTimeout(() => {
+                if (document.body.contains(messageDiv)) {
+                    document.body.removeChild(messageDiv);
+                }
+            }, 200);
+        }, 1500);
     }
 
     gameLoop(currentTime = 0) {
