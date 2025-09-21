@@ -317,7 +317,16 @@ class SceneManager {
 
     // Development mode helpers
     createNewScene(name, description) {
+        // Save current scene data before creating new scene
+        this.saveCurrentSceneData();
+
         const newScene = this.sceneData.createScene(name, description);
+
+        // Immediately save to localStorage
+        if (this.game && this.game.sceneSystem) {
+            this.game.sceneSystem.saveScenes();
+        }
+
         this.updateSceneUI();
         return newScene;
     }
@@ -327,6 +336,12 @@ class SceneManager {
         if (currentScene) {
             this.saveCurrentSceneData();
             const duplicatedScene = this.sceneData.duplicateScene(currentScene.id);
+
+            // Immediately save to localStorage
+            if (this.game && this.game.sceneSystem) {
+                this.game.sceneSystem.saveScenes();
+            }
+
             this.updateSceneUI();
             return duplicatedScene;
         }
@@ -340,6 +355,12 @@ class SceneManager {
             if (firstScene) {
                 this.loadScene(firstScene.id);
             }
+
+            // Immediately save to localStorage
+            if (this.game && this.game.sceneSystem) {
+                this.game.sceneSystem.saveScenes();
+            }
+
             this.updateSceneUI();
             return true;
         }
@@ -406,9 +427,9 @@ class SceneManager {
             const isCurrentClass = currentScene && currentScene.id === scene.id ? 'current' : '';
             const isStartClass = startScene && startScene.id === scene.id ? 'start' : '';
 
-            return `<div class="scene-item ${isCurrentClass} ${isStartClass}" data-scene-id="${scene.id}">
+            return `<div class="scene-item ${isCurrentClass} ${isStartClass}" data-scene-id="${scene.id}" onclick="game.sceneSystem.loadScene(${scene.id})" style="cursor: pointer;" title="Click to load scene">
                 <div class="scene-header">
-                    <span class="scene-name" onclick="game.sceneSystem.renameScene(${scene.id})" style="cursor: pointer;" title="Click to rename">${scene.name}</span>
+                    <span class="scene-name" onclick="event.stopPropagation(); game.sceneSystem.renameScene(${scene.id})" style="cursor: pointer;" title="Click to rename">${scene.name}</span>
                     <div class="scene-badges">
                         ${startScene && startScene.id === scene.id ? '<span class="badge start-badge">START</span>' : ''}
                         ${currentScene && currentScene.id === scene.id ? '<span class="badge current-badge">CURRENT</span>' : ''}
@@ -418,8 +439,7 @@ class SceneManager {
                 <div class="scene-stats">
                     Platforms: ${scene.platforms.length} | Props: ${scene.props.length} | Transitions: ${scene.transitions.zones.length}
                 </div>
-                <div class="scene-actions">
-                    <button onclick="game.sceneSystem.loadScene(${scene.id})" class="btn-small">Load</button>
+                <div class="scene-actions" onclick="event.stopPropagation();">
                     <button onclick="game.sceneSystem.setStartScene(${scene.id}); game.sceneSystem.updateUI();" class="btn-small">Set Start</button>
                     <button onclick="game.sceneSystem.duplicateScene(${scene.id})" class="btn-small">Duplicate</button>
                     ${this.sceneData.scenes.length > 1 ? `<button onclick="game.sceneSystem.deleteScene(${scene.id})" class="btn-small btn-danger">Delete</button>` : ''}
