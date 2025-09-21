@@ -596,7 +596,7 @@ class SceneManager {
         const height = Math.abs(endY - startY);
 
         // Ensure minimum size for transition zones
-        const minSize = 50;
+        const minSize = 15;
         if (width < minSize || height < minSize) {
             alert(`Transition zone too small! Please drag to create a zone at least ${minSize}x${minSize} pixels.`);
             return;
