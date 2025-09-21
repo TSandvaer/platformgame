@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Platform Game Storage</title>
+</head>
+<body>
+    <h1>Clear Platform Game Storage</h1>
+    <button onclick="clearStorage()">Clear All Storage</button>
+    <button onclick="checkStorage()">Check Storage</button>
+    <div id="output"></div>
+
+    <script>
+        function clearStorage() {
+            localStorage.removeItem('platformGame_sceneData');
+            localStorage.removeItem('platformGame_scenes');
+            document.getElementById('output').innerHTML = '<p style="color: green;">Storage cleared! You can now go back to the game.</p>';
+        }
+
+        function checkStorage() {
+            const sceneData = localStorage.getItem('platformGame_sceneData');
+            const oldScenes = localStorage.getItem('platformGame_scenes');
+
+            let output = '<h3>Current Storage:</h3>';
+            output += '<p><strong>platformGame_sceneData:</strong> ' + (sceneData ? 'EXISTS' : 'NOT FOUND') + '</p>';
+            output += '<p><strong>platformGame_scenes:</strong> ' + (oldScenes ? 'EXISTS' : 'NOT FOUND') + '</p>';
+
+            if (sceneData) {
+                try {
+                    const parsed = JSON.parse(sceneData);
+                    output += '<p><strong>Scene count:</strong> ' + (parsed.scenes ? parsed.scenes.length : 'No scenes') + '</p>';
+                    if (parsed.scenes && parsed.scenes[0]) {
+                        output += '<p><strong>First scene has boundaries:</strong> ' + (parsed.scenes[0].boundaries ? 'YES' : 'NO') + '</p>';
+                        output += '<p><strong>First scene has settings:</strong> ' + (parsed.scenes[0].settings ? 'YES' : 'NO') + '</p>';
+                    }
+                } catch (e) {
+                    output += '<p style="color: red;"><strong>Error parsing data:</strong> ' + e.message + '</p>';
+                }
+            }
+
+            document.getElementById('output').innerHTML = output;
+        }
+    </script>
+</body>
+</html>

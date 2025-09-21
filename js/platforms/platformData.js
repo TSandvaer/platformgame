@@ -1,13 +1,8 @@
 class PlatformData {
     constructor() {
-        this.platforms = [
-            { id: 0, x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-            { id: 1, x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-            { id: 2, x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-            { id: 3, x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-            { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 }
-        ];
-        this.nextPlatformId = 5;
+        // Start with empty platforms - they will be loaded from scene data
+        this.platforms = [];
+        this.nextPlatformId = 0;
         this.selectedPlatform = null;
 
         // Platform placement system

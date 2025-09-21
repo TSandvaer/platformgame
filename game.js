@@ -24,6 +24,7 @@ class PlatformRPG {
             jumpPower: -14,
             onGround: false,
             color: '#FF6B6B',
+            lastValidPosition: { x: 100, y: 400 }, // Track last known good position
             facing: 'right',
             currentAnimation: 'idle',
             frameIndex: 0,
@@ -70,6 +71,15 @@ class PlatformRPG {
         // Initialize prop system
         this.torchParticles = [];
         this.propSystem = new PropSystem(this.ctx, this.platformSprites, this.torchParticles);
+
+        // Initialize scene system
+        this.sceneSystem = new SceneSystem(this);
+
+        // Scene interaction state
+        this.isAddingTransition = false;
+        this.transitionStart = null;
+        this.isDraggingStartPosition = false;
+        this.startPositionDragOffset = { x: 0, y: 0 };
 
         // Initialize mouse handlers (will be set after viewport and camera are ready)
         this.platformMouseHandler = null;
@@ -132,19 +142,8 @@ class PlatformRPG {
         this.mouseX = 0;
         this.mouseY = 0;
 
-        this.scenes = [
-            {
-                id: 1,
-                name: 'Tutorial',
-                description: 'Starting scene with basic platforms',
-                platforms: [...this.platformSystem.platforms],
-                props: [...this.propSystem.props],
-                background: {
-                    name: 'none',
-                    layers: []
-                }
-            }
-        ];
+        // Scene data is now handled by the sceneSystem
+        this.pendingGameDataImport = null; // Store gameData.json data until scene system is ready
 
         this.gameData = {
             characters: [
@@ -200,13 +199,19 @@ class PlatformRPG {
         let loadedCount = 0;
         const totalImages = 3;
 
+        const checkAllLoaded = () => {
+            if (loadedCount === totalImages) {
+                this.platformSpritesLoaded = true;
+                console.log('🎨 All platform sprites loaded, initializing scene system...');
+                this.onPlatformSpritesLoaded();
+            }
+        };
+
         // Load ground tileset
         const groundImg = new Image();
         groundImg.onload = () => {
             loadedCount++;
-            if (loadedCount === totalImages) {
-                this.platformSpritesLoaded = true;
-            }
+            checkAllLoaded();
         };
         groundImg.onerror = () => {
             console.error('Failed to load ground tileset');
@@ -218,9 +223,7 @@ class PlatformRPG {
         const propsImg = new Image();
         propsImg.onload = () => {
             loadedCount++;
-            if (loadedCount === totalImages) {
-                this.platformSpritesLoaded = true;
-            }
+            checkAllLoaded();
         };
         propsImg.onerror = () => {
             console.error('Failed to load village props tileset');
@@ -232,15 +235,47 @@ class PlatformRPG {
         const torchFlameImg = new Image();
         torchFlameImg.onload = () => {
             loadedCount++;
-            if (loadedCount === totalImages) {
-                this.platformSpritesLoaded = true;
-            }
+            checkAllLoaded();
         };
         torchFlameImg.onerror = () => {
             console.error('Failed to load torch flame sprite');
         };
         torchFlameImg.src = 'sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
         this.platformSprites.torchFlame.image = torchFlameImg;
+    }
+
+    onPlatformSpritesLoaded() {
+        console.log('🎨 Platform sprites loaded, initializing scene system...');
+
+        // Check if we have pending gameData.json import
+        if (this.pendingGameDataImport) {
+            console.log('📦 Loading pending gameData.json import...');
+            // Initialize scene system with imported data
+            this.sceneSystem.data.importSceneData(this.pendingGameDataImport);
+            this.sceneSystem.initialize();
+
+            // Save the imported data to localStorage
+            this.sceneSystem.saveScenes();
+            console.log('✅ Imported scene data saved to localStorage');
+
+            this.pendingGameDataImport = null; // Clear pending data
+        } else {
+            // Initialize scene system normally
+            this.sceneSystem.initialize();
+        }
+
+        // Position player at the current scene's start position
+        this.positionPlayerAtSceneStart();
+
+        // Then set development mode (which will call sceneSystem.updateUI())
+        this.setDevelopmentMode(true); // Properly initialize development mode UI
+
+        // Update platform UI after everything is loaded
+        this.platformSystem.updatePlatformList();
+        this.platformSystem.updatePlatformProperties();
+
+        console.log('✅ Scene system fully initialized');
+        console.log('✅ Final platform count:', this.platformSystem.platforms.length);
     }
 
     loadAvailableBackgrounds() {
@@ -360,17 +395,25 @@ class PlatformRPG {
     }
 
     setSceneBackground(backgroundName) {
-        // Update current scene background
-        if (this.scenes.length > 0) {
-            // Initialize background property if it doesn't exist
-            if (!this.scenes[0].background) {
-                this.scenes[0].background = {
-                    name: 'none',
-                    layers: []
-                };
+        console.log('🎨 setSceneBackground called with:', backgroundName);
+        // Update current scene background using the new scene system
+        if (this.sceneSystem) {
+            const currentScene = this.sceneSystem.currentScene;
+            if (currentScene) {
+                // Initialize background property if it doesn't exist
+                if (!currentScene.background) {
+                    currentScene.background = {
+                        name: 'none',
+                        layers: []
+                    };
+                }
+                currentScene.background.name = backgroundName;
+                currentScene.background.layers = [];
+                currentScene.metadata.modified = new Date().toISOString();
+
+                // Save the scene data to persist the background change
+                this.sceneSystem.saveScenes();
             }
-            this.scenes[0].background.name = backgroundName;
-            this.scenes[0].background.layers = [];
         }
 
         // Load the background
@@ -460,10 +503,13 @@ class PlatformRPG {
 
     init() {
         this.setupEventListeners();
-        this.setDevelopmentMode(true); // Properly initialize development mode UI
         this.populateBackgroundDropdown();
         this.updateViewport(); // Ensure viewport is properly initialized
         this.updateViewportUI(); // Initialize viewport UI
+
+        // Scene system initialization is now handled by onPlatformSpritesLoaded()
+        // after platform sprites are loaded
+
         this.gameLoop();
         this.updateUI();
         this.loadGameDataFromFile();
@@ -565,6 +611,7 @@ class PlatformRPG {
                     `X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`;
 
                 this.updateCursor();
+                this.handleStartPositionDrag();
                 this.handlePlatformDrag(e);
 
                 // Handle free camera mode mouse edge scrolling
@@ -623,6 +670,7 @@ class PlatformRPG {
         });
 
         this.setupPlatformEditorListeners();
+        this.setupSceneEditorListeners();
     }
 
     handlePlayerAttack() {
@@ -644,10 +692,21 @@ class PlatformRPG {
         document.getElementById('backgroundEditor').style.display = isDev ? 'block' : 'none';
         document.getElementById('viewportEditor').style.display = isDev ? 'block' : 'none';
         document.getElementById('propsEditor').style.display = isDev ? 'block' : 'none';
+        document.getElementById('sceneProperties').style.display = isDev ? 'block' : 'none';
+
+        // Clear invalid zones cache when switching modes
+        if (this.sceneSystem && this.sceneSystem.manager) {
+            this.sceneSystem.manager.invalidZonesChecked = new Set();
+            this.sceneSystem.manager.lastCheckedSceneId = null;
+        }
 
         if (isDev) {
             this.platformSystem.updatePlatformList();
             this.propSystem.updatePropList();
+            this.sceneSystem.updateUI();
+        } else {
+            // Production mode - start with the designated start scene
+            this.sceneSystem.startGame();
         }
     }
 
@@ -784,6 +843,10 @@ class PlatformRPG {
 
     updatePhysics() {
         if (!this.isDevelopmentMode) {
+            // Track position before physics update
+            const startX = this.player.x;
+            const startY = this.player.y;
+
             // Use delta time for framerate-independent physics (60fps = 16.67ms baseline)
             const physicsMultiplier = this.deltaTime / 16.67;
 
@@ -792,17 +855,85 @@ class PlatformRPG {
             this.player.x += this.player.velocityX * physicsMultiplier;
             this.player.y += this.player.velocityY * physicsMultiplier;
 
+            // Detect large jumps in position (potential teleportation)
+            const deltaX = Math.abs(this.player.x - startX);
+            const deltaY = Math.abs(this.player.y - startY);
+
+            // If position changed dramatically (more than would be possible with normal physics)
+            if (deltaX > 200 || deltaY > 200) {
+                console.warn('🚨 LARGE POSITION CHANGE DETECTED IN PHYSICS!', {
+                    from: { x: startX, y: startY },
+                    to: { x: this.player.x, y: this.player.y },
+                    delta: { x: deltaX, y: deltaY },
+                    velocity: { x: this.player.velocityX, y: this.player.velocityY },
+                    physicsMultiplier
+                });
+            }
+
             this.player.onGround = false;
 
             // Check collision with platforms using actual positions
+            const beforeCollisionX = this.player.x;
+            const beforeCollisionY = this.player.y;
+
             this.platformSystem.checkPlayerPlatformCollisions(this.player, this.viewport);
 
+            // Check if platform collision caused teleportation
+            if (Math.abs(this.player.x - beforeCollisionX) > 200 || Math.abs(this.player.y - beforeCollisionY) > 200) {
+                console.warn('🚨 PLATFORM COLLISION CAUSED TELEPORTATION!', {
+                    before: { x: beforeCollisionX, y: beforeCollisionY },
+                    after: { x: this.player.x, y: this.player.y }
+                });
+            }
+
             // Check collision with obstacle props
+            const beforePropX = this.player.x;
+            const beforePropY = this.player.y;
+
             this.propSystem.checkPlayerPropCollisions(this.player, this.viewport);
 
-            if (this.player.y > this.viewport.designHeight) {
-                this.player.x = 100;
-                this.player.y = 400;
+            // Check if prop collision caused teleportation
+            if (Math.abs(this.player.x - beforePropX) > 200 || Math.abs(this.player.y - beforePropY) > 200) {
+                console.warn('🚨 PROP COLLISION CAUSED TELEPORTATION!', {
+                    before: { x: beforePropX, y: beforePropY },
+                    after: { x: this.player.x, y: this.player.y }
+                });
+            }
+
+            // Check scene transitions using player center point
+            const beforeTransitionX = this.player.x;
+            const beforeTransitionY = this.player.y;
+
+            const playerCenterX = this.player.x + this.player.width / 2;
+            const playerCenterY = this.player.y + this.player.height / 2;
+            this.sceneSystem.checkTransitions(playerCenterX, playerCenterY);
+
+            // Check if transition caused teleportation
+            if (Math.abs(this.player.x - beforeTransitionX) > 200 || Math.abs(this.player.y - beforeTransitionY) > 200) {
+                console.warn('🚨 SCENE TRANSITION CAUSED TELEPORTATION!', {
+                    before: { x: beforeTransitionX, y: beforeTransitionY },
+                    after: { x: this.player.x, y: this.player.y },
+                    centerPoint: { x: playerCenterX, y: playerCenterY }
+                });
+            }
+
+            // Check if player fell below the viewport (using player's bottom edge)
+            if (this.player.y + this.player.height > this.viewport.designHeight + 100) {
+                console.log('⚠️ Player fell below viewport, resetting to start position', {
+                    playerY: this.player.y,
+                    playerBottom: this.player.y + this.player.height,
+                    viewportHeight: this.viewport.designHeight
+                });
+                // Reset player to current scene's start position
+                const currentScene = this.sceneSystem.currentScene;
+                if (currentScene) {
+                    this.player.x = currentScene.settings.playerStartX;
+                    this.player.y = currentScene.settings.playerStartY;
+                } else {
+                    // Fallback to default position
+                    this.player.x = 100;
+                    this.player.y = 400;
+                }
                 this.player.velocityX = 0;
                 this.player.velocityY = 0;
             }
@@ -812,7 +943,7 @@ class PlatformRPG {
 
     updateCamera() {
         // Don't update camera automatically during drag operations
-        if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.platformSystem.isResizing) {
+        if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.platformSystem.isResizing || this.isDraggingStartPosition) {
             return;
         }
 
@@ -914,7 +1045,7 @@ class PlatformRPG {
         this.ctx.imageSmoothingEnabled = false;
 
         // Debug: Log camera position during render
-        if (this.platformSystem.isDragging || this.propSystem.isDraggingProp) {
+        if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.isDraggingStartPosition) {
             console.log('Rendering with camera position:', this.camera.x, this.camera.y);
         }
 
@@ -955,6 +1086,15 @@ class PlatformRPG {
             this.ctx.save();
             this.ctx.translate(this.viewport.offsetX, this.viewport.offsetY);
             this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
+
+            // Apply camera transformation for scene development overlays
+            this.ctx.save();
+            this.ctx.translate(-this.camera.x, -this.camera.y);
+
+            // Render scene development overlays (transition zones, boundaries, etc.)
+            this.sceneSystem.renderer.renderDevelopmentOverlays(this.ctx);
+
+            this.ctx.restore();
 
             // Render drag selection rectangle
             this.renderDragSelection();
@@ -1221,12 +1361,7 @@ class PlatformRPG {
 
 
     updateUI() {
-        document.getElementById('scenesList').innerHTML = this.scenes.map(scene =>
-            `<div class="item">
-                <div class="item-name">${scene.name}</div>
-                <div class="item-details">${scene.description}</div>
-            </div>`
-        ).join('');
+        // Note: scenesList is now handled by the scene system, not here
 
         document.getElementById('charactersList').innerHTML = this.gameData.characters.map(char =>
             `<div class="item">
@@ -1260,10 +1395,6 @@ class PlatformRPG {
     setupPlatformEditorListeners() {
         document.getElementById('addPlatform').addEventListener('click', () => {
             this.platformSystem.togglePlatformPlacement();
-        });
-
-        document.getElementById('savePlatforms').addEventListener('click', () => {
-            this.savePlatforms();
         });
 
         document.getElementById('updatePlatform').addEventListener('click', () => {
@@ -1433,6 +1564,51 @@ class PlatformRPG {
         });
     }
 
+    setupSceneEditorListeners() {
+        // Scene management controls
+        document.getElementById('createSceneBtn').addEventListener('click', () => {
+            const name = prompt('Scene name:', 'New Scene');
+            const description = prompt('Scene description:', '');
+            if (name !== null) {
+                this.sceneSystem.createScene(name, description);
+            }
+        });
+
+        document.getElementById('saveSceneBtn').addEventListener('click', () => {
+            this.sceneSystem.saveScenes();
+            alert('Current scene saved!');
+        });
+
+        document.getElementById('addTransitionBtn').addEventListener('click', () => {
+            this.sceneSystem.startAddingTransition();
+        });
+
+        // Scene property inputs - use onchange events for real-time updates
+        const sceneNameInput = document.getElementById('sceneName');
+        if (sceneNameInput) {
+            sceneNameInput.addEventListener('change', () => {
+                this.sceneSystem.updateSceneName(sceneNameInput.value);
+            });
+        }
+
+        const sceneDescInput = document.getElementById('sceneDescription');
+        if (sceneDescInput) {
+            sceneDescInput.addEventListener('change', () => {
+                this.sceneSystem.updateSceneDescription(sceneDescInput.value);
+            });
+        }
+
+        const playerStartX = document.getElementById('playerStartX');
+        const playerStartY = document.getElementById('playerStartY');
+        if (playerStartX && playerStartY) {
+            const updatePlayerStart = () => {
+                this.sceneSystem.updatePlayerStart();
+            };
+            playerStartX.addEventListener('change', updatePlayerStart);
+            playerStartY.addEventListener('change', updatePlayerStart);
+        }
+    }
+
     handlePlatformMouseDown(e) {
         const rect = this.canvas.getBoundingClientRect();
         const clientMouseX = e.clientX - rect.left;
@@ -1460,6 +1636,23 @@ class PlatformRPG {
             return;
         }
 
+        // Handle transition zone creation mode
+        if (this.isAddingTransition) {
+            this.transitionStart = { x: worldMouseX, y: worldMouseY };
+            return;
+        }
+
+        // Handle start position dragging
+        if (this.sceneSystem.renderer.isMouseOverStartPosition(worldMouseX, worldMouseY)) {
+            this.isDraggingStartPosition = true;
+            const currentScene = this.sceneSystem.currentScene;
+            if (currentScene) {
+                this.startPositionDragOffset.x = worldMouseX - currentScene.settings.playerStartX;
+                this.startPositionDragOffset.y = worldMouseY - currentScene.settings.playerStartY;
+            }
+            return;
+        }
+
 
         // Check for prop clicks first (props should be selectable before platforms)
         const propResult = this.propsMouseHandler.handleMouseDown(worldMouseX, worldMouseY, e.ctrlKey, e.shiftKey);
@@ -1479,6 +1672,17 @@ class PlatformRPG {
 
         // No platform was clicked - start drag selection for props
         this.propSystem.data.startDragSelection(worldMouseX, worldMouseY);
+    }
+
+    handleStartPositionDrag() {
+        if (!this.isDraggingStartPosition) return;
+
+        // Calculate new position based on mouse position minus drag offset
+        const newX = this.mouseX - this.startPositionDragOffset.x;
+        const newY = this.mouseY - this.startPositionDragOffset.y;
+
+        // Update the start position
+        this.sceneSystem.renderer.updateStartPosition(newX, newY);
     }
 
     handlePlatformDrag(e) {
@@ -1733,6 +1937,32 @@ class PlatformRPG {
         this.render();
 
         console.log('Camera focused on player at:', this.camera.x);
+    }
+
+    positionPlayerAtSceneStart() {
+        const currentScene = this.sceneSystem.currentScene;
+        if (currentScene && currentScene.settings) {
+            // Position player so their center is at the start point
+            // (subtract half width and half height to center the player)
+            this.player.x = currentScene.settings.playerStartX - (this.player.width / 2);
+            this.player.y = currentScene.settings.playerStartY - (this.player.height / 2);
+            this.player.velocityX = 0;
+            this.player.velocityY = 0;
+
+            // Update camera to follow player to the new position
+            if (this.camera) {
+                this.camera.targetX = this.player.x;
+                this.camera.targetY = this.player.y;
+            }
+
+            console.log('Player centered at scene start point:', {
+                startPoint: [currentScene.settings.playerStartX, currentScene.settings.playerStartY],
+                playerTopLeft: [this.player.x, this.player.y],
+                playerSize: [this.player.width, this.player.height]
+            });
+        } else {
+            console.log('No current scene found, player remains at default position');
+        }
     }
 
 
@@ -2023,6 +2253,30 @@ class PlatformRPG {
     */
 
     handlePlatformMouseUp(e) {
+        // Handle transition zone creation completion
+        if (this.isAddingTransition && this.transitionStart) {
+            const rect = this.canvas.getBoundingClientRect();
+            const clientMouseX = e.clientX - rect.left;
+            const clientMouseY = e.clientY - rect.top;
+            const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
+
+            this.sceneSystem.handleTransitionCreation(
+                this.transitionStart.x, this.transitionStart.y,
+                worldCoords.x, worldCoords.y
+            );
+
+            this.isAddingTransition = false;
+            this.transitionStart = null;
+            return;
+        }
+
+        // Handle start position drag completion
+        if (this.isDraggingStartPosition) {
+            this.isDraggingStartPosition = false;
+            this.startPositionDragOffset = { x: 0, y: 0 };
+            return;
+        }
+
         // Handle platform mouse up using the platform mouse handler
         this.platformMouseHandler.handleMouseUp();
 
@@ -2041,6 +2295,12 @@ class PlatformRPG {
         const worldCoords = this.screenToWorld(this.lastMouseX, this.lastMouseY);
         const worldMouseX = worldCoords.x;
         const worldMouseY = worldCoords.y;
+
+        // Check if mouse is over start position (highest priority)
+        if (this.sceneSystem.renderer.isMouseOverStartPosition(worldMouseX, worldMouseY)) {
+            this.canvas.style.cursor = 'move';
+            return;
+        }
 
 
         // Check if mouse is over any prop first (props have priority)
@@ -2117,13 +2377,9 @@ class PlatformRPG {
 
 
     async savePlatforms() {
-        // Update the current scene with the current platforms and props
-        if (this.scenes.length > 0) {
-            this.scenes[0].platforms = JSON.parse(JSON.stringify(this.platformSystem.platforms));
-            this.scenes[0].props = JSON.parse(JSON.stringify(this.propSystem.props));
-
-            // Save to localStorage as backup
-            localStorage.setItem('platformGame_scenes', JSON.stringify(this.scenes));
+        // Use the new scene system for saving
+        if (this.sceneSystem) {
+            this.sceneSystem.saveScenes();
 
             // Create the gameData object
             const gameData = {
@@ -2132,7 +2388,7 @@ class PlatformRPG {
                     version: "1.0.0",
                     lastModified: new Date().toISOString().split('T')[0]
                 },
-                scenes: this.scenes,
+                scenes: this.sceneSystem.exportSceneData().scenes,
                 characters: this.gameData.characters,
                 classes: this.gameData.classes,
                 weapons: this.gameData.weapons,
@@ -2186,81 +2442,58 @@ class PlatformRPG {
     loadGameDataFromObject(gameData) {
         try {
             console.log('📁 Loading game data from object');
-            if (gameData.scenes && gameData.scenes.length > 0) {
-                this.scenes = gameData.scenes;
-                if (this.scenes[0].platforms) {
-                    this.platformSystem.platforms = [...this.scenes[0].platforms];
 
-                    // Migrate platforms to ensure they have positioning properties
-                    this.platformSystem.platforms.forEach(platform => {
-                        if (!platform.positioning) {
-                            platform.positioning = 'absolute';
-                            platform.relativeX = 0.5;
-                            platform.relativeY = 0.5;
-                            console.log(`Migrated platform ${platform.id} to have positioning properties`);
-                        }
+            // Check if scene system is already initialized
+            if (this.sceneSystem && this.platformSpritesLoaded) {
+                // Scene system is ready, import immediately
+                if (gameData.scenes && gameData.scenes.length > 0) {
+                    console.log('🔄 Importing scene data immediately (scene system is ready)');
+
+                    // Import the scene data
+                    this.sceneSystem.data.importSceneData({
+                        scenes: gameData.scenes,
+                        currentSceneId: gameData.currentSceneId || gameData.scenes[0].id,
+                        startSceneId: gameData.startSceneId || gameData.scenes[0].id
                     });
 
-                    this.platformSystem.nextPlatformId = Math.max(...this.platformSystem.platforms.map(p => p.id || 0)) + 1;
+                    console.log('📥 Imported scenes:', this.sceneSystem.data.scenes.map(s => ({
+                        id: s.id,
+                        name: s.name,
+                        platforms: s.platforms?.length || 0,
+                        props: s.props?.length || 0
+                    })));
+
+                    // Force clear the current platforms to ensure reload
+                    this.platformSystem.platforms = [];
+
+                    // Force load the start scene or current scene (bypass optimization)
+                    const sceneToLoad = gameData.startSceneId || gameData.currentSceneId || gameData.scenes[0].id;
+                    console.log('📥 Force loading imported scene:', sceneToLoad);
+                    this.sceneSystem.manager.forceLoadScene(sceneToLoad);
+
+                    // Save the imported data to localStorage
+                    this.sceneSystem.saveScenes();
+
+                    // Update UI
+                    this.sceneSystem.updateUI();
+                    this.platformSystem.updatePlatformList();
+                    this.platformSystem.updatePlatformProperties();
+
+                    console.log('✅ Scene data imported and saved to localStorage');
                 }
-
-                // Load props if they exist
-                if (this.scenes[0].props) {
-                    this.propSystem.props = [...this.scenes[0].props];
-
-                    // Initialize groups from loaded props
-                    this.propSystem.data.initializeGroupsFromProps();
-
-                    // Migrate props to ensure they have positioning properties and convert scale to sizeMultiplier
-                    let migratedCount = 0;
-                    let scaleConvertCount = 0;
-                    this.propSystem.props.forEach(prop => {
-                        if (!prop.positioning) {
-                            prop.positioning = 'absolute';
-                            prop.relativeX = 0.5;
-                            prop.relativeY = 0.5;
-                            migratedCount++;
-                        }
-
-                        // Migrate scale to sizeMultiplier
-                        if (prop.scale !== undefined && prop.sizeMultiplier === undefined) {
-                            prop.sizeMultiplier = prop.scale;
-                            delete prop.scale;
-                            scaleConvertCount++;
-                        }
-
-                        // Remove old width/height properties as they're calculated from sizeMultiplier now
-                        delete prop.width;
-                        delete prop.height;
-                    });
-                    if (migratedCount > 0) {
-                        console.log(`✅ Migrated ${migratedCount} props to have positioning properties`);
-                    }
-                    if (scaleConvertCount > 0) {
-                        console.log(`✅ Converted ${scaleConvertCount} props from scale to sizeMultiplier`);
-                    }
-
-                    this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
-                }
-
-                // Restore background if it exists
-                if (this.scenes[0].background && this.scenes[0].background.name && this.scenes[0].background.name !== 'none') {
-                    console.log('🎨 Loading background:', this.scenes[0].background.name);
-                    this.loadBackground(this.scenes[0].background.name);
-
-                    // Update the UI dropdown to match the loaded background (with small delay for DOM)
-                    setTimeout(() => {
-                        const backgroundSelect = document.getElementById('backgroundSelect');
-                        if (backgroundSelect) {
-                            backgroundSelect.value = this.scenes[0].background.name;
-                            console.log('📝 Set dropdown to:', this.scenes[0].background.name);
-                        }
-                    }, 100);
-                } else {
-                    console.log('⚠️ No background found in scene data');
+            } else {
+                // Store the scene data to be loaded after scene system initializes
+                if (gameData.scenes && gameData.scenes.length > 0) {
+                    this.pendingGameDataImport = {
+                        scenes: gameData.scenes,
+                        currentSceneId: gameData.currentSceneId || gameData.scenes[0].id,
+                        startSceneId: gameData.startSceneId || gameData.scenes[0].id
+                    };
+                    console.log('📦 Stored scene data for later import (waiting for scene system)');
                 }
             }
 
+            // Load other game data immediately
             if (gameData.characters) {
                 this.gameData.characters = gameData.characters;
             }
@@ -2281,89 +2514,23 @@ class PlatformRPG {
     }
 
     loadSavedData() {
-        const savedScenes = localStorage.getItem('platformGame_scenes');
-        if (savedScenes) {
-            try {
-                this.scenes = JSON.parse(savedScenes);
-                if (this.scenes.length > 0 && this.scenes[0].platforms) {
-                    this.platformSystem.platforms = [...this.scenes[0].platforms];
-
-                    // Migrate platforms to ensure they have positioning properties
-                    this.platformSystem.platforms.forEach(platform => {
-                        if (!platform.positioning) {
-                            platform.positioning = 'absolute';
-                            platform.relativeX = 0.5;
-                            platform.relativeY = 0.5;
-                            console.log(`Migrated platform ${platform.id} to have positioning properties (localStorage)`);
-                        }
-                    });
-
-                    this.platformSystem.nextPlatformId = Math.max(...this.platformSystem.platforms.map(p => p.id || 0)) + 1;
-                }
-
-                // Load props if they exist
-                if (this.scenes.length > 0 && this.scenes[0].props) {
-                    this.propSystem.props = [...this.scenes[0].props];
-
-                    // Initialize groups from loaded props
-                    this.propSystem.data.initializeGroupsFromProps();
-
-                    // Migrate props to ensure they have positioning properties and convert scale to sizeMultiplier
-                    let migratedCount = 0;
-                    let scaleConvertCount = 0;
-                    this.propSystem.props.forEach(prop => {
-                        if (!prop.positioning) {
-                            prop.positioning = 'absolute';
-                            prop.relativeX = 0.5;
-                            prop.relativeY = 0.5;
-                            migratedCount++;
-                        }
-
-                        // Migrate scale to sizeMultiplier
-                        if (prop.scale !== undefined && prop.sizeMultiplier === undefined) {
-                            prop.sizeMultiplier = prop.scale;
-                            delete prop.scale;
-                            scaleConvertCount++;
-                        }
-
-                        // Remove old width/height properties as they're calculated from sizeMultiplier now
-                        delete prop.width;
-                        delete prop.height;
-                    });
-                    if (migratedCount > 0) {
-                        console.log(`✅ Migrated ${migratedCount} props to have positioning properties (localStorage)`);
-                    }
-                    if (scaleConvertCount > 0) {
-                        console.log(`✅ Converted ${scaleConvertCount} props from scale to sizeMultiplier (localStorage)`);
-                    }
-
-                    this.propSystem.nextPropId = Math.max(...this.propSystem.props.map(p => p.id || 0)) + 1;
-                }
-
-                // Restore background if it exists
-                if (this.scenes.length > 0 && this.scenes[0].background && this.scenes[0].background.name && this.scenes[0].background.name !== 'none') {
-                    this.loadBackground(this.scenes[0].background.name);
-
-                    // Update the UI dropdown to match the loaded background (with small delay for DOM)
-                    setTimeout(() => {
-                        const backgroundSelect = document.getElementById('backgroundSelect');
-                        if (backgroundSelect) {
-                            backgroundSelect.value = this.scenes[0].background.name;
-                        }
-                    }, 100);
-                }
-            } catch (e) {
-                console.error('Error loading saved data:', e);
-            }
+        // Use the new scene system to load saved data
+        if (this.sceneSystem) {
+            this.sceneSystem.loadSavedScenes();
+            return;
         }
+
+        // All loading is now handled by the scene system in onPlatformSpritesLoaded()
     }
 
     exportGameData() {
-        // Update current scene with current platforms and props
-        if (this.scenes.length > 0) {
-            this.scenes[0].platforms = JSON.parse(JSON.stringify(this.platformSystem.platforms));
-            this.scenes[0].props = JSON.parse(JSON.stringify(this.propSystem.props));
+        // Save current scene data using the new scene system
+        if (this.sceneSystem) {
+            this.sceneSystem.saveScenes();
         }
+
+        // Get the full scene data including currentSceneId and startSceneId
+        const sceneData = this.sceneSystem ? this.sceneSystem.exportSceneData() : { scenes: [], currentSceneId: null, startSceneId: null };
 
         const gameData = {
             gameInfo: {
@@ -2371,7 +2538,9 @@ class PlatformRPG {
                 version: "1.0.0",
                 lastModified: new Date().toISOString().split('T')[0]
             },
-            scenes: this.scenes,
+            scenes: sceneData.scenes,
+            currentSceneId: sceneData.currentSceneId,
+            startSceneId: sceneData.startSceneId,
             characters: this.gameData.characters,
             classes: this.gameData.classes,
             weapons: this.gameData.weapons,

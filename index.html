@@ -197,6 +197,141 @@
             color: #999;
             margin-top: 5px;
         }
+
+        /* Scene Management Styles */
+        .scene-item {
+            background-color: #444;
+            border: 1px solid #666;
+            border-radius: 4px;
+            margin: 5px 0;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .scene-item:hover {
+            background-color: #555;
+        }
+
+        .scene-item.current {
+            border-color: #4CAF50;
+            background-color: #2a4a2a;
+        }
+
+        .scene-item.start {
+            border-color: #FF9800;
+        }
+
+        .scene-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scene-name {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .scene-name:hover {
+            color: #4CAF50;
+            text-decoration: underline;
+        }
+
+        .scene-badges {
+            display: flex;
+            gap: 4px;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .start-badge {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .current-badge {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .scene-description {
+            font-size: 12px;
+            color: #ccc;
+            margin: 4px 0;
+        }
+
+        .scene-stats {
+            font-size: 11px;
+            color: #999;
+            margin: 4px 0;
+        }
+
+        .scene-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .btn-small {
+            padding: 3px 8px;
+            font-size: 11px;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+        }
+
+        .btn-danger:hover {
+            background-color: #da190b;
+        }
+
+        .transition-item {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 6px;
+            margin: 3px 0;
+            font-size: 11px;
+        }
+
+        .transition-info {
+            color: #ccc;
+            margin-bottom: 4px;
+        }
+
+        .property-group {
+            margin: 8px 0;
+        }
+
+        .property-group label {
+            display: block;
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 4px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        .input-row input {
+            flex: 1;
+        }
+
+        textarea {
+            background-color: #555;
+            border: 1px solid #777;
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -225,11 +360,41 @@
             </div>
 
             <div class="section">
-                <h3>Scenes</h3>
-                <div id="scenesList">
-                    <div class="item">
-                        <div class="item-name">Scene 1 - Tutorial</div>
-                        <div class="item-details">Starting scene with basic platforms</div>
+                <h3>Game Management</h3>
+                <div class="property-row">
+                    <button class="btn small" id="exportGameData">Export Game Data</button>
+                    <input type="file" id="importGameData" accept=".json" style="display: none;">
+                    <button class="btn small" id="importGameDataBtn">Import Game Data</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Scene Management</h3>
+                <div class="property-row">
+                    <button class="btn small" id="createSceneBtn">Create New Scene</button>
+                    <button class="btn small" id="saveSceneBtn">Save Current Scene</button>
+                </div>
+                <div id="scenesList"></div>
+
+                <div class="platform-editor" id="sceneProperties" style="display: none;">
+                    <h4>Scene Properties</h4>
+                    <div class="property-row">
+                        <span class="property-label">Name:</span>
+                        <input type="text" id="sceneName" style="width: 180px;">
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Description:</span>
+                        <textarea id="sceneDescription" style="width: 180px; height: 60px; resize: vertical;"></textarea>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Player Start:</span>
+                        <input type="number" id="playerStartX" style="width: 70px;" placeholder="X">
+                        <input type="number" id="playerStartY" style="width: 70px;" placeholder="Y">
+                    </div>
+                    <div class="property-row">
+                        <h4>Transitions (<span id="transitionCount">0</span>)</h4>
+                        <div id="transitionsList"></div>
+                        <button class="btn small" id="addTransitionBtn">Add Transition Zone</button>
                     </div>
                 </div>
 
@@ -588,14 +753,8 @@
 
                     <div class="property-row">
                         <button class="btn small" id="addPlatform">Add Platform (Click on map)</button>
-                        <button class="btn small" id="savePlatforms">Save Scene</button>
                     </div>
 
-                    <div class="property-row" style="margin-top: 15px; border-top: 1px solid #555; padding-top: 10px;">
-                        <button class="btn small" id="exportGameData">Export Game Data</button>
-                        <input type="file" id="importGameData" accept=".json" style="display: none;">
-                        <button class="btn small" id="importGameDataBtn">Import Game Data</button>
-                    </div>
                 </div>
             </div>
 
@@ -656,6 +815,12 @@
     <script src="js/props/propManager.js"></script>
     <script src="js/props/propsMouseHandler.js"></script>
     <script src="js/props/propSystem.js"></script>
+
+    <!-- Scene System Scripts -->
+    <script src="js/scenes/sceneData.js"></script>
+    <script src="js/scenes/sceneRenderer.js"></script>
+    <script src="js/scenes/sceneManager.js"></script>
+    <script src="js/scenes/sceneSystem.js"></script>
 
     <!-- Main Game Script -->
     <script src="game.js"></script>

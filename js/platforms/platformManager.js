@@ -324,6 +324,7 @@ class PlatformManager {
             if (yInput) yInput.value = Math.round(this.platformData.selectedPlatform.y);
             if (widthInput) widthInput.value = this.platformData.selectedPlatform.width;
             if (heightInput) heightInput.value = this.platformData.selectedPlatform.height;
+            console.log('🔧 Platform selected - spriteType:', this.platformData.selectedPlatform.spriteType);
             if (spriteTypeInput) spriteTypeInput.value = this.platformData.selectedPlatform.spriteType || 'color';
 
             // Handle positioning properties

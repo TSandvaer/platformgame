@@ -12,7 +12,16 @@ class PlatformSystem {
     }
 
     set platforms(value) {
+        console.log('🔧 Setting platformSystem.platforms:', value.map(p => ({
+            id: p.id,
+            spriteType: p.spriteType,
+            x: p.x,
+            y: p.y
+        })));
+        console.log('🔧 Before assignment - this.data.platforms:', this.data.platforms);
         this.data.platforms = value;
+        console.log('🔧 After assignment - this.data.platforms:', this.data.platforms);
+        console.log('🔧 Verify assignment - this.data.platforms.length:', this.data.platforms.length);
     }
 
     get selectedPlatform() {
@@ -41,6 +50,9 @@ class PlatformSystem {
 
     // Rendering
     renderPlatforms(isDevelopmentMode, viewport) {
+        if (this.data.platforms.length === 0) {
+            console.warn('⚠️ No platforms to render in platformSystem!');
+        }
         this.data.platforms.forEach(platform => {
             const isSelected = this.data.selectedPlatform && this.data.selectedPlatform.id === platform.id;
 
