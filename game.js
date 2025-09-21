@@ -743,14 +743,9 @@ class PlatformRPG {
         this.canvas.style.width = newWidth + 'px';
         this.canvas.style.height = newHeight + 'px';
 
-        // Adjust design width dynamically based on dashboard state to prevent letterboxing
-        if (!this.showDashboard) {
-            // When dashboard is hidden, use the full window width as design width
-            this.viewport.designWidth = window.innerWidth;
-        } else {
-            // When dashboard is shown, revert to standard design width
-            this.viewport.designWidth = 1920;
-        }
+        // Keep design dimensions and viewport mode constant
+        this.viewport.designWidth = 1920;
+        this.viewport.designHeight = 1080;
 
         this.updateViewport();
 
@@ -1024,17 +1019,20 @@ class PlatformRPG {
         }
 
         const bounds = currentScene.boundaries;
-        const cameraWidth = this.canvas.width;
-        const cameraHeight = this.canvas.height;
+
+        // Calculate the actual visible area in world coordinates
+        // This accounts for the actual canvas size and viewport scaling
+        const visibleWorldWidth = this.canvas.width / this.viewport.scaleX;
+        const visibleWorldHeight = this.canvas.height / this.viewport.scaleY;
 
         // Calculate the constrained camera position
-        // Camera X constraints: left boundary to (right boundary - camera width)
+        // Camera X constraints: left boundary to (right boundary - visible width)
         const minCameraX = bounds.left;
-        const maxCameraX = Math.max(bounds.left, bounds.right - cameraWidth);
+        const maxCameraX = Math.max(bounds.left, bounds.right - visibleWorldWidth);
 
-        // Camera Y constraints: top boundary to (bottom boundary - camera height)
+        // Camera Y constraints: top boundary to (bottom boundary - visible height)
         const minCameraY = bounds.top;
-        const maxCameraY = Math.max(bounds.top, bounds.bottom - cameraHeight);
+        const maxCameraY = Math.max(bounds.top, bounds.bottom - visibleWorldHeight);
 
         // Apply constraints
         this.camera.x = Math.max(minCameraX, Math.min(maxCameraX, targetX));
@@ -1055,11 +1053,6 @@ class PlatformRPG {
         const originalY = this.player.y;
 
         // Constrain player position to scene boundaries
-        // Left boundary: player's left edge can't go left of scene left
-        // Right boundary: player's right edge can't go right of scene right
-        // Top boundary: player's top edge can't go above scene top
-        // Bottom boundary: player's bottom edge can't go below scene bottom
-
         const playerLeft = this.player.x;
         const playerRight = this.player.x + this.player.width;
         const playerTop = this.player.y;
@@ -1104,8 +1097,16 @@ class PlatformRPG {
                 this.viewport.scale = Math.min(scaleX, scaleY);
                 this.viewport.scaleX = this.viewport.scale;
                 this.viewport.scaleY = this.viewport.scale;
-                this.viewport.offsetX = (this.viewport.actualWidth - this.viewport.designWidth * this.viewport.scale) / 2;
-                this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2;
+
+                // Align to left in production mode when dashboard is hidden, center otherwise
+                if (!this.isDevelopmentMode && !this.showDashboard) {
+                    this.viewport.offsetX = 0; // Align to left (no gap on left side)
+                    this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2; // Center vertically
+                } else {
+                    // Default centering behavior
+                    this.viewport.offsetX = (this.viewport.actualWidth - this.viewport.designWidth * this.viewport.scale) / 2;
+                    this.viewport.offsetY = (this.viewport.actualHeight - this.viewport.designHeight * this.viewport.scale) / 2;
+                }
                 break;
             case 'stretch':
                 // Stretch to fill entire viewport (may distort)
