@@ -116,15 +116,21 @@ class SceneSystem {
                 const sceneData = JSON.parse(savedData);
                 this.data.importSceneData(sceneData);
 
-                // Load the start scene (not the last current scene)
-                const startScene = this.data.getStartScene();
-                if (startScene) {
-                    this.manager.loadScene(startScene.id);
+                // Load the last current scene (to maintain context after refresh)
+                const currentSceneId = sceneData.currentSceneId;
+                if (currentSceneId) {
+                    this.manager.loadScene(currentSceneId);
                 } else {
-                    // Fallback: load first scene if no start scene is set
-                    const firstScene = this.data.scenes[0];
-                    if (firstScene) {
-                        this.manager.loadScene(firstScene.id);
+                    // Fallback: load start scene if no current scene is set
+                    const startScene = this.data.getStartScene();
+                    if (startScene) {
+                        this.manager.loadScene(startScene.id);
+                    } else {
+                        // Final fallback: load first scene
+                        const firstScene = this.data.scenes[0];
+                        if (firstScene) {
+                            this.manager.loadScene(firstScene.id);
+                        }
                     }
                 }
 

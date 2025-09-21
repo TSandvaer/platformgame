@@ -1488,8 +1488,7 @@ class PlatformRPG {
 
         document.getElementById('deleteProp').addEventListener('click', () => {
             if (this.propSystem.selectedProp && confirm('Delete this prop? This cannot be undone.')) {
-                this.propSystem.props = this.propSystem.props.filter(prop => prop.id !== this.propSystem.selectedProp.id);
-                this.propSystem.selectedProp = null;
+                this.propSystem.deleteSelectedProp();
                 this.propSystem.updatePropProperties();
                 this.propSystem.updatePropList();
             }
@@ -2433,23 +2432,30 @@ class PlatformRPG {
     }
 
     async loadGameDataFromFile() {
+        // Check if we have saved scene data in localStorage first
+        const savedSceneData = localStorage.getItem('platformGame_sceneData');
+        if (savedSceneData) {
+            console.log('✅ Found saved scene data in localStorage, using that instead of gameData.json');
+            this.loadSavedData();
+            return;
+        }
+
+        // If no localStorage data, try to load from gameData.json as fallback
         try {
-            console.log('🔄 Attempting to load gameData.json...');
+            console.log('🔄 No localStorage data found, attempting to load gameData.json...');
             const response = await fetch('./gameData.json');
             if (response.ok) {
                 console.log('✅ gameData.json found, loading from JSON file');
                 const gameData = await response.json();
                 this.loadGameDataFromObject(gameData);
             } else {
-                console.log('❌ gameData.json response not ok, falling back to localStorage');
-                // Fallback to localStorage if JSON file not found
-                this.loadSavedData();
+                console.log('❌ gameData.json response not ok, loading defaults');
+                // No saved data and no JSON file, start fresh
+                console.log('🆕 Starting with default game state');
             }
         } catch (error) {
             console.log('❌ No gameData.json found, error:', error);
-            console.log('🔄 Falling back to localStorage');
-            // Fallback to localStorage
-            this.loadSavedData();
+            console.log('🆕 Starting with default game state');
         }
     }
 
