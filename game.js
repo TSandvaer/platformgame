@@ -731,9 +731,31 @@ class PlatformRPG {
         this.showDashboard = !this.showDashboard;
         const dashboard = document.getElementById('dashboard');
         dashboard.classList.toggle('hidden', !this.showDashboard);
-        this.canvas.width = window.innerWidth - (this.showDashboard ? 300 : 0);
-        this.canvas.height = window.innerHeight;
+
+        // Update canvas element size
+        const newWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
+        const newHeight = window.innerHeight;
+
+        this.canvas.width = newWidth;
+        this.canvas.height = newHeight;
+
+        // Also update CSS size to match
+        this.canvas.style.width = newWidth + 'px';
+        this.canvas.style.height = newHeight + 'px';
+
+        // Adjust design width dynamically based on dashboard state to prevent letterboxing
+        if (!this.showDashboard) {
+            // When dashboard is hidden, use the full window width as design width
+            this.viewport.designWidth = window.innerWidth;
+        } else {
+            // When dashboard is shown, revert to standard design width
+            this.viewport.designWidth = 1920;
+        }
+
         this.updateViewport();
+
+        // Force a render to see the changes immediately
+        this.render();
     }
 
     handleInput() {
@@ -934,6 +956,9 @@ class PlatformRPG {
                 });
             }
 
+            // Apply scene boundary constraints to player position
+            this.applyPlayerBoundaryConstraints();
+
             // Check if player fell below the viewport (using player's bottom edge)
             if (this.player.y + this.player.height > this.viewport.designHeight + 100) {
                 console.log('⚠️ Player fell below viewport, resetting to start position', {
@@ -968,15 +993,101 @@ class PlatformRPG {
         if (this.cameraMode === 'character') {
             // Character mode: always follow player
             const targetX = this.player.x - this.canvas.width / 2;
-            this.camera.x = Math.max(0, targetX);
+            const targetY = this.player.y - this.canvas.height / 2;
+
+            if (this.isDevelopmentMode) {
+                // Development mode: basic constraints
+                this.camera.x = Math.max(0, targetX);
+                this.camera.y = Math.max(0, targetY);
+            } else {
+                // Production mode: use scene boundaries
+                this.applyCameraBoundaryConstraints(targetX, targetY);
+            }
         } else if (this.cameraMode === 'free') {
             // Free mode: only follow player in production mode
             if (!this.isDevelopmentMode) {
                 const targetX = this.player.x - this.canvas.width / 2;
-                this.camera.x = Math.max(0, targetX);
+                const targetY = this.player.y - this.canvas.height / 2;
+                this.applyCameraBoundaryConstraints(targetX, targetY);
             }
             // In development mode with free camera, camera stays manual
         }
+    }
+
+    applyCameraBoundaryConstraints(targetX, targetY) {
+        const currentScene = this.sceneSystem.currentScene;
+        if (!currentScene || !currentScene.boundaries) {
+            // Fallback to basic constraints if no scene boundaries
+            this.camera.x = Math.max(0, targetX);
+            this.camera.y = Math.max(0, targetY);
+            return;
+        }
+
+        const bounds = currentScene.boundaries;
+        const cameraWidth = this.canvas.width;
+        const cameraHeight = this.canvas.height;
+
+        // Calculate the constrained camera position
+        // Camera X constraints: left boundary to (right boundary - camera width)
+        const minCameraX = bounds.left;
+        const maxCameraX = Math.max(bounds.left, bounds.right - cameraWidth);
+
+        // Camera Y constraints: top boundary to (bottom boundary - camera height)
+        const minCameraY = bounds.top;
+        const maxCameraY = Math.max(bounds.top, bounds.bottom - cameraHeight);
+
+        // Apply constraints
+        this.camera.x = Math.max(minCameraX, Math.min(maxCameraX, targetX));
+        this.camera.y = Math.max(minCameraY, Math.min(maxCameraY, targetY));
+
+        // Debug logging for camera constraints (can be removed for production)
+        // console.log('🎥 Camera constrained:', { target: { x: targetX, y: targetY }, actual: { x: this.camera.x, y: this.camera.y } });
+    }
+
+    applyPlayerBoundaryConstraints() {
+        const currentScene = this.sceneSystem.currentScene;
+        if (!currentScene || !currentScene.boundaries) {
+            return; // No constraints if no scene boundaries
+        }
+
+        const bounds = currentScene.boundaries;
+        const originalX = this.player.x;
+        const originalY = this.player.y;
+
+        // Constrain player position to scene boundaries
+        // Left boundary: player's left edge can't go left of scene left
+        // Right boundary: player's right edge can't go right of scene right
+        // Top boundary: player's top edge can't go above scene top
+        // Bottom boundary: player's bottom edge can't go below scene bottom
+
+        const playerLeft = this.player.x;
+        const playerRight = this.player.x + this.player.width;
+        const playerTop = this.player.y;
+        const playerBottom = this.player.y + this.player.height;
+
+        // Apply horizontal constraints
+        if (playerLeft < bounds.left) {
+            this.player.x = bounds.left;
+            this.player.velocityX = 0; // Stop horizontal movement
+        } else if (playerRight > bounds.right) {
+            this.player.x = bounds.right - this.player.width;
+            this.player.velocityX = 0; // Stop horizontal movement
+        }
+
+        // Apply vertical constraints
+        if (playerTop < bounds.top) {
+            this.player.y = bounds.top;
+            this.player.velocityY = 0; // Stop vertical movement
+        } else if (playerBottom > bounds.bottom) {
+            this.player.y = bounds.bottom - this.player.height;
+            this.player.velocityY = 0; // Stop vertical movement
+            this.player.onGround = true; // Player landed on bottom boundary
+        }
+
+        // Debug logging for player constraints (can be removed for production)
+        // if (this.player.x !== originalX || this.player.y !== originalY) {
+        //     console.log('🚧 Player constrained by scene boundaries:', { original: { x: originalX, y: originalY }, constrained: { x: this.player.x, y: this.player.y } });
+        // }
     }
 
     updateViewport() {
