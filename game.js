@@ -1030,9 +1030,21 @@ class PlatformRPG {
         const minCameraX = bounds.left;
         const maxCameraX = Math.max(bounds.left, bounds.right - visibleWorldWidth);
 
-        // Camera Y constraints: top boundary to (bottom boundary - visible height)
-        const minCameraY = bounds.top;
-        const maxCameraY = Math.max(bounds.top, bounds.bottom - visibleWorldHeight);
+        // Camera Y constraints: more flexible for smaller screens
+        let minCameraY, maxCameraY;
+
+        if (visibleWorldHeight >= (bounds.bottom - bounds.top)) {
+            // Screen is tall enough to show the entire scene height - center it vertically
+            const sceneHeight = bounds.bottom - bounds.top;
+            const excessHeight = visibleWorldHeight - sceneHeight;
+            const centerOffset = excessHeight / 2;
+            minCameraY = bounds.top - centerOffset;
+            maxCameraY = bounds.top - centerOffset;  // Same value for centering
+        } else {
+            // Screen is shorter than scene - use normal constraints
+            minCameraY = bounds.top;
+            maxCameraY = Math.max(bounds.top, bounds.bottom - visibleWorldHeight);
+        }
 
         // Apply constraints
         this.camera.x = Math.max(minCameraX, Math.min(maxCameraX, targetX));

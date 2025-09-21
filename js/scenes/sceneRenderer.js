@@ -88,13 +88,33 @@ class SceneRenderer {
         ctx.lineWidth = 1;
         ctx.setLineDash([10, 10]);
 
+        // Draw the scene boundaries as they are defined
         ctx.strokeRect(bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top);
+
+        // Also draw the effective camera boundaries (what player sees in production mode)
+        ctx.strokeStyle = 'rgba(255, 100, 100, 0.7)'; // Red color for camera bounds
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+
+        // Calculate the visible area that matches production mode
+        const visibleWorldWidth = this.game.canvas.width / this.game.viewport.scaleX;
+        const visibleWorldHeight = this.game.canvas.height / this.game.viewport.scaleY;
+
+        // Show the maximum camera view area
+        const maxCameraX = Math.max(bounds.left, bounds.right - visibleWorldWidth);
+        const maxCameraY = Math.max(bounds.top, bounds.bottom - visibleWorldHeight);
+
+        // Draw the effective viewing area rectangle
+        ctx.strokeRect(bounds.left, bounds.top, Math.min(visibleWorldWidth, bounds.right - bounds.left), Math.min(visibleWorldHeight, bounds.bottom - bounds.top));
 
         // Labels
         ctx.setLineDash([]);
         ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
         ctx.font = '12px Arial';
         ctx.fillText('Scene Boundary', bounds.left + 10, bounds.top + 20);
+
+        ctx.fillStyle = 'rgba(255, 100, 100, 0.8)';
+        ctx.fillText('Camera View Area', bounds.left + 10, bounds.top + 40);
 
         ctx.restore();
     }
