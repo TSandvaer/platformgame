@@ -241,6 +241,10 @@ class SceneSystem {
         this.manager.updatePlayerStart();
     }
 
+    updateSceneBoundaries(left, right, top, bottom) {
+        this.manager.updateSceneBoundaries(left, right, top, bottom);
+    }
+
     // Transition creation
     startAddingTransition() {
         this.manager.startAddingTransition();

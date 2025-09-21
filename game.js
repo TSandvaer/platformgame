@@ -538,6 +538,11 @@ class PlatformRPG {
 
     setupEventListeners() {
         window.addEventListener('keydown', (e) => {
+            // Skip game key handling if user is typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
             // Don't register arrow keys for player movement if we're nudging props
             const isArrowKey = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
             const isNudgingProp = this.isDevelopmentMode &&
@@ -674,6 +679,10 @@ class PlatformRPG {
 
         // Add keyboard event listener for Delete key
         window.addEventListener('keydown', (e) => {
+            // Skip game key handling if user is typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
             this.handleKeyDown(e);
         });
 
@@ -1642,6 +1651,7 @@ class PlatformRPG {
             playerStartX.addEventListener('change', updatePlayerStart);
             playerStartY.addEventListener('change', updatePlayerStart);
         }
+
     }
 
     handlePlatformMouseDown(e) {
@@ -2640,6 +2650,27 @@ class PlatformRPG {
 
         URL.revokeObjectURL(link.href);
     }
+
+    updateSceneBoundaries() {
+        const left = parseInt(document.getElementById('boundaryLeft').value) || 0;
+        const right = parseInt(document.getElementById('boundaryRight').value) || 2000;
+        const top = parseInt(document.getElementById('boundaryTop').value) || 0;
+        const bottom = parseInt(document.getElementById('boundaryBottom').value) || 1000;
+
+        // Validate boundaries
+        if (left >= right) {
+            alert('Left boundary must be less than right boundary');
+            return;
+        }
+        if (top >= bottom) {
+            alert('Top boundary must be less than bottom boundary');
+            return;
+        }
+
+        this.sceneSystem.updateSceneBoundaries(left, right, top, bottom);
+        console.log('🟩 Scene boundaries updated:', { left, right, top, bottom });
+    }
+
 
     importGameData(event) {
         const file = event.target.files[0];

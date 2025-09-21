@@ -521,6 +521,22 @@ class SceneManager {
                     </div>
                 </div>
                 <div class="property-group">
+                    <h4>Scene Boundaries</h4>
+                    <div class="input-row">
+                        <label>Left:</label>
+                        <input type="number" id="boundaryLeft" value="${currentScene.boundaries.left}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                        <label>Right:</label>
+                        <input type="number" id="boundaryRight" value="${currentScene.boundaries.right}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                    </div>
+                    <div class="input-row">
+                        <label>Top:</label>
+                        <input type="number" id="boundaryTop" value="${currentScene.boundaries.top}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                        <label>Bottom:</label>
+                        <input type="number" id="boundaryBottom" value="${currentScene.boundaries.bottom}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                    </div>
+                    <button onclick="game.updateSceneBoundaries()" class="btn-small">Apply Boundaries</button>
+                </div>
+                <div class="property-group">
                     <h4>Transitions (${currentScene.transitions.zones.length})</h4>
                     <div id="transitionsList"></div>
                     <button onclick="game.sceneSystem.startAddingTransition()" class="btn-small">Add Transition Zone</button>
@@ -580,6 +596,19 @@ class SceneManager {
             currentScene.settings.playerStartX = startX;
             currentScene.settings.playerStartY = startY;
             currentScene.metadata.modified = new Date().toISOString();
+        }
+    }
+
+    updateSceneBoundaries(left, right, top, bottom) {
+        const currentScene = this.sceneData.getCurrentScene();
+        if (currentScene) {
+            currentScene.boundaries.left = left;
+            currentScene.boundaries.right = right;
+            currentScene.boundaries.top = top;
+            currentScene.boundaries.bottom = bottom;
+            currentScene.metadata.modified = new Date().toISOString();
+
+            console.log('🟩 Scene boundaries saved to scene data:', currentScene.boundaries);
         }
     }
 
