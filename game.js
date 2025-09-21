@@ -757,6 +757,9 @@ class PlatformRPG {
 
         this.updateViewport();
 
+        // Ensure canvas maintains focus for key events
+        this.canvas.focus();
+
         // Force a render to see the changes immediately
         this.render();
     }
@@ -998,14 +1001,8 @@ class PlatformRPG {
             const targetX = this.player.x - this.canvas.width / 2;
             const targetY = this.player.y - this.canvas.height / 2;
 
-            if (this.isDevelopmentMode) {
-                // Development mode: basic constraints
-                this.camera.x = Math.max(0, targetX);
-                this.camera.y = Math.max(0, targetY);
-            } else {
-                // Production mode: use scene boundaries
-                this.applyCameraBoundaryConstraints(targetX, targetY);
-            }
+            // Both development and production modes use scene boundary constraints
+            this.applyCameraBoundaryConstraints(targetX, targetY);
         } else if (this.cameraMode === 'free') {
             // Free mode: only follow player in production mode
             if (!this.isDevelopmentMode) {
@@ -1042,12 +1039,12 @@ class PlatformRPG {
         let minCameraY, maxCameraY;
 
         if (visibleWorldHeight >= (bounds.bottom - bounds.top)) {
-            // Screen is tall enough to show the entire scene height - center it vertically
+            // Screen is tall enough to show the entire scene height - align to bottom
             const sceneHeight = bounds.bottom - bounds.top;
             const excessHeight = visibleWorldHeight - sceneHeight;
-            const centerOffset = excessHeight / 2;
-            minCameraY = bounds.top - centerOffset;
-            maxCameraY = bounds.top - centerOffset;  // Same value for centering
+            // Align scene to bottom by positioning camera to show the bottom boundary at viewport bottom
+            minCameraY = bounds.bottom - visibleWorldHeight;
+            maxCameraY = bounds.bottom - visibleWorldHeight;  // Same value for bottom alignment
         } else {
             // Screen is shorter than scene - use normal constraints
             minCameraY = bounds.top;
