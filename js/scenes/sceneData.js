@@ -222,29 +222,9 @@ class SceneData {
                 });
             }
 
-            // Special case: if the first scene (Tutorial) has no valid platforms, add default platforms
-            // This handles the case where localStorage has empty platform data
-            // Check for both empty array and arrays with a single empty object
-            const hasValidPlatforms = this.scenes[0].platforms &&
-                this.scenes[0].platforms.length > 0 &&
-                this.scenes[0].platforms.some(p => p && (p.x !== undefined || p.y !== undefined));
-
-            if (this.scenes.length > 0 && this.scenes[0].name === 'Tutorial' && !hasValidPlatforms) {
-                console.log('🔧 Tutorial scene has no valid platforms, adding defaults');
-                this.scenes[0].platforms = [
-                    { id: 0, x: 0, y: 550, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-                    { id: 1, x: 400, y: 450, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-                    { id: 2, x: 700, y: 350, width: 150, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-                    { id: 3, x: 950, y: 250, width: 200, height: 20, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 },
-                    { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 }
-                ];
-            } else {
-                console.log('🔧 Not adding default platforms because:', {
-                    hasScenes: this.scenes.length > 0,
-                    firstSceneName: this.scenes.length > 0 ? this.scenes[0].name : 'no scenes',
-                    firstScenePlatforms: this.scenes.length > 0 ? this.scenes[0].platforms?.length : 'no scenes'
-                });
-            }
+            // Note: Removed dangerous auto-replacement logic that was overwriting valid scene data
+            // with default platforms when adding transitions. The original logic was too aggressive
+            // and would incorrectly trigger during normal operations, corrupting user's scene data.
 
             this.currentSceneId = data.currentSceneId || (this.scenes.length > 0 ? this.scenes[0].id : null);
             this.startSceneId = data.startSceneId || this.currentSceneId;

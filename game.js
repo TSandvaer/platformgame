@@ -1099,6 +1099,9 @@ class PlatformRPG {
             // Render drag selection rectangle
             this.renderDragSelection();
 
+            // Render transition zone drag preview
+            this.renderTransitionZoneDrag();
+
             this.ctx.restore();
 
             // Draw yellow and black striped police barrier at bottom of scene (in screen coordinates)
@@ -1577,11 +1580,19 @@ class PlatformRPG {
             const spinner = document.getElementById('saveSpinner');
             const overlay = document.getElementById('sceneSavedOverlay');
 
+            console.log('🔴 SAVE BUTTON CLICKED');
+            console.log('🔴 Current scene:', this.sceneSystem.data.getCurrentScene()?.name);
+            console.log('🔴 Platforms in memory:', this.platformSystem.platforms.length);
+            console.log('🔴 Props in memory:', this.propSystem.props.length);
+
             spinner.style.display = 'inline-block';
 
             // Use setTimeout to ensure spinner shows before save operation
             setTimeout(() => {
+                console.log('🔴 About to call saveScenes()');
                 this.sceneSystem.saveScenes();
+                console.log('🔴 saveScenes() completed');
+
                 spinner.style.display = 'none';
 
                 // Show overlay briefly
@@ -2073,6 +2084,47 @@ class PlatformRPG {
         // Fill and stroke the rectangle
         this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
         this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+        // Reset line dash
+        this.ctx.setLineDash([]);
+
+        this.ctx.restore();
+    }
+
+    renderTransitionZoneDrag() {
+        if (!this.isAddingTransition || !this.transitionStart) return;
+
+        // Use existing mouse coordinates (already in world space)
+        const endX = this.mouseX;
+        const endY = this.mouseY;
+
+        // Calculate drag rectangle
+        const startX = this.transitionStart.x;
+        const startY = this.transitionStart.y;
+
+        const width = Math.abs(endX - startX);
+        const height = Math.abs(endY - startY);
+        const x = Math.min(startX, endX);
+        const y = Math.min(startY, endY);
+
+        // Apply camera transformation for world coordinates
+        this.ctx.save();
+        this.ctx.translate(-this.camera.x, -this.camera.y);
+
+        // Draw transition zone preview in purple
+        this.ctx.strokeStyle = '#9966FF'; // Purple border
+        this.ctx.fillStyle = 'rgba(153, 102, 255, 0.2)'; // Semi-transparent purple fill
+        this.ctx.lineWidth = 3;
+        this.ctx.setLineDash([8, 4]); // Dashed line
+
+        // Fill and stroke the rectangle
+        this.ctx.fillRect(x, y, width, height);
+        this.ctx.strokeRect(x, y, width, height);
+
+        // Add label
+        this.ctx.fillStyle = '#9966FF';
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText(`Transition Zone (${Math.round(width)}x${Math.round(height)})`, x, y - 5);
 
         // Reset line dash
         this.ctx.setLineDash([]);

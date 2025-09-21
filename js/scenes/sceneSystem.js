@@ -102,8 +102,16 @@ class SceneSystem {
 
     // Save/Load
     saveScenes() {
+        console.log('🔥 DEBUG: saveScenes() called');
+        console.log('🔥 Current scene before save:', this.data.getCurrentScene()?.name, 'ID:', this.data.currentSceneId);
+
         this.manager.saveCurrentSceneData();
+
         const sceneData = this.data.exportSceneData();
+        console.log('🔥 About to save to localStorage:');
+        console.log('🔥 Tutorial scene data:', sceneData.scenes.find(s => s.name === 'Tutorial')?.platforms?.length, 'platforms,', sceneData.scenes.find(s => s.name === 'Tutorial')?.props?.length, 'props');
+        console.log('🔥 Scene1 data:', sceneData.scenes.find(s => s.name === 'Scene1')?.platforms?.length, 'platforms,', sceneData.scenes.find(s => s.name === 'Scene1')?.props?.length, 'props');
+
         localStorage.setItem('platformGame_sceneData', JSON.stringify(sceneData));
 
         // Backward compatibility code removed - old scenes array is no longer used

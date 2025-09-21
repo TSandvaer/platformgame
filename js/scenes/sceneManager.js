@@ -81,7 +81,17 @@ class SceneManager {
         this.cleanupInvalidTransitions(scene);
 
         // Load platforms
-        console.log('🔧 Loading platforms for scene:', scene.name, 'Platform count:', scene.platforms.length);
+        console.log('🔧 DEBUG: Loading scene data');
+        console.log('🔧 Loading platforms for scene:', scene.name, 'ID:', scene.id, 'Platform count:', scene.platforms.length);
+        console.log('🔧 Loading props for scene:', scene.name, 'Prop count:', scene.props.length);
+
+        if (scene.name === 'Tutorial' && scene.platforms.length !== 5) {
+            console.error('🚨 CORRUPTION DETECTED: Tutorial scene should have 5 platforms, but has:', scene.platforms.length);
+        }
+        if (scene.name === 'Tutorial' && scene.props.length !== 110) {
+            console.error('🚨 CORRUPTION DETECTED: Tutorial scene should have 110 props, but has:', scene.props.length);
+        }
+
         console.log('🔧 Scene platforms:', scene.platforms);
         console.log('🔧 Platforms being loaded:', scene.platforms.map(p => ({
             id: p.id,
@@ -148,6 +158,12 @@ class SceneManager {
     saveCurrentSceneData() {
         const currentScene = this.sceneData.getCurrentScene();
         if (currentScene) {
+            console.log('💾 DEBUG: About to save scene data');
+            console.log('💾 Current scene ID:', currentScene.id, 'Name:', currentScene.name);
+            console.log('💾 Platforms in memory:', this.game.platformSystem.platforms.length);
+            console.log('💾 Props in memory:', this.game.propSystem.props.length);
+            console.log('💾 Scene data before update - platforms:', currentScene.platforms.length, 'props:', currentScene.props.length);
+
             console.log('💾 Saving current scene data for:', currentScene.name);
             console.log('💾 Platforms being saved:', this.game.platformSystem.platforms.map(p => ({
                 id: p.id,
@@ -155,11 +171,14 @@ class SceneManager {
                 x: p.x,
                 y: p.y
             })));
+
             this.sceneData.updateSceneData(
                 currentScene.id,
                 this.game.platformSystem.platforms,
                 this.game.propSystem.props
             );
+
+            console.log('💾 Scene data after update - platforms:', currentScene.platforms.length, 'props:', currentScene.props.length);
         }
     }
 
@@ -171,6 +190,19 @@ class SceneManager {
         if (!currentScene) return;
 
         const transitionZones = currentScene.transitions.zones;
+
+        // Debug: Show transition zone info when player moves
+        if (transitionZones.length > 0 && Math.random() < 0.01) {
+            console.log('🔄 Checking transitions:', {
+                playerPos: [Math.round(playerX), Math.round(playerY)],
+                zonesCount: transitionZones.length,
+                zones: transitionZones.map(z => ({
+                    id: z.id,
+                    bounds: `(${z.x},${z.y}) to (${z.x + z.width},${z.y + z.height})`,
+                    target: z.targetSceneId
+                }))
+            });
+        }
 
         // Debug: Log when in production mode
         if (!this.game.isDevelopmentMode && transitionZones.length > 0 && Math.random() < 0.01) {
@@ -375,8 +407,19 @@ class SceneManager {
     addTransitionZone(x, y, width, height, targetSceneId, playerStartX, playerStartY) {
         const currentScene = this.sceneData.getCurrentScene();
         if (currentScene) {
+            console.log('🔗 DEBUG: Adding transition zone');
+            console.log('🔗 Current scene ID:', currentScene.id, 'Name:', currentScene.name);
+            console.log('🔗 Target scene ID:', targetSceneId);
+            console.log('🔗 Current scene platforms before save:', currentScene.platforms.length);
+            console.log('🔗 Current scene props before save:', currentScene.props.length);
+            console.log('🔗 Loaded platforms:', this.game.platformSystem.platforms.length);
+            console.log('🔗 Loaded props:', this.game.propSystem.props.length);
+
             // Save current platform/prop data before adding transition
             this.saveCurrentSceneData();
+
+            console.log('🔗 Current scene platforms after save:', currentScene.platforms.length);
+            console.log('🔗 Current scene props after save:', currentScene.props.length);
 
             const zone = this.sceneData.addTransitionZone(currentScene.id, {
                 x, y, width, height,
@@ -389,6 +432,9 @@ class SceneManager {
             if (this.game && this.game.sceneSystem) {
                 this.game.sceneSystem.saveScenes();
             }
+
+            console.log('🔗 Final current scene platforms:', currentScene.platforms.length);
+            console.log('🔗 Final current scene props:', currentScene.props.length);
 
             return zone;
         }
@@ -548,6 +594,14 @@ class SceneManager {
     handleTransitionCreation(startX, startY, endX, endY) {
         const width = Math.abs(endX - startX);
         const height = Math.abs(endY - startY);
+
+        // Ensure minimum size for transition zones
+        const minSize = 50;
+        if (width < minSize || height < minSize) {
+            alert(`Transition zone too small! Please drag to create a zone at least ${minSize}x${minSize} pixels.`);
+            return;
+        }
+
         const x = Math.min(startX, endX);
         const y = Math.min(startY, endY);
 
@@ -617,10 +671,9 @@ class SceneManager {
 
         if (invalidZones.length > 0) {
             console.log(`🧹 Cleaned up ${invalidZones.length} invalid transition zones from scene "${scene.name}"`);
-            // Save the scene to persist the cleanup
-            if (this.game && this.game.sceneSystem) {
-                this.game.sceneSystem.saveScenes();
-            }
+            // NOTE: Removed automatic save here as it was causing data corruption
+            // by saving before scene data was fully loaded. The cleanup will be
+            // persisted on the next manual save operation.
         }
     }
 
