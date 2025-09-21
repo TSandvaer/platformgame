@@ -1037,9 +1037,21 @@ class PlatformRPG {
         const visibleWorldHeight = this.canvas.height / this.viewport.scaleY;
 
         // Calculate the constrained camera position
-        // Camera X constraints: left boundary to (right boundary - visible width)
-        const minCameraX = bounds.left;
-        const maxCameraX = Math.max(bounds.left, bounds.right - visibleWorldWidth);
+        // Camera X constraints: use normal constraints for most cases
+        let minCameraX, maxCameraX;
+        const sceneWidth = bounds.right - bounds.left;
+
+        if (visibleWorldWidth > sceneWidth * 1.5) {
+            // Only apply expanded bounds if visible area is significantly larger than scene (50% larger)
+            // This helps with very small scenes on large screens
+            const excessWidth = visibleWorldWidth - sceneWidth;
+            minCameraX = bounds.left - (excessWidth * 0.3); // Allow 30% of excess on left
+            maxCameraX = bounds.right - visibleWorldWidth + (excessWidth * 0.3); // Allow 30% of excess on right
+        } else {
+            // Standard camera constraints for normal cases
+            minCameraX = bounds.left;
+            maxCameraX = Math.max(bounds.left, bounds.right - visibleWorldWidth);
+        }
 
         // Camera Y constraints: more flexible for smaller screens
         let minCameraY, maxCameraY;
