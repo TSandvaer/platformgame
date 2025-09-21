@@ -1575,8 +1575,22 @@ class PlatformRPG {
         });
 
         document.getElementById('saveSceneBtn').addEventListener('click', () => {
-            this.sceneSystem.saveScenes();
-            alert('Current scene saved!');
+            const spinner = document.getElementById('saveSpinner');
+            const overlay = document.getElementById('sceneSavedOverlay');
+
+            spinner.style.display = 'inline-block';
+
+            // Use setTimeout to ensure spinner shows before save operation
+            setTimeout(() => {
+                this.sceneSystem.saveScenes();
+                spinner.style.display = 'none';
+
+                // Show overlay briefly
+                overlay.style.display = 'flex';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 1500);
+            }, 10);
         });
 
         document.getElementById('addTransitionBtn').addEventListener('click', () => {

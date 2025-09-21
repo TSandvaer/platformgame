@@ -332,9 +332,55 @@
             border-radius: 4px;
             font-family: Arial, sans-serif;
         }
+
+        .spinner {
+            display: inline-block;
+            margin-left: 8px;
+            animation: spin 1s linear infinite;
+            font-size: 14px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .scene-saved-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .scene-saved-text {
+            color: #4CAF50;
+            font-size: 72px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: fadeInOut 1.5s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: scale(0.8); }
+            20% { opacity: 1; transform: scale(1.1); }
+            80% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
     </style>
 </head>
 <body>
+    <!-- Scene Saved Overlay -->
+    <div class="scene-saved-overlay" id="sceneSavedOverlay">
+        <div class="scene-saved-text">Scene Saved!</div>
+    </div>
+
     <div class="container">
         <div class="game-area">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -372,7 +418,10 @@
                 <h3>Scene Management</h3>
                 <div class="property-row">
                     <button class="btn small" id="createSceneBtn">Create New Scene</button>
-                    <button class="btn small" id="saveSceneBtn">Save Current Scene</button>
+                    <button class="btn small" id="saveSceneBtn">
+                        Save Current Scene
+                        <span class="spinner" id="saveSpinner" style="display: none;">⟳</span>
+                    </button>
                 </div>
                 <div id="scenesList"></div>
 
