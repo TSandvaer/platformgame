@@ -315,7 +315,7 @@ class PropManager {
             const yInput = document.getElementById('propY');
             const sizeInput = document.getElementById('propSize');
             const rotationInput = document.getElementById('propRotation');
-            const isObstacleInput = document.getElementById('propIsObstacle');
+            const isObstacleInput = document.getElementById('selectedPropObstacle');
             const typeSelect = document.getElementById('propTypeSelect');
             const zOrderDisplay = document.getElementById('propZOrder');
 
@@ -346,7 +346,7 @@ class PropManager {
         const yInput = document.getElementById('propY');
         const sizeInput = document.getElementById('propSize');
         const rotationInput = document.getElementById('propRotation');
-        const isObstacleInput = document.getElementById('propIsObstacle');
+        const isObstacleInput = document.getElementById('selectedPropObstacle');
         const typeSelect = document.getElementById('propTypeSelect');
 
         if (xInput) this.propData.selectedProp.x = parseInt(xInput.value);
