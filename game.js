@@ -2345,54 +2345,7 @@ class PlatformRPG {
         this.ctx.restore();
     }
 
-    renderPoliceBarrier() {
-        // Draw barrier at the actual canvas bottom in screen coordinates
-        const stripeWidth = 40; // Width of each diagonal stripe
-        const barrierHeight = 12; // Height of the barrier
-        const canvasBottom = this.canvas.height;
-
-        // Draw directly in screen coordinates (no camera transform)
-        this.ctx.save();
-
-        // Draw the barrier background at canvas bottom
-        this.ctx.fillStyle = '#000000'; // Black background
-        this.ctx.fillRect(0, canvasBottom - barrierHeight, this.canvas.width, barrierHeight);
-
-        // Draw diagonal yellow stripes
-        this.ctx.fillStyle = '#FFFF00'; // Bright yellow
-
-        // Calculate how many stripes we need to cover the width
-        const numStripes = Math.ceil(this.canvas.width / stripeWidth) + 2; // Extra stripes for offset
-
-        for (let i = 0; i < numStripes; i++) {
-            // Create diagonal stripes by drawing angled rectangles
-            this.ctx.save();
-
-            // Position for this stripe
-            const xStart = (i * stripeWidth) - stripeWidth; // Start a bit left to ensure coverage
-
-            // Create diagonal stripe path
-            this.ctx.beginPath();
-            this.ctx.moveTo(xStart, canvasBottom - barrierHeight);
-            this.ctx.lineTo(xStart + stripeWidth/2, canvasBottom - barrierHeight);
-            this.ctx.lineTo(xStart + stripeWidth, canvasBottom);
-            this.ctx.lineTo(xStart + stripeWidth/2, canvasBottom);
-            this.ctx.closePath();
-            this.ctx.fill();
-
-            this.ctx.restore();
-        }
-
-        // Add a thin black border line at the very bottom
-        this.ctx.strokeStyle = '#000000';
-        this.ctx.lineWidth = 2;
-        this.ctx.beginPath();
-        this.ctx.moveTo(0, canvasBottom);
-        this.ctx.lineTo(this.canvas.width, canvasBottom);
-        this.ctx.stroke();
-
-        this.ctx.restore();
-    }
+    // renderPoliceBarrier method removed
 
     handleKeyDown(e) {
         // Only handle keys in development mode
