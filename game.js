@@ -1313,8 +1313,8 @@ class PlatformRPG {
 
             this.ctx.restore();
 
-            // Draw yellow and black striped police barrier at bottom of scene (in screen coordinates)
-            this.renderPoliceBarrier();
+            // Police barrier removed from dev mode
+            // this.renderPoliceBarrier();
 
             // Render feedback messages (copy/paste notifications) on top of everything
             this.renderFeedbackMessages();
