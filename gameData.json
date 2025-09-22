@@ -66,9 +66,9 @@
         },
         {
           "id": 9,
-          "x": 475.3232949512843,
+          "x": 494.03011514614695,
           "y": 630.3346852607835,
-          "width": 704,
+          "width": 672,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "grass",
@@ -80,8 +80,8 @@
       "props": [
         {
           "id": 2,
-          "x": 1203.6178114274453,
-          "y": 306.09527135722044,
+          "x": 1033.555809655966,
+          "y": 590.0988143155906,
           "type": "barrel",
           "isObstacle": true,
           "positioning": "absolute",
@@ -1309,6 +1309,16 @@
             "targetSceneId": 2,
             "playerStartX": 199,
             "playerStartY": 861
+          },
+          {
+            "id": 2,
+            "x": 1168.325952170062,
+            "y": 676.0850310008857,
+            "width": 111.39061116031894,
+            "height": 15.305580159433134,
+            "targetSceneId": 2,
+            "playerStartX": 96,
+            "playerStartY": 851
           }
         ]
       },
@@ -1326,7 +1336,7 @@
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-22T16:54:32.256Z"
+        "modified": "2025-09-22T19:25:08.777Z"
       }
     },
     {
@@ -1408,7 +1418,7 @@
     }
   ],
   "currentSceneId": 1,
-  "startSceneId": 1,
+  "startSceneId": "1",
   "characters": [],
   "classes": [],
   "weapons": [],

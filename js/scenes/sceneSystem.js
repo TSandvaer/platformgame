@@ -4,6 +4,11 @@ class SceneSystem {
         this.data = new SceneData();
         this.manager = new SceneManager(this.data, game);
         this.renderer = new SceneRenderer(this.data, game);
+
+        // Transition zone creation state
+        this.isAddingTransition = false;
+        this.transitionStart = null;
+        this.transitionEnd = null;
     }
 
     // Initialization
@@ -23,12 +28,28 @@ class SceneSystem {
             const defaultScene = this.data.scenes[0];
             console.log('🔧 Default scene id:', defaultScene.id, 'name:', defaultScene.name);
             console.log('🔧 Default scene platforms:', defaultScene.platforms);
+            console.log('🔧 Default scene platforms count:', defaultScene.platforms?.length || 0);
             this.manager.loadScene(defaultScene.id);
+        } else if (loaded) {
+            console.log('🔧 Saved scenes were loaded successfully');
+            console.log('🔧 Current scene after load:', this.currentScene?.name);
+            console.log('🔧 Current scene platforms:', this.currentScene?.platforms?.length || 0);
+        } else {
+            console.log('🔧 No scenes available at all!');
         }
 
         console.log('🔧 Current scenes:', this.data.scenes.length);
         console.log('🔧 Current scene:', this.data.getCurrentScene());
         console.log('🔧 PlatformSystem platforms after init:', this.game.platformSystem.platforms);
+
+        // Temporary alert-based debugging to see what's happening
+        const currentScene = this.data.getCurrentScene();
+        if (currentScene) {
+            console.warn(`DEBUG: Current scene "${currentScene.name}" has ${currentScene.platforms?.length || 0} platforms`);
+            console.warn(`DEBUG: PlatformSystem has ${this.game.platformSystem.platforms.length} platforms loaded`);
+        } else {
+            console.warn('DEBUG: No current scene set!');
+        }
         this.manager.updateSceneUI();
     }
 
@@ -140,20 +161,52 @@ class SceneSystem {
 
         this.manager.saveCurrentSceneData();
 
-        const sceneData = this.data.exportSceneData();
-        console.log('🔥 About to save to localStorage:');
-        console.log('🔥 Tutorial scene data:', sceneData.scenes.find(s => s.name === 'Tutorial')?.platforms?.length, 'platforms,', sceneData.scenes.find(s => s.name === 'Tutorial')?.props?.length, 'props');
-        console.log('🔥 Scene1 data:', sceneData.scenes.find(s => s.name === 'Scene1')?.platforms?.length, 'platforms,', sceneData.scenes.find(s => s.name === 'Scene1')?.props?.length, 'props');
-
-        localStorage.setItem('platformGame_sceneData', JSON.stringify(sceneData));
-
-        // Backward compatibility code removed - old scenes array is no longer used
+        // Use the GameDataSystem to save all game data instead of just scenes
+        if (this.game.gameDataSystem) {
+            this.game.gameDataSystem.saveCurrentData();
+        } else {
+            // Fallback for backward compatibility
+            const sceneData = this.data.exportSceneData();
+            localStorage.setItem('platformGame_sceneData', JSON.stringify(sceneData));
+        }
     }
 
     loadSavedScenes() {
+        // First try to load from the GameDataSystem's complete data
+        if (this.game.gameDataSystem) {
+            const completeData = this.game.gameDataSystem.storage.loadFromLocalStorage();
+            if (completeData && completeData.scenes) {
+                console.log('📂 Loading scenes from complete game data');
+                this.data.importSceneData({
+                    scenes: completeData.scenes,
+                    currentSceneId: completeData.currentSceneId,
+                    startSceneId: completeData.startSceneId
+                });
+
+                // Load the last current scene
+                const currentSceneId = completeData.currentSceneId;
+                if (currentSceneId) {
+                    this.manager.loadScene(currentSceneId);
+                } else {
+                    const startScene = this.data.getStartScene();
+                    if (startScene) {
+                        this.manager.loadScene(startScene.id);
+                    } else {
+                        const firstScene = this.data.scenes[0];
+                        if (firstScene) {
+                            this.manager.loadScene(firstScene.id);
+                        }
+                    }
+                }
+                return true;
+            }
+        }
+
+        // Fallback to legacy scene data
         const savedData = localStorage.getItem('platformGame_sceneData');
         if (savedData) {
             try {
+                console.log('📂 Loading from legacy scene data');
                 const sceneData = JSON.parse(savedData);
                 this.data.importSceneData(sceneData);
 
@@ -280,7 +333,76 @@ class SceneSystem {
 
     // Transition creation
     startAddingTransition() {
-        this.manager.startAddingTransition();
+        console.log('🎯 SceneSystem: Starting transition zone creation');
+        this.isAddingTransition = true;
+        this.transitionStart = null;
+        this.transitionEnd = null;
+    }
+
+    setTransitionStart(x, y) {
+        if (!this.isAddingTransition) return;
+        this.transitionStart = { x, y };
+        this.transitionEnd = { x, y };
+    }
+
+    setTransitionEnd(x, y) {
+        if (!this.isAddingTransition || !this.transitionStart) return;
+        this.transitionEnd = { x, y };
+    }
+
+    finishTransitionCreation() {
+        if (!this.isAddingTransition || !this.transitionStart || !this.transitionEnd) return;
+
+        const startX = this.transitionStart.x;
+        const startY = this.transitionStart.y;
+        const endX = this.transitionEnd.x;
+        const endY = this.transitionEnd.y;
+
+        // Create the transition zone using the existing manager method
+        this.manager.handleTransitionCreation(startX, startY, endX, endY);
+
+        // Reset state
+        this.isAddingTransition = false;
+        this.transitionStart = null;
+        this.transitionEnd = null;
+    }
+
+    cancelTransitionCreation() {
+        this.isAddingTransition = false;
+        this.transitionStart = null;
+        this.transitionEnd = null;
+        console.log('🎯 SceneSystem: Cancelled transition zone creation');
+    }
+
+    renderTransitionPreview(ctx) {
+        if (!this.isAddingTransition || !this.transitionStart || !this.transitionEnd) return;
+
+        ctx.save();
+
+        // Calculate rectangle bounds
+        const x = Math.min(this.transitionStart.x, this.transitionEnd.x);
+        const y = Math.min(this.transitionStart.y, this.transitionEnd.y);
+        const width = Math.abs(this.transitionEnd.x - this.transitionStart.x);
+        const height = Math.abs(this.transitionEnd.y - this.transitionStart.y);
+
+        // Draw semi-transparent purple rectangle
+        ctx.fillStyle = 'rgba(128, 0, 128, 0.3)';
+        ctx.fillRect(x, y, width, height);
+
+        // Draw border
+        ctx.strokeStyle = 'rgba(128, 0, 128, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+
+        // Draw corner indicators
+        ctx.fillStyle = 'rgba(128, 0, 128, 0.8)';
+        const cornerSize = 5;
+        ctx.fillRect(x - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
+        ctx.fillRect(x + width - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
+        ctx.fillRect(x - cornerSize/2, y + height - cornerSize/2, cornerSize, cornerSize);
+        ctx.fillRect(x + width - cornerSize/2, y + height - cornerSize/2, cornerSize, cornerSize);
+
+        ctx.restore();
     }
 
     handleTransitionCreation(startX, startY, endX, endY) {

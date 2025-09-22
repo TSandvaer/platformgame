@@ -62,12 +62,7 @@ class InputEditor {
             });
         }
 
-        const addTransitionBtn = document.getElementById('addTransitionBtn');
-        if (addTransitionBtn) {
-            addTransitionBtn.addEventListener('click', () => {
-                this.game.sceneSystem.startAddingTransition();
-            });
-        }
+        // addTransitionBtn is now handled by SceneManager event delegation
 
         // Scene property inputs
         const sceneNameInput = document.getElementById('sceneName');

@@ -1248,9 +1248,6 @@ class PlatformRPG {
             }, 10);
         });
 
-        document.getElementById('addTransitionBtn').addEventListener('click', () => {
-            this.sceneSystem.startAddingTransition();
-        });
 
         // Scene property inputs - use onchange events for real-time updates
         const sceneNameInput = document.getElementById('sceneName');
@@ -1494,11 +1491,11 @@ class PlatformRPG {
     }
 
     renderTransitionZoneDrag() {
-        // Delegate to editor system
-        if (this.editorSystem) {
+        // Delegate to scene system
+        if (this.sceneSystem) {
             this.ctx.save();
             this.cameraSystem.applyTransform(this.ctx);
-            this.editorSystem.renderTransitionPreview(this.ctx);
+            this.sceneSystem.renderTransitionPreview(this.ctx);
             this.ctx.restore();
         }
     }

@@ -76,9 +76,16 @@ class GameDataSystem {
             return;
         }
 
-        // Start with default data
-        console.log('🆕 Starting with default game state');
-        this.applyGameData(this.defaultGameData);
+        // Check if scene system already has default scenes before applying empty defaults
+        if (this.game.sceneSystem && this.game.sceneSystem.data.scenes.length > 0) {
+            console.log('🆕 SceneSystem already has scenes, not overwriting with empty defaults');
+            // Collect current scene data instead of overwriting
+            const currentGameData = this.collectCurrentGameData();
+            this.gameData = currentGameData;
+        } else {
+            console.log('🆕 Starting with default game state');
+            this.applyGameData(this.defaultGameData);
+        }
     }
 
     // Apply loaded data to the game

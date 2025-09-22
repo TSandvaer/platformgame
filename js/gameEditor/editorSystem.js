@@ -11,9 +11,6 @@ class EditorSystem {
         this.contextMenu = new EditorContextMenu(this);
 
         // Editor state
-        this.isAddingTransition = false;
-        this.transitionStart = null;
-        this.transitionEnd = null;
         this.contextMenuCoords = null;
     }
 
@@ -81,76 +78,6 @@ class EditorSystem {
         this.game.render();
     }
 
-    // Transition zone handling
-    startAddingTransition() {
-        this.isAddingTransition = true;
-        this.transitionStart = null;
-        this.transitionEnd = null;
-    }
-
-    setTransitionStart(x, y) {
-        this.transitionStart = { x, y };
-        this.transitionEnd = { x, y };
-    }
-
-    updateTransitionEnd(x, y) {
-        if (this.transitionStart) {
-            this.transitionEnd = { x, y };
-        }
-    }
-
-    completeTransition() {
-        if (this.isAddingTransition && this.transitionStart && this.transitionEnd) {
-            this.game.sceneSystem.handleTransitionCreation(
-                this.transitionStart.x, this.transitionStart.y,
-                this.transitionEnd.x, this.transitionEnd.y
-            );
-        }
-        this.isAddingTransition = false;
-        this.transitionStart = null;
-        this.transitionEnd = null;
-    }
-
-    renderTransitionPreview(ctx) {
-        if (!this.isAddingTransition || !this.transitionStart || !this.transitionEnd) return;
-
-        ctx.save();
-
-        // Calculate rectangle bounds
-        const x = Math.min(this.transitionStart.x, this.transitionEnd.x);
-        const y = Math.min(this.transitionStart.y, this.transitionEnd.y);
-        const width = Math.abs(this.transitionEnd.x - this.transitionStart.x);
-        const height = Math.abs(this.transitionEnd.y - this.transitionStart.y);
-
-        // Draw semi-transparent blue rectangle
-        ctx.fillStyle = 'rgba(0, 100, 255, 0.3)';
-        ctx.fillRect(x, y, width, height);
-
-        // Draw border
-        ctx.strokeStyle = 'rgba(0, 100, 255, 0.8)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, width, height);
-
-        // Draw corner indicators
-        ctx.fillStyle = 'rgba(0, 100, 255, 0.8)';
-        const cornerSize = 5;
-        ctx.fillRect(x - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
-        ctx.fillRect(x + width - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
-        ctx.fillRect(x - cornerSize/2, y + height - cornerSize/2, cornerSize, cornerSize);
-        ctx.fillRect(x + width - cornerSize/2, y + height - cornerSize/2, cornerSize, cornerSize);
-
-        // Display dimensions
-        ctx.font = '12px Arial';
-        ctx.fillStyle = 'white';
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 3;
-        const text = `${Math.round(width)} x ${Math.round(height)}`;
-        ctx.strokeText(text, x + width/2 - 30, y - 10);
-        ctx.fillText(text, x + width/2 - 30, y - 10);
-
-        ctx.restore();
-    }
-
     renderDevelopmentInfo(ctx) {
         if (!this.isDevelopmentMode) return;
 
@@ -161,9 +88,6 @@ class EditorSystem {
             const worldCoords = this.game.cameraSystem.screenToWorld(mousePos.x, mousePos.y);
             coordsElement.textContent = `X: ${Math.round(worldCoords.x)}, Y: ${Math.round(worldCoords.y)}`;
         }
-
-        // Render transition preview if active
-        this.renderTransitionPreview(ctx);
 
         // Render any other development overlays
         this.tools.renderOverlays(ctx);

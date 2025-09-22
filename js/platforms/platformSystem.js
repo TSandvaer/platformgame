@@ -51,7 +51,11 @@ class PlatformSystem {
     // Rendering
     renderPlatforms(isDevelopmentMode, viewport) {
         if (this.data.platforms.length === 0) {
-            console.warn('⚠️ No platforms to render in platformSystem!');
+            // Reduce console spam - only warn occasionally
+            if (!this._lastNoplatformsWarning || Date.now() - this._lastNoplatformsWarning > 5000) {
+                console.warn('⚠️ No platforms to render in platformSystem!');
+                this._lastNoplatformsWarning = Date.now();
+            }
         }
         this.data.platforms.forEach(platform => {
             const isSelected = this.data.selectedPlatform && this.data.selectedPlatform.id === platform.id;

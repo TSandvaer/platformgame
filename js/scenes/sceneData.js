@@ -73,7 +73,8 @@ class SceneData {
     }
 
     getSceneById(id) {
-        return this.scenes.find(scene => scene.id === id);
+        // Handle both string and number IDs
+        return this.scenes.find(scene => scene.id == id || scene.id === String(id) || String(scene.id) === String(id));
     }
 
     getCurrentScene() {

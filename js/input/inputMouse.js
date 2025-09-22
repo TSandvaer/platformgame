@@ -54,9 +54,8 @@ class InputMouse {
         }
 
         // Handle transition zone creation
-        if (this.game.isAddingTransition) {
-            this.game.transitionStart = { x: mouseX, y: mouseY };
-            this.game.transitionEnd = { x: mouseX, y: mouseY };
+        if (this.game.sceneSystem.isAddingTransition) {
+            this.game.sceneSystem.setTransitionStart(mouseX, mouseY);
             return;
         }
 
@@ -94,7 +93,7 @@ class InputMouse {
         if (!this.game.isDevelopmentMode) return;
 
         // Handle transition zone creation completion
-        if (this.game.isAddingTransition && this.game.transitionStart) {
+        if (this.game.sceneSystem.isAddingTransition && this.game.sceneSystem.transitionStart) {
             this.completeTransitionZone(e);
             return;
         }
@@ -136,8 +135,8 @@ class InputMouse {
         const mouseY = worldCoords.y;
 
         // Update transition zone preview
-        if (this.game.isAddingTransition && this.game.transitionStart) {
-            this.game.transitionEnd = { x: mouseX, y: mouseY };
+        if (this.game.sceneSystem.isAddingTransition && this.game.sceneSystem.transitionStart) {
+            this.game.sceneSystem.setTransitionEnd(mouseX, mouseY);
         }
 
         // Update player start position dragging
@@ -271,19 +270,10 @@ class InputMouse {
         const clientMouseY = e.clientY - rect.top;
 
         const worldCoords = this.game.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
-        this.game.transitionEnd = { x: worldCoords.x, y: worldCoords.y };
+        this.game.sceneSystem.setTransitionEnd(worldCoords.x, worldCoords.y);
 
-        const startX = this.game.transitionStart.x;
-        const startY = this.game.transitionStart.y;
-        const endX = this.game.transitionEnd.x;
-        const endY = this.game.transitionEnd.y;
-
-        // Use the proper scene manager method instead of prompt dialogs
-        this.game.sceneSystem.handleTransitionCreation(startX, startY, endX, endY);
-
-        this.game.isAddingTransition = false;
-        this.game.transitionStart = null;
-        this.game.transitionEnd = null;
+        // Complete the transition creation
+        this.game.sceneSystem.finishTransitionCreation();
     }
 
     checkPlayerStartHandle(mouseX, mouseY) {

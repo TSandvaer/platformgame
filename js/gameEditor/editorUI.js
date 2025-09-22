@@ -41,12 +41,13 @@ class EditorUI {
         }
 
         // Add transition button
-        const addTransitionBtn = document.getElementById('addTransition');
-        if (addTransitionBtn) {
-            addTransitionBtn.addEventListener('click', () => {
-                this.handleAddTransition();
-            });
-        }
+        // Transition button is now handled by SceneManager
+        // const addTransitionBtn = document.getElementById('addTransition');
+        // if (addTransitionBtn) {
+        //     addTransitionBtn.addEventListener('click', () => {
+        //         this.handleAddTransition();
+        //     });
+        // }
 
         // Add platform button
         const addPlatformBtn = document.getElementById('addPlatform');

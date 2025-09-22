@@ -11,6 +11,9 @@ class GameDataStorage {
         this.autoSaveEnabled = localStorage.getItem('platformGame_autoSave') !== 'false';
         this.autoSaveInterval = 60000; // Auto-save every minute
 
+        // Clean up any inconsistent legacy data
+        this.cleanupLegacyData();
+
         if (this.autoSaveEnabled) {
             this.startAutoSave();
         }
@@ -134,6 +137,29 @@ class GameDataStorage {
         } catch (error) {
             console.error('Error clearing localStorage:', error);
             return false;
+        }
+    }
+
+    // Clean up inconsistent legacy data
+    cleanupLegacyData() {
+        const mainData = localStorage.getItem(this.storageKey);
+        const legacyData = localStorage.getItem(this.sceneStorageKey);
+
+        if (mainData && legacyData) {
+            try {
+                const main = JSON.parse(mainData);
+                const legacy = JSON.parse(legacyData);
+
+                // If main data has more complete scene information, remove legacy
+                if (main.scenes && main.scenes.length > 0 &&
+                    (!legacy.scenes || legacy.scenes.length === 0 ||
+                     main.scenes.length >= legacy.scenes.length)) {
+                    console.log('🧹 Removing incomplete legacy scene data');
+                    localStorage.removeItem(this.sceneStorageKey);
+                }
+            } catch (error) {
+                console.error('Error cleaning up legacy data:', error);
+            }
         }
     }
 

@@ -4,6 +4,72 @@ class SceneManager {
         this.game = game;
         this.isTransitioning = false;
         this.transitionCallback = null;
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // Set up event delegation for scene list clicks
+        const listElement = document.getElementById('scenesList');
+        if (listElement) {
+            listElement.addEventListener('click', (e) => {
+                const sceneItem = e.target.closest('.scene-item');
+                if (!sceneItem) return;
+
+                const sceneId = sceneItem.dataset.sceneId;
+                const action = e.target.dataset.action;
+
+                // Handle different actions
+                if (action === 'rename') {
+                    e.stopPropagation();
+                    this.game.sceneSystem.renameScene(sceneId);
+                } else if (action === 'setStart') {
+                    e.stopPropagation();
+                    this.game.sceneSystem.setStartScene(sceneId);
+                    this.game.sceneSystem.updateUI();
+                } else if (action === 'duplicate') {
+                    e.stopPropagation();
+                    this.game.sceneSystem.duplicateScene(sceneId);
+                } else if (action === 'delete') {
+                    e.stopPropagation();
+                    this.game.sceneSystem.deleteScene(sceneId);
+                } else if (!e.target.closest('.scene-actions')) {
+                    // Load scene if not clicking on action buttons
+                    this.game.sceneSystem.loadScene(sceneId);
+                }
+            });
+        }
+
+        // Set up event delegation for scene properties panel
+        const propertiesDiv = document.getElementById('sceneProperties');
+        if (propertiesDiv) {
+            propertiesDiv.addEventListener('click', (e) => {
+                const action = e.target.dataset.action;
+
+                if (action === 'apply-boundaries') {
+                    e.stopPropagation();
+                    this.game.updateSceneBoundaries();
+                } else if (action === 'add-transition') {
+                    e.stopPropagation();
+                    this.game.sceneSystem.startAddingTransition();
+                } else if (action === 'remove-transition') {
+                    e.stopPropagation();
+                    const zoneId = e.target.dataset.zoneId;
+                    this.game.sceneSystem.removeTransitionZone(zoneId);
+                    this.game.sceneSystem.updateUI();
+                }
+            });
+
+            propertiesDiv.addEventListener('change', (e) => {
+                const action = e.target.dataset.action;
+
+                if (action === 'boundary-change') {
+                    // Auto-apply boundaries when input changes
+                    this.game.updateSceneBoundaries();
+                }
+            });
+        }
+
+        // The addTransitionBtn is handled by event delegation above
     }
 
     // Scene loading and switching
@@ -21,7 +87,7 @@ class SceneManager {
         return this._performSceneLoad(scene, sceneId, playerStartX, playerStartY);
     }
 
-    loadScene(sceneId, playerStartX = null, playerStartY = null) {
+    loadScene(sceneId, playerStartX = null, playerStartY = null) {     
         const scene = this.sceneData.getSceneById(sceneId);
         if (!scene) {
             console.error('Scene not found:', sceneId);
@@ -487,9 +553,9 @@ class SceneManager {
             const isCurrentClass = currentScene && currentScene.id === scene.id ? 'current' : '';
             const isStartClass = startScene && startScene.id === scene.id ? 'start' : '';
 
-            return `<div class="scene-item ${isCurrentClass} ${isStartClass}" data-scene-id="${scene.id}" onclick="game.sceneSystem.loadScene(${scene.id})" style="cursor: pointer;" title="Click to load scene">
+            return `<div class="scene-item ${isCurrentClass} ${isStartClass}" data-scene-id="${scene.id}" style="cursor: pointer;" title="Click to load scene">
                 <div class="scene-header">
-                    <span class="scene-name" onclick="event.stopPropagation(); game.sceneSystem.renameScene(${scene.id})" style="cursor: pointer;" title="Click to rename">${scene.name}</span>
+                    <span class="scene-name" data-action="rename" style="cursor: pointer;" title="Click to rename">${scene.name}</span>
                     <div class="scene-badges">
                         ${startScene && startScene.id === scene.id ? '<span class="badge start-badge">START</span>' : ''}
                         ${currentScene && currentScene.id === scene.id ? '<span class="badge current-badge">CURRENT</span>' : ''}
@@ -499,10 +565,10 @@ class SceneManager {
                 <div class="scene-stats">
                     Platforms: ${scene.platforms.length} | Props: ${scene.props.length} | Transitions: ${scene.transitions.zones.length}
                 </div>
-                <div class="scene-actions" onclick="event.stopPropagation();">
-                    <button onclick="game.sceneSystem.setStartScene(${scene.id}); game.sceneSystem.updateUI();" class="btn-small">Set Start</button>
-                    <button onclick="game.sceneSystem.duplicateScene(${scene.id})" class="btn-small">Duplicate</button>
-                    ${this.sceneData.scenes.length > 1 ? `<button onclick="game.sceneSystem.deleteScene(${scene.id})" class="btn-small btn-danger">Delete</button>` : ''}
+                <div class="scene-actions">
+                    <button data-action="setStart" class="btn-small">Set Start</button>
+                    <button data-action="duplicate" class="btn-small">Duplicate</button>
+                    ${this.sceneData.scenes.length > 1 ? `<button data-action="delete" class="btn-small btn-danger">Delete</button>` : ''}
                 </div>
             </div>`;
         }).join('');
@@ -538,22 +604,22 @@ class SceneManager {
                     <h4>Scene Boundaries</h4>
                     <div class="input-row">
                         <label>Left:</label>
-                        <input type="number" id="boundaryLeft" value="${currentScene.boundaries.left}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                        <input type="number" id="boundaryLeft" value="${currentScene.boundaries.left}" style="width: 80px;" data-action="boundary-change">
                         <label>Right:</label>
-                        <input type="number" id="boundaryRight" value="${currentScene.boundaries.right}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                        <input type="number" id="boundaryRight" value="${currentScene.boundaries.right}" style="width: 80px;" data-action="boundary-change">
                     </div>
                     <div class="input-row">
                         <label>Top:</label>
-                        <input type="number" id="boundaryTop" value="${currentScene.boundaries.top}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                        <input type="number" id="boundaryTop" value="${currentScene.boundaries.top}" style="width: 80px;" data-action="boundary-change">
                         <label>Bottom:</label>
-                        <input type="number" id="boundaryBottom" value="${currentScene.boundaries.bottom}" style="width: 80px;" onchange="game.updateSceneBoundaries()">
+                        <input type="number" id="boundaryBottom" value="${currentScene.boundaries.bottom}" style="width: 80px;" data-action="boundary-change">
                     </div>
-                    <button onclick="game.updateSceneBoundaries()" class="btn-small">Apply Boundaries</button>
+                    <button data-action="apply-boundaries" class="btn-small">Apply Boundaries</button>
                 </div>
                 <div class="property-group">
                     <h4>Transitions (${currentScene.transitions.zones.length})</h4>
                     <div id="transitionsList"></div>
-                    <button onclick="game.sceneSystem.startAddingTransition()" class="btn-small">Add Transition Zone</button>
+                    <button data-action="add-transition" class="btn-small">Add Transition Zone</button>
                 </div>
             `;
             this.updateTransitionsList();
@@ -577,7 +643,7 @@ class SceneManager {
                     <br>Position: (${zone.x}, ${zone.y}) Size: ${zone.width}x${zone.height}
                     <br>Player Start: (${zone.playerStartX}, ${zone.playerStartY})
                 </div>
-                <button onclick="game.sceneSystem.removeTransitionZone(${zone.id}); game.sceneSystem.updateUI();" class="btn-small btn-danger">Remove</button>
+                <button data-action="remove-transition" data-zone-id="${zone.id}" class="btn-small btn-danger">Remove</button>
             </div>`;
         }).join('');
     }
@@ -633,10 +699,11 @@ class SceneManager {
 
     // Transition zone creation
     startAddingTransition() {
-        this.game.isAddingTransition = true;
-        this.game.transitionStart = null;
+        // Use the EditorSystem's transition handling
+        if (this.game.editorSystem) {
+            this.game.editorSystem.startAddingTransition();
+        }
         console.log('Click and drag to create a transition zone');
-        // Change cursor or show instructions
     }
 
     handleTransitionCreation(startX, startY, endX, endY) {
