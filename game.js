@@ -72,8 +72,6 @@ class PlatformRPG {
         this.startPositionDragOffset = { x: 0, y: 0 };
 
         // Initialize mouse handlers (will be set after viewport and camera are ready)
-        this.platformMouseHandler = null;
-        this.propsMouseHandler = null;
 
 
         // Camera scrolling during drag
@@ -108,20 +106,6 @@ class PlatformRPG {
 
         this.updateViewport();
 
-        // Initialize mouse handlers after viewport and camera are ready
-        this.platformMouseHandler = new PlatformMouseHandler(
-            this.platformSystem,
-            this.viewport,
-            this.cameraSystem.camera,
-            this.canvas
-        );
-        this.propsMouseHandler = new PropsMouseHandler(
-            this.propSystem,
-            this.propSystem.manager,
-            this.platformSystem,
-            this.viewport,
-            this.cameraSystem.camera
-        );
 
         // Initialize input system
         this.inputSystem = new InputSystem(this);
@@ -1411,186 +1395,6 @@ class PlatformRPG {
         this.sceneSystem.renderer.updateStartPosition(newX, newY);
     }
 
-    handlePlatformDrag(e) {
-        const rect = this.canvas.getBoundingClientRect();
-        const clientMouseX = e.clientX - rect.left;
-        const clientMouseY = e.clientY - rect.top;
-
-        // Convert to both coordinate systems
-        const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
-        const viewportCoords = this.screenToViewport(clientMouseX, clientMouseY);
-        const worldMouseX = worldCoords.x;
-        const worldMouseY = worldCoords.y;
-        const viewportMouseX = viewportCoords.x;
-        const viewportMouseY = viewportCoords.y;
-
-        // Store current mouse position for continuous scrolling
-        this.lastMousePosition.x = clientMouseX;
-        this.lastMousePosition.y = clientMouseY;
-
-        // Handle camera scrolling during drag operations
-        this.handleDragScrolling(clientMouseX, clientMouseY);
-
-        // Handle prop dragging using the props mouse handler
-        const propMoved = this.propsMouseHandler.handleMouseMove(worldMouseX, worldMouseY);
-        if (propMoved) {
-            this.propSystem.updatePropProperties();
-            return;
-        }
-
-        // Handle platform dragging using the platform mouse handler
-        const platformMoved = this.platformMouseHandler.handleMouseMove(worldMouseX, worldMouseY);
-        if (platformMoved) {
-            // Force render during drag to show camera movement immediately
-            this.render();
-        }
-    }
-
-    handleDragScrolling(clientMouseX, clientMouseY) {
-        // Only scroll if we're actually dragging something
-        if (!this.platformSystem.isDragging && !this.propSystem.isDraggingProp && !this.propSystem.isDraggingMultiple && !this.platformSystem.isResizing) {
-            this.stopDragScrolling();
-            return;
-        }
-
-        const scrollTriggerZone = 50; // Pixels from screen edge to trigger scrolling
-        const canvasWidth = this.canvas.width;
-        let newDirection = null;
-
-        // Check platform/prop edges instead of mouse position
-        if (this.platformSystem.isDragging && this.platformSystem.selectedPlatform) {
-            // Calculate platform bounds relative to screen (camera view)
-            const platformScreenLeft = this.platformSystem.selectedPlatform.x - this.cameraSystem.x;
-            const platformScreenRight = this.platformSystem.selectedPlatform.x + this.platformSystem.selectedPlatform.width - this.cameraSystem.x;
-
-            console.log('Platform screen bounds:', platformScreenLeft, 'to', platformScreenRight, 'Canvas width:', canvasWidth);
-
-            // Check which edges are near screen edges
-            const leftEdgeNearScreen = platformScreenLeft < scrollTriggerZone;
-            const rightEdgeNearScreen = platformScreenRight > canvasWidth - scrollTriggerZone;
-
-            // Calculate movement direction by comparing current position with initial position
-            const movementDeltaX = this.platformSystem.selectedPlatform.x - (this.platformSystem.initialDragPosition?.x || this.platformSystem.selectedPlatform.x);
-            const isMovingRight = movementDeltaX > 2; // Small threshold to avoid jitter
-            const isMovingLeft = movementDeltaX < -2;
-
-            // If both edges are near screen edges (long platform), choose based on movement direction
-            if (leftEdgeNearScreen && rightEdgeNearScreen) {
-                if (isMovingRight) {
-                    newDirection = 'right';
-                    console.log('Long platform: Moving right, scroll right');
-                } else if (isMovingLeft) {
-                    newDirection = 'left';
-                    console.log('Long platform: Moving left, scroll left');
-                }
-                // If not moving much, don't scroll
-            }
-            // If only left edge is near screen edge and moving left
-            else if (leftEdgeNearScreen && (isMovingLeft || !isMovingRight)) {
-                newDirection = 'left';
-                console.log('Platform left edge near screen left, should scroll left');
-            }
-            // If only right edge is near screen edge and moving right
-            else if (rightEdgeNearScreen && (isMovingRight || !isMovingLeft)) {
-                newDirection = 'right';
-                console.log('Platform right edge near screen right, should scroll right');
-            }
-        } else if ((this.propSystem.isDraggingProp || this.propSystem.isDraggingMultiple) && this.propSystem.selectedProp) {
-            // Similar logic for props - need to calculate prop dimensions
-            const propType = this.propSystem.getPropType(this.propSystem.selectedProp.type);
-            if (propType) {
-                const sizeMultiplier = this.propSystem.selectedProp.sizeMultiplier || 1.0;
-                const propWidth = propType.width * sizeMultiplier;
-                const propHeight = propType.height * sizeMultiplier;
-
-                const propScreenLeft = this.propSystem.selectedProp.x - this.cameraSystem.x;
-                const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.cameraSystem.x;
-
-                if (propScreenLeft < scrollTriggerZone) {
-                    newDirection = 'left';
-                    console.log('Prop left edge near screen left, should scroll left');
-                } else if (propScreenRight > canvasWidth - scrollTriggerZone) {
-                    newDirection = 'right';
-                    console.log('Prop right edge near screen right, should scroll right');
-                }
-            }
-        }
-
-        // Start or update scrolling
-        if (newDirection !== this.dragScrollDirection) {
-            this.stopDragScrolling();
-            if (newDirection) {
-                console.log('Starting scroll in direction:', newDirection);
-                this.startDragScrolling(newDirection);
-            }
-        }
-    }
-
-    startDragScrolling(direction) {
-        this.dragScrollDirection = direction;
-        console.log('Starting drag scroll timer for direction:', direction);
-        this.dragScrollTimer = setInterval(() => {
-            const scrollSpeed = 8; // Faster scrolling speed
-            const oldCameraX = this.cameraSystem.x;
-            const scrollTriggerZone = 50;
-            const canvasWidth = this.canvas.width;
-
-            let shouldContinue = false;
-
-            // Check if platform/prop edges are still near screen edges
-            if (this.platformSystem.isDragging && this.platformSystem.selectedPlatform) {
-                const platformScreenLeft = this.platformSystem.selectedPlatform.x - this.cameraSystem.x;
-                const platformScreenRight = this.platformSystem.selectedPlatform.x + this.platformSystem.selectedPlatform.width - this.cameraSystem.x;
-
-                if (direction === 'left' && platformScreenLeft < scrollTriggerZone) {
-                    shouldContinue = true;
-                    const newCameraX = Math.max(0, this.cameraSystem.x - scrollSpeed);
-                    this.cameraSystem.x = newCameraX;
-                } else if (direction === 'right' && platformScreenRight > canvasWidth - scrollTriggerZone) {
-                    shouldContinue = true;
-                    this.cameraSystem.x += scrollSpeed;
-                }
-            } else if ((this.propSystem.isDraggingProp || this.propSystem.isDraggingMultiple) && this.propSystem.selectedProp) {
-                // Calculate prop dimensions
-                const propType = this.propSystem.getPropType(this.propSystem.selectedProp.type);
-                if (propType) {
-                    const sizeMultiplier = this.propSystem.selectedProp.sizeMultiplier || 1.0;
-                    const propWidth = propType.width * sizeMultiplier;
-
-                    const propScreenLeft = this.propSystem.selectedProp.x - this.cameraSystem.x;
-                    const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.cameraSystem.x;
-
-                    if (direction === 'left' && propScreenLeft < scrollTriggerZone) {
-                        shouldContinue = true;
-                        const newCameraX = Math.max(0, this.cameraSystem.x - scrollSpeed);
-                        this.cameraSystem.x = newCameraX;
-                    } else if (direction === 'right' && propScreenRight > canvasWidth - scrollTriggerZone) {
-                        shouldContinue = true;
-                        this.cameraSystem.x += scrollSpeed;
-                    }
-                }
-            }
-
-            if (!shouldContinue) {
-                this.stopDragScrolling();
-                return;
-            }
-
-            console.log('Scrolling camera from', oldCameraX, 'to', this.cameraSystem.x);
-
-            // Force a re-render to show the camera movement
-            this.render();
-        }, 50); // 50ms interval for smooth scrolling
-    }
-
-    stopDragScrolling() {
-        if (this.dragScrollTimer) {
-            clearInterval(this.dragScrollTimer);
-            this.dragScrollTimer = null;
-        }
-        this.dragScrollDirection = null;
-    }
-
     handleFreeCameraScroll(clientMouseX, clientMouseY) {
         // Only in development mode with free camera
         if (!this.isDevelopmentMode || this.cameraSystem.mode !== 'free') {
@@ -1972,40 +1776,6 @@ class PlatformRPG {
     }
     */
 
-    handlePlatformMouseUp(e) {
-        // Handle transition zone creation completion
-        if (this.isAddingTransition && this.transitionStart) {
-            const rect = this.canvas.getBoundingClientRect();
-            const clientMouseX = e.clientX - rect.left;
-            const clientMouseY = e.clientY - rect.top;
-            const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
-
-            this.sceneSystem.handleTransitionCreation(
-                this.transitionStart.x, this.transitionStart.y,
-                worldCoords.x, worldCoords.y
-            );
-
-            this.isAddingTransition = false;
-            this.transitionStart = null;
-            return;
-        }
-
-        // Handle start position drag completion
-        if (this.isDraggingStartPosition) {
-            this.isDraggingStartPosition = false;
-            this.startPositionDragOffset = { x: 0, y: 0 };
-            return;
-        }
-
-        // Handle platform mouse up using the platform mouse handler
-        this.platformMouseHandler.handleMouseUp();
-
-        // Handle prop mouse up using the props mouse handler
-        this.propsMouseHandler.handleMouseUp(e.ctrlKey);
-
-        // Stop camera scrolling when drag ends
-        this.stopDragScrolling();
-    }
 
     updateCursor() {
         // Default cursor
