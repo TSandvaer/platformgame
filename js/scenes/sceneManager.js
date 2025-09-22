@@ -615,6 +615,11 @@ class SceneManager {
             currentScene.metadata.modified = new Date().toISOString();
 
             console.log('🟩 Scene boundaries saved to scene data:', currentScene.boundaries);
+
+            // Save to localStorage to persist changes
+            if (this.game && this.game.sceneSystem) {
+                this.game.sceneSystem.saveScenes();
+            }
         }
     }
 
