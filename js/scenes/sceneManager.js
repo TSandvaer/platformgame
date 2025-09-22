@@ -658,8 +658,9 @@ class SceneManager {
     }
 
     showTransitionDialog(x, y, width, height) {
-        const scenes = this.sceneData.scenes.filter(s => s.id !== this.sceneData.currentSceneId);
-
+        const currentScene = this.sceneData.getCurrentScene();
+        const scenes = this.sceneData.scenes.filter(s => s.id !== currentScene.id);
+        
         if (scenes.length === 0) {
             alert('Create another scene first to set up transitions.');
             return;

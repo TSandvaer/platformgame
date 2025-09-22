@@ -263,25 +263,13 @@ class InputMouse {
         const worldCoords = this.game.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
         this.game.transitionEnd = { x: worldCoords.x, y: worldCoords.y };
 
-        const x = Math.min(this.game.transitionStart.x, this.game.transitionEnd.x);
-        const y = Math.min(this.game.transitionStart.y, this.game.transitionEnd.y);
-        const width = Math.abs(this.game.transitionEnd.x - this.game.transitionStart.x);
-        const height = Math.abs(this.game.transitionEnd.y - this.game.transitionStart.y);
+        const startX = this.game.transitionStart.x;
+        const startY = this.game.transitionStart.y;
+        const endX = this.game.transitionEnd.x;
+        const endY = this.game.transitionEnd.y;
 
-        if (width > 10 && height > 10) {
-            const targetSceneId = prompt('Enter target scene ID:');
-            if (targetSceneId) {
-                const playerStartX = prompt('Enter player start X in target scene:', '100');
-                const playerStartY = prompt('Enter player start Y in target scene:', '400');
-
-                this.game.sceneSystem.addTransitionZone(
-                    x, y, width, height,
-                    targetSceneId,
-                    parseInt(playerStartX) || 100,
-                    parseInt(playerStartY) || 400
-                );
-            }
-        }
+        // Use the proper scene manager method instead of prompt dialogs
+        this.game.sceneSystem.handleTransitionCreation(startX, startY, endX, endY);
 
         this.game.isAddingTransition = false;
         this.game.transitionStart = null;

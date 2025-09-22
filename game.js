@@ -1895,11 +1895,11 @@ class PlatformRPG {
     }
 
     renderTransitionZoneDrag() {
-        if (!this.isAddingTransition || !this.transitionStart) return;
+        if (!this.isAddingTransition || !this.transitionStart || !this.transitionEnd) return;
 
-        // Use existing mouse coordinates (already in world space)
-        const endX = this.mouseX;
-        const endY = this.mouseY;
+        // Use transition end coordinates (already in world space)
+        const endX = this.transitionEnd.x;
+        const endY = this.transitionEnd.y;
 
         // Calculate drag rectangle
         const startX = this.transitionStart.x;
