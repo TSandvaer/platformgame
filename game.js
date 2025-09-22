@@ -385,8 +385,7 @@ class PlatformRPG {
         this.gameLoop();
         this.updateUI();
 
-        // Load game data using the new system
-        this.gameDataSystem.loadGameData();
+        // Game data will be loaded after scene system is initialized in checkAllSpritesLoaded()
     }
 
     populateBackgroundDropdown() {
@@ -1040,28 +1039,35 @@ class PlatformRPG {
     updateUI() {
         // Note: scenesList is now handled by the scene system, not here
 
-        document.getElementById('charactersList').innerHTML = this.gameData.characters.map(char =>
+        // Get game data from gameDataSystem
+        const gameData = this.gameDataSystem ? this.gameDataSystem.gameData : null;
+        if (!gameData) {
+            console.log('Game data not yet loaded');
+            return;
+        }
+
+        document.getElementById('charactersList').innerHTML = (gameData.characters || []).map(char =>
             `<div class="item">
                 <div class="item-name">${char.name}</div>
                 <div class="item-details">${char.description}</div>
             </div>`
         ).join('');
 
-        document.getElementById('classesList').innerHTML = this.gameData.classes.map(cls =>
+        document.getElementById('classesList').innerHTML = (gameData.classes || []).map(cls =>
             `<div class="item">
                 <div class="item-name">${cls.name}</div>
                 <div class="item-details">${cls.description}</div>
             </div>`
         ).join('');
 
-        document.getElementById('weaponsList').innerHTML = this.gameData.weapons.map(weapon =>
+        document.getElementById('weaponsList').innerHTML = (gameData.weapons || []).map(weapon =>
             `<div class="item">
                 <div class="item-name">${weapon.name}</div>
                 <div class="item-details">${weapon.description}</div>
             </div>`
         ).join('');
 
-        document.getElementById('itemsList').innerHTML = this.gameData.items.map(item =>
+        document.getElementById('itemsList').innerHTML = (gameData.items || []).map(item =>
             `<div class="item">
                 <div class="item-name">${item.name}</div>
                 <div class="item-details">${item.description}</div>
@@ -1734,6 +1740,7 @@ class PlatformRPG {
             this.sceneSystem.saveScenes();
 
             // Create the gameData object
+            const currentGameData = this.gameDataSystem ? this.gameDataSystem.gameData : {};
             const gameData = {
                 gameInfo: {
                     title: "Platform RPG Game",
@@ -1741,10 +1748,10 @@ class PlatformRPG {
                     lastModified: new Date().toISOString().split('T')[0]
                 },
                 scenes: this.sceneSystem.exportSceneData().scenes,
-                characters: this.gameData.characters,
-                classes: this.gameData.classes,
-                weapons: this.gameData.weapons,
-                items: this.gameData.items
+                characters: currentGameData.characters || [],
+                classes: currentGameData.classes || [],
+                weapons: currentGameData.weapons || [],
+                items: currentGameData.items || []
             };
 
             try {

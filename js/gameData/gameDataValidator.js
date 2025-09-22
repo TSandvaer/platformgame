@@ -69,15 +69,17 @@ class GameDataValidator {
 
         // Validate scene IDs
         if (gameData.currentSceneId && gameData.scenes) {
-            const sceneIds = new Set(gameData.scenes.map(s => s.id));
-            if (!sceneIds.has(gameData.currentSceneId)) {
+            // Convert both to strings for comparison to handle mixed types
+            const sceneIds = new Set(gameData.scenes.map(s => String(s.id)));
+            if (!sceneIds.has(String(gameData.currentSceneId))) {
                 errors.push(`Current scene ID "${gameData.currentSceneId}" not found in scenes`);
             }
         }
 
         if (gameData.startSceneId && gameData.scenes) {
-            const sceneIds = new Set(gameData.scenes.map(s => s.id));
-            if (!sceneIds.has(gameData.startSceneId)) {
+            // Convert both to strings for comparison to handle mixed types
+            const sceneIds = new Set(gameData.scenes.map(s => String(s.id)));
+            if (!sceneIds.has(String(gameData.startSceneId))) {
                 errors.push(`Start scene ID "${gameData.startSceneId}" not found in scenes`);
             }
         }

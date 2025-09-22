@@ -1369,17 +1369,7 @@
           "relativeY": 0.5
         }
       ],
-      "props": [
-        {
-          "id": 5,
-          "x": 943,
-          "y": 549,
-          "type": "SmallPot",
-          "isObstacle": false,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5
-        }
+      "props": [        
       ],
       "background": {
         "name": "The Dawn",
@@ -1418,7 +1408,7 @@
     }
   ],
   "currentSceneId": 1,
-  "startSceneId": "1",
+  "startSceneId": 1,
   "characters": [],
   "classes": [],
   "weapons": [],

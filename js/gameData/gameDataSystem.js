@@ -62,10 +62,16 @@ class GameDataSystem {
     async loadGameData() {
         // Try to load from localStorage first
         const savedData = this.storage.loadFromLocalStorage();
-        if (savedData) {
-            console.log('✅ Loaded game data from localStorage');
-            this.applyGameData(savedData);
-            return;
+        if (savedData && savedData.scenes && savedData.scenes.length > 0) {
+            // Check if scenes have platforms - if not, the data is incomplete
+            const hasPlatforms = savedData.scenes.some(scene => scene.platforms && scene.platforms.length > 0);
+            if (hasPlatforms) {
+                console.log('✅ Loaded valid game data from localStorage');
+                this.applyGameData(savedData);
+                return;
+            } else {
+                console.log('⚠️ localStorage data has empty platforms, loading from file instead');
+            }
         }
 
         // Try to load from gameData.json file

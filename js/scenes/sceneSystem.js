@@ -161,22 +161,21 @@ class SceneSystem {
 
         this.manager.saveCurrentSceneData();
 
-        // Use the GameDataSystem to save all game data instead of just scenes
+        // Use the GameDataSystem to save all game data
         if (this.game.gameDataSystem) {
             this.game.gameDataSystem.saveCurrentData();
-        } else {
-            // Fallback for backward compatibility
-            const sceneData = this.data.exportSceneData();
-            localStorage.setItem('platformGame_sceneData', JSON.stringify(sceneData));
         }
     }
 
     loadSavedScenes() {
         // First try to load from the GameDataSystem's complete data
         if (this.game.gameDataSystem) {
+            console.log('🔍 Attempting to load from gameDataSystem...');
             const completeData = this.game.gameDataSystem.storage.loadFromLocalStorage();
+            console.log('🔍 Loaded data:', completeData);
             if (completeData && completeData.scenes) {
                 console.log('📂 Loading scenes from complete game data');
+                console.log('📂 Number of scenes:', completeData.scenes.length);
                 this.data.importSceneData({
                     scenes: completeData.scenes,
                     currentSceneId: completeData.currentSceneId,
@@ -199,38 +198,6 @@ class SceneSystem {
                     }
                 }
                 return true;
-            }
-        }
-
-        // Fallback to legacy scene data
-        const savedData = localStorage.getItem('platformGame_sceneData');
-        if (savedData) {
-            try {
-                console.log('📂 Loading from legacy scene data');
-                const sceneData = JSON.parse(savedData);
-                this.data.importSceneData(sceneData);
-
-                // Load the last current scene (to maintain context after refresh)
-                const currentSceneId = sceneData.currentSceneId;
-                if (currentSceneId) {
-                    this.manager.loadScene(currentSceneId);
-                } else {
-                    // Fallback: load start scene if no current scene is set
-                    const startScene = this.data.getStartScene();
-                    if (startScene) {
-                        this.manager.loadScene(startScene.id);
-                    } else {
-                        // Final fallback: load first scene
-                        const firstScene = this.data.scenes[0];
-                        if (firstScene) {
-                            this.manager.loadScene(firstScene.id);
-                        }
-                    }
-                }
-
-                return true;
-            } catch (e) {
-                console.error('Error loading scene data:', e);
             }
         }
 

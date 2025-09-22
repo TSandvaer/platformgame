@@ -3,7 +3,6 @@ class GameDataStorage {
         this.dataSystem = gameDataSystem;
         this.game = gameDataSystem.game;
         this.storageKey = 'platformGame_gameData';
-        this.sceneStorageKey = 'platformGame_sceneData'; // Legacy key for compatibility
     }
 
     initialize() {
@@ -44,17 +43,6 @@ class GameDataStorage {
         try {
             const dataStr = JSON.stringify(gameData);
             localStorage.setItem(this.storageKey, dataStr);
-
-            // Also save to legacy scene key for compatibility
-            if (gameData.scenes) {
-                const sceneData = {
-                    scenes: gameData.scenes,
-                    currentSceneId: gameData.currentSceneId,
-                    startSceneId: gameData.startSceneId
-                };
-                localStorage.setItem(this.sceneStorageKey, JSON.stringify(sceneData));
-            }
-
             return true;
         } catch (error) {
             console.error('Error saving to localStorage:', error);
@@ -71,37 +59,23 @@ class GameDataStorage {
     // Load from localStorage
     loadFromLocalStorage() {
         try {
-            // Try to load from the main storage key first
-            let dataStr = localStorage.getItem(this.storageKey);
+            console.log('🔍 Looking for localStorage key:', this.storageKey);
+            // Load from the main storage key
+            const dataStr = localStorage.getItem(this.storageKey);
+            console.log('🔍 Found data:', dataStr ? `${dataStr.length} characters` : 'null');
             if (dataStr) {
                 const gameData = JSON.parse(dataStr);
                 console.log('📂 Loaded game data from localStorage');
+                console.log('📂 Data structure:', {
+                    hasScenes: !!gameData.scenes,
+                    sceneCount: gameData.scenes?.length || 0,
+                    currentSceneId: gameData.currentSceneId,
+                    startSceneId: gameData.startSceneId
+                });
                 return gameData;
             }
 
-            // Fall back to legacy scene data if available
-            dataStr = localStorage.getItem(this.sceneStorageKey);
-            if (dataStr) {
-                const sceneData = JSON.parse(dataStr);
-                console.log('📂 Loaded legacy scene data from localStorage');
-
-                // Convert legacy format to new format
-                return {
-                    gameInfo: {
-                        title: "Platform RPG Game",
-                        version: "1.0.0",
-                        lastModified: new Date().toISOString().split('T')[0]
-                    },
-                    scenes: sceneData.scenes || [],
-                    currentSceneId: sceneData.currentSceneId,
-                    startSceneId: sceneData.startSceneId,
-                    characters: [],
-                    classes: [],
-                    weapons: [],
-                    items: []
-                };
-            }
-
+            console.log('⚠️ No data found in localStorage');
             return null;
         } catch (error) {
             console.error('Error loading from localStorage:', error);
@@ -142,24 +116,18 @@ class GameDataStorage {
 
     // Clean up inconsistent legacy data
     cleanupLegacyData() {
-        const mainData = localStorage.getItem(this.storageKey);
-        const legacyData = localStorage.getItem(this.sceneStorageKey);
+        // Remove any remaining legacy scene data
+        const legacySceneKey = 'platformGame_sceneData';
+        if (localStorage.getItem(legacySceneKey)) {
+            console.log('🧹 Removing legacy scene data');
+            localStorage.removeItem(legacySceneKey);
+        }
 
-        if (mainData && legacyData) {
-            try {
-                const main = JSON.parse(mainData);
-                const legacy = JSON.parse(legacyData);
-
-                // If main data has more complete scene information, remove legacy
-                if (main.scenes && main.scenes.length > 0 &&
-                    (!legacy.scenes || legacy.scenes.length === 0 ||
-                     main.scenes.length >= legacy.scenes.length)) {
-                    console.log('🧹 Removing incomplete legacy scene data');
-                    localStorage.removeItem(this.sceneStorageKey);
-                }
-            } catch (error) {
-                console.error('Error cleaning up legacy data:', error);
-            }
+        // Also remove very old format if it exists
+        const oldScenesKey = 'platformGame_scenes';
+        if (localStorage.getItem(oldScenesKey)) {
+            console.log('🧹 Removing old scenes format');
+            localStorage.removeItem(oldScenesKey);
         }
     }
 
@@ -167,14 +135,11 @@ class GameDataStorage {
     getStorageSize() {
         let totalSize = 0;
 
-        // Calculate size of our storage keys
-        const keys = [this.storageKey, this.sceneStorageKey];
-        keys.forEach(key => {
-            const item = localStorage.getItem(key);
-            if (item) {
-                totalSize += item.length;
-            }
-        });
+        // Calculate size of our storage key
+        const item = localStorage.getItem(this.storageKey);
+        if (item) {
+            totalSize += item.length;
+        }
 
         // Return size in KB
         return Math.round(totalSize / 1024 * 100) / 100;
