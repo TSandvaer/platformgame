@@ -1309,16 +1309,6 @@
             "targetSceneId": 2,
             "playerStartX": 199,
             "playerStartY": 861
-          },
-          {
-            "id": 2,
-            "x": 3729.3401240035428,
-            "y": 339.36226749335697,
-            "width": 415.80159433126664,
-            "height": 104.5881310894597,
-            "targetSceneId": 2,
-            "playerStartX": 96,
-            "playerStartY": 851
           }
         ]
       },
@@ -1329,14 +1319,14 @@
         "bottom": 1000
       },
       "settings": {
-        "playerStartX": 4184,
-        "playerStartY": 810,
+        "playerStartX": 187,
+        "playerStartY": 801,
         "gravity": 0.8,
         "playerSpeed": 5
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-22T05:55:02.555Z"
+        "modified": "2025-09-22T06:02:10.493Z"
       }
     },
     {
