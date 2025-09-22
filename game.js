@@ -24,39 +24,13 @@ class PlatformRPG {
         this.lastTime = 0;
         this.deltaTime = 0;
 
-        this.player = {
-            x: 100,
-            y: 400,
-            width: 44,  // 35 * 1.25 = 43.75, rounded to 44
-            height: 59, // 47 * 1.25 = 58.75, rounded to 59
-            velocityX: 0,
-            velocityY: 0,
-            speed: 5.5,
-            jumpPower: -14,
-            onGround: false,
-            color: '#FF6B6B',
-            lastValidPosition: { x: 100, y: 400 }, // Track last known good position
-            facing: 'right',
-            currentAnimation: 'idle',
-            frameIndex: 0,
-            frameTimer: 0,
-            frameRate: 150, // milliseconds per frame (was 6 frames @ 60fps = 100ms)
-            isAttacking: false,
-            attackTimer: 0,
-            attackDuration: 545,
-            spaceKeyPressed: false
-        };
+        // Initialize player system
+        this.playerSystem = new PlayerSystem();
+        this.playerSystem.init();
 
-        this.sprites = {
-            idle: { image: null, frames: 6, frameWidth: 100, frameHeight: 100 },
-            walk: { image: null, frames: 8, frameWidth: 100, frameHeight: 100 },
-            attack: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
-            hurt: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
-            death: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 }
-        };
-
-        this.spritesLoaded = false;
-        this.loadSprites();
+        // Keep player reference for backwards compatibility during transition
+        this.player = this.playerSystem.data;
+        this.spritesLoaded = this.playerSystem.isReady();
 
         // Platform sprites
         this.platformSprites = {
@@ -169,37 +143,6 @@ class PlatformRPG {
         this.init();
     }
 
-    loadSprites() {
-        const spriteFiles = {
-            idle: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
-            walk: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
-            attack: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
-            hurt: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
-            death: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
-        };
-
-        let loadedCount = 0;
-        const totalSprites = Object.keys(spriteFiles).length;
-
-        Object.entries(spriteFiles).forEach(([animationName, filePath]) => {
-            const img = new Image();
-            img.onload = () => {
-                loadedCount++;
-                if (loadedCount === totalSprites) {
-                    this.spritesLoaded = true;
-                }
-            };
-            img.onerror = () => {
-                console.error(`Failed to load sprite: ${filePath}`);
-                loadedCount++;
-                if (loadedCount === totalSprites) {
-                    this.spritesLoaded = true;
-                }
-            };
-            img.src = filePath;
-            this.sprites[animationName].image = img;
-        });
-    }
 
     loadPlatformSprites() {
         let loadedCount = 0;
@@ -562,25 +505,13 @@ class PlatformRPG {
                 this.keys[e.key.toLowerCase()] = true;
             }
 
-            // Handle Ctrl key for attack (but not in development mode with props selected)
-            if (e.key === 'Control' && !this.player.isAttacking) {
-                // Don't attack if in development mode and props are selected (Ctrl is used for multi-selection)
-                const hasSelectedProps = this.isDevelopmentMode &&
-                    (this.propSystem.selectedProp || (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0));
-
-                if (!hasSelectedProps) {
-                    e.preventDefault(); // Prevent browser shortcuts like Ctrl+Space
-                    this.handlePlayerAttack();
-                }
+            // Let player system handle special keys
+            const handled = this.playerSystem.handleKeyDown(e.key, this.isDevelopmentMode, this.propSystem);
+            if (handled && e.key === ' ') {
+                e.preventDefault(); // Prevent page scrolling for space
             }
-
-            // Handle space key for jump (one-time trigger) - works in both development and production modes
-            if (e.key === ' ' && this.player.onGround && !this.player.spaceKeyPressed) {
-                const jumpPower = this.keys['shift'] ? -17 : this.player.jumpPower;
-                this.player.velocityY = jumpPower;
-                this.player.onGround = false;
-                this.player.spaceKeyPressed = true;
-                e.preventDefault(); // Prevent page scrolling
+            if (handled && e.key === 'Control') {
+                e.preventDefault(); // Prevent browser shortcuts
             }
 
             // Prevent browser shortcuts when Ctrl is held down with other keys
@@ -592,10 +523,8 @@ class PlatformRPG {
         window.addEventListener('keyup', (e) => {
             this.keys[e.key.toLowerCase()] = false;
 
-            // Reset space key flag when released
-            if (e.key === ' ') {
-                this.player.spaceKeyPressed = false;
-            }
+            // Let player system handle key up
+            this.playerSystem.handleKeyUp(e.key);
 
             // Prevent browser shortcuts for Control key
             if (e.key === 'Control') {
@@ -711,16 +640,6 @@ class PlatformRPG {
         this.setupSceneEditorListeners();
     }
 
-    handlePlayerAttack() {
-        if (!this.player.isAttacking) {
-            this.player.isAttacking = true;
-            this.player.attackTimer = 0;
-            this.setPlayerAnimation('attack');
-
-            // Attack in the direction the player is currently facing
-            // Don't change facing direction during attack - use current facing
-        }
-    }
 
     setDevelopmentMode(isDev) {
         this.isDevelopmentMode = isDev;
@@ -811,226 +730,26 @@ class PlatformRPG {
     }
 
     handleInput() {
-        if (this.isDevelopmentMode) {
-            // Check if we're nudging a prop - if so, don't move the player
-            const isNudgingProp = this.propSystem.selectedProp ||
-                                 (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0);
-
-            // Use delta time for framerate-independent movement (60fps = 16.67ms baseline)
-            const moveMultiplier = this.deltaTime / 16.67;
-            const speedMultiplier = (this.keys['shift']) ? 1.5 : 1.0;
-            let isMoving = false;
-
-            // Don't use arrow keys for player movement if nudging props
-            if (!isNudgingProp) {
-                if (this.keys['arrowleft']) {
-                    this.player.x -= this.player.speed * moveMultiplier * speedMultiplier;
-                    this.player.facing = 'left';
-                    isMoving = true;
-                }
-                if (this.keys['arrowright']) {
-                    this.player.x += this.player.speed * moveMultiplier * speedMultiplier;
-                    this.player.facing = 'right';
-                    isMoving = true;
-                }
-                if (this.keys['arrowup']) {
-                    this.player.y -= this.player.speed * moveMultiplier * speedMultiplier;
-                    isMoving = true;
-                }
-                if (this.keys['arrowdown']) {
-                    this.player.y += this.player.speed * moveMultiplier * speedMultiplier;
-                    isMoving = true;
-                }
-            }
-
-            // WASD still works for player movement regardless of prop selection
-            if (this.keys['a']) {
-                this.player.x -= this.player.speed * moveMultiplier * speedMultiplier;
-                this.player.facing = 'left';
-                isMoving = true;
-            }
-            if (this.keys['d']) {
-                this.player.x += this.player.speed * moveMultiplier * speedMultiplier;
-                this.player.facing = 'right';
-                isMoving = true;
-            }
-            if (this.keys['w']) {
-                this.player.y -= this.player.speed * moveMultiplier * speedMultiplier;
-                isMoving = true;
-            }
-            if (this.keys['s']) {
-                this.player.y += this.player.speed * moveMultiplier * speedMultiplier;
-                isMoving = true;
-            }
-            this.setPlayerAnimation(isMoving ? 'walk' : 'idle');
-        } else {
-            const speedMultiplier = (this.keys['shift']) ? 1.5 : 1.0;
-            let isMoving = false;
-            if (this.keys['arrowleft'] || this.keys['a']) {
-                this.player.velocityX = -this.player.speed * speedMultiplier;
-                this.player.facing = 'left';
-                isMoving = true;
-            } else if (this.keys['arrowright'] || this.keys['d']) {
-                this.player.velocityX = this.player.speed * speedMultiplier;
-                this.player.facing = 'right';
-                isMoving = true;
-            } else {
-                this.player.velocityX *= this.friction;
-            }
-
-
-            // Set animation based on movement and ground state
-            if (!this.player.onGround) {
-                this.setPlayerAnimation('idle'); // Could be jump animation if you have one
-            } else if (isMoving || Math.abs(this.player.velocityX) > 0.5) {
-                this.setPlayerAnimation('walk');
-            } else {
-                this.setPlayerAnimation('idle');
-            }
-        }
+        // Pass keys to player controller
+        this.playerSystem.controller.keys = this.keys;
     }
 
-    setPlayerAnimation(animationName) {
-        // Don't change animation if currently attacking (unless setting to attack)
-        if (this.player.isAttacking && animationName !== 'attack') {
-            return;
-        }
-
-        if (this.player.currentAnimation !== animationName) {
-            this.player.currentAnimation = animationName;
-            this.player.frameIndex = 0;
-            this.player.frameTimer = 0;
-        }
-    }
-
-    updatePlayerAnimation() {
-        if (!this.spritesLoaded) return;
-
-        // Update frame animation using delta time
-        this.player.frameTimer += this.deltaTime;
-        if (this.player.frameTimer >= this.player.frameRate) {
-            this.player.frameTimer = 0;
-            const sprite = this.sprites[this.player.currentAnimation];
-            this.player.frameIndex = (this.player.frameIndex + 1) % sprite.frames;
-        }
-
-        // Handle attack timing - check this after frame updates
-        if (this.player.isAttacking) {
-            this.player.attackTimer += this.deltaTime;
-            if (this.player.attackTimer >= this.player.attackDuration) {
-                this.player.isAttacking = false;
-                this.player.attackTimer = 0;
-                // Return to appropriate animation based on current state
-                if (!this.isDevelopmentMode && !this.player.onGround) {
-                    this.setPlayerAnimation('idle');
-                } else if (Math.abs(this.player.velocityX) > 0.5) {
-                    this.setPlayerAnimation('walk');
-                } else {
-                    this.setPlayerAnimation('idle');
-                }
-            }
-        }
-    }
 
     updatePhysics() {
-        if (!this.isDevelopmentMode) {
-            // Track position before physics update
-            const startX = this.player.x;
-            const startY = this.player.y;
+        // Delegate to player system
+        this.playerSystem.update(
+            this.deltaTime,
+            this.isDevelopmentMode,
+            this.platformSystem,
+            this.propSystem,
+            this.sceneSystem,
+            this.viewport
+        );
 
-            // Use delta time for framerate-independent physics (60fps = 16.67ms baseline)
-            const physicsMultiplier = this.deltaTime / 16.67;
-
-            this.player.velocityY += this.gravity * physicsMultiplier;
-
-            this.player.x += this.player.velocityX * physicsMultiplier;
-            this.player.y += this.player.velocityY * physicsMultiplier;
-
-            // Detect large jumps in position (potential teleportation)
-            const deltaX = Math.abs(this.player.x - startX);
-            const deltaY = Math.abs(this.player.y - startY);
-
-            // If position changed dramatically (more than would be possible with normal physics)
-            if (deltaX > 200 || deltaY > 200) {
-                console.warn('🚨 LARGE POSITION CHANGE DETECTED IN PHYSICS!', {
-                    from: { x: startX, y: startY },
-                    to: { x: this.player.x, y: this.player.y },
-                    delta: { x: deltaX, y: deltaY },
-                    velocity: { x: this.player.velocityX, y: this.player.velocityY },
-                    physicsMultiplier
-                });
-            }
-
-            this.player.onGround = false;
-
-            // Check collision with platforms using actual positions
-            const beforeCollisionX = this.player.x;
-            const beforeCollisionY = this.player.y;
-
-            this.platformSystem.checkPlayerPlatformCollisions(this.player, this.viewport);
-
-            // Check if platform collision caused teleportation
-            if (Math.abs(this.player.x - beforeCollisionX) > 200 || Math.abs(this.player.y - beforeCollisionY) > 200) {
-                console.warn('🚨 PLATFORM COLLISION CAUSED TELEPORTATION!', {
-                    before: { x: beforeCollisionX, y: beforeCollisionY },
-                    after: { x: this.player.x, y: this.player.y }
-                });
-            }
-
-            // Check collision with obstacle props
-            const beforePropX = this.player.x;
-            const beforePropY = this.player.y;
-
-            this.propSystem.checkPlayerPropCollisions(this.player, this.viewport);
-
-            // Check if prop collision caused teleportation
-            if (Math.abs(this.player.x - beforePropX) > 200 || Math.abs(this.player.y - beforePropY) > 200) {
-                console.warn('🚨 PROP COLLISION CAUSED TELEPORTATION!', {
-                    before: { x: beforePropX, y: beforePropY },
-                    after: { x: this.player.x, y: this.player.y }
-                });
-            }
-
-            // Check scene transitions using player center point
-            const beforeTransitionX = this.player.x;
-            const beforeTransitionY = this.player.y;
-
-            const playerCenterX = this.player.x + this.player.width / 2;
-            const playerCenterY = this.player.y + this.player.height / 2;
-            this.sceneSystem.checkTransitions(playerCenterX, playerCenterY);
-
-            // Check if transition caused teleportation
-            if (Math.abs(this.player.x - beforeTransitionX) > 200 || Math.abs(this.player.y - beforeTransitionY) > 200) {
-                console.warn('🚨 SCENE TRANSITION CAUSED TELEPORTATION!', {
-                    before: { x: beforeTransitionX, y: beforeTransitionY },
-                    after: { x: this.player.x, y: this.player.y },
-                    centerPoint: { x: playerCenterX, y: playerCenterY }
-                });
-            }
-
-            // Apply scene boundary constraints to player position
-            this.applyPlayerBoundaryConstraints();
-
-            // Check if player fell below the viewport (using player's bottom edge)
-            if (this.player.y + this.player.height > this.viewport.designHeight + 100) {
-                console.log('⚠️ Player fell below viewport, resetting to start position', {
-                    playerY: this.player.y,
-                    playerBottom: this.player.y + this.player.height,
-                    viewportHeight: this.viewport.designHeight
-                });
-                // Reset player to current scene's start position
-                const currentScene = this.sceneSystem.currentScene;
-                if (currentScene) {
-                    this.player.x = currentScene.settings.playerStartX;
-                    this.player.y = currentScene.settings.playerStartY;
-                } else {
-                    // Fallback to default position
-                    this.player.x = 100;
-                    this.player.y = 400;
-                }
-                this.player.velocityX = 0;
-                this.player.velocityY = 0;
-            }
+        // Apply scene boundaries
+        const sceneBoundaries = this.sceneSystem.getSceneBoundaries();
+        if (sceneBoundaries) {
+            this.playerSystem.applyBoundaryConstraints(sceneBoundaries);
         }
     }
 
@@ -1126,46 +845,6 @@ class PlatformRPG {
         // console.log('🎥 Camera constrained:', { target: { x: targetX, y: targetY }, actual: { x: this.cameraSystem.x, y: this.cameraSystem.y } });
     }
 
-    applyPlayerBoundaryConstraints() {
-        const currentScene = this.sceneSystem.currentScene;
-        if (!currentScene || !currentScene.boundaries) {
-            return; // No constraints if no scene boundaries
-        }
-
-        const bounds = currentScene.boundaries;
-        const originalX = this.player.x;
-        const originalY = this.player.y;
-
-        // Constrain player position to scene boundaries
-        const playerLeft = this.player.x;
-        const playerRight = this.player.x + this.player.width;
-        const playerTop = this.player.y;
-        const playerBottom = this.player.y + this.player.height;
-
-        // Apply horizontal constraints
-        if (playerLeft < bounds.left) {
-            this.player.x = bounds.left;
-            this.player.velocityX = 0; // Stop horizontal movement
-        } else if (playerRight > bounds.right) {
-            this.player.x = bounds.right - this.player.width;
-            this.player.velocityX = 0; // Stop horizontal movement
-        }
-
-        // Apply vertical constraints
-        if (playerTop < bounds.top) {
-            this.player.y = bounds.top;
-            this.player.velocityY = 0; // Stop vertical movement
-        } else if (playerBottom > bounds.bottom) {
-            this.player.y = bounds.bottom - this.player.height;
-            this.player.velocityY = 0; // Stop vertical movement
-            this.player.onGround = true; // Player landed on bottom boundary
-        }
-
-        // Debug logging for player constraints (can be removed for production)
-        // if (this.player.x !== originalX || this.player.y !== originalY) {
-        //     console.log('🚧 Player constrained by scene boundaries:', { original: { x: originalX, y: originalY }, constrained: { x: this.player.x, y: this.player.y } });
-        // }
-    }
 
     updateViewport() {
         this.viewport.actualWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
@@ -1264,19 +943,8 @@ class PlatformRPG {
         // Render props (background props first, then obstacle props)
         this.propSystem.renderBackgroundProps(this.isDevelopmentMode, this.viewport);
 
-        // Render player sprite or fallback to rectangle
-        if (this.spritesLoaded && this.sprites[this.player.currentAnimation].image) {
-            this.drawPlayerSprite();
-        } else {
-            // Fallback to rectangle
-            this.ctx.fillStyle = this.player.color;
-            this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
-        }
-
-        if (this.isDevelopmentMode) {
-            this.ctx.strokeStyle = '#333';
-            this.ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
-        }
+        // Render player using the player system
+        this.playerSystem.render(this.ctx, this.isDevelopmentMode);
 
         this.ctx.restore();
 
@@ -1321,45 +989,6 @@ class PlatformRPG {
         }
     }
 
-    drawPlayerSprite() {
-        const sprite = this.sprites[this.player.currentAnimation];
-        if (!sprite.image) return;
-
-        const sourceX = this.player.frameIndex * sprite.frameWidth;
-        const sourceY = 0;
-
-        this.ctx.save();
-
-        // Make sprite render larger than collision box, scaled with player size
-        const baseSpriteSize = 256;
-        const playerScale = this.player.width / 35; // Scale based on original player width (35)
-        const spriteRenderWidth = baseSpriteSize * playerScale;
-        const spriteRenderHeight = baseSpriteSize * playerScale;
-        const spriteOffsetX = (this.player.width - spriteRenderWidth) / 2;
-        const spriteOffsetY = this.player.height - spriteRenderHeight + (110 * playerScale); // Adjust to center character in collision box
-
-        // Flip sprite horizontally if facing left
-        if (this.player.facing === 'left') {
-            this.ctx.scale(-1, 1);
-            this.ctx.drawImage(
-                sprite.image,
-                sourceX, sourceY,
-                sprite.frameWidth, sprite.frameHeight,
-                -(this.player.x + spriteOffsetX + spriteRenderWidth), this.player.y + spriteOffsetY,
-                spriteRenderWidth, spriteRenderHeight
-            );
-        } else {
-            this.ctx.drawImage(
-                sprite.image,
-                sourceX, sourceY,
-                sprite.frameWidth, sprite.frameHeight,
-                this.player.x + spriteOffsetX, this.player.y + spriteOffsetY,
-                spriteRenderWidth, spriteRenderHeight
-            );
-        }
-
-        this.ctx.restore();
-    }
 
 
     // Prop rendering methods have been moved to propSystem
@@ -2994,7 +2623,6 @@ class PlatformRPG {
 
         this.handleInput();
         this.updatePhysics();
-        this.updatePlayerAnimation();
         this.cameraSystem.update(this.player, this.sceneSystem, this.platformSystem, this.propSystem, this.isDraggingStartPosition);
         this.render();
 

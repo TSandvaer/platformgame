@@ -185,6 +185,10 @@ class CameraManager {
 
     // Convert screen coordinates to world coordinates
     screenToWorld(screenX, screenY) {
+        if (!this.viewport) {
+            // Return basic conversion if viewport not initialized
+            return { x: screenX + this.data.x, y: screenY + this.data.y };
+        }
         const worldX = (screenX - this.viewport.offsetX) / this.viewport.scaleX + this.data.x;
         const worldY = (screenY - this.viewport.offsetY) / this.viewport.scaleY + this.data.y;
         return { x: worldX, y: worldY };
@@ -192,6 +196,10 @@ class CameraManager {
 
     // Convert world coordinates to screen coordinates
     worldToScreen(worldX, worldY) {
+        if (!this.viewport) {
+            // Return basic conversion if viewport not initialized
+            return { x: worldX - this.data.x, y: worldY - this.data.y };
+        }
         const screenX = (worldX - this.data.x) * this.viewport.scaleX + this.viewport.offsetX;
         const screenY = (worldY - this.data.y) * this.viewport.scaleY + this.viewport.offsetY;
         return { x: screenX, y: screenY };

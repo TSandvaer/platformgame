@@ -80,6 +80,15 @@ class SceneSystem {
         return this.manager.setStartScene(sceneId);
     }
 
+    // Get scene boundaries for physics constraints
+    getSceneBoundaries() {
+        const currentScene = this.currentScene;
+        if (!currentScene || !currentScene.boundaries) {
+            return null;
+        }
+        return currentScene.boundaries;
+    }
+
     // Transition management
     addTransitionZone(x, y, width, height, targetSceneId, playerStartX, playerStartY) {
         return this.manager.addTransitionZone(x, y, width, height, targetSceneId, playerStartX, playerStartY);
