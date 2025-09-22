@@ -1,7 +1,7 @@
 class PlatformSystem {
-    constructor(ctx, platformSprites) {
+    constructor(ctx, onSpritesLoadedCallback) {
         this.data = new PlatformData();
-        this.renderer = new PlatformRenderer(ctx, platformSprites);
+        this.renderer = new PlatformRenderer(ctx, onSpritesLoadedCallback);
         this.collisions = new PlatformCollisions();
         this.manager = new PlatformManager(this.data);
     }

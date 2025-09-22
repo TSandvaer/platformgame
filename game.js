@@ -33,14 +33,12 @@ class PlatformRPG {
         this.player = this.playerSystem.data;
         this.spritesLoaded = this.playerSystem.isReady();
 
-        // Platform sprites
-        this.platformSprites = {
-            tileset: { image: null, tileWidth: 16, tileHeight: 16 },
-            villageProps: { image: null, tileWidth: 32, tileHeight: 32 },
-            torchFlame: { image: null, frameWidth: 21, frameHeight: 21, totalFrames: 6 }
+        // Sprite loading coordination
+        this.spritesLoaded = {
+            platforms: false,
+            props: false
         };
-        this.platformSpritesLoaded = false;
-        this.loadPlatformSprites();
+        this.allSpritesLoaded = false;
 
         // Background management
         this.backgrounds = {};
@@ -52,11 +50,17 @@ class PlatformRPG {
         this.friction = 0.8;
 
         // Initialize platform system
-        this.platformSystem = new PlatformSystem(this.ctx, this.platformSprites);
+        this.platformSystem = new PlatformSystem(this.ctx, () => {
+            this.spritesLoaded.platforms = true;
+            this.checkAllSpritesLoaded();
+        });
 
         // Initialize prop system
         this.torchParticles = [];
-        this.propSystem = new PropSystem(this.ctx, this.platformSprites, this.torchParticles);
+        this.propSystem = new PropSystem(this.ctx, this.platformSystem.renderer.platformSprites, this.torchParticles, () => {
+            this.spritesLoaded.props = true;
+            this.checkAllSpritesLoaded();
+        });
 
         // Initialize scene system
         this.sceneSystem = new SceneSystem(this);
@@ -147,56 +151,15 @@ class PlatformRPG {
     }
 
 
-    loadPlatformSprites() {
-        let loadedCount = 0;
-        const totalImages = 3;
-
-        const checkAllLoaded = () => {
-            if (loadedCount === totalImages) {
-                this.platformSpritesLoaded = true;
-                console.log('🎨 All platform sprites loaded, initializing scene system...');
-                this.onPlatformSpritesLoaded();
-            }
-        };
-
-        // Load ground tileset
-        const groundImg = new Image();
-        groundImg.onload = () => {
-            loadedCount++;
-            checkAllLoaded();
-        };
-        groundImg.onerror = () => {
-            console.error('Failed to load ground tileset');
-        };
-        groundImg.src = 'textures_02_08_25.png';
-        this.platformSprites.tileset.image = groundImg;
-
-        // Load village props tileset
-        const propsImg = new Image();
-        propsImg.onload = () => {
-            loadedCount++;
-            checkAllLoaded();
-        };
-        propsImg.onerror = () => {
-            console.error('Failed to load village props tileset');
-        };
-        propsImg.src = 'sprites/Pixel Art Platformer/Texture/TX Village Props.png';
-        this.platformSprites.villageProps.image = propsImg;
-
-        // Load torch flame animation
-        const torchFlameImg = new Image();
-        torchFlameImg.onload = () => {
-            loadedCount++;
-            checkAllLoaded();
-        };
-        torchFlameImg.onerror = () => {
-            console.error('Failed to load torch flame sprite');
-        };
-        torchFlameImg.src = 'sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
-        this.platformSprites.torchFlame.image = torchFlameImg;
+    checkAllSpritesLoaded() {
+        if (this.spritesLoaded.platforms && this.spritesLoaded.props) {
+            this.allSpritesLoaded = true;
+            console.log('🎨 All sprites loaded, initializing scene system...');
+            this.onAllSpritesLoaded();
+        }
     }
 
-    onPlatformSpritesLoaded() {
+    onAllSpritesLoaded() {
         console.log('🎨 Platform sprites loaded, initializing scene system...');
 
         // Check if we have pending gameData.json import
@@ -2272,7 +2235,7 @@ class PlatformRPG {
             console.log('📁 Loading game data from object');
 
             // Check if scene system is already initialized
-            if (this.sceneSystem && this.platformSpritesLoaded) {
+            if (this.sceneSystem && this.allSpritesLoaded) {
                 // Scene system is ready, import immediately
                 if (gameData.scenes && gameData.scenes.length > 0) {
                     console.log('🔄 Importing scene data immediately (scene system is ready)');

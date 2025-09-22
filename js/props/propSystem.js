@@ -1,7 +1,7 @@
 class PropSystem {
-    constructor(ctx, platformSprites, torchParticles) {
+    constructor(ctx, platformSprites, torchParticles, onSpritesLoadedCallback) {
         this.data = new PropData();
-        this.renderer = new PropRenderer(ctx, platformSprites, torchParticles);
+        this.renderer = new PropRenderer(ctx, platformSprites, torchParticles, onSpritesLoadedCallback);
         this.collisions = new PropCollisions();
         this.manager = new PropManager(this.data);
 

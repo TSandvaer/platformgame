@@ -1,7 +1,15 @@
 class PlatformRenderer {
-    constructor(ctx, platformSprites) {
+    constructor(ctx, onSpritesLoadedCallback) {
         this.ctx = ctx;
-        this.platformSprites = platformSprites;
+        this.onSpritesLoadedCallback = onSpritesLoadedCallback;
+
+        // Initialize platform sprites
+        this.platformSprites = {
+            tileset: { image: null, tileWidth: 16, tileHeight: 16 },
+            villageProps: { image: null, tileWidth: 32, tileHeight: 32 },
+        };
+        this.spritesLoaded = false;
+        this.loadSprites();
 
         // Platform sprite type mappings - based on actual tileset layout
         this.platformSpriteTypes = {
@@ -63,6 +71,45 @@ class PlatformRenderer {
             fence: { tileset: 'villageProps', tileX: 3, tileY: 0 }, // Fence texture
             bridge: { tileset: 'villageProps', tileX: 4, tileY: 0 }, // Bridge planks
         };
+    }
+
+    loadSprites() {
+        let loadedCount = 0;
+        const totalImages = 2; // Only tileset and villageProps for platforms
+
+        const checkAllLoaded = () => {
+            if (loadedCount === totalImages) {
+                this.spritesLoaded = true;
+                console.log('🎨 Platform sprites loaded');
+                if (this.onSpritesLoadedCallback) {
+                    this.onSpritesLoadedCallback();
+                }
+            }
+        };
+
+        // Load ground tileset
+        const groundImg = new Image();
+        groundImg.onload = () => {
+            loadedCount++;
+            checkAllLoaded();
+        };
+        groundImg.onerror = () => {
+            console.error('Failed to load ground tileset');
+        };
+        groundImg.src = 'textures_02_08_25.png';
+        this.platformSprites.tileset.image = groundImg;
+
+        // Load village props tileset
+        const propsImg = new Image();
+        propsImg.onload = () => {
+            loadedCount++;
+            checkAllLoaded();
+        };
+        propsImg.onerror = () => {
+            console.error('Failed to load village props tileset');
+        };
+        propsImg.src = 'sprites/Pixel Art Platformer/Texture/TX Village Props.png';
+        this.platformSprites.villageProps.image = propsImg;
     }
 
     renderPlatform(platform, isDevelopmentMode, isSelected) {

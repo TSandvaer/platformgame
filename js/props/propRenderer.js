@@ -1,8 +1,43 @@
 class PropRenderer {
-    constructor(ctx, platformSprites, torchParticles) {
+    constructor(ctx, platformSprites, torchParticles, onSpritesLoadedCallback) {
         this.ctx = ctx;
-        this.platformSprites = platformSprites;
+        this.platformSprites = platformSprites; // Keep reference to platform sprites for villageProps
         this.torchParticles = torchParticles;
+        this.onSpritesLoadedCallback = onSpritesLoadedCallback;
+
+        // Initialize prop-specific sprites
+        this.propSprites = {
+            torchFlame: { image: null, frameWidth: 21, frameHeight: 21, totalFrames: 6 }
+        };
+        this.spritesLoaded = false;
+        this.loadSprites();
+    }
+
+    loadSprites() {
+        let loadedCount = 0;
+        const totalImages = 1; // Only torch flame for props
+
+        const checkAllLoaded = () => {
+            if (loadedCount === totalImages) {
+                this.spritesLoaded = true;
+                console.log('🎨 Prop sprites loaded');
+                if (this.onSpritesLoadedCallback) {
+                    this.onSpritesLoadedCallback();
+                }
+            }
+        };
+
+        // Load torch flame animation
+        const torchFlameImg = new Image();
+        torchFlameImg.onload = () => {
+            loadedCount++;
+            checkAllLoaded();
+        };
+        torchFlameImg.onerror = () => {
+            console.error('Failed to load torch flame sprite');
+        };
+        torchFlameImg.src = 'sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
+        this.propSprites.torchFlame.image = torchFlameImg;
     }
 
     renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = [], viewport, camera) {
@@ -166,9 +201,9 @@ class PropRenderer {
     }
 
     renderTorchFlame(prop, renderWidth, renderHeight, flameScale) {
-        if (!this.platformSprites.torchFlame || !this.platformSprites.torchFlame.image) return;
+        if (!this.propSprites.torchFlame || !this.propSprites.torchFlame.image) return;
 
-        const flameSprite = this.platformSprites.torchFlame;
+        const flameSprite = this.propSprites.torchFlame;
         const currentTime = Date.now();
 
         try {
