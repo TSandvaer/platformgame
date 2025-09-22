@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-21"
+    "lastModified": "2025-09-22"
   },
   "scenes": [
     {
@@ -1299,23 +1299,34 @@
         "layers": []
       },
       "transitions": {
-        "zones": []
+        "zones": [
+          {
+            "id": 1,
+            "x": 4277.236492471214,
+            "y": 541.7360496014172,
+            "width": 20.407440212577058,
+            "height": 375.837023914969,
+            "targetSceneId": 2,
+            "playerStartX": 199,
+            "playerStartY": 861
+          }
+        ]
       },
       "boundaries": {
         "left": 0,
-        "right": 2000,
+        "right": 4300,
         "top": 0,
         "bottom": 1000
       },
       "settings": {
-        "playerStartX": 185,
-        "playerStartY": 865,
+        "playerStartX": 4184,
+        "playerStartY": 810,
         "gravity": 0.8,
         "playerSpeed": 5
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-21T14:32:42.114Z"
+        "modified": "2025-09-22T05:49:38.321Z"
       }
     },
     {
@@ -1324,71 +1335,31 @@
       "description": "",
       "platforms": [
         {
-          "id": 0,
+          "id": 9,
           "x": 3,
-          "y": 920,
-          "width": 1152,
+          "y": 923,
+          "width": 416,
           "height": 32,
           "color": "#4ECDC4",
-          "spriteType": "grass",
-          "tileX": 1,
-          "tileY": 0,
-          "isGroundPlatform": true,
+          "spriteType": "cobblestone",
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5
         },
         {
-          "id": 5,
-          "x": 3,
-          "y": 952,
-          "width": 1152,
-          "height": 160,
-          "color": "#4ECDC4",
-          "spriteType": "dirt",
-          "tileX": 1,
-          "tileY": 0,
-          "isGroundPlatform": true,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5
-        },
-        {
-          "id": 7,
-          "x": 1155,
-          "y": 920,
-          "width": 3904,
+          "id": 10,
+          "x": 419,
+          "y": 846.5279007971657,
+          "width": 320,
           "height": 32,
           "color": "#4ECDC4",
-          "spriteType": "grass",
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5
-        },
-        {
-          "id": 8,
-          "x": 1155,
-          "y": 952,
-          "width": 3904,
-          "height": 160,
-          "color": "#4ECDC4",
-          "spriteType": "dirt",
+          "spriteType": "cobblestone",
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5
         }
       ],
       "props": [
-        {
-          "id": 3,
-          "x": 353.98759964570417,
-          "y": 775.2612931798051,
-          "type": "crate",
-          "isObstacle": true,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5
-        },
         {
           "id": 5,
           "x": 943,
@@ -1398,496 +1369,6 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5
-        },
-        {
-          "id": 18,
-          "x": 429.9397697077059,
-          "y": 684.0575730735163,
-          "type": "crate",
-          "isObstacle": true,
-          "zOrder": 8,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1
-        },
-        {
-          "id": 23,
-          "x": 460.94186729301236,
-          "y": 857.1409277745156,
-          "type": "bush1",
-          "isObstacle": false,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.6
-        },
-        {
-          "id": 24,
-          "x": 2431.501328609389,
-          "y": 634.1718334809566,
-          "type": "tree1",
-          "isObstacle": false,
-          "zOrder": 2,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 2
-        },
-        {
-          "id": 28,
-          "x": 385.2285208148804,
-          "y": 772.5438441098318,
-          "type": "torch",
-          "isObstacle": false,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5
-        },
-        {
-          "id": 67,
-          "type": "boardFenceComplete",
-          "x": 1825.8015943312666,
-          "y": 860.1656333038088,
-          "isObstacle": false,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 70,
-          "type": "table",
-          "x": 2057.8999114260405,
-          "y": 877.2736935341011,
-          "isObstacle": false,
-          "zOrder": 3,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 71,
-          "type": "chair",
-          "x": 2020.3365810451728,
-          "y": 862.2674933569531,
-          "isObstacle": false,
-          "zOrder": 4,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 72,
-          "type": "wine",
-          "x": 2080.007971656333,
-          "y": 846.6625332152348,
-          "isObstacle": false,
-          "zOrder": -10,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 73,
-          "type": "apple",
-          "x": 2102.0456227620944,
-          "y": 860.5668733392384,
-          "isObstacle": false,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 74,
-          "type": "mug",
-          "x": 2120.392832682378,
-          "y": 858.0159433126662,
-          "isObstacle": false,
-          "zOrder": 2,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 75,
-          "type": "cake",
-          "x": 2139.9499628860976,
-          "y": 862.2674933569531,
-          "isObstacle": false,
-          "zOrder": 3,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 82,
-          "type": "grass7",
-          "x": 218.71990604815028,
-          "y": 894.5619495008808,
-          "isObstacle": false,
-          "zOrder": 2,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 83,
-          "type": "grass8",
-          "x": 324.6975924838521,
-          "y": 902.4539048737522,
-          "isObstacle": false,
-          "zOrder": 3,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 84,
-          "type": "grass9",
-          "x": 69.90017615971817,
-          "y": 901.3264826776277,
-          "isObstacle": false,
-          "zOrder": 4,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 85,
-          "type": "crate",
-          "x": 261.8954827280779,
-          "y": 814.6501328609389,
-          "isObstacle": true,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1,
-          "rotation": 0
-        },
-        {
-          "id": 86,
-          "type": "grass1",
-          "x": 1972.689083116983,
-          "y": 903.0823737821081,
-          "isObstacle": false,
-          "zOrder": 2,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 87,
-          "type": "stone1",
-          "x": 1118.6527900797166,
-          "y": 905.0062001771479,
-          "isObstacle": false,
-          "zOrder": 3,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 0.7,
-          "rotation": 0
-        },
-        {
-          "id": 89,
-          "type": "stone3",
-          "x": 127,
-          "y": 896,
-          "isObstacle": true,
-          "zOrder": 5,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 90,
-          "type": "stone2",
-          "x": -15,
-          "y": 878,
-          "isObstacle": true,
-          "zOrder": 6,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 91,
-          "type": "treeStump",
-          "x": 2228.381450400836,
-          "y": 877.5730735163862,
-          "isObstacle": false,
-          "zOrder": 7,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 92,
-          "type": "axe",
-          "x": 2211.375250223687,
-          "y": 854.6147032772365,
-          "isObstacle": false,
-          "zOrder": 18,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0.39114260407440155
-        },
-        {
-          "id": 93,
-          "type": "corn1",
-          "x": 2319.767050487157,
-          "y": 838.8910540301151,
-          "isObstacle": false,
-          "zOrder": -13,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 94,
-          "type": "corn2",
-          "x": 2313.4738706820194,
-          "y": 860.3153232949513,
-          "isObstacle": false,
-          "zOrder": -11,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1,
-          "rotation": -0.2125775022143489
-        },
-        {
-          "id": 95,
-          "type": "corn3",
-          "x": 2327.012400354296,
-          "y": 831.2781222320638,
-          "isObstacle": false,
-          "zOrder": 21,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 96,
-          "type": "corn4",
-          "x": 2346.1018600531443,
-          "y": 839.2196634189548,
-          "isObstacle": false,
-          "zOrder": 22,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0.24658990256864513
-        },
-        {
-          "id": 97,
-          "type": "hayStack1",
-          "x": 2769.6856562950716,
-          "y": 866.5190434012401,
-          "isObstacle": false,
-          "zOrder": 23,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 98,
-          "type": "hoe",
-          "x": 2836.860146994806,
-          "y": 868.2196634189548,
-          "isObstacle": false,
-          "zOrder": -14,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": -3.9029229406554475
-        },
-        {
-          "id": 99,
-          "type": "graveStone1",
-          "x": 2585.2622398524713,
-          "y": 880.273693534101,
-          "isObstacle": false,
-          "zOrder": 25,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 100,
-          "type": "graveStone2",
-          "x": 2653.2870405610633,
-          "y": 847.8122232063773,
-          "isObstacle": false,
-          "zOrder": 26,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 101,
-          "type": "grass1",
-          "x": 2501.0815489755896,
-          "y": 901.3817537643934,
-          "isObstacle": false,
-          "zOrder": 27,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 102,
-          "type": "grass1",
-          "x": 2719.61122125194,
-          "y": 901.3817537643932,
-          "isObstacle": false,
-          "zOrder": 28,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 103,
-          "type": "scareCrow",
-          "x": 2363.0161376120523,
-          "y": 783.88928255093,
-          "isObstacle": false,
-          "zOrder": 29,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 104,
-          "type": "prayingStatue",
-          "x": 2918.268573395932,
-          "y": 803.2967227635074,
-          "isObstacle": false,
-          "zOrder": 30,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 105,
-          "type": "celticCrossStone",
-          "x": 3022.4183158751475,
-          "y": 853.7643932683792,
-          "isObstacle": false,
-          "zOrder": 31,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 106,
-          "type": "crossStone",
-          "x": 3116.8027268583182,
-          "y": 849.5128432240922,
-          "isObstacle": false,
-          "zOrder": 32,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 107,
-          "type": "flowerBundle",
-          "x": 2597.2633114464493,
-          "y": 869.0699734278122,
-          "isObstacle": false,
-          "zOrder": 33,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
-        },
-        {
-          "id": 108,
-          "type": "bush2",
-          "x": 2976.320637732507,
-          "y": 896.378210806023,
-          "isObstacle": false,
-          "zOrder": 34,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 0.7,
-          "rotation": 0
-        },
-        {
-          "id": 110,
-          "type": "grass9",
-          "x": 3081.9400164951644,
-          "y": 903.9326837909654,
-          "isObstacle": false,
-          "zOrder": 36,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0
         }
       ],
       "background": {
@@ -1895,23 +1376,34 @@
         "layers": []
       },
       "transitions": {
-        "zones": []
+        "zones": [
+          {
+            "id": 1,
+            "x": 4.251550044286979,
+            "y": 526.4304694419841,
+            "width": 19.557130203720106,
+            "height": 389.44198405668726,
+            "targetSceneId": 1,
+            "playerStartX": 4239,
+            "playerStartY": 783
+          }
+        ]
       },
       "boundaries": {
         "left": 0,
-        "right": 2000,
+        "right": 5000,
         "top": 0,
         "bottom": 1000
       },
       "settings": {
-        "playerStartX": 199,
-        "playerStartY": 861,
+        "playerStartX": 96,
+        "playerStartY": 851,
         "gravity": 0.8,
         "playerSpeed": 5
       },
       "metadata": {
         "created": "2025-09-21T13:12:09.327Z",
-        "modified": "2025-09-21T14:32:24.364Z"
+        "modified": "2025-09-22T05:39:37.877Z"
       }
     }
   ],
