@@ -155,6 +155,14 @@ class SceneManager {
         // Update UI
         this.updateSceneUI();
 
+        // Update background dropdown to reflect current scene's background
+        const backgroundSelect = document.getElementById('backgroundSelect');
+        if (backgroundSelect && scene.background) {
+            const backgroundName = scene.background.name || 'none';
+            console.log('🎨 Updating background dropdown to:', backgroundName);
+            backgroundSelect.value = backgroundName;
+        }
+
         // Debug: Log transition zones in the loaded scene
         this.logTransitionZones();
 
