@@ -286,31 +286,6 @@ class PlatformRPG {
         this.currentBackground = background;
     }
 
-    setSceneBackground(backgroundName) {
-        console.log('🎨 setSceneBackground called with:', backgroundName);
-        // Update current scene background using the new scene system
-        if (this.sceneSystem) {
-            const currentScene = this.sceneSystem.currentScene;
-            if (currentScene) {
-                // Initialize background property if it doesn't exist
-                if (!currentScene.background) {
-                    currentScene.background = {
-                        name: 'none',
-                        layers: []
-                    };
-                }
-                currentScene.background.name = backgroundName;
-                currentScene.background.layers = [];
-                currentScene.metadata.modified = new Date().toISOString();
-
-                // Save the scene data to persist the background change
-                this.sceneSystem.saveScenes();
-            }
-        }
-
-        // Load the background
-        this.loadBackground(backgroundName);
-    }
 
     applyViewportSettings() {
         const modeSelect = document.getElementById('viewportModeSelect');
@@ -1117,7 +1092,7 @@ class PlatformRPG {
         // Background controls
         document.getElementById('applyBackground').addEventListener('click', () => {
             const selectedBackground = document.getElementById('backgroundSelect').value;
-            this.setSceneBackground(selectedBackground);
+            this.sceneSystem.setSceneBackground(selectedBackground);
         });
 
         // Viewport controls

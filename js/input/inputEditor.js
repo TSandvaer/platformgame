@@ -167,7 +167,7 @@ class InputEditor {
         if (applyBackgroundBtn) {
             applyBackgroundBtn.addEventListener('click', () => {
                 const selectedBackground = document.getElementById('backgroundSelect').value;
-                this.game.setSceneBackground(selectedBackground);
+                this.game.sceneSystem.setSceneBackground(selectedBackground);
             });
         }
     }

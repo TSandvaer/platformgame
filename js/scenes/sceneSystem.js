@@ -89,6 +89,30 @@ class SceneSystem {
         return currentScene.boundaries;
     }
 
+    // Background management
+    setSceneBackground(backgroundName) {
+        console.log('🎨 setSceneBackground called with:', backgroundName);
+        const currentScene = this.currentScene;
+        if (currentScene) {
+            // Initialize background property if it doesn't exist
+            if (!currentScene.background) {
+                currentScene.background = {
+                    name: 'none',
+                    layers: []
+                };
+            }
+            currentScene.background.name = backgroundName;
+            currentScene.background.layers = [];
+            currentScene.metadata.modified = new Date().toISOString();
+
+            // Save the scene data to persist the background change
+            this.saveScenes();
+
+            // Load the background in the game
+            this.game.loadBackground(backgroundName);
+        }
+    }
+
     // Transition management
     addTransitionZone(x, y, width, height, targetSceneId, playerStartX, playerStartY) {
         return this.manager.addTransitionZone(x, y, width, height, targetSceneId, playerStartX, playerStartY);
