@@ -5,7 +5,8 @@
       "Bash(dir:*)",
       "Bash(python3:*)",
       "Bash(npx http-server:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

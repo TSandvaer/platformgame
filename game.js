@@ -682,6 +682,10 @@ class PlatformRPG {
             this.focusPlayer();
         });
 
+        document.getElementById('backToDevBtn').addEventListener('click', () => {
+            this.setDevelopmentMode(true);
+        });
+
         window.addEventListener('resize', () => {
             this.canvas.width = window.innerWidth - (this.showDashboard ? 300 : 0);
             this.canvas.height = window.innerHeight;
@@ -721,6 +725,34 @@ class PlatformRPG {
         document.getElementById('viewportEditor').style.display = isDev ? 'block' : 'none';
         document.getElementById('propsEditor').style.display = isDev ? 'block' : 'none';
         document.getElementById('sceneProperties').style.display = isDev ? 'block' : 'none';
+
+        // Hide/show dev buttons based on mode
+        document.getElementById('devModeBtn').style.display = isDev ? 'inline-block' : 'none';
+        document.getElementById('productionBtn').style.display = isDev ? 'inline-block' : 'none';
+        document.getElementById('toggleDashboardBtn').style.display = isDev ? 'inline-block' : 'none';
+        document.getElementById('cameraModeBtn').style.display = isDev ? 'inline-block' : 'none';
+        document.getElementById('focusPlayerBtn').style.display = isDev ? 'inline-block' : 'none';
+
+        // Show/hide back to dev button
+        document.getElementById('backToDevBtn').style.display = isDev ? 'none' : 'inline-block';
+
+        // Hide dashboard in production mode
+        if (!isDev) {
+            this.showDashboard = false;
+            const dashboard = document.getElementById('dashboard');
+            dashboard.classList.add('hidden');
+            // Update canvas size when dashboard is hidden
+            this.canvas.width = window.innerWidth;
+            this.updateViewport();
+        } else {
+            // Show dashboard in development mode
+            this.showDashboard = true;
+            const dashboard = document.getElementById('dashboard');
+            dashboard.classList.remove('hidden');
+            // Update canvas size when dashboard is shown
+            this.canvas.width = window.innerWidth - 300;
+            this.updateViewport();
+        }
 
         // Clear invalid zones cache when switching modes
         if (this.sceneSystem && this.sceneSystem.manager) {
