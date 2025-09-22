@@ -59,6 +59,14 @@ class PlatformManager {
             }
         }
 
+        // No platform was clicked - deselect current platform
+        if (this.platformData.selectedPlatform) {
+            console.log('🎯 Deselecting platform - clicked on background');
+            this.platformData.selectedPlatform = null;
+            this.updatePlatformProperties();
+            this.updatePlatformList();
+        }
+
         return { handled: false };
     }
 
