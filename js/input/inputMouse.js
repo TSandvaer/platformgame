@@ -123,6 +123,11 @@ class InputMouse {
             return;
         }
 
+        // Handle free camera scrolling in development mode
+        if (this.game.isDevelopmentMode) {
+            this.game.handleFreeCameraScroll(clientMouseX, clientMouseY);
+        }
+
         if (!this.game.isDevelopmentMode) return;
 
         // Convert to world coordinates
@@ -167,6 +172,11 @@ class InputMouse {
     handleCanvasMouseLeave() {
         // Stop drag scrolling
         this.stopDragScrolling();
+
+        // Stop free camera scrolling
+        if (this.game.stopFreeCameraScroll) {
+            this.game.stopFreeCameraScroll();
+        }
     }
 
     handleCanvasWheel(e) {
