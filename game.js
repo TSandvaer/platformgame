@@ -113,26 +113,14 @@ class PlatformRPG {
         this.editorSystem = new EditorSystem(this);
         this.editorSystem.initialize();
 
+        // Initialize Game Data System
+        this.gameDataSystem = new GameDataSystem(this);
+        this.gameDataSystem.initialize();
+
         // Keep keys reference for backwards compatibility
         this.keys = this.inputSystem.keys;
 
-        // Scene data is now handled by the sceneSystem
-        this.pendingGameDataImport = null; // Store gameData.json data until scene system is ready
-
-        this.gameData = {
-            characters: [
-                { name: 'Hero', description: 'Main player character' }
-            ],
-            classes: [
-                { name: 'Warrior', description: 'Melee combat specialist' }
-            ],
-            weapons: [
-                { name: 'Iron Sword', description: 'Basic melee weapon', damage: 10 }
-            ],
-            items: [
-                { name: 'Health Potion', description: 'Restores 50 HP', effect: 'heal', value: 50 }
-            ]
-        };
+        // Game data is now handled by gameDataSystem
 
         this.init();
     }
@@ -421,7 +409,9 @@ class PlatformRPG {
 
         this.gameLoop();
         this.updateUI();
-        this.loadGameDataFromFile();
+
+        // Load game data using the new system
+        this.gameDataSystem.loadGameData();
     }
 
     populateBackgroundDropdown() {
@@ -1122,17 +1112,7 @@ class PlatformRPG {
             this.platformSystem.updateSelectedPlatform();
         });
 
-        document.getElementById('exportGameData').addEventListener('click', () => {
-            this.exportGameData();
-        });
-
-        document.getElementById('importGameDataBtn').addEventListener('click', () => {
-            document.getElementById('importGameData').click();
-        });
-
-        document.getElementById('importGameData').addEventListener('change', (e) => {
-            this.importGameData(e);
-        });
+        // Game data export/import is now handled by gameDataSystem in its initialize method
 
         // Background controls
         document.getElementById('applyBackground').addEventListener('click', () => {
@@ -1818,152 +1798,9 @@ class PlatformRPG {
         }
     }
 
-    async loadGameDataFromFile() {
-        // Check if we have saved scene data in localStorage first
-        const savedSceneData = localStorage.getItem('platformGame_sceneData');
-        if (savedSceneData) {
-            console.log('✅ Found saved scene data in localStorage, using that instead of gameData.json');
-            this.loadSavedData();
-            return;
-        }
 
-        // If no localStorage data, try to load from gameData.json as fallback
-        try {
-            console.log('🔄 No localStorage data found, attempting to load gameData.json...');
-            const response = await fetch('./gameData.json');
-            if (response.ok) {
-                console.log('✅ gameData.json found, loading from JSON file');
-                const gameData = await response.json();
-                this.loadGameDataFromObject(gameData);
-            } else {
-                console.log('❌ gameData.json response not ok, loading defaults');
-                // No saved data and no JSON file, start fresh
-                console.log('🆕 Starting with default game state');
-            }
-        } catch (error) {
-            console.log('❌ No gameData.json found, error:', error);
-            console.log('🆕 Starting with default game state');
-        }
-    }
 
-    loadGameDataFromObject(gameData) {
-        try {
-            console.log('📁 Loading game data from object');
 
-            // Check if scene system is already initialized
-            if (this.sceneSystem && this.allSpritesLoaded) {
-                // Scene system is ready, import immediately
-                if (gameData.scenes && gameData.scenes.length > 0) {
-                    console.log('🔄 Importing scene data immediately (scene system is ready)');
-
-                    // Import the scene data
-                    this.sceneSystem.data.importSceneData({
-                        scenes: gameData.scenes,
-                        currentSceneId: gameData.currentSceneId || gameData.scenes[0].id,
-                        startSceneId: gameData.startSceneId || gameData.scenes[0].id
-                    });
-
-                    console.log('📥 Imported scenes:', this.sceneSystem.data.scenes.map(s => ({
-                        id: s.id,
-                        name: s.name,
-                        platforms: s.platforms?.length || 0,
-                        props: s.props?.length || 0
-                    })));
-
-                    // Force clear the current platforms to ensure reload
-                    this.platformSystem.platforms = [];
-
-                    // Force load the start scene or current scene (bypass optimization)
-                    const sceneToLoad = gameData.startSceneId || gameData.currentSceneId || gameData.scenes[0].id;
-                    console.log('📥 Force loading imported scene:', sceneToLoad);
-                    this.sceneSystem.manager.forceLoadScene(sceneToLoad);
-
-                    // Save the imported data to localStorage
-                    this.sceneSystem.saveScenes();
-
-                    // Update UI
-                    this.sceneSystem.updateUI();
-                    this.platformSystem.updatePlatformList();
-                    this.platformSystem.updatePlatformProperties();
-
-                    console.log('✅ Scene data imported and saved to localStorage');
-                }
-            } else {
-                // Store the scene data to be loaded after scene system initializes
-                if (gameData.scenes && gameData.scenes.length > 0) {
-                    this.pendingGameDataImport = {
-                        scenes: gameData.scenes,
-                        currentSceneId: gameData.currentSceneId || gameData.scenes[0].id,
-                        startSceneId: gameData.startSceneId || gameData.scenes[0].id
-                    };
-                    console.log('📦 Stored scene data for later import (waiting for scene system)');
-                }
-            }
-
-            // Load other game data immediately
-            if (gameData.characters) {
-                this.gameData.characters = gameData.characters;
-            }
-            if (gameData.classes) {
-                this.gameData.classes = gameData.classes;
-            }
-            if (gameData.weapons) {
-                this.gameData.weapons = gameData.weapons;
-            }
-            if (gameData.items) {
-                this.gameData.items = gameData.items;
-            }
-
-            this.updateUI();
-        } catch (e) {
-            console.error('Error loading game data:', e);
-        }
-    }
-
-    loadSavedData() {
-        // Use the new scene system to load saved data
-        if (this.sceneSystem) {
-            this.sceneSystem.loadSavedScenes();
-            return;
-        }
-
-        // All loading is now handled by the scene system in onPlatformSpritesLoaded()
-    }
-
-    exportGameData() {
-        // Save current scene data using the new scene system
-        if (this.sceneSystem) {
-            this.sceneSystem.saveScenes();
-        }
-
-        // Get the full scene data including currentSceneId and startSceneId
-        const sceneData = this.sceneSystem ? this.sceneSystem.exportSceneData() : { scenes: [], currentSceneId: null, startSceneId: null };
-
-        const gameData = {
-            gameInfo: {
-                title: "Platform RPG Game",
-                version: "1.0.0",
-                lastModified: new Date().toISOString().split('T')[0]
-            },
-            scenes: sceneData.scenes,
-            currentSceneId: sceneData.currentSceneId,
-            startSceneId: sceneData.startSceneId,
-            characters: this.gameData.characters,
-            classes: this.gameData.classes,
-            weapons: this.gameData.weapons,
-            items: this.gameData.items
-        };
-
-        const dataStr = JSON.stringify(gameData, null, 2);
-        const dataBlob = new Blob([dataStr], {type: 'application/json'});
-
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(dataBlob);
-        link.download = 'gameData.json';
-        link.click();
-
-        URL.revokeObjectURL(link.href);
-    }
 
     updateSceneBoundaries() {
         const left = parseInt(document.getElementById('boundaryLeft').value) || 0;
@@ -1986,32 +1823,6 @@ class PlatformRPG {
     }
 
 
-    importGameData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const gameData = JSON.parse(e.target.result);
-                this.loadGameDataFromObject(gameData);
-
-                // Reset platform editor
-                this.platformSystem.selectedPlatform = null;
-                this.platformSystem.updatePlatformProperties();
-                this.platformSystem.updatePlatformList();
-
-                alert('Game data imported successfully!');
-            } catch (error) {
-                alert('Error importing game data. Please check the file format.');
-                console.error('Import error:', error);
-            }
-        };
-        reader.readAsText(file);
-
-        // Reset the file input
-        event.target.value = '';
-    }
 
     // Context Menu Methods
 

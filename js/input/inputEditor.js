@@ -199,7 +199,7 @@ class InputEditor {
         const exportBtn = document.getElementById('exportGameData');
         if (exportBtn) {
             exportBtn.addEventListener('click', () => {
-                this.game.exportGameData();
+                this.game.gameDataSystem.exportGameData();
             });
         }
 
@@ -213,7 +213,7 @@ class InputEditor {
         const importInput = document.getElementById('importGameData');
         if (importInput) {
             importInput.addEventListener('change', (e) => {
-                this.game.importGameData(e);
+                this.game.gameDataSystem.importGameData(e);
             });
         }
     }

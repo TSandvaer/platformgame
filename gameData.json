@@ -80,8 +80,8 @@
       "props": [
         {
           "id": 2,
-          "x": 1077.7719301165507,
-          "y": 590.949124324448,
+          "x": 1203.6178114274453,
+          "y": 306.09527135722044,
           "type": "barrel",
           "isObstacle": true,
           "positioning": "absolute",
@@ -1326,7 +1326,7 @@
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-22T06:02:10.493Z"
+        "modified": "2025-09-22T16:54:32.256Z"
       }
     },
     {
@@ -1409,31 +1409,8 @@
   ],
   "currentSceneId": 1,
   "startSceneId": 1,
-  "characters": [
-    {
-      "name": "Hero",
-      "description": "Main player character"
-    }
-  ],
-  "classes": [
-    {
-      "name": "Warrior",
-      "description": "Melee combat specialist"
-    }
-  ],
-  "weapons": [
-    {
-      "name": "Iron Sword",
-      "description": "Basic melee weapon",
-      "damage": 10
-    }
-  ],
-  "items": [
-    {
-      "name": "Health Potion",
-      "description": "Restores 50 HP",
-      "effect": "heal",
-      "value": 50
-    }
-  ]
+  "characters": [],
+  "classes": [],
+  "weapons": [],
+  "items": []
 }
