@@ -14,7 +14,8 @@ class PlatformRPG {
 
         // Make canvas focusable for key events
         this.canvas.tabIndex = 0;
-        this.isDevelopmentMode = true;
+        // Editor system will be initialized after other systems
+        this.editorSystem = null;
         this.showDashboard = true;
 
         // Use viewport height for consistent sizing across browsers
@@ -66,8 +67,6 @@ class PlatformRPG {
         this.sceneSystem = new SceneSystem(this);
 
         // Scene interaction state
-        this.isAddingTransition = false;
-        this.transitionStart = null;
         this.isDraggingStartPosition = false;
         this.startPositionDragOffset = { x: 0, y: 0 };
 
@@ -109,6 +108,10 @@ class PlatformRPG {
 
         // Initialize input system
         this.inputSystem = new InputSystem(this);
+
+        // Initialize Editor System
+        this.editorSystem = new EditorSystem(this);
+        this.editorSystem.initialize();
 
         // Keep keys reference for backwards compatibility
         this.keys = this.inputSystem.keys;
@@ -170,7 +173,6 @@ class PlatformRPG {
         this.cameraSystem.init(this.canvas, this.viewport);
 
         // Then set development mode (which will call sceneSystem.updateUI())
-        this.setDevelopmentMode(true); // Properly initialize development mode UI
 
         // Update platform UI after everything is loaded
         this.platformSystem.updatePlatformList();
@@ -570,91 +572,29 @@ class PlatformRPG {
 
 
     setDevelopmentMode(isDev) {
-        this.isDevelopmentMode = isDev;
-        this.cameraSystem.setDevelopmentMode(isDev);
-        document.getElementById('currentMode').textContent = isDev ? 'Development' : 'Production';
-        document.getElementById('coordinates').style.display = isDev ? 'block' : 'none';
-        document.getElementById('platformEditor').style.display = isDev ? 'block' : 'none';
-        document.getElementById('backgroundEditor').style.display = isDev ? 'block' : 'none';
-        document.getElementById('viewportEditor').style.display = isDev ? 'block' : 'none';
-        document.getElementById('propsEditor').style.display = isDev ? 'block' : 'none';
-        document.getElementById('sceneProperties').style.display = isDev ? 'block' : 'none';
+        // Delegate to editor system
+        this.editorSystem.setDevelopmentMode(isDev);
+    }
 
-        // Hide/show dev buttons based on mode
-        document.getElementById('devModeBtn').style.display = isDev ? 'inline-block' : 'none';
-        document.getElementById('productionBtn').style.display = isDev ? 'inline-block' : 'none';
-        document.getElementById('toggleDashboardBtn').style.display = isDev ? 'inline-block' : 'none';
-        document.getElementById('cameraModeBtn').style.display = isDev ? 'inline-block' : 'none';
-        document.getElementById('focusPlayerBtn').style.display = isDev ? 'inline-block' : 'none';
-
-        // Show/hide back to dev button
-        document.getElementById('backToDevBtn').style.display = isDev ? 'none' : 'inline-block';
-
-        // Hide dashboard in production mode
-        if (!isDev) {
-            this.showDashboard = false;
-            const dashboard = document.getElementById('dashboard');
-            dashboard.classList.add('hidden');
-            // Update canvas size when dashboard is hidden
-            this.canvas.width = window.innerWidth;
-            this.updateViewport();
-        } else {
-            // Show dashboard in development mode
-            this.showDashboard = true;
-            const dashboard = document.getElementById('dashboard');
-            dashboard.classList.remove('hidden');
-            // Update canvas size when dashboard is shown
-            this.canvas.width = window.innerWidth - 300;
-            this.updateViewport();
-        }
-
-        // Clear invalid zones cache when switching modes
-        if (this.sceneSystem && this.sceneSystem.manager) {
-            this.sceneSystem.manager.invalidZonesChecked = new Set();
-            this.sceneSystem.manager.lastCheckedSceneId = null;
-        }
-
-        if (isDev) {
-            this.platformSystem.updatePlatformList();
-            this.propSystem.updatePropList();
-            this.sceneSystem.updateUI();
-        } else {
-            // Production mode - start with the designated start scene
-            this.sceneSystem.startGame();
-        }
+    // Getter for backward compatibility
+    get isDevelopmentMode() {
+        return this.editorSystem ? this.editorSystem.isDevelopmentMode : true;
     }
 
     toggleDashboard() {
-        this.showDashboard = !this.showDashboard;
-        const dashboard = document.getElementById('dashboard');
-        dashboard.classList.toggle('hidden', !this.showDashboard);
-        this.cameraSystem.setDashboardState(this.showDashboard);
+        // Delegate to editor system
+        this.editorSystem.toggleDashboard();
+    }
 
-        // Update canvas element size
-        const newWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
-        const newHeight = window.innerHeight;
+    // Getters for backward compatibility
+    get showDashboard() {
+        return this.editorSystem ? this.editorSystem.showDashboard : true;
+    }
 
-        this.canvas.width = newWidth;
-        this.canvas.height = newHeight;
-
-        // Also update CSS size to match
-        this.canvas.style.width = newWidth + 'px';
-        this.canvas.style.height = newHeight + 'px';
-
-        // Keep design dimensions and viewport mode constant
-        this.viewport.designWidth = 1920;
-        this.viewport.designHeight = 1080;
-
-        this.updateViewport();
-
-        // Reset space key state to prevent it from getting stuck
-        this.player.spaceKeyPressed = false;
-
-        // Ensure canvas maintains focus for key events
-        this.canvas.focus();
-
-        // Force a render to see the changes immediately
-        this.render();
+    set showDashboard(value) {
+        if (this.editorSystem) {
+            this.editorSystem.showDashboard = value;
+        }
     }
 
     handleInput() {
@@ -909,8 +849,10 @@ class PlatformRPG {
 
             this.ctx.restore();
 
-            // Police barrier removed from dev mode
-            // this.renderPoliceBarrier();
+            // Render editor system development info
+            if (this.editorSystem) {
+                this.editorSystem.renderDevelopmentInfo(this.ctx);
+            }
         }
 
         // Render feedback messages (copy/paste notifications) on top of everything
@@ -1312,7 +1254,6 @@ class PlatformRPG {
         });
 
         // Context menu event listeners
-        this.setupContextMenuListeners();
     }
 
     setupSceneEditorListeners() {
@@ -1598,44 +1539,13 @@ class PlatformRPG {
     }
 
     renderTransitionZoneDrag() {
-        if (!this.isAddingTransition || !this.transitionStart || !this.transitionEnd) return;
-
-        // Use transition end coordinates (already in world space)
-        const endX = this.transitionEnd.x;
-        const endY = this.transitionEnd.y;
-
-        // Calculate drag rectangle
-        const startX = this.transitionStart.x;
-        const startY = this.transitionStart.y;
-
-        const width = Math.abs(endX - startX);
-        const height = Math.abs(endY - startY);
-        const x = Math.min(startX, endX);
-        const y = Math.min(startY, endY);
-
-        // Apply camera transformation for world coordinates
-        this.ctx.save();
-        this.cameraSystem.applyTransform(this.ctx);
-
-        // Draw transition zone preview in purple
-        this.ctx.strokeStyle = '#9966FF'; // Purple border
-        this.ctx.fillStyle = 'rgba(153, 102, 255, 0.2)'; // Semi-transparent purple fill
-        this.ctx.lineWidth = 3;
-        this.ctx.setLineDash([8, 4]); // Dashed line
-
-        // Fill and stroke the rectangle
-        this.ctx.fillRect(x, y, width, height);
-        this.ctx.strokeRect(x, y, width, height);
-
-        // Add label
-        this.ctx.fillStyle = '#9966FF';
-        this.ctx.font = '14px Arial';
-        this.ctx.fillText(`Transition Zone (${Math.round(width)}x${Math.round(height)})`, x, y - 5);
-
-        // Reset line dash
-        this.ctx.setLineDash([]);
-
-        this.ctx.restore();
+        // Delegate to editor system
+        if (this.editorSystem) {
+            this.ctx.save();
+            this.cameraSystem.applyTransform(this.ctx);
+            this.editorSystem.renderTransitionPreview(this.ctx);
+            this.ctx.restore();
+        }
     }
 
     // renderPoliceBarrier method removed
@@ -2104,30 +2014,6 @@ class PlatformRPG {
     }
 
     // Context Menu Methods
-    setupContextMenuListeners() {
-        // Store context menu coordinates
-        this.contextMenuCoords = { x: 0, y: 0 };
-
-        // Copy coordinates action
-        document.getElementById('copyCoordinates').addEventListener('click', () => {
-            this.copyCoordinatesToClipboard();
-            this.hideContextMenu();
-        });
-
-        // Hide context menu on click outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.context-menu')) {
-                this.hideContextMenu();
-            }
-        });
-
-        // Hide context menu on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.hideContextMenu();
-            }
-        });
-    }
 
     showContextMenu(e) {
         const rect = this.canvas.getBoundingClientRect();
@@ -2135,113 +2021,72 @@ class PlatformRPG {
         const clientMouseY = e.clientY - rect.top;
         const worldCoords = this.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
 
-        // Store coordinates for use by menu actions
-        this.contextMenuCoords = {
-            x: Math.round(worldCoords.x),
-            y: Math.round(worldCoords.y),
-            screenX: e.clientX,
-            screenY: e.clientY
-        };
-
-        const contextMenu = document.getElementById('contextMenu');
-
-        // Position the menu at the mouse location
-        contextMenu.style.left = `${e.clientX}px`;
-        contextMenu.style.top = `${e.clientY}px`;
-        contextMenu.style.display = 'block';
-
-        // Adjust position if menu would go off screen
-        const menuRect = contextMenu.getBoundingClientRect();
-        if (menuRect.right > window.innerWidth) {
-            contextMenu.style.left = `${e.clientX - menuRect.width}px`;
-        }
-        if (menuRect.bottom > window.innerHeight) {
-            contextMenu.style.top = `${e.clientY - menuRect.height}px`;
-        }
+        // Delegate to editor system's context menu
+        this.editorSystem.contextMenu.show(e, worldCoords);
     }
 
     hideContextMenu() {
-        const contextMenu = document.getElementById('contextMenu');
-        contextMenu.style.display = 'none';
+        // Delegate to editor system's context menu
+        this.editorSystem.contextMenu.hide();
     }
 
     copyCoordinatesToClipboard() {
-        const coordsText = `${this.contextMenuCoords.x}, ${this.contextMenuCoords.y}`;
-
-        // Try modern clipboard API first
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(coordsText).then(() => {
-                console.log('📋 Coordinates copied to clipboard:', coordsText);
-                this.showTemporaryMessage(`Copied: ${coordsText}`);
-            }).catch(err => {
-                console.error('Failed to copy to clipboard:', err);
-                this.fallbackCopyToClipboard(coordsText);
-            });
-        } else {
-            // Fallback for older browsers or non-secure contexts
-            this.fallbackCopyToClipboard(coordsText);
+        // Get coordinates from editor system
+        const coords = this.editorSystem.contextMenuCoords;
+        if (coords) {
+            this.editorSystem.tools.copyCoordinates(coords.x, coords.y);
         }
     }
 
-    fallbackCopyToClipboard(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        try {
-            document.execCommand('copy');
-            console.log('📋 Coordinates copied to clipboard (fallback):', text);
-            this.showTemporaryMessage(`Copied: ${text}`);
-        } catch (err) {
-            console.error('Fallback copy failed:', err);
-            this.showTemporaryMessage('Copy failed - coordinates: ' + text);
-        }
-
-        document.body.removeChild(textArea);
+    // Getters for backward compatibility
+    get contextMenuCoords() {
+        return this.editorSystem ? this.editorSystem.contextMenuCoords : null;
     }
 
+    set contextMenuCoords(value) {
+        if (this.editorSystem) {
+            this.editorSystem.contextMenuCoords = value;
+        }
+    }
+
+    // Keep showTemporaryMessage for backward compatibility
     showTemporaryMessage(message) {
-        // Create a temporary message element
-        const messageDiv = document.createElement('div');
-        messageDiv.textContent = message;
-        messageDiv.style.cssText = `
-            position: fixed;
-            left: ${this.contextMenuCoords.screenX + 10}px;
-            top: ${this.contextMenuCoords.screenY - 30}px;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #ccc;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-family: monospace;
-            z-index: 1001;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-        `;
-
-        document.body.appendChild(messageDiv);
-
-        // Fade in
-        setTimeout(() => {
-            messageDiv.style.opacity = '1';
-        }, 10);
-
-        // Fade out and remove after 1.5 seconds
-        setTimeout(() => {
-            messageDiv.style.opacity = '0';
-            setTimeout(() => {
-                if (document.body.contains(messageDiv)) {
-                    document.body.removeChild(messageDiv);
-                }
-            }, 200);
-        }, 1500);
+        if (this.editorSystem && this.editorSystem.ui) {
+            this.editorSystem.ui.showTemporaryMessage(message);
+        }
     }
+
+    // Transition zone getters for backward compatibility
+    get isAddingTransition() {
+        return this.editorSystem ? this.editorSystem.isAddingTransition : false;
+    }
+
+    set isAddingTransition(value) {
+        if (this.editorSystem) {
+            this.editorSystem.isAddingTransition = value;
+        }
+    }
+
+    get transitionStart() {
+        return this.editorSystem ? this.editorSystem.transitionStart : null;
+    }
+
+    set transitionStart(value) {
+        if (this.editorSystem) {
+            this.editorSystem.transitionStart = value;
+        }
+    }
+
+    get transitionEnd() {
+        return this.editorSystem ? this.editorSystem.transitionEnd : null;
+    }
+
+    set transitionEnd(value) {
+        if (this.editorSystem) {
+            this.editorSystem.transitionEnd = value;
+        }
+    }
+
 
     gameLoop(currentTime = 0) {
         // Calculate delta time in milliseconds
