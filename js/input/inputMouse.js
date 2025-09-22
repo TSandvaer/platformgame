@@ -74,7 +74,7 @@ class InputMouse {
 
         // Handle platform interaction
         const platformResult = this.game.platformSystem.handleMouseDown(
-            e, mouseX, mouseY, clientMouseX, clientMouseY
+            mouseX, mouseY, this.game.cameraSystem.camera, this.game.viewport
         );
 
         if (!platformResult.handled) {
@@ -145,7 +145,7 @@ class InputMouse {
         }
 
         // Handle platform dragging/resizing
-        this.game.platformSystem.handleMouseMove(e, mouseX, mouseY, clientMouseX, clientMouseY);
+        this.game.platformSystem.handleMouseMove(mouseX, mouseY, this.game.viewport);
 
         // Handle prop dragging
         this.game.propSystem.handleMouseMove(mouseX, mouseY, this.game.viewport, this.game.cameraSystem.camera);
@@ -293,9 +293,20 @@ class InputMouse {
     updateCursor(mouseX, mouseY) {
         // Check if hovering over resize handles for selected platform
         if (this.game.platformSystem.selectedPlatform) {
-            const resizeHandle = this.game.platformSystem.getResizeHandle(
-                this.game.platformSystem.selectedPlatform, mouseX, mouseY
+            console.log('🖱️ Checking cursor for selected platform:', this.game.platformSystem.selectedPlatform.id);
+            // Get actual position based on positioning mode
+            const platform = this.game.platformSystem.selectedPlatform;
+            const actualPos = this.game.platformSystem.data.getActualPosition(
+                platform,
+                this.game.viewport.designWidth,
+                this.game.viewport.designHeight
             );
+            const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
+
+            const resizeHandle = this.game.platformSystem.getResizeHandle(
+                renderPlatform, mouseX, mouseY
+            );
+            console.log('🖱️ Resize handle check result:', resizeHandle, 'at mouse:', mouseX, mouseY);
             if (resizeHandle) {
                 const cursors = {
                     'top-left': 'nw-resize',
@@ -315,8 +326,14 @@ class InputMouse {
         // Check other cursor states
         if (this.checkPlayerStartHandle(mouseX, mouseY)) {
             this.game.canvas.style.cursor = 'move';
-        } else if (this.game.platformSystem.platforms.some(p =>
-                   this.game.platformSystem.isPointInPlatform(mouseX, mouseY, p)) ||
+        } else if (this.game.platformSystem.platforms.some(p => {
+                   // Get actual position for hover detection
+                   const actualPos = this.game.platformSystem.data.getActualPosition(
+                       p, this.game.viewport.designWidth, this.game.viewport.designHeight
+                   );
+                   const renderPlatform = { ...p, x: actualPos.x, y: actualPos.y };
+                   return this.game.platformSystem.isPointInPlatform(mouseX, mouseY, renderPlatform);
+               }) ||
                    this.game.propSystem.props.some(prop =>
                    this.game.propSystem.data.isPointInProp(mouseX, mouseY, prop))) {
             this.game.canvas.style.cursor = 'pointer';

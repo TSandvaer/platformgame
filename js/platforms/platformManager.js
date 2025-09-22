@@ -3,7 +3,7 @@ class PlatformManager {
         this.platformData = platformData;
     }
 
-    handleMouseDown(mouseX, mouseY, camera) {
+    handleMouseDown(mouseX, mouseY, camera, viewport) {
         // Check if platform placement mode is active
         if (this.platformData.platformPlacementMode) {
             this.placePlatform(mouseX, mouseY);
@@ -12,21 +12,49 @@ class PlatformManager {
 
         // Check for platform selection or resize
         for (let platform of this.platformData.platforms) {
-            const resizeHandle = this.getResizeHandle(platform, mouseX, mouseY);
+            // Get actual position based on positioning mode
+            let actualPos, renderPlatform;
+            if (viewport) {
+                actualPos = this.platformData.getActualPosition(platform, viewport.designWidth, viewport.designHeight);
+                renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
+            } else {
+                renderPlatform = platform;
+            }
+
+            const resizeHandle = this.getResizeHandle(renderPlatform, mouseX, mouseY);
             if (resizeHandle) {
+                console.log('🔧 Resize handle clicked:', resizeHandle, 'on platform:', platform.id);
                 this.platformData.isResizing = true;
                 this.platformData.resizeHandle = resizeHandle;
                 this.platformData.selectedPlatform = platform;
+                // Store the starting state for resize operation
+                this.platformData.resizeStartState = {
+                    x: renderPlatform.x,
+                    y: renderPlatform.y,
+                    width: renderPlatform.width,
+                    height: renderPlatform.height,
+                    // Store original raw coordinates too
+                    rawX: platform.x,
+                    rawY: platform.y,
+                    rawWidth: platform.width,
+                    rawHeight: platform.height
+                };
                 return { handled: true, type: 'resize', platform };
             }
 
-            if (this.platformData.isPointInPlatform(mouseX, mouseY, platform)) {
+            if (this.platformData.isPointInPlatform(mouseX, mouseY, renderPlatform)) {
+                console.log('🎯 Platform clicked and selected:', platform.id, 'at', platform.x, platform.y);
                 this.platformData.isDragging = true;
                 this.platformData.selectedPlatform = platform;
+                // Store the drag offset using the difference between mouse and actual rendered position
+                // But we need to calculate what the new raw position should be when dragging
                 this.platformData.dragOffset = {
-                    x: mouseX - platform.x,
-                    y: mouseY - platform.y
+                    x: mouseX - renderPlatform.x,
+                    y: mouseY - renderPlatform.y
                 };
+                // Store the original position for coordinate system consistency
+                this.platformData.dragStartRawPos = { x: platform.x, y: platform.y };
+                this.platformData.dragStartActualPos = { x: renderPlatform.x, y: renderPlatform.y };
                 return { handled: true, type: 'drag', platform };
             }
         }
@@ -38,12 +66,20 @@ class PlatformManager {
         if (!this.platformData.selectedPlatform) return false;
 
         if (this.platformData.isDragging) {
-            // Calculate new position based on mouse
-            const newX = mouseX - this.platformData.dragOffset.x;
-            const newY = mouseY - this.platformData.dragOffset.y;
+            // Calculate new actual position based on mouse
+            const newActualX = mouseX - this.platformData.dragOffset.x;
+            const newActualY = mouseY - this.platformData.dragOffset.y;
 
-            // Apply snapping
-            const snappedPos = this.snapPlatformPosition(this.platformData.selectedPlatform, newX, newY);
+            // Calculate the delta from the original actual position
+            const deltaX = newActualX - this.platformData.dragStartActualPos.x;
+            const deltaY = newActualY - this.platformData.dragStartActualPos.y;
+
+            // Apply the delta to the original raw position
+            const newRawX = this.platformData.dragStartRawPos.x + deltaX;
+            const newRawY = this.platformData.dragStartRawPos.y + deltaY;
+
+            // Apply snapping using raw coordinates
+            const snappedPos = this.snapPlatformPosition(this.platformData.selectedPlatform, newRawX, newRawY);
 
             // Apply boundary constraints - prevent platform from going below bottom edge
             const platform = this.platformData.selectedPlatform;
@@ -100,22 +136,22 @@ class PlatformManager {
         // Top-left corner (outside platform)
         if (mouseX >= platform.x - handleSize && mouseX < platform.x &&
             mouseY >= platform.y - handleSize && mouseY < platform.y) {
-            return 'nw';
+            return 'top-left';
         }
         // Top-right corner (outside platform)
         if (mouseX > platform.x + platform.width && mouseX <= platform.x + platform.width + handleSize &&
             mouseY >= platform.y - handleSize && mouseY < platform.y) {
-            return 'ne';
+            return 'top-right';
         }
         // Bottom-left corner (outside platform)
         if (mouseX >= platform.x - handleSize && mouseX < platform.x &&
             mouseY > platform.y + platform.height && mouseY <= platform.y + platform.height + handleSize) {
-            return 'sw';
+            return 'bottom-left';
         }
         // Bottom-right corner (outside platform)
         if (mouseX > platform.x + platform.width && mouseX <= platform.x + platform.width + handleSize &&
             mouseY > platform.y + platform.height && mouseY <= platform.y + platform.height + handleSize) {
-            return 'se';
+            return 'bottom-right';
         }
 
         // Check edges if not on corners - left/right zones include platform edge
@@ -132,10 +168,10 @@ class PlatformManager {
         const isNearBottom = mouseY > platform.y + platform.height && mouseY <= platform.y + platform.height + handleSize &&
                             mouseX >= platform.x && mouseX <= platform.x + platform.width;
 
-        if (isNearTop) return 'n';
-        if (isNearBottom) return 's';
-        if (isNearLeft) return 'w';
-        if (isNearRight) return 'e';
+        if (isNearTop) return 'top';
+        if (isNearBottom) return 'bottom';
+        if (isNearLeft) return 'left';
+        if (isNearRight) return 'right';
 
         return null;
     }
@@ -152,6 +188,10 @@ class PlatformManager {
               width: resizeState.width,
               height: resizeState.height } :
             this.platformData.selectedPlatform;
+
+        console.log('🔧 Resize - Start State:', resizeState);
+        console.log('🔧 Resize - Mouse:', mouseX, mouseY);
+        console.log('🔧 Resize - Platform before:', this.platformData.selectedPlatform);
         const tileWidth = 32; // Display tile width
         const tileHeight = 32; // Display tile height
         const minSize = tileHeight; // Minimum size should be at least one tile
@@ -162,38 +202,38 @@ class PlatformManager {
 
         // Calculate new dimensions based on resize handle
         switch (this.platformData.resizeHandle) {
-            case 'se': // Bottom-right
+            case 'bottom-right': // Bottom-right
                 newWidth = Math.max(minSize, mouseX - platform.x);
                 newHeight = Math.max(minSize, mouseY - platform.y);
                 break;
-            case 'sw': // Bottom-left
+            case 'bottom-left': // Bottom-left
                 newWidth = Math.max(minSize, platform.x + platform.width - mouseX);
                 newX = platform.x + platform.width - newWidth;
                 newHeight = Math.max(minSize, mouseY - platform.y);
                 break;
-            case 'ne': // Top-right
+            case 'top-right': // Top-right
                 newWidth = Math.max(minSize, mouseX - platform.x);
                 newHeight = Math.max(minSize, platform.y + platform.height - mouseY);
                 newY = platform.y + platform.height - newHeight;
                 break;
-            case 'nw': // Top-left
+            case 'top-left': // Top-left
                 newWidth = Math.max(minSize, platform.x + platform.width - mouseX);
                 newX = platform.x + platform.width - newWidth;
                 newHeight = Math.max(minSize, platform.y + platform.height - mouseY);
                 newY = platform.y + platform.height - newHeight;
                 break;
-            case 'n': // Top edge
+            case 'top': // Top edge
                 newHeight = Math.max(minSize, platform.y + platform.height - mouseY);
                 newY = platform.y + platform.height - newHeight;
                 break;
-            case 's': // Bottom edge
+            case 'bottom': // Bottom edge
                 newHeight = Math.max(minSize, mouseY - platform.y);
                 break;
-            case 'w': // Left edge
+            case 'left': // Left edge
                 newWidth = Math.max(minSize, platform.x + platform.width - mouseX);
                 newX = platform.x + platform.width - newWidth;
                 break;
-            case 'e': // Right edge
+            case 'right': // Right edge
                 newWidth = Math.max(minSize, mouseX - platform.x);
                 break;
         }
@@ -210,9 +250,9 @@ class PlatformManager {
         newHeight = Math.max(tileHeight, newHeight);
 
         // Adjust Y position for top edge resizing when height was snapped
-        if ((this.platformData.resizeHandle === 'n' ||
-             this.platformData.resizeHandle === 'ne' ||
-             this.platformData.resizeHandle === 'nw') &&
+        if ((this.platformData.resizeHandle === 'top' ||
+             this.platformData.resizeHandle === 'top-right' ||
+             this.platformData.resizeHandle === 'top-left') &&
             newHeight !== originalNewHeight) {
             const heightDifference = newHeight - originalNewHeight;
             newY = newY - heightDifference;
@@ -225,11 +265,38 @@ class PlatformManager {
             newY = snappedPos.y;
         }
 
+        console.log('🔧 Resize - New dimensions:', { newX, newY, newWidth, newHeight });
+
         // Update the actual selected platform with new dimensions
-        this.platformData.selectedPlatform.x = newX;
-        this.platformData.selectedPlatform.y = newY;
-        this.platformData.selectedPlatform.width = newWidth;
-        this.platformData.selectedPlatform.height = newHeight;
+        // If we used resizeStartState (rendered coordinates), we need to convert back to raw coordinates
+        if (resizeState && resizeState.rawX !== undefined) {
+            // Calculate the delta from the original rendered position
+            const deltaX = newX - resizeState.x;
+            const deltaY = newY - resizeState.y;
+            const deltaWidth = newWidth - resizeState.width;
+            const deltaHeight = newHeight - resizeState.height;
+
+            console.log('🔧 Resize - Deltas:', { deltaX, deltaY, deltaWidth, deltaHeight });
+
+            // Apply deltas to the ORIGINAL raw coordinates (not current ones)
+            this.platformData.selectedPlatform.x = resizeState.rawX + deltaX;
+            this.platformData.selectedPlatform.y = resizeState.rawY + deltaY;
+            this.platformData.selectedPlatform.width = resizeState.rawWidth + deltaWidth;
+            this.platformData.selectedPlatform.height = resizeState.rawHeight + deltaHeight;
+
+            // Ensure width and height are never negative or zero
+            this.platformData.selectedPlatform.width = Math.max(32, this.platformData.selectedPlatform.width);
+            this.platformData.selectedPlatform.height = Math.max(32, this.platformData.selectedPlatform.height);
+
+            console.log('🔧 Resize - Platform after:', this.platformData.selectedPlatform);
+        } else {
+            // No coordinate transformation needed, use values directly
+            this.platformData.selectedPlatform.x = newX;
+            this.platformData.selectedPlatform.y = newY;
+            this.platformData.selectedPlatform.width = Math.max(32, newWidth);
+            this.platformData.selectedPlatform.height = Math.max(32, newHeight);
+            console.log('🔧 Resize - Platform after (direct):', this.platformData.selectedPlatform);
+        }
     }
 
     snapPlatformPosition(platform, newX, newY, skipSelf = false) {
@@ -320,10 +387,10 @@ class PlatformManager {
             const relativeYInput = document.getElementById('platformRelativeY');
             const relativeRow = document.getElementById('relativePositionRow');
 
-            if (xInput) xInput.value = Math.round(this.platformData.selectedPlatform.x);
-            if (yInput) yInput.value = Math.round(this.platformData.selectedPlatform.y);
-            if (widthInput) widthInput.value = this.platformData.selectedPlatform.width;
-            if (heightInput) heightInput.value = this.platformData.selectedPlatform.height;
+            if (xInput) xInput.value = Math.round(this.platformData.selectedPlatform.x || 0);
+            if (yInput) yInput.value = Math.round(this.platformData.selectedPlatform.y || 0);
+            if (widthInput) widthInput.value = this.platformData.selectedPlatform.width || 100;
+            if (heightInput) heightInput.value = this.platformData.selectedPlatform.height || 20;
             console.log('🔧 Platform selected - spriteType:', this.platformData.selectedPlatform.spriteType);
             if (spriteTypeInput) spriteTypeInput.value = this.platformData.selectedPlatform.spriteType || 'color';
 
