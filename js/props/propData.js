@@ -157,6 +157,27 @@ class PropData {
                 prop.zOrder = this.nextPropZOrder++;
             }
         });
+
+        // Update nextPropId to be higher than any existing prop ID
+        if (this.props.length > 0) {
+            const maxId = Math.max(...this.props.map(prop => prop.id || 0));
+            this.nextPropId = maxId + 1;
+        }
+
+        // Update nextPropZOrder to be higher than any existing z-order
+        if (this.props.length > 0) {
+            const maxZOrder = Math.max(...this.props.map(prop => prop.zOrder || 0));
+            this.nextPropZOrder = maxZOrder + 1;
+        }
+    }
+
+    getNextUniqueId() {
+        // Ensure nextPropId is always higher than any existing prop ID
+        if (this.props.length > 0) {
+            const maxId = Math.max(...this.props.map(prop => prop.id || 0));
+            this.nextPropId = Math.max(this.nextPropId, maxId + 1);
+        }
+        return this.nextPropId++;
     }
 
     addProp(type, x, y, isObstacle = false, sizeMultiplier = 1.0) {
@@ -164,7 +185,7 @@ class PropData {
         if (!propType) return null;
 
         const newProp = {
-            id: this.nextPropId++,
+            id: this.getNextUniqueId(),
             type: type,
             x: x,
             y: y,
@@ -347,7 +368,7 @@ class PropData {
     getPropsInSameGroup(prop) {
         if (!prop.groupId) return [prop];
         // Use direct filtering instead of the Map, as Map might not be initialized for loaded groups
-        return this.props.filter(p => p.groupId === prop.groupId);
+        return this.props.filter(p => p.groupId && p.groupId === prop.groupId);
     }
 
     // Helper to expand selection to include all group members
@@ -458,6 +479,25 @@ class PropData {
 
     // Copy selected props to clipboard
     copySelectedProps() {
+        // If no multi-selection but a single prop is selected
+        if (this.selectedProps.length === 0 && this.selectedProp) {
+            this.clipboard = [{
+                type: this.selectedProp.type,
+                x: 0, // Offset from paste position
+                y: 0, // Offset from paste position
+                sizeMultiplier: this.selectedProp.sizeMultiplier || 1.0,
+                isObstacle: this.selectedProp.isObstacle || false,
+                rotation: this.selectedProp.rotation || 0,
+                groupId: null, // Single props should not inherit group IDs
+                zOrder: this.selectedProp.zOrder || 0,
+                positioning: this.selectedProp.positioning,
+                relativeX: this.selectedProp.relativeX,
+                relativeY: this.selectedProp.relativeY
+            }];
+            console.log('Copied 1 prop to clipboard');
+            return true;
+        }
+
         if (this.selectedProps.length === 0) return false;
 
         // Clear clipboard
@@ -511,6 +551,22 @@ class PropData {
         return true;
     }
 
+    // Nudge selected props
+    nudgeSelectedProps(deltaX, deltaY) {
+        if (this.selectedProps.length === 0 && this.selectedProp) {
+            // If no multi-selection, nudge the single selected prop
+            this.selectedProp.x += deltaX;
+            this.selectedProp.y += deltaY;
+            return;
+        }
+
+        // Nudge all selected props
+        this.selectedProps.forEach(prop => {
+            prop.x += deltaX;
+            prop.y += deltaY;
+        });
+    }
+
     // Paste props from clipboard at specified position
     pasteProps(mouseX, mouseY) {
         if (this.clipboard.length === 0) return [];
@@ -524,12 +580,12 @@ class PropData {
         const groupIdMap = new Map();
 
         // Create new props from clipboard
-        this.clipboard.forEach(clipProp => {
+        this.clipboard.forEach((clipProp, index) => {
             const newProp = {
-                id: this.nextPropId++,
+                id: this.getNextUniqueId(),
                 type: clipProp.type,
-                x: mouseX + clipProp.x,
-                y: mouseY + clipProp.y,
+                x: mouseX + clipProp.x + (index * 5), // Small offset to prevent overlap
+                y: mouseY + clipProp.y + (index * 5), // Small offset to prevent overlap
                 isObstacle: clipProp.isObstacle,
                 zOrder: this.nextPropZOrder++,
                 positioning: clipProp.positioning,

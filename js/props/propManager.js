@@ -38,6 +38,7 @@ class PropManager {
 
         // If we found props under mouse, select the one with highest z-order (topmost)
         if (propsUnderMouse.length > 0) {
+            console.log('Props under mouse:', propsUnderMouse.map(p => `ID:${p.id} Z:${p.zOrder} Group:${p.groupId}`));
             const topProp = propsUnderMouse.reduce((highest, current) =>
                 (current.zOrder || 0) > (highest.zOrder || 0) ? current : highest
             );
@@ -52,10 +53,6 @@ class PropManager {
                 this.rotationStartY = mouseY;
                 this.rotationStartAngle = topProp.rotation || 0;
                 return { handled: true, type: 'rotation', prop: topProp };
-            } else if (ctrlPressed) {
-                // Multi-selection mode - just toggle selection, don't start dragging
-                this.propData.toggleSelection(topProp);
-                return { handled: true, type: 'selection', prop: topProp };
             } else {
                 // Check if clicked prop is already in multi-selection
                 if (this.propData.selectedProps.length > 1 && this.propData.selectedProps.includes(topProp)) {
@@ -80,10 +77,39 @@ class PropManager {
                     this.propData.dragSelection = expandedSelection;
 
                     return { handled: true, type: 'multi-drag', prop: topProp };
+                } else if (ctrlPressed) {
+                    // Ctrl+click: toggle selection
+                    console.log('Ctrl+click on prop:', topProp.id, 'groupId:', topProp.groupId);
+                    if (this.propData.selectedProps.includes(topProp)) {
+                        // Remove from selection
+                        this.propData.removeFromSelection(topProp);
+                        // Set primary selection to first remaining prop
+                        if (this.propData.selectedProps.length > 0) {
+                            this.propData.selectedProp = this.propData.selectedProps[0];
+                        } else {
+                            this.propData.selectedProp = null;
+                        }
+                    } else {
+                        // Add to selection
+                        this.propData.addToSelection(topProp);
+                        this.propData.selectedProp = topProp; // Set as primary
+                    }
+                    return { handled: true, type: 'multi-select', prop: topProp };
                 } else {
-                    // Single selection
-                    this.propData.selectedProps = [topProp];
-                    this.propData.selectedProp = topProp;
+                    // Single selection - if prop is grouped, select entire group
+                    console.log('Selecting single prop:', topProp.id, 'groupId:', topProp.groupId);
+
+                    if (topProp.groupId) {
+                        // Select all props in the same group
+                        const groupMembers = this.propData.getPropsInSameGroup(topProp);
+                        this.propData.selectedProps = groupMembers;
+                        this.propData.selectedProp = topProp; // Set clicked prop as primary
+                        console.log('Selected entire group:', groupMembers.length, 'props');
+                    } else {
+                        // Single ungrouped prop
+                        this.propData.selectedProps = [topProp];
+                        this.propData.selectedProp = topProp;
+                    }
                     this.propData.isDraggingProp = true;
 
                     // Calculate drag offset using actual position
@@ -96,12 +122,10 @@ class PropManager {
                 }
             }
         } else {
-            // Clicked on empty space - clear selection but don't start drag selection yet
-            if (!ctrlPressed) {
-                // Clear selection unless Ctrl is held
-                this.propData.clearMultiSelection();
-            }
-            // Don't start drag selection immediately - let platforms have a chance to be selected
+            // Clicked on empty space - start drag selection
+            this.propData.clearMultiSelection();
+            this.propData.startDragSelection(mouseX, mouseY);
+            return { handled: true, type: 'drag-select' };
         }
 
         return { handled: false };
@@ -243,6 +267,11 @@ class PropManager {
     updatePropList() {
         const listElement = document.getElementById('propList');
         if (!listElement) return;
+
+        // Debug logging
+        if (this.propData.selectedProps.length > 1) {
+            console.log('Multiple props selected:', this.propData.selectedProps.map(p => `ID:${p.id} Group:${p.groupId}`));
+        }
 
         listElement.innerHTML = this.propData.props.map(prop => {
             const propType = this.propData.getPropType(prop.type);

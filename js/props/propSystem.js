@@ -156,8 +156,8 @@ class PropSystem {
     }
 
     // Mouse event handling
-    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, viewport, camera) {
-        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed, viewport, camera);
+    handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, shiftPressed = false, viewport, camera) {
+        const result = this.manager.handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed, shiftPressed, viewport, camera);
         if (result.handled) {
             this.manager.updatePropProperties();
             this.manager.updatePropList();
@@ -260,8 +260,34 @@ class PropSystem {
         this.manager.updatePropList();
     }
 
+    // Copy/paste methods
+    copySelectedProps() {
+        return this.data.copySelectedProps();
+    }
+
+    pasteProps(mouseX, mouseY) {
+        const pastedProps = this.data.pasteProps(mouseX, mouseY);
+        if (pastedProps.length > 0) {
+            this.manager.updatePropProperties();
+            this.manager.updatePropList();
+        }
+        return pastedProps;
+    }
+
+    get copiedProps() {
+        return this.data.clipboard;
+    }
+
     get selectedProps() {
         return this.data.selectedProps;
+    }
+
+    get isDragSelecting() {
+        return this.data.isDragSelecting;
+    }
+
+    get dragSelectionRect() {
+        return this.data.getDragSelectionRect();
     }
 
     // Grouping methods
@@ -310,6 +336,16 @@ class PropSystem {
 
     deleteSelectedProps() {
         this.data.deleteSelectedProps();
+        this.manager.updatePropProperties();
+        this.manager.updatePropList();
+    }
+
+    clearSelection() {
+        this.clearMultiSelection();
+    }
+
+    nudgeSelectedProps(deltaX, deltaY) {
+        this.data.nudgeSelectedProps(deltaX, deltaY);
         this.manager.updatePropProperties();
         this.manager.updatePropList();
     }

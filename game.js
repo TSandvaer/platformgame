@@ -1,5 +1,6 @@
 class PlatformRPG {
     constructor() {
+        console.log('PlatformRPG constructor called!');
         this.canvas = document.getElementById('gameCanvas');
         if (!this.canvas) {
             console.error('Canvas element not found! Make sure gameCanvas exists in the DOM.');
@@ -118,9 +119,11 @@ class PlatformRPG {
             this.cameraSystem.camera
         );
 
-        this.keys = {};
-        this.mouseX = 0;
-        this.mouseY = 0;
+        // Initialize input system
+        this.inputSystem = new InputSystem(this);
+
+        // Keep keys reference for backwards compatibility
+        this.keys = this.inputSystem.keys;
 
         // Scene data is now handled by the sceneSystem
         this.pendingGameDataImport = null; // Store gameData.json data until scene system is ready
@@ -454,7 +457,12 @@ class PlatformRPG {
     }
 
     init() {
-        this.setupEventListeners();
+        console.log('Game init() called!');
+        // Setup UI button listeners
+        this.setupUIListeners();
+        this.setupAdditionalListeners();
+
+        // Input system sets up all game input event listeners
         this.populateBackgroundDropdown();
         this.updateViewport(); // Ensure viewport is properly initialized
         this.updateViewportUI(); // Initialize viewport UI
@@ -488,115 +496,51 @@ class PlatformRPG {
         return name.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
     }
 
-    setupEventListeners() {
-        window.addEventListener('keydown', (e) => {
-            // Skip game key handling if user is typing in an input field
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return;
-            }
+    // Input event listeners are now handled by InputSystem
 
-            // Don't register arrow keys for player movement if we're nudging props
-            const isArrowKey = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
-            const isNudgingProp = this.isDevelopmentMode &&
-                                  (this.propSystem.selectedProp ||
-                                   (this.propSystem.selectedProps && this.propSystem.selectedProps.length > 0));
+    showFeedbackMessage(message, worldX = null, worldY = null) {
+        if (!this.feedbackMessages) {
+            this.feedbackMessages = [];
+        }
 
-            if (!(isArrowKey && isNudgingProp)) {
-                this.keys[e.key.toLowerCase()] = true;
-            }
+        // Use provided coordinates or default to center of screen
+        let x, y;
+        if (worldX !== null && worldY !== null) {
+            // Use provided world coordinates
+            x = worldX;
+            y = worldY;
+        } else {
+            // Default to center of screen
+            const centerX = this.canvas.width / 2;
+            const centerY = 100;
+            x = this.cameraSystem.x + centerX / this.viewport.scaleX;
+            y = this.cameraSystem.y + centerY / this.viewport.scaleY;
+        }
 
-            // Let player system handle special keys
-            const handled = this.playerSystem.handleKeyDown(e.key, this.isDevelopmentMode, this.propSystem);
-            if (handled && e.key === ' ') {
-                e.preventDefault(); // Prevent page scrolling for space
-            }
-            if (handled && e.key === 'Control') {
-                e.preventDefault(); // Prevent browser shortcuts
-            }
-
-            // Prevent browser shortcuts when Ctrl is held down with other keys
-            if (e.ctrlKey && (e.key === ' ' || e.key === 'Space')) {
-                e.preventDefault(); // Specifically prevent Ctrl+Space
-            }
+        this.feedbackMessages.push({
+            text: message,
+            x: x,
+            y: y,
+            lifetime: 120, // frames to display
+            opacity: 1.0
         });
+    }
 
-        window.addEventListener('keyup', (e) => {
-            this.keys[e.key.toLowerCase()] = false;
-
-            // Let player system handle key up
-            this.playerSystem.handleKeyUp(e.key);
-
-            // Prevent browser shortcuts for Control key
-            if (e.key === 'Control') {
-                e.preventDefault();
-            }
-        });
-
-        this.canvas.addEventListener('mousemove', (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const clientMouseX = e.clientX - rect.left;
-            const clientMouseY = e.clientY - rect.top;
-
-            // Store client mouse position for copy/paste
-            this.lastMouseX = clientMouseX;
-            this.lastMouseY = clientMouseY;
-
-            // Convert screen coordinates to both coordinate systems
-            const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
-            const viewportCoords = this.screenToViewport(clientMouseX, clientMouseY);
-            this.mouseX = worldCoords.x;  // Keep world coordinates for backward compatibility
-            this.mouseY = worldCoords.y;
-            this.viewportMouseX = viewportCoords.x;  // Add viewport coordinates
-            this.viewportMouseY = viewportCoords.y;
-
-            if (this.isDevelopmentMode) {
-                document.getElementById('coordinates').textContent =
-                    `X: ${Math.round(this.mouseX)}, Y: ${Math.round(this.mouseY)}`;
-
-                this.updateCursor();
-                this.handleStartPositionDrag();
-                this.handlePlatformDrag(e);
-
-                // Handle free camera mode mouse edge scrolling
-                if (this.cameraSystem.mode === 'free' && !this.platformSystem.isDragging && !this.platformSystem.isDraggingProp && !this.platformSystem.isResizing) {
-                    this.handleFreeCameraScroll(clientMouseX, clientMouseY);
-                }
-            }
-        });
-
-        this.canvas.addEventListener('mousedown', (e) => {
-            if (this.isDevelopmentMode) {
-                this.handlePlatformMouseDown(e);
-            }
-        });
-
-        this.canvas.addEventListener('mouseup', (e) => {
-            if (this.isDevelopmentMode) {
-                this.handlePlatformMouseUp(e);
-            }
-        });
-
-        this.canvas.addEventListener('mouseleave', () => {
-            // Stop free camera scrolling when mouse leaves canvas
-            this.stopFreeCameraScroll();
-        });
-
-        // Right-click context menu
-        this.canvas.addEventListener('contextmenu', (e) => {
-            if (this.isDevelopmentMode) {
-                e.preventDefault(); // Prevent default browser context menu
-                this.showContextMenu(e);
-            }
-        });
-
+    // Setup UI button listeners (not moved to input system)
+    setupUIListeners() {
+        console.log('setupUIListeners called!');
+        console.log('Setting up dev mode button...');
         document.getElementById('devModeBtn').addEventListener('click', () => {
             this.setDevelopmentMode(true);
         });
+        console.log('Dev mode button setup complete');
 
+        console.log('Setting up production button...');
         document.getElementById('productionBtn').addEventListener('click', () => {
             this.setDevelopmentMode(false);
         });
 
+        console.log('Setting up dashboard button...');
         document.getElementById('toggleDashboardBtn').addEventListener('click', () => {
             this.toggleDashboard();
         });
@@ -627,17 +571,54 @@ class PlatformRPG {
             this.updateViewport();
         });
 
-        // Add keyboard event listener for Delete key
-        window.addEventListener('keydown', (e) => {
-            // Skip game key handling if user is typing in an input field
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        console.log('Reached group button setup section!');
+        // Multi-selection and grouping event listeners
+        const groupButton = document.getElementById('groupProps');
+        console.log('Group button element found:', groupButton);
+        if (groupButton) {
+            groupButton.addEventListener('click', () => {
+            console.log('Group button clicked! Selected props:', this.propSystem.selectedProps?.length || 0);
+            console.log('Selected prop IDs:', this.propSystem.selectedProps?.map(p => p.id) || []);
+
+            if (this.propSystem.selectedProps?.length < 2) {
+                console.log('Not enough props selected for grouping');
+                alert('Select at least 2 props to create a group');
                 return;
             }
-            this.handleKeyDown(e);
-        });
 
-        this.setupPlatformEditorListeners();
-        this.setupSceneEditorListeners();
+            const groupId = this.propSystem.groupSelectedProps();
+            if (groupId) {
+                console.log(`Created group ${groupId} with ${this.propSystem.selectedProps.length} props`);
+                console.log('Props after grouping:', this.propSystem.selectedProps.map(p => `ID:${p.id} Group:${p.groupId}`));
+            } else {
+                console.log('Grouping failed - groupSelectedProps returned null');
+                alert('Grouping failed');
+            }
+            });
+        } else {
+            console.error('Group button not found!');
+        }
+
+        const ungroupButton = document.getElementById('ungroupProps');
+        console.log('Ungroup button element found:', ungroupButton);
+        if (ungroupButton) {
+            ungroupButton.addEventListener('click', () => {
+                this.propSystem.ungroupSelectedProps();
+                console.log('Ungrouped selected props');
+            });
+        } else {
+            console.error('Ungroup button not found!');
+        }
+
+        document.getElementById('deleteSelectedProps').addEventListener('click', () => {
+            if (this.propSystem.selectedProps.length > 0) {
+                if (confirm(`Delete ${this.propSystem.selectedProps.length} selected props?`)) {
+                    this.propSystem.deleteSelectedProps();
+                }
+            } else {
+                alert('No props selected');
+            }
+        });
     }
 
 
@@ -730,8 +711,8 @@ class PlatformRPG {
     }
 
     handleInput() {
-        // Pass keys to player controller
-        this.playerSystem.controller.keys = this.keys;
+        // Delegate to input system
+        this.inputSystem.updatePlayerInput();
     }
 
 
@@ -983,10 +964,11 @@ class PlatformRPG {
 
             // Police barrier removed from dev mode
             // this.renderPoliceBarrier();
-
-            // Render feedback messages (copy/paste notifications) on top of everything
-            this.renderFeedbackMessages();
         }
+
+        // Render feedback messages (copy/paste notifications) on top of everything
+        // Should work in both development and production modes
+        this.renderFeedbackMessages();
     }
 
 
@@ -1309,6 +1291,9 @@ class PlatformRPG {
             }
         });
 
+    }
+
+    setupAdditionalListeners() {
         // Prop properties event listeners
         document.getElementById('updateProp').addEventListener('click', () => {
             if (this.propSystem.selectedProp) {
@@ -1337,40 +1322,16 @@ class PlatformRPG {
 
         document.getElementById('sendToBackground').addEventListener('click', () => {
             if (this.propSystem.selectedProp) {
-                this.propsMouseHandler.sendPropToBackground(this.propSystem.selectedProp);
+                this.propSystem.movePropToBack();
             }
         });
 
         document.getElementById('bringToFront').addEventListener('click', () => {
             if (this.propSystem.selectedProp) {
-                this.propsMouseHandler.bringPropToFront(this.propSystem.selectedProp);
+                this.propSystem.movePropToFront();
             }
         });
 
-        // Multi-selection and grouping event listeners
-        document.getElementById('groupProps').addEventListener('click', () => {
-            const groupId = this.propSystem.groupSelectedProps();
-            if (groupId) {
-                console.log(`Created group ${groupId} with ${this.propSystem.selectedProps.length} props`);
-            } else {
-                alert('Select at least 2 props to create a group');
-            }
-        });
-
-        document.getElementById('ungroupProps').addEventListener('click', () => {
-            this.propSystem.ungroupSelectedProps();
-            console.log('Ungrouped selected props');
-        });
-
-        document.getElementById('deleteSelectedProps').addEventListener('click', () => {
-            if (this.propSystem.selectedProps.length > 0) {
-                if (confirm(`Delete ${this.propSystem.selectedProps.length} selected props?`)) {
-                    this.propSystem.deleteSelectedProps();
-                }
-            } else {
-                alert('No props selected');
-            }
-        });
 
         // Alignment button event listeners
         document.getElementById('alignLeft').addEventListener('click', () => {
@@ -2503,7 +2464,7 @@ class PlatformRPG {
         const rect = this.canvas.getBoundingClientRect();
         const clientMouseX = e.clientX - rect.left;
         const clientMouseY = e.clientY - rect.top;
-        const worldCoords = this.screenToWorld(clientMouseX, clientMouseY);
+        const worldCoords = this.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
 
         // Store coordinates for use by menu actions
         this.contextMenuCoords = {
