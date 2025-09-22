@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Game</title>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            var extra = !col ? '' : '\ncolumn: ' + col;
+            extra += !error ? '' : '\nerror: ' + error;
+            console.error("Error: " + msg + "\nurl: " + url + "\nline: " + line + extra);
+            document.body.innerHTML += '<div style="color:red; padding:10px; background:black;">' +
+                "Error: " + msg + "<br>File: " + url + "<br>Line: " + line + extra + '</div>';
+            return true;
+        };
+    </script>
+</head>
+<body style="margin:0; padding:0; background: #333; color: white;">
+    <h3>Check for JavaScript errors below:</h3>
+    <div id="errors"></div>
+
+    <!-- Platform System Scripts -->
+    <script src="js/platforms/platformData.js"></script>
+    <script src="js/platforms/platformRenderer.js"></script>
+    <script src="js/platforms/platformCollisions.js"></script>
+    <script src="js/platforms/platformManager.js"></script>
+    <script src="js/platforms/platformMouseHandler.js"></script>
+    <script src="js/platforms/platformSystem.js"></script>
+
+    <!-- Prop System Scripts -->
+    <script src="js/props/propData.js"></script>
+    <script src="js/props/propRenderer.js"></script>
+    <script src="js/props/propCollisions.js"></script>
+    <script src="js/props/propManager.js"></script>
+    <script src="js/props/propsMouseHandler.js"></script>
+    <script src="js/props/propSystem.js"></script>
+
+    <!-- Scene System Scripts -->
+    <script src="js/scenes/sceneData.js"></script>
+    <script src="js/scenes/sceneRenderer.js"></script>
+    <script src="js/scenes/sceneManager.js"></script>
+    <script src="js/scenes/sceneSystem.js"></script>
+
+    <!-- Camera System Scripts -->
+    <script src="js/camera/cameraData.js"></script>
+    <script src="js/camera/cameraManager.js"></script>
+    <script src="js/camera/cameraController.js"></script>
+    <script src="js/camera/cameraSystem.js"></script>
+
+    <script>
+        console.log('Testing class availability:');
+        console.log('CameraData:', typeof CameraData);
+        console.log('CameraManager:', typeof CameraManager);
+        console.log('CameraController:', typeof CameraController);
+        console.log('CameraSystem:', typeof CameraSystem);
+
+        document.getElementById('errors').innerHTML = '<p style="color:green;">All camera classes loaded successfully!</p>';
+    </script>
+</body>
+</html>

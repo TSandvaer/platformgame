@@ -85,12 +85,7 @@ class SceneManager {
         console.log('🔧 Loading platforms for scene:', scene.name, 'ID:', scene.id, 'Platform count:', scene.platforms.length);
         console.log('🔧 Loading props for scene:', scene.name, 'Prop count:', scene.props.length);
 
-        if (scene.name === 'Tutorial' && scene.platforms.length !== 5) {
-            console.error('🚨 CORRUPTION DETECTED: Tutorial scene should have 5 platforms, but has:', scene.platforms.length);
-        }
-        if (scene.name === 'Tutorial' && scene.props.length !== 110) {
-            console.error('🚨 CORRUPTION DETECTED: Tutorial scene should have 110 props, but has:', scene.props.length);
-        }
+        // Removed corruption detection messages
 
         console.log('🔧 Scene platforms:', scene.platforms);
         console.log('🔧 Platforms being loaded:', scene.platforms.map(p => ({

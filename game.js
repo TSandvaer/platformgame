@@ -1,7 +1,15 @@
 class PlatformRPG {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
+        if (!this.canvas) {
+            console.error('Canvas element not found! Make sure gameCanvas exists in the DOM.');
+            throw new Error('Canvas element not found');
+        }
         this.ctx = this.canvas.getContext('2d');
+        if (!this.ctx) {
+            console.error('Could not get 2D context from canvas!');
+            throw new Error('Could not get 2D context');
+        }
 
         // Make canvas focusable for key events
         this.canvas.tabIndex = 0;
@@ -94,10 +102,8 @@ class PlatformRPG {
         this.dragScrollDirection = null;
         this.lastMousePosition = { x: 0, y: 0 };
 
-        // Camera mode system
-        this.cameraMode = 'character'; // 'free' or 'character'
-        this.freeCameraScrollTimer = null;
-        this.freeCameraScrollDirection = null;
+        // Initialize camera system
+        this.cameraSystem = new CameraSystem(this);
 
         // Temporary prop types reference for backward compatibility
         this.propTypes = {
@@ -119,10 +125,7 @@ class PlatformRPG {
             mode: 'fit'           // 'fit', 'stretch', 'crop', 'pixel-perfect'
         };
 
-        this.camera = {
-            x: 0,
-            y: 0
-        };
+        // Camera system will handle camera state
 
         this.updateViewport();
 
@@ -130,7 +133,7 @@ class PlatformRPG {
         this.platformMouseHandler = new PlatformMouseHandler(
             this.platformSystem,
             this.viewport,
-            this.camera,
+            this.cameraSystem.camera,
             this.canvas
         );
         this.propsMouseHandler = new PropsMouseHandler(
@@ -138,7 +141,7 @@ class PlatformRPG {
             this.propSystem.manager,
             this.platformSystem,
             this.viewport,
-            this.camera
+            this.cameraSystem.camera
         );
 
         this.keys = {};
@@ -270,6 +273,9 @@ class PlatformRPG {
         // Position player at the current scene's start position
         this.positionPlayerAtSceneStart();
 
+        // Initialize camera system with canvas and viewport
+        this.cameraSystem.init(this.canvas, this.viewport);
+
         // Then set development mode (which will call sceneSystem.updateUI())
         this.setDevelopmentMode(true); // Properly initialize development mode UI
 
@@ -384,7 +390,7 @@ class PlatformRPG {
             const img = new Image();
             img.onload = () => {
                 background.layersLoaded++;
-                console.log(`Loaded background layer ${index + 1}/${background.totalLayers} for ${backgroundName}`);
+                // Removed background loading debug message
             };
             img.onerror = (error) => {
                 console.warn(`Failed to load background layer: ${path}`);
@@ -477,7 +483,7 @@ class PlatformRPG {
             // Scale the camera offset by viewport scale to maintain consistent parallax
             // Use safety fallback for viewport scale in case it's not initialized
             const viewportScale = this.viewport?.scaleX || 1;
-            const scaledCameraX = this.camera.x * viewportScale;
+            const scaledCameraX = this.cameraSystem.x * viewportScale;
             const parallaxOffset = scaledCameraX * parallaxSpeed;
 
             // Calculate how many times we need to repeat the image to fill the screen
@@ -623,7 +629,7 @@ class PlatformRPG {
                 this.handlePlatformDrag(e);
 
                 // Handle free camera mode mouse edge scrolling
-                if (this.cameraMode === 'free' && !this.platformSystem.isDragging && !this.platformSystem.isDraggingProp && !this.platformSystem.isResizing) {
+                if (this.cameraSystem.mode === 'free' && !this.platformSystem.isDragging && !this.platformSystem.isDraggingProp && !this.platformSystem.isResizing) {
                     this.handleFreeCameraScroll(clientMouseX, clientMouseY);
                 }
             }
@@ -675,11 +681,11 @@ class PlatformRPG {
         });
 
         document.getElementById('cameraModeBtn').addEventListener('click', () => {
-            this.toggleCameraMode();
+            this.cameraSystem.toggleMode();
         });
 
         document.getElementById('focusPlayerBtn').addEventListener('click', () => {
-            this.focusPlayer();
+            this.cameraSystem.focusOnPlayer(this.player);
         });
 
         document.getElementById('backToDevBtn').addEventListener('click', () => {
@@ -718,6 +724,7 @@ class PlatformRPG {
 
     setDevelopmentMode(isDev) {
         this.isDevelopmentMode = isDev;
+        this.cameraSystem.setDevelopmentMode(isDev);
         document.getElementById('currentMode').textContent = isDev ? 'Development' : 'Production';
         document.getElementById('coordinates').style.display = isDev ? 'block' : 'none';
         document.getElementById('platformEditor').style.display = isDev ? 'block' : 'none';
@@ -774,6 +781,7 @@ class PlatformRPG {
         this.showDashboard = !this.showDashboard;
         const dashboard = document.getElementById('dashboard');
         dashboard.classList.toggle('hidden', !this.showDashboard);
+        this.cameraSystem.setDashboardState(this.showDashboard);
 
         // Update canvas element size
         const newWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
@@ -1027,7 +1035,7 @@ class PlatformRPG {
     }
 
 
-    updateCamera() {
+    updateCameraOld() {
         // Don't update camera automatically during drag operations
         if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.platformSystem.isResizing || this.isDraggingStartPosition) {
             return;
@@ -1056,8 +1064,8 @@ class PlatformRPG {
         const currentScene = this.sceneSystem.currentScene;
         if (!currentScene || !currentScene.boundaries) {
             // Fallback to basic constraints if no scene boundaries
-            this.camera.x = Math.max(0, targetX);
-            this.camera.y = Math.max(0, targetY);
+            this.cameraSystem.x = Math.max(0, targetX);
+            this.cameraSystem.y = Math.max(0, targetY);
             return;
         }
 
@@ -1103,19 +1111,19 @@ class PlatformRPG {
         }
 
         // Apply constraints
-        this.camera.x = Math.max(minCameraX, Math.min(maxCameraX, targetX));
-        this.camera.y = Math.max(minCameraY, Math.min(maxCameraY, targetY));
+        this.cameraSystem.x = Math.max(minCameraX, Math.min(maxCameraX, targetX));
+        this.cameraSystem.y = Math.max(minCameraY, Math.min(maxCameraY, targetY));
 
         // Special handling for hidden dashboard: force camera to left boundary to eliminate gaps
         if (!this.showDashboard) {
             // When dashboard is hidden, ensure camera doesn't create gaps on the left
-            this.camera.x = Math.max(this.camera.x, bounds.left);
+            this.cameraSystem.x = Math.max(this.cameraSystem.x, bounds.left);
             // Also ensure viewport offset is 0 for proper alignment
             this.viewport.offsetX = 0;
         }
 
         // Debug logging for camera constraints (can be removed for production)
-        // console.log('🎥 Camera constrained:', { target: { x: targetX, y: targetY }, actual: { x: this.camera.x, y: this.camera.y } });
+        // console.log('🎥 Camera constrained:', { target: { x: targetX, y: targetY }, actual: { x: this.cameraSystem.x, y: this.cameraSystem.y } });
     }
 
     applyPlayerBoundaryConstraints() {
@@ -1213,16 +1221,12 @@ class PlatformRPG {
 
     // Convert screen coordinates to world coordinates
     screenToWorld(screenX, screenY) {
-        const worldX = (screenX - this.viewport.offsetX) / this.viewport.scaleX + this.camera.x;
-        const worldY = (screenY - this.viewport.offsetY) / this.viewport.scaleY + this.camera.y;
-        return { x: worldX, y: worldY };
+        return this.cameraSystem.screenToWorld(screenX, screenY);
     }
 
     // Convert world coordinates to screen coordinates
     worldToScreen(worldX, worldY) {
-        const screenX = (worldX - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
-        const screenY = (worldY - this.camera.y) * this.viewport.scaleY + this.viewport.offsetY;
-        return { x: screenX, y: screenY };
+        return this.cameraSystem.worldToScreen(worldX, worldY);
     }
 
     // Convert screen coordinates to viewport coordinates (without camera offset)
@@ -1244,14 +1248,14 @@ class PlatformRPG {
         this.ctx.scale(this.viewport.scaleX, this.viewport.scaleY);
 
         this.ctx.save();
-        this.ctx.translate(-this.camera.x, -this.camera.y);
+        this.cameraSystem.applyTransform(this.ctx);
 
         // Disable image smoothing for crisp pixel art rendering
         this.ctx.imageSmoothingEnabled = false;
 
         // Debug: Log camera position during render
         if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.isDraggingStartPosition) {
-            console.log('Rendering with camera position:', this.camera.x, this.camera.y);
+            console.log('Rendering with camera position:', this.cameraSystem.x, this.cameraSystem.y);
         }
 
         // Render platforms using the platform system
@@ -1281,10 +1285,10 @@ class PlatformRPG {
 
         // Render obstacle props after removing transformations
         // They need special handling for proper coordinate transformation
-        this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport, this.camera);
+        this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport, this.cameraSystem.camera);
 
         // Render torch particles after obstacle props (they need the same transformation)
-        this.propSystem.renderParticles(this.viewport, this.camera);
+        this.propSystem.renderParticles(this.viewport, this.cameraSystem.camera);
 
         if (this.isDevelopmentMode) {
             // Apply viewport scaling for dev rendering
@@ -1294,7 +1298,7 @@ class PlatformRPG {
 
             // Apply camera transformation for scene development overlays
             this.ctx.save();
-            this.ctx.translate(-this.camera.x, -this.camera.y);
+            this.cameraSystem.applyTransform(this.ctx);
 
             // Render scene development overlays (transition zones, boundaries, etc.)
             this.sceneSystem.renderer.renderDevelopmentOverlays(this.ctx);
@@ -1967,8 +1971,8 @@ class PlatformRPG {
         // Check platform/prop edges instead of mouse position
         if (this.platformSystem.isDragging && this.platformSystem.selectedPlatform) {
             // Calculate platform bounds relative to screen (camera view)
-            const platformScreenLeft = this.platformSystem.selectedPlatform.x - this.camera.x;
-            const platformScreenRight = this.platformSystem.selectedPlatform.x + this.platformSystem.selectedPlatform.width - this.camera.x;
+            const platformScreenLeft = this.platformSystem.selectedPlatform.x - this.cameraSystem.x;
+            const platformScreenRight = this.platformSystem.selectedPlatform.x + this.platformSystem.selectedPlatform.width - this.cameraSystem.x;
 
             console.log('Platform screen bounds:', platformScreenLeft, 'to', platformScreenRight, 'Canvas width:', canvasWidth);
 
@@ -2010,8 +2014,8 @@ class PlatformRPG {
                 const propWidth = propType.width * sizeMultiplier;
                 const propHeight = propType.height * sizeMultiplier;
 
-                const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
-                const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.camera.x;
+                const propScreenLeft = this.propSystem.selectedProp.x - this.cameraSystem.x;
+                const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.cameraSystem.x;
 
                 if (propScreenLeft < scrollTriggerZone) {
                     newDirection = 'left';
@@ -2038,7 +2042,7 @@ class PlatformRPG {
         console.log('Starting drag scroll timer for direction:', direction);
         this.dragScrollTimer = setInterval(() => {
             const scrollSpeed = 8; // Faster scrolling speed
-            const oldCameraX = this.camera.x;
+            const oldCameraX = this.cameraSystem.x;
             const scrollTriggerZone = 50;
             const canvasWidth = this.canvas.width;
 
@@ -2046,16 +2050,16 @@ class PlatformRPG {
 
             // Check if platform/prop edges are still near screen edges
             if (this.platformSystem.isDragging && this.platformSystem.selectedPlatform) {
-                const platformScreenLeft = this.platformSystem.selectedPlatform.x - this.camera.x;
-                const platformScreenRight = this.platformSystem.selectedPlatform.x + this.platformSystem.selectedPlatform.width - this.camera.x;
+                const platformScreenLeft = this.platformSystem.selectedPlatform.x - this.cameraSystem.x;
+                const platformScreenRight = this.platformSystem.selectedPlatform.x + this.platformSystem.selectedPlatform.width - this.cameraSystem.x;
 
                 if (direction === 'left' && platformScreenLeft < scrollTriggerZone) {
                     shouldContinue = true;
-                    const newCameraX = Math.max(0, this.camera.x - scrollSpeed);
-                    this.camera.x = newCameraX;
+                    const newCameraX = Math.max(0, this.cameraSystem.x - scrollSpeed);
+                    this.cameraSystem.x = newCameraX;
                 } else if (direction === 'right' && platformScreenRight > canvasWidth - scrollTriggerZone) {
                     shouldContinue = true;
-                    this.camera.x += scrollSpeed;
+                    this.cameraSystem.x += scrollSpeed;
                 }
             } else if ((this.propSystem.isDraggingProp || this.propSystem.isDraggingMultiple) && this.propSystem.selectedProp) {
                 // Calculate prop dimensions
@@ -2064,16 +2068,16 @@ class PlatformRPG {
                     const sizeMultiplier = this.propSystem.selectedProp.sizeMultiplier || 1.0;
                     const propWidth = propType.width * sizeMultiplier;
 
-                    const propScreenLeft = this.propSystem.selectedProp.x - this.camera.x;
-                    const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.camera.x;
+                    const propScreenLeft = this.propSystem.selectedProp.x - this.cameraSystem.x;
+                    const propScreenRight = this.propSystem.selectedProp.x + propWidth - this.cameraSystem.x;
 
                     if (direction === 'left' && propScreenLeft < scrollTriggerZone) {
                         shouldContinue = true;
-                        const newCameraX = Math.max(0, this.camera.x - scrollSpeed);
-                        this.camera.x = newCameraX;
+                        const newCameraX = Math.max(0, this.cameraSystem.x - scrollSpeed);
+                        this.cameraSystem.x = newCameraX;
                     } else if (direction === 'right' && propScreenRight > canvasWidth - scrollTriggerZone) {
                         shouldContinue = true;
-                        this.camera.x += scrollSpeed;
+                        this.cameraSystem.x += scrollSpeed;
                     }
                 }
             }
@@ -2083,7 +2087,7 @@ class PlatformRPG {
                 return;
             }
 
-            console.log('Scrolling camera from', oldCameraX, 'to', this.camera.x);
+            console.log('Scrolling camera from', oldCameraX, 'to', this.cameraSystem.x);
 
             // Force a re-render to show the camera movement
             this.render();
@@ -2100,7 +2104,7 @@ class PlatformRPG {
 
     handleFreeCameraScroll(clientMouseX, clientMouseY) {
         // Only in development mode with free camera
-        if (!this.isDevelopmentMode || this.cameraMode !== 'free') {
+        if (!this.isDevelopmentMode || this.cameraSystem.mode !== 'free') {
             this.stopFreeCameraScroll();
             return;
         }
@@ -2131,10 +2135,10 @@ class PlatformRPG {
             const scrollSpeed = 6;
 
             if (direction === 'left') {
-                const newCameraX = Math.max(0, this.camera.x - scrollSpeed);
-                this.camera.x = newCameraX;
+                const newCameraX = Math.max(0, this.cameraSystem.x - scrollSpeed);
+                this.cameraSystem.x = newCameraX;
             } else if (direction === 'right') {
-                this.camera.x += scrollSpeed;
+                this.cameraSystem.x += scrollSpeed;
             }
 
             // Force render to show camera movement
@@ -2150,7 +2154,7 @@ class PlatformRPG {
         this.freeCameraScrollDirection = null;
     }
 
-    toggleCameraMode() {
+    toggleCameraModeOld() {
         this.cameraMode = this.cameraMode === 'free' ? 'character' : 'free';
         const btn = document.getElementById('cameraModeBtn');
         btn.textContent = `Camera: ${this.cameraMode === 'free' ? 'Free Mode' : 'Character Mode'}`;
@@ -2161,15 +2165,15 @@ class PlatformRPG {
         console.log('Camera mode switched to:', this.cameraMode);
     }
 
-    focusPlayer() {
+    focusPlayerOld() {
         // Move camera to focus on player
         const targetX = this.player.x - this.canvas.width / 2;
-        this.camera.x = Math.max(0, targetX);
+        this.cameraSystem.x = Math.max(0, targetX);
 
         // Force render to show immediate camera movement
         this.render();
 
-        console.log('Camera focused on player at:', this.camera.x);
+        console.log('Camera focused on player at:', this.cameraSystem.x);
     }
 
     positionPlayerAtSceneStart() {
@@ -2183,9 +2187,9 @@ class PlatformRPG {
             this.player.velocityY = 0;
 
             // Update camera to follow player to the new position
-            if (this.camera) {
-                this.camera.targetX = this.player.x;
-                this.camera.targetY = this.player.y;
+            if (this.cameraSystem) {
+                this.cameraSystem.camera.targetX = this.player.x;
+                this.cameraSystem.camera.targetY = this.player.y;
             }
 
             console.log('Player centered at scene start point:', {
@@ -2254,8 +2258,8 @@ class PlatformRPG {
             }
 
             // Convert world coordinates to screen coordinates
-            const screenX = (msg.x - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
-            const screenY = (msg.y - this.camera.y) * this.viewport.scaleY + this.viewport.offsetY;
+            const screenX = (msg.x - this.cameraSystem.x) * this.viewport.scaleX + this.viewport.offsetX;
+            const screenY = (msg.y - this.cameraSystem.y) * this.viewport.scaleY + this.viewport.offsetY;
 
             // Draw background
             this.ctx.globalAlpha = msg.opacity * 0.8;
@@ -2282,7 +2286,7 @@ class PlatformRPG {
 
         // Apply camera transformation for world coordinates
         this.ctx.save();
-        this.ctx.translate(-this.camera.x, -this.camera.y);
+        this.cameraSystem.applyTransform(this.ctx);
 
         // Draw selection rectangle
         this.ctx.strokeStyle = '#0099FF'; // Blue selection color
@@ -2318,7 +2322,7 @@ class PlatformRPG {
 
         // Apply camera transformation for world coordinates
         this.ctx.save();
-        this.ctx.translate(-this.camera.x, -this.camera.y);
+        this.cameraSystem.applyTransform(this.ctx);
 
         // Draw transition zone preview in purple
         this.ctx.strokeStyle = '#9966FF'; // Purple border
@@ -3038,11 +3042,15 @@ class PlatformRPG {
         this.handleInput();
         this.updatePhysics();
         this.updatePlayerAnimation();
-        this.updateCamera();
+        this.cameraSystem.update(this.player, this.sceneSystem, this.platformSystem, this.propSystem, this.isDraggingStartPosition);
         this.render();
 
         requestAnimationFrame((time) => this.gameLoop(time));
     }
 }
 
-const game = new PlatformRPG();
+// Wait for DOM to be ready before creating the game
+window.addEventListener('DOMContentLoaded', () => {
+    const game = new PlatformRPG();
+    window.game = game; // Make it available globally for debugging
+});
