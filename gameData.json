@@ -1309,12 +1309,22 @@
             "targetSceneId": 2,
             "playerStartX": 199,
             "playerStartY": 861
+          },
+          {
+            "id": 2,
+            "x": 3729.3401240035428,
+            "y": 339.36226749335697,
+            "width": 415.80159433126664,
+            "height": 104.5881310894597,
+            "targetSceneId": 2,
+            "playerStartX": 96,
+            "playerStartY": 851
           }
         ]
       },
       "boundaries": {
         "left": 0,
-        "right": 4300,
+        "right": 4305,
         "top": 0,
         "bottom": 1000
       },
@@ -1326,7 +1336,7 @@
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-22T05:49:38.321Z"
+        "modified": "2025-09-22T05:55:02.555Z"
       }
     },
     {
