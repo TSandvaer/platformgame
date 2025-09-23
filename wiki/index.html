@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform RPG Game - Documentation Wiki</title>
+    <link rel="stylesheet" href="css/wiki.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="wiki-container">
+        <!-- Navigation Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">🎮</div>
+                    <div class="logo-text">
+                        <h1>Platform RPG</h1>
+                        <span>Documentation Wiki</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="nav-section">
+                    <h3>Getting Started</h3>
+                    <ul class="nav-menu">
+                        <li><a href="#overview" class="nav-link active" data-page="overview">🌟 Overview</a></li>
+                        <li><a href="#quick-start" class="nav-link" data-page="quick-start">🚀 Quick Start</a></li>
+                        <li><a href="#architecture" class="nav-link" data-page="architecture">🏗️ Architecture</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Core Systems</h3>
+                    <ul class="nav-menu">
+                        <li><a href="#player-system" class="nav-link" data-page="player-system">👤 Player System</a></li>
+                        <li><a href="#platform-system" class="nav-link" data-page="platform-system">🧱 Platform System</a></li>
+                        <li><a href="#prop-system" class="nav-link" data-page="prop-system">🎯 Prop System</a></li>
+                        <li><a href="#scene-system" class="nav-link" data-page="scene-system">🌍 Scene System</a></li>
+                        <li><a href="#camera-system" class="nav-link" data-page="camera-system">📹 Camera System</a></li>
+                        <li><a href="#input-system" class="nav-link" data-page="input-system">⌨️ Input System</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Game Editor</h3>
+                    <ul class="nav-menu">
+                        <li><a href="#editor-overview" class="nav-link" data-page="editor-overview">🛠️ Editor Overview</a></li>
+                        <li><a href="#development-mode" class="nav-link" data-page="development-mode">🔧 Development Mode</a></li>
+                        <li><a href="#editing-tools" class="nav-link" data-page="editing-tools">🎨 Editing Tools</a></li>
+                        <li><a href="#data-management" class="nav-link" data-page="data-management">💾 Data Management</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Advanced Topics</h3>
+                    <ul class="nav-menu">
+                        <li><a href="#rendering-pipeline" class="nav-link" data-page="rendering-pipeline">🎭 Rendering Pipeline</a></li>
+                        <li><a href="#game-loop" class="nav-link" data-page="game-loop">🔄 Game Loop</a></li>
+                        <li><a href="#technologies" class="nav-link" data-page="technologies">💻 Technologies</a></li>
+                        <li><a href="#extending" class="nav-link" data-page="extending">🔌 Extending the Game</a></li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Reference</h3>
+                    <ul class="nav-menu">
+                        <li><a href="#api-reference" class="nav-link" data-page="api-reference">📚 API Reference</a></li>
+                        <li><a href="#troubleshooting" class="nav-link" data-page="troubleshooting">🔍 Troubleshooting</a></li>
+                        <li><a href="#contributing" class="nav-link" data-page="contributing">🤝 Contributing</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="version-info">
+                    <span>Version 1.0.0</span>
+                    <span>Built with ❤️</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-header">
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="breadcrumb">
+                    <span id="currentSection">Getting Started</span>
+                    <span class="separator">›</span>
+                    <span id="currentPage">Overview</span>
+                </div>
+                <div class="header-actions">
+                    <button class="search-button" id="searchButton">🔍</button>
+                    <button class="theme-toggle" id="themeToggle">🌙</button>
+                </div>
+            </div>
+
+            <div class="content-body" id="contentBody">
+                <!-- Content will be loaded here dynamically -->
+            </div>
+
+            <div class="content-footer">
+                <div class="navigation-footer">
+                    <button class="nav-footer-btn" id="prevPage">
+                        <span>←</span> Previous
+                    </button>
+                    <button class="nav-footer-btn" id="nextPage">
+                        Next <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Search Modal -->
+        <div class="search-modal" id="searchModal">
+            <div class="search-modal-content">
+                <div class="search-modal-header">
+                    <input type="text" placeholder="Search documentation..." class="search-input" id="searchInput">
+                    <button class="search-close" id="searchClose">×</button>
+                </div>
+                <div class="search-results" id="searchResults">
+                    <!-- Search results will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="pages/systems.js"></script>
+    <script src="js/wiki.js"></script>
+</body>
+</html>
