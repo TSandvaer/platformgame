@@ -256,9 +256,13 @@ class PropRenderer {
             this.ctx.imageSmoothingEnabled = true;
             this.ctx.imageSmoothingQuality = 'high';
 
-            // Apply subtle glow effect
-            this.ctx.shadowColor = 'rgba(255, 100, 0, 0.6)';
-            this.ctx.shadowBlur = 15;
+            // Apply enhanced warm orange glow with multiple layers for cozy effect
+            const flickerBase = Math.sin(currentTime * 0.002) * 0.1 + Math.sin(currentTime * 0.005) * 0.05;
+            const glowIntensity = 0.7 + flickerBase; // Gentle flickering
+
+            // Create layered glow effect for smooth halo
+            this.ctx.shadowColor = `rgba(255, 140, 40, ${glowIntensity})`;
+            this.ctx.shadowBlur = 25;
 
             // Draw flame sprite (21x21 source frame)
             this.ctx.drawImage(
@@ -269,11 +273,22 @@ class PropRenderer {
                 flameWidth, flameHeight
             );
 
+            // Add second layer of softer, wider glow for cozy halo effect
+            this.ctx.shadowColor = `rgba(255, 180, 80, ${glowIntensity * 0.4})`;
+            this.ctx.shadowBlur = 40;
+            this.ctx.drawImage(
+                flameSprite.image,
+                sourceX, sourceY,
+                frameSize, frameSize,
+                flameX, flameY,
+                flameWidth, flameHeight
+            );
+
             // Restore context state
             this.ctx.restore();
 
             // Add flame particles at the top of the flame
-            this.addTorchParticles(torchCenterX, flameY, flameSizeScale);
+            this.addTorchParticles(prop, torchCenterX, flameY, flameSizeScale);
 
         } catch (error) {
             console.error('Error rendering torch flame:', error);
@@ -356,9 +371,10 @@ class PropRenderer {
         this.ctx.restore();
     }
 
-    addTorchParticles(x, y, scale) {
-        // Add fewer particles that are more impactful
-        if (Math.random() < 0.015) { // 1.5% chance - fewer particles
+    addTorchParticles(prop, x, y, scale) {
+        // Simple random chance approach - much more reliable
+        // At 60fps, 0.0008 chance = roughly 1 ember every 2 seconds per torch
+        if (Math.random() < 0.0008) {
             // Create glowing sparks that rise from the flame tip then fall
             this.torchParticles.push({
                 x: x + (Math.random() - 0.5) * 6 * scale, // Tighter spread from flame
@@ -367,8 +383,10 @@ class PropRenderer {
                 vy: -(Math.random() * 0.8 + 0.2), // Slower initial upward velocity
                 life: 1.0,
                 maxLife: 1.0, // Track original life for glow calculation
-                size: 1.2 + Math.random() * 0.3, // Consistent size
-                glowIntensity: 1.0 // Start with full glow
+                size: 3.0 + Math.random() * 3.0, // Much larger, more visible embers (3-6px)
+                glowIntensity: 1.0, // Start with full glow
+                windPhase: Math.random() * Math.PI * 2, // Random starting phase for wind movement
+                windStrength: 0.5 + Math.random() * 0.3, // Individual wind sensitivity
             });
         }
     }
@@ -378,12 +396,22 @@ class PropRenderer {
         for (let i = this.torchParticles.length - 1; i >= 0; i--) {
             const particle = this.torchParticles[i];
 
-            // Update particle physics - slower movement
-            particle.x += particle.vx;
+            // Update particle physics with gentle leaf-like wave movement
+            const currentTime = Date.now();
+
+            // Create gentle wave motion instead of directional wind
+            const waveMotion = Math.sin(currentTime * 0.0008 + particle.windPhase) * 0.15;
+            const gentleSway = Math.sin(currentTime * 0.0012 + particle.windPhase * 0.7) * 0.1;
+
+            // Apply gentle horizontal wave movement without accumulating velocity
+            particle.x += waveMotion + gentleSway;
             particle.y += particle.vy;
-            particle.life -= 0.003; // Much slower decay - particles live longer
-            particle.vy += 0.06; // Gentler gravity
-            particle.vx *= 0.995; // Less air resistance
+
+            particle.life -= 0.0015; // Even slower decay for longer visible life
+            particle.vy += 0.015; // Much slower gravity for floating leaf effect
+
+            // Reset horizontal velocity to prevent drifting far from torch
+            particle.vx *= 0.95; // Strong dampening to keep embers near torch
 
             // Remove particles when they die or fall way off screen
             if (particle.life <= 0 || particle.y > window.innerHeight + 300) {
@@ -398,20 +426,21 @@ class PropRenderer {
             // Opacity starts high and fades to almost nothing at ground
             const opacity = Math.max(0.1, lifeRatio * 0.9);
 
-            // Color progression: bright yellow-orange to dim red
-            const hue = 45 - (1 - lifeRatio) * 25; // Yellow to red-orange
-            const lightness = 70 + lifeRatio * 20; // Bright to dim
+            // Improved color progression: bright white-yellow to deep orange-red
+            const hue = 60 - (1 - lifeRatio) * 40; // Bright yellow to deep orange-red
+            const saturation = 90 + lifeRatio * 10; // High saturation throughout
+            const lightness = 85 - (1 - lifeRatio) * 45; // Very bright to moderate
 
             // Save context for glow effect
             this.ctx.save();
 
-            // Add glow effect when particles are fresh
-            if (particle.glowIntensity > 0.5) {
-                this.ctx.shadowColor = `hsla(${hue}, 100%, 60%, ${particle.glowIntensity * 0.8})`;
-                this.ctx.shadowBlur = 4 + particle.glowIntensity * 6;
+            // Enhanced glow effect for embers
+            if (particle.glowIntensity > 0.3) {
+                this.ctx.shadowColor = `hsla(${hue}, ${saturation}%, 70%, ${particle.glowIntensity * 0.9})`;
+                this.ctx.shadowBlur = 6 + particle.glowIntensity * 8;
             }
 
-            this.ctx.fillStyle = `hsla(${hue}, 100%, ${lightness}%, ${opacity})`;
+            this.ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${opacity})`;
 
             // Apply camera and viewport transformation to particle position
             let renderX = particle.x;
@@ -422,9 +451,21 @@ class PropRenderer {
                 renderY = (particle.y - camera.y) * viewport.scaleY + viewport.offsetY;
             }
 
-            // Draw as glowing ember, scaled by viewport
+            // Draw as glowing ember with rounded shape, scaled by viewport
             const size = particle.size * (viewport ? viewport.scaleX : 1);
-            this.ctx.fillRect(Math.floor(renderX), Math.floor(renderY), size, size);
+
+            // Draw as circle for more natural ember appearance
+            this.ctx.beginPath();
+            this.ctx.arc(renderX, renderY, size / 2, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Add small bright core for hot embers
+            if (particle.glowIntensity > 0.7) {
+                this.ctx.fillStyle = `hsla(${Math.min(hue + 20, 60)}, 100%, 95%, ${opacity * 0.8})`;
+                this.ctx.beginPath();
+                this.ctx.arc(renderX, renderY, size / 4, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
 
             // Restore context
             this.ctx.restore();
