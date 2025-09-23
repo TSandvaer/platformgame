@@ -117,7 +117,7 @@ class PlayerPhysics {
 
         if (this.data.isRunning || isJumping) {
             // Drain stamina when running or jumping
-            const drainRate = isJumping ? 3.0 : 2.0; // Jumping drains faster, running drains moderately
+            const drainRate = isJumping ? 1.5 : 0.5; // Jumping drains faster, running drains moderately
             this.data.stamina = Math.max(0, this.data.stamina - drainRate * physicsMultiplier);
 
             // If stamina hits 0, immediately stop running and start cooldown
