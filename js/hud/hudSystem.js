@@ -15,7 +15,7 @@ class HUDSystem {
         this.barHeight = 16;
         this.barSpacing = 25;
         this.barOffsetX = 65;
-        this.barOffsetY = 18;
+        this.barOffsetY = 35;
 
         // Gear icon settings
         this.gearSize = 16;
