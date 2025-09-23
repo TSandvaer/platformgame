@@ -59,7 +59,13 @@ class PlayerController {
 
         // Use delta time for framerate-independent movement
         const moveMultiplier = deltaTime / 16.67;
-        const speedMultiplier = this.keys['shift'] ? 1.5 : 1.0;
+
+        // Check if player can run (has stamina and not in cooldown)
+        const canRun = this.data.stamina > 0 && this.data.staminaExhaustedTimer <= 0;
+        const wantsToRun = this.keys['shift'];
+        const isRunning = wantsToRun && canRun;
+        const speedMultiplier = isRunning ? 1.62 : 1.0; // 1.5 * 1.08 = 8% faster running
+
         let isMoving = false;
 
         // Don't use arrow keys for player movement if nudging props
@@ -104,12 +110,23 @@ class PlayerController {
             isMoving = true;
         }
 
+        // Update running state - but only if we have stamina
+        this.data.isRunning = isRunning && isMoving && this.data.stamina > 0;
+
+        // Store whether player is trying to run (for stamina regeneration)
+        this.data.isTryingToRun = wantsToRun && isMoving;
+
         // Update animation based on movement
         this.animator.updateAnimationBasedOnState(isMoving, true);
     }
 
     updateProductionControls() {
-        const speedMultiplier = this.keys['shift'] ? 1.5 : 1.0;
+        // Check if player can run (has stamina and not in cooldown)
+        const canRun = this.data.stamina > 0 && this.data.staminaExhaustedTimer <= 0;
+        const wantsToRun = this.keys['shift'];
+        const isRunning = wantsToRun && canRun;
+        const speedMultiplier = isRunning ? 1.62 : 1.0; // 1.5 * 1.08 = 8% faster running
+
         let isMoving = false;
 
         if (this.keys['arrowleft'] || this.keys['a']) {
@@ -123,6 +140,12 @@ class PlayerController {
         } else {
             this.physics.applyFriction();
         }
+
+        // Update running state - but only if we have stamina
+        this.data.isRunning = isRunning && isMoving && this.data.stamina > 0;
+
+        // Store whether player is trying to run (for stamina regeneration)
+        this.data.isTryingToRun = wantsToRun && isMoving;
 
         // Update animation based on movement
         this.animator.updateAnimationBasedOnState(isMoving, false);

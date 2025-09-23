@@ -5,6 +5,10 @@ class PlayerPhysics {
     }
 
     update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport) {
+        // Always update stamina regardless of mode
+        const physicsMultiplier = deltaTime / 16.67;
+        this.updateStamina(physicsMultiplier);
+
         if (isDevelopmentMode) {
             return; // No physics in development mode
         }
@@ -14,7 +18,7 @@ class PlayerPhysics {
         const startY = this.data.y;
 
         // Use delta time for framerate-independent physics (60fps = 16.67ms baseline)
-        const physicsMultiplier = deltaTime / 16.67;
+        // physicsMultiplier already declared above
 
         // Apply gravity
         this.data.velocityY += this.gravity * physicsMultiplier;
@@ -94,6 +98,34 @@ class PlayerPhysics {
                 after: { x: this.data.x, y: this.data.y },
                 centerPoint: playerCenter
             });
+        }
+    }
+
+    updateStamina(physicsMultiplier) {
+        const isJumping = this.data.velocityY < -0.1;
+
+        // Update exhaustion cooldown timer
+        if (this.data.staminaExhaustedTimer > 0) {
+            this.data.staminaExhaustedTimer -= physicsMultiplier;
+            if (this.data.staminaExhaustedTimer < 0) {
+                this.data.staminaExhaustedTimer = 0;
+            }
+        }
+
+        if (this.data.isRunning || isJumping) {
+            // Drain stamina when running or jumping
+            const drainRate = isJumping ? 3.0 : 2.0; // Jumping drains faster, running drains moderately
+            this.data.stamina = Math.max(0, this.data.stamina - drainRate * physicsMultiplier);
+
+            // If stamina hits 0, immediately stop running and start cooldown
+            if (this.data.stamina <= 0) {
+                this.data.isRunning = false;
+                this.data.staminaExhaustedTimer = 60; // 60 frames = ~1 second cooldown at 60fps
+            }
+        } else if (!this.data.isTryingToRun) {
+            // Only regenerate stamina when NOT trying to run (walking or idle)
+            const regenRate = 0.3;
+            this.data.stamina = Math.min(this.data.maxStamina, this.data.stamina + regenRate * physicsMultiplier);
         }
     }
 

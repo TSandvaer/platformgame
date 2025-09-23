@@ -82,7 +82,16 @@ class PlayerRenderer {
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 3;
         ctx.font = '12px Arial';
-        const stateText = `${this.data.currentAnimation} | ${this.data.onGround ? 'ground' : 'air'}`;
+        // Determine movement state (only show if moving or trying to move)
+        let stateText = `${this.data.currentAnimation} | ${this.data.onGround ? 'ground' : 'air'}`;
+
+        if (this.data.isRunning) {
+            stateText += ' | running';
+        } else if (this.data.isTryingToRun) {
+            stateText += ' | trying to run';
+        } else if (this.data.currentAnimation === 'walk') {
+            stateText += ' | walking';
+        }
         ctx.strokeText(stateText, this.data.x, this.data.y - 5);
         ctx.fillText(stateText, this.data.x, this.data.y - 5);
     }

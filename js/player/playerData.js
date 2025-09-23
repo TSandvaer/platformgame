@@ -9,7 +9,7 @@ class PlayerData {
         // Physics properties
         this.velocityX = 0;
         this.velocityY = 0;
-        this.speed = 5.5;
+        this.speed = 4.675; // 5.5 * 0.85 = 15% slower
         this.jumpPower = -14;
         this.onGround = false;
         this.friction = 0.9;
@@ -32,6 +32,17 @@ class PlayerData {
         // Input state
         this.spaceKeyPressed = false;
 
+        // Player stats for HUD
+        this.health = 100;
+        this.maxHealth = 100;
+        this.stamina = 100;
+        this.maxStamina = 100;
+
+        // Running state
+        this.isRunning = false;
+        this.isTryingToRun = false; // Whether player is holding shift while moving
+        this.staminaExhaustedTimer = 0; // Cooldown timer after stamina depletion
+
         // Tracking
         this.lastValidPosition = { x: 100, y: 400 };
     }
@@ -49,6 +60,11 @@ class PlayerData {
         this.isAttacking = false;
         this.attackTimer = 0;
         this.spaceKeyPressed = false;
+        this.health = this.maxHealth;
+        this.stamina = this.maxStamina;
+        this.isRunning = false;
+        this.isTryingToRun = false;
+        this.staminaExhaustedTimer = 0;
         this.lastValidPosition = { x: 100, y: 400 };
     }
 

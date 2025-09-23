@@ -124,5 +124,42 @@ class DevelopmentInputHandler {
                 this.game.propSystem.updatePropProperties();
             }
         }
+
+        // HUD testing shortcuts (development only)
+        if (e.key === 'h' && !e.ctrlKey && !e.metaKey) {
+            // Decrease health by 10
+            const player = this.game.playerSystem.data;
+            player.health = Math.max(0, player.health - 10);
+            console.log(`Health decreased to ${player.health}/${player.maxHealth}`);
+        }
+
+        if (e.key === 'H' && e.shiftKey) {
+            // Increase health by 10
+            const player = this.game.playerSystem.data;
+            player.health = Math.min(player.maxHealth, player.health + 10);
+            console.log(`Health increased to ${player.health}/${player.maxHealth}`);
+        }
+
+        if (e.key === 's' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+            // Decrease stamina by 20
+            const player = this.game.playerSystem.data;
+            player.stamina = Math.max(0, player.stamina - 20);
+            console.log(`Stamina decreased to ${player.stamina}/${player.maxStamina}`);
+        }
+
+        if (e.key === 'S' && e.shiftKey) {
+            // Increase stamina by 20
+            const player = this.game.playerSystem.data;
+            player.stamina = Math.min(player.maxStamina, player.stamina + 20);
+            console.log(`Stamina increased to ${player.stamina}/${player.maxStamina}`);
+        }
+
+        if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+            // Reset health and stamina to full
+            const player = this.game.playerSystem.data;
+            player.health = player.maxHealth;
+            player.stamina = player.maxStamina;
+            console.log('Player health and stamina restored to full');
+        }
     }
 }

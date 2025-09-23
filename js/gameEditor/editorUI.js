@@ -71,6 +71,7 @@ class EditorUI {
                 this.game.platformSystem.togglePlatformPlacement();
             });
         }
+
     }
 
     updateUIVisibility(isDev) {
@@ -228,4 +229,5 @@ class EditorUI {
             msgDiv.style.display = 'none';
         }, 2000);
     }
+
 }

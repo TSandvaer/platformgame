@@ -21,7 +21,14 @@ class GameDataSystem {
             characters: [],
             classes: [],
             weapons: [],
-            items: []
+            items: [],
+            gameSettings: {
+                hud: {
+                    position: { x: 20, y: 20 },
+                    width: 220,
+                    height: 80
+                }
+            }
         };
 
         // Current game data
@@ -35,8 +42,35 @@ class GameDataSystem {
         this.importer.initialize();
         this.validator.initialize();
 
+        // Load saved data from localStorage (especially gameSettings)
+        this.loadSavedGameSettings();
+
         // Set up event listeners
         this.setupEventListeners();
+    }
+
+    // Load just the gameSettings from localStorage (not full game data)
+    loadSavedGameSettings() {
+        try {
+            const savedData = this.storage.loadFromLocalStorage();
+            if (savedData && savedData.gameSettings) {
+                // Apply only the gameSettings, not scenes or other data
+                this.gameData.gameSettings = savedData.gameSettings;
+
+                // Apply HUD settings immediately if HUD system exists
+                if (savedData.gameSettings.hud && this.game.hudSystem) {
+                    const hudSettings = savedData.gameSettings.hud;
+                    if (hudSettings.position) {
+                        this.game.hudSystem.position.x = hudSettings.position.x;
+                        this.game.hudSystem.position.y = hudSettings.position.y;
+                    }
+                    if (hudSettings.width) this.game.hudSystem.width = hudSettings.width;
+                    if (hudSettings.height) this.game.hudSystem.height = hudSettings.height;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading game settings:', error);
+        }
     }
 
     setupEventListeners() {
@@ -134,6 +168,22 @@ class GameDataSystem {
         if (gameData.weapons) this.gameData.weapons = gameData.weapons;
         if (gameData.items) this.gameData.items = gameData.items;
 
+        // Apply game settings (HUD, etc.)
+        if (gameData.gameSettings) {
+            this.gameData.gameSettings = gameData.gameSettings;
+
+            // Apply HUD settings to the HUD system
+            if (gameData.gameSettings.hud && this.game.hudSystem) {
+                const hudSettings = gameData.gameSettings.hud;
+                if (hudSettings.position) {
+                    this.game.hudSystem.position.x = hudSettings.position.x;
+                    this.game.hudSystem.position.y = hudSettings.position.y;
+                }
+                if (hudSettings.width) this.game.hudSystem.width = hudSettings.width;
+                if (hudSettings.height) this.game.hudSystem.height = hudSettings.height;
+            }
+        }
+
         // Save the imported data to localStorage
         this.storage.saveToLocalStorage(gameData);
         return true;
@@ -150,12 +200,33 @@ class GameDataSystem {
         this.storage.updateCurrentSceneId(currentSceneId);
     }
 
+    // Update just the gameSettings in localStorage without triggering full save
+    updateGameSettings(gameSettings) {
+        if (!gameSettings) return;
+
+        // Update the in-memory gameData
+        this.gameData.gameSettings = { ...this.gameData.gameSettings, ...gameSettings };
+
+        // Update only gameSettings in localStorage
+        this.storage.updateGameSettings(this.gameData.gameSettings);
+    }
+
     // Collect current game state
     collectCurrentGameData() {
         // Get scene data from scene system
         const sceneData = this.game.sceneSystem ?
             this.game.sceneSystem.exportSceneData() :
             { scenes: [], currentSceneId: null, startSceneId: null };
+
+        // Collect current HUD settings
+        const hudSettings = this.game.hudSystem ? {
+            position: {
+                x: this.game.hudSystem.position.x,
+                y: this.game.hudSystem.position.y
+            },
+            width: this.game.hudSystem.width,
+            height: this.game.hudSystem.height
+        } : this.defaultGameData.gameSettings.hud;
 
         return {
             gameInfo: {
@@ -169,7 +240,10 @@ class GameDataSystem {
             characters: this.gameData.characters || [],
             classes: this.gameData.classes || [],
             weapons: this.gameData.weapons || [],
-            items: this.gameData.items || []
+            items: this.gameData.items || [],
+            gameSettings: {
+                hud: hudSettings
+            }
         };
     }
 

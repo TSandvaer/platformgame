@@ -107,6 +107,9 @@ class PlatformRPG {
         // Initialize development input handler
         this.developmentInputHandler = new DevelopmentInputHandler(this);
 
+        // Initialize HUD system
+        this.hudSystem = new HUDSystem(this);
+
         // Keep keys reference for backwards compatibility
         this.keys = this.inputSystem.keys;
 
@@ -249,6 +252,16 @@ class PlatformRPG {
         const sceneBoundaries = this.sceneSystem.getSceneBoundaries();
         if (sceneBoundaries) {
             this.playerSystem.applyBoundaryConstraints(sceneBoundaries);
+        }
+
+        // Update HUD with current player stats
+        if (this.hudSystem && this.playerSystem) {
+            this.hudSystem.updatePlayerStats(
+                this.playerSystem.data.health,
+                this.playerSystem.data.maxHealth,
+                this.playerSystem.data.stamina,
+                this.playerSystem.data.maxStamina
+            );
         }
     }
 
@@ -411,6 +424,11 @@ class PlatformRPG {
         // Render feedback messages (copy/paste notifications) on top of everything
         // Should work in both development and production modes
         this.renderFeedbackMessages();
+
+        // Render HUD (player status) on top of everything
+        if (this.hudSystem && this.hudSystem.isVisible) {
+            this.hudSystem.render();
+        }
     }
 
 

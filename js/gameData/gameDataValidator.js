@@ -84,6 +84,12 @@ class GameDataValidator {
             }
         }
 
+        // Validate gameSettings
+        if (gameData.gameSettings) {
+            const settingsErrors = this.validateGameSettings(gameData.gameSettings);
+            errors.push(...settingsErrors);
+        }
+
         if (errors.length > 0) {
             console.error('Validation errors:', errors);
             return false;
@@ -211,6 +217,63 @@ class GameDataValidator {
         }
 
         return true;
+    }
+
+    // Validate game settings
+    validateGameSettings(gameSettings) {
+        const errors = [];
+
+        if (typeof gameSettings !== 'object') {
+            errors.push('gameSettings must be an object');
+            return errors;
+        }
+
+        // Validate HUD settings
+        if (gameSettings.hud) {
+            const hudErrors = this.validateHudSettings(gameSettings.hud);
+            errors.push(...hudErrors);
+        }
+
+        return errors;
+    }
+
+    // Validate HUD settings
+    validateHudSettings(hudSettings) {
+        const errors = [];
+
+        if (typeof hudSettings !== 'object') {
+            errors.push('HUD settings must be an object');
+            return errors;
+        }
+
+        // Validate position
+        if (hudSettings.position) {
+            if (typeof hudSettings.position !== 'object') {
+                errors.push('HUD position must be an object');
+            } else {
+                if (!this.validateNumber(hudSettings.position.x, 0, 3000)) {
+                    errors.push('HUD position.x must be a number between 0 and 3000');
+                }
+                if (!this.validateNumber(hudSettings.position.y, 0, 2000)) {
+                    errors.push('HUD position.y must be a number between 0 and 2000');
+                }
+            }
+        }
+
+        // Validate dimensions
+        if (hudSettings.width !== undefined) {
+            if (!this.validateNumber(hudSettings.width, 100, 500)) {
+                errors.push('HUD width must be a number between 100 and 500');
+            }
+        }
+
+        if (hudSettings.height !== undefined) {
+            if (!this.validateNumber(hudSettings.height, 50, 300)) {
+                errors.push('HUD height must be a number between 50 and 300');
+            }
+        }
+
+        return errors;
     }
 
     // Helper to validate number

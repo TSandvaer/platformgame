@@ -41,6 +41,16 @@ class InputMouse {
         const clientMouseX = e.clientX - rect.left;
         const clientMouseY = e.clientY - rect.top;
 
+        // Check if clicking on HUD first (before world coordinate conversion)
+        // HUD uses screen coordinates, so check with clientMouseX/Y
+        if (this.game.hudSystem && (
+            this.game.hudSystem.isPointInHUD(clientMouseX, clientMouseY) ||
+            this.game.hudSystem.isPointInResizeHandle(clientMouseX, clientMouseY)
+        )) {
+            // HUD system will handle this interaction, don't process other systems
+            return;
+        }
+
         // Convert to world coordinates
         const worldCoords = this.game.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
         const mouseX = worldCoords.x;
