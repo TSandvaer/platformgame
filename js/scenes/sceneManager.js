@@ -302,31 +302,6 @@ class SceneManager {
 
         const transitionZones = currentScene.transitions.zones;
 
-        // Debug: Show transition zone info when player moves
-        if (transitionZones.length > 0 && Math.random() < 0.01) {
-            console.log('🔄 Checking transitions:', {
-                playerPos: [Math.round(playerX), Math.round(playerY)],
-                zonesCount: transitionZones.length,
-                zones: transitionZones.map(z => ({
-                    id: z.id,
-                    bounds: `(${z.x},${z.y}) to (${z.x + z.width},${z.y + z.height})`,
-                    target: z.targetSceneId
-                }))
-            });
-        }
-
-        // Debug: Log when in production mode
-        if (!this.game.isDevelopmentMode && transitionZones.length > 0 && Math.random() < 0.01) {
-            console.log('🎮 Checking transitions in production mode', {
-                playerPos: [Math.round(playerX), Math.round(playerY)],
-                zonesCount: transitionZones.length,
-                zones: transitionZones.map(z => ({
-                    id: z.id,
-                    bounds: `(${z.x},${z.y}) ${z.width}x${z.height}`,
-                    target: this.sceneData.getSceneById(z.targetSceneId)?.name || 'INVALID'
-                }))
-            });
-        }
 
         // Initialize set to track invalid zones if not exists
         if (!this.invalidZonesChecked) {

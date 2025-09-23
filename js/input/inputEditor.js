@@ -110,12 +110,6 @@ class InputEditor {
     }
 
     setupPropsEditorListeners() {
-        const addPropBtn = document.getElementById('addPropBtn');
-        if (addPropBtn) {
-            addPropBtn.addEventListener('click', () => {
-                this.game.propSystem.togglePropPlacement();
-            });
-        }
 
         const propType = document.getElementById('propType');
         if (propType) {
