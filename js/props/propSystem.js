@@ -113,8 +113,8 @@ class PropSystem {
     }
 
     // Render all torch particles - call this once per frame after rendering props
-    renderParticles(viewport, camera) {
-        this.renderer.renderAllParticles(viewport, camera);
+    renderParticles(viewport, camera, platforms) {
+        this.renderer.renderAllParticles(viewport, camera, platforms);
     }
 
     drawProp(prop, isDevelopmentMode) {

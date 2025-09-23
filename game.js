@@ -401,7 +401,7 @@ class PlatformRPG {
         this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport, this.cameraSystem.camera);
 
         // Render torch particles after obstacle props (they need the same transformation)
-        this.propSystem.renderParticles(this.viewport, this.cameraSystem.camera);
+        this.propSystem.renderParticles(this.viewport, this.cameraSystem.camera, this.platformSystem.platforms);
 
         if (this.isDevelopmentMode) {
             // Apply viewport scaling for dev rendering

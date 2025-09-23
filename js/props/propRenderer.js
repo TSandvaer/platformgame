@@ -379,6 +379,7 @@ class PropRenderer {
             this.torchParticles.push({
                 x: x + (Math.random() - 0.5) * 6 * scale, // Tighter spread from flame
                 y: y, // Start right at flame tip
+                startY: y, // Store starting position for distance calculation
                 vx: (Math.random() - 0.5) * 0.3 * scale, // Slower horizontal drift
                 vy: -(Math.random() * 0.8 + 0.2), // Slower initial upward velocity
                 life: 1.0,
@@ -387,11 +388,12 @@ class PropRenderer {
                 glowIntensity: 1.0, // Start with full glow
                 windPhase: Math.random() * Math.PI * 2, // Random starting phase for wind movement
                 windStrength: 0.5 + Math.random() * 0.3, // Individual wind sensitivity
+                fadeDistance: 120 + Math.random() * 80, // Distance to fall before fading out (120-200px)
             });
         }
     }
 
-    updateAndRenderParticles(viewport, camera) {
+    updateAndRenderParticles(viewport, camera, platforms) {
         // Update and render particles
         for (let i = this.torchParticles.length - 1; i >= 0; i--) {
             const particle = this.torchParticles[i];
@@ -407,14 +409,47 @@ class PropRenderer {
             particle.x += waveMotion + gentleSway;
             particle.y += particle.vy;
 
-            particle.life -= 0.0015; // Even slower decay for longer visible life
+            // Calculate distance fallen from starting position
+            const distanceFallen = particle.y - particle.startY;
+            const fadeStartDistance = particle.fadeDistance - 30; // Start fading 30px before fade distance
+
+            // Normal decay rate, but accelerate when approaching fade distance
+            let decayRate = 0.0015;
+            if (distanceFallen > fadeStartDistance) {
+                // Accelerate fade-out in the final 30 pixels of fall
+                const fadeProgress = (distanceFallen - fadeStartDistance) / 30;
+                decayRate = 0.0015 + (fadeProgress * 0.02); // Much faster decay near platform
+            }
+
+            particle.life -= decayRate;
             particle.vy += 0.015; // Much slower gravity for floating leaf effect
 
             // Reset horizontal velocity to prevent drifting far from torch
             particle.vx *= 0.95; // Strong dampening to keep embers near torch
 
-            // Remove particles when they die or fall way off screen
-            if (particle.life <= 0 || particle.y > window.innerHeight + 300) {
+            // Check for platform collisions if platforms are provided
+            let hitPlatform = false;
+            if (platforms && platforms.length > 0) {
+                for (const platform of platforms) {
+                    // Simple bounding box collision detection
+                    const emberLeft = particle.x - particle.size / 2;
+                    const emberRight = particle.x + particle.size / 2;
+                    const emberBottom = particle.y + particle.size / 2;
+
+                    // Check if ember is within platform horizontal bounds and touching top surface
+                    if (emberLeft < platform.x + platform.width &&
+                        emberRight > platform.x &&
+                        emberBottom >= platform.y &&
+                        particle.y < platform.y + platform.height) {
+                        hitPlatform = true;
+                        break;
+                    }
+                }
+            }
+
+            // Remove particles when they die, fall too far, reach fade distance, or hit platform
+            if (particle.life <= 0 || particle.y > window.innerHeight + 300 ||
+                distanceFallen >= particle.fadeDistance || hitPlatform) {
                 this.torchParticles.splice(i, 1);
                 continue;
             }
@@ -473,7 +508,7 @@ class PropRenderer {
     }
 
     // Call this once per frame after all props have been rendered
-    renderAllParticles(viewport, camera) {
-        this.updateAndRenderParticles(viewport, camera);
+    renderAllParticles(viewport, camera, platforms) {
+        this.updateAndRenderParticles(viewport, camera, platforms);
     }
 }
