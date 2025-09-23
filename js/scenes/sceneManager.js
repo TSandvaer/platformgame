@@ -145,6 +145,18 @@ class SceneManager {
         // Set as current scene
         this.sceneData.setCurrentScene(sceneId);
 
+        // Clear any selections from previous scene
+        if (this.game.platformSystem) {
+            this.game.platformSystem.clearSelection();
+            this.game.platformSystem.updatePlatformProperties();
+            console.log('🧹 Cleared platform selection');
+        }
+        if (this.game.propSystem) {
+            this.game.propSystem.clearSelection();
+            this.game.propSystem.updatePropProperties();
+            console.log('🧹 Cleared prop selection');
+        }
+
         // Clean up any invalid transition zones in this scene
         this.cleanupInvalidTransitions(scene);
 

@@ -135,6 +135,11 @@ class PlatformSystem {
         this.manager.updateSelectedPlatform();
     }
 
+    // Selection methods
+    clearSelection() {
+        this.data.clearSelection();
+    }
+
     // Utility methods
     isPointInPlatform(x, y, platform) {
         return this.data.isPointInPlatform(x, y, platform);
