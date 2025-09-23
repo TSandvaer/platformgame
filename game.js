@@ -441,8 +441,7 @@ class PlatformRPG {
             this.hudSystem.render();
         }
 
-        // Render damage screen flash effect on top of everything
-        this.renderDamageScreenFlash();
+        // Note: Damage visual now handled by hurt sprite animation
     }
 
 
@@ -549,7 +548,7 @@ class PlatformRPG {
         }
 
         // Calculate flash intensity based on remaining damage timer
-        const intensity = this.playerSystem.data.damageTimer / 200; // 200ms is max damage timer
+        const intensity = this.playerSystem.data.damageTimer / 600; // 600ms is max damage timer
         const alpha = intensity * 0.3; // Max alpha of 0.3 for visibility
 
         // Draw red flash overlay

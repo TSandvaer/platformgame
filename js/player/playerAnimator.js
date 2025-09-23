@@ -54,7 +54,17 @@ class PlayerAnimator {
         if (this.data.frameTimer >= this.data.frameRate) {
             this.data.frameTimer = 0;
             const sprite = this.sprites[this.data.currentAnimation];
-            this.data.frameIndex = (this.data.frameIndex + 1) % sprite.frames;
+
+            // Handle death animation - play once and stop at last frame
+            if (this.data.currentAnimation === 'death') {
+                if (this.data.frameIndex < sprite.frames - 1) {
+                    this.data.frameIndex++;
+                }
+                // Stay at last frame when animation completes
+            } else {
+                // Normal looping animation for all other states
+                this.data.frameIndex = (this.data.frameIndex + 1) % sprite.frames;
+            }
         }
 
         // Handle attack timing
@@ -106,8 +116,10 @@ class PlayerAnimator {
     }
 
     updateAnimationBasedOnState(isMoving, isDevelopmentMode) {
-        // Don't update if attacking
+        // Don't update if attacking, hurt, or dead
         if (this.data.isAttacking) return;
+        if (this.data.isDead) return;
+        if (this.data.isDamaged && this.data.damageTimer > 0) return;
 
         if (!this.data.onGround && !isDevelopmentMode) {
             this.setAnimation('idle'); // Could be jump animation

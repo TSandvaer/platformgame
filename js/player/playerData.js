@@ -149,7 +149,7 @@ class PlayerData {
         // Apply damage
         this.health = Math.max(0, this.health - amount);
         this.isDamaged = true;
-        this.damageTimer = 200; // Visual damage feedback duration
+        this.damageTimer = 600; // Duration to match hurt animation cycle (4 frames × 150ms)
 
         console.log(`Player took ${amount} damage. Health: ${this.health}/${this.maxHealth}`);
 
@@ -209,6 +209,12 @@ class PlayerData {
             this.isDead = true;
             this.deathStartTime = currentTime;
             this.deathTimer = 3000; // 3 seconds in milliseconds
+
+            // Trigger death animation
+            this.currentAnimation = 'death';
+            this.frameIndex = 0;
+            this.frameTimer = 0;
+
             console.log('💀 Player died! Respawning in 3 seconds...');
         }
 
