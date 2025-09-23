@@ -55,6 +55,22 @@ class GameDataStorage {
         }
     }
 
+    // Update only the current scene ID in localStorage
+    updateCurrentSceneId(currentSceneId) {
+        try {
+            const dataStr = localStorage.getItem(this.storageKey);
+            if (dataStr) {
+                const gameData = JSON.parse(dataStr);
+                gameData.currentSceneId = currentSceneId;
+                localStorage.setItem(this.storageKey, JSON.stringify(gameData));
+                return true;
+            }
+        } catch (error) {
+            console.error('Error updating current scene ID in localStorage:', error);
+        }
+        return false;
+    }
+
     // Load from localStorage
     loadFromLocalStorage() {
         try {

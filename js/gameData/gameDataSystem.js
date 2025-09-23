@@ -145,6 +145,11 @@ class GameDataSystem {
         this.storage.saveToLocalStorage(gameData);
     }
 
+    // Update just the current scene ID in localStorage
+    updateCurrentSceneId(currentSceneId) {
+        this.storage.updateCurrentSceneId(currentSceneId);
+    }
+
     // Collect current game state
     collectCurrentGameData() {
         // Get scene data from scene system

@@ -137,6 +137,11 @@ class SceneManager {
         // Set as current scene
         this.sceneData.setCurrentScene(sceneId);
 
+        // Immediately persist the current scene ID to localStorage
+        if (this.game.gameDataSystem) {
+            this.game.gameDataSystem.updateCurrentSceneId(sceneId);
+        }
+
         // Clear any selections from previous scene
         if (this.game.platformSystem) {
             this.game.platformSystem.clearSelection();
