@@ -219,12 +219,13 @@ class PropManager {
     }
 
     placeProp(mouseX, mouseY) {
-        // Get prop type, obstacle setting, and size from UI
+        // Get prop type, obstacle setting, size, and damage from UI
         const propTypeSelect = document.getElementById('propTypeSelect');
         const obstacleCheck = document.getElementById('propObstacleCheck');
         const sizeInput = document.getElementById('propSizeInput');
+        const damageInput = document.getElementById('propDamageInput');
 
-        if (!propTypeSelect || !obstacleCheck || !sizeInput) {
+        if (!propTypeSelect || !obstacleCheck || !sizeInput || !damageInput) {
             console.error('UI elements not found for prop placement');
             return;
         }
@@ -232,13 +233,15 @@ class PropManager {
         const propType = propTypeSelect.value;
         const isObstacle = obstacleCheck.checked;
         const sizeMultiplier = parseFloat(sizeInput.value) || 1.0;
+        const damagePerSecond = parseFloat(damageInput.value) || 0;
 
         this.propData.addProp(
             propType,
             mouseX,
             mouseY,
             isObstacle,
-            sizeMultiplier
+            sizeMultiplier,
+            damagePerSecond
         );
 
         // Exit placement mode
@@ -278,7 +281,7 @@ class PropManager {
             return `<div class="prop-item ${isPrimary ? 'selected' : ''} ${isSelected ? 'multi-selected' : ''}"
                       data-prop-id="${prop.id}">
                     ${propType.name} (${Math.round(prop.x)}, ${Math.round(prop.y)})
-                    ${prop.isObstacle ? ' [Obstacle]' : ''}${groupInfo}
+                    ${prop.isObstacle ? ' [Obstacle]' : ''}${prop.damagePerSecond > 0 ? ` [🔥 ${prop.damagePerSecond} DPS]` : ''}${groupInfo}
                     Z: ${prop.zOrder || 0}
                 </div>`;
         }).join('');
@@ -312,6 +315,7 @@ class PropManager {
             const sizeInput = document.getElementById('propSize');
             const rotationInput = document.getElementById('propRotation');
             const isObstacleInput = document.getElementById('selectedPropObstacle');
+            const damageInput = document.getElementById('selectedPropDamage');
             const typeSelect = document.getElementById('propTypeSelect');
             const zOrderDisplay = document.getElementById('propZOrder');
 
@@ -328,6 +332,7 @@ class PropManager {
                 rotationInput.value = (rotation * 180 / Math.PI).toFixed(1);
             }
             if (isObstacleInput) isObstacleInput.checked = this.propData.selectedProp.isObstacle;
+            if (damageInput) damageInput.value = this.propData.selectedProp.damagePerSecond || 0;
             if (typeSelect) typeSelect.value = this.propData.selectedProp.type;
             if (zOrderDisplay) zOrderDisplay.textContent = this.propData.selectedProp.zOrder || 0;
         } else {
@@ -343,6 +348,7 @@ class PropManager {
         const sizeInput = document.getElementById('propSize');
         const rotationInput = document.getElementById('propRotation');
         const isObstacleInput = document.getElementById('selectedPropObstacle');
+        const damageInput = document.getElementById('selectedPropDamage');
         const typeSelect = document.getElementById('propTypeSelect');
 
         if (xInput) this.propData.selectedProp.x = parseInt(xInput.value);
@@ -353,6 +359,7 @@ class PropManager {
             this.propData.selectedProp.rotation = parseFloat(rotationInput.value) * Math.PI / 180;
         }
         if (isObstacleInput) this.propData.selectedProp.isObstacle = isObstacleInput.checked;
+        if (damageInput) this.propData.selectedProp.damagePerSecond = parseFloat(damageInput.value) || 0;
         if (typeSelect) this.propData.selectedProp.type = typeSelect.value;
 
         this.updatePropList();

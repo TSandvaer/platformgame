@@ -38,6 +38,18 @@ class PlayerData {
         this.stamina = 100;
         this.maxStamina = 100;
 
+        // Damage system
+        this.isDamaged = false;
+        this.damageTimer = 0;
+        this.damageCooldown = 500; // 500ms between damage applications
+        this.damagingProps = [];   // Array of props currently causing damage
+        this.lastDamageTime = 0;
+
+        // Health regeneration system
+        this.healthRegenRate = 50; // HP per second regeneration rate (fast for testing)
+        this.lastHealthRegenTime = 0;
+        this.healthRegenCooldown = 100; // 100ms between regen ticks
+
         // Running state
         this.isRunning = false;
         this.isTryingToRun = false; // Whether player is holding shift while moving
@@ -66,6 +78,15 @@ class PlayerData {
         this.isTryingToRun = false;
         this.staminaExhaustedTimer = 0;
         this.lastValidPosition = { x: 100, y: 400 };
+
+        // Reset damage system
+        this.isDamaged = false;
+        this.damageTimer = 0;
+        this.damagingProps = [];
+        this.lastDamageTime = 0;
+
+        // Reset health regeneration
+        this.lastHealthRegenTime = 0;
     }
 
     setPosition(x, y) {
@@ -111,6 +132,73 @@ class PlayerData {
             x: this.x + this.width / 2,
             y: this.y + this.height / 2
         };
+    }
+
+    // Damage system methods
+    takeDamage(amount) {
+        if (amount <= 0) return false;
+
+        // Apply damage
+        this.health = Math.max(0, this.health - amount);
+        this.isDamaged = true;
+        this.damageTimer = 200; // Visual damage feedback duration
+
+        console.log(`Player took ${amount} damage. Health: ${this.health}/${this.maxHealth}`);
+
+        // Trigger hurt animation if available
+        if (this.health > 0 && this.currentAnimation !== 'hurt') {
+            this.currentAnimation = 'hurt';
+            this.frameIndex = 0;
+            this.frameTimer = 0;
+        }
+
+        return true;
+    }
+
+    updateDamageSystem(deltaTime, currentTime, isDevelopmentMode = false) {
+        // Update damage visual timer
+        if (this.isDamaged && this.damageTimer > 0) {
+            this.damageTimer -= deltaTime;
+            if (this.damageTimer <= 0) {
+                this.isDamaged = false;
+            }
+        }
+
+        // Apply damage from touching props (only in production mode)
+        if (!isDevelopmentMode && this.damagingProps.length > 0 && currentTime - this.lastDamageTime >= this.damageCooldown) {
+            // Find highest damage among all touching props
+            const maxDamage = Math.max(...this.damagingProps.map(prop => prop.damagePerSecond));
+
+            if (maxDamage > 0) {
+                // Calculate damage for this interval (damage per second * time interval)
+                const damageAmount = (maxDamage * this.damageCooldown) / 1000;
+                this.takeDamage(damageAmount);
+                this.lastDamageTime = currentTime;
+            }
+        }
+
+        // Health regeneration (when not taking damage and health is not full)
+        if (this.health < this.maxHealth && this.damagingProps.length === 0 &&
+            currentTime - this.lastHealthRegenTime >= this.healthRegenCooldown) {
+
+            // Calculate regen amount for this interval
+            const regenAmount = (this.healthRegenRate * this.healthRegenCooldown) / 1000;
+            this.health = Math.min(this.maxHealth, this.health + regenAmount);
+            this.lastHealthRegenTime = currentTime;
+
+            if (this.health >= this.maxHealth) {
+                console.log('Health fully regenerated!');
+            }
+        }
+
+        // Clear damaging props list (will be repopulated by collision detection)
+        this.damagingProps = [];
+    }
+
+    addDamagingProp(prop) {
+        if (prop.damagePerSecond > 0) {
+            this.damagingProps.push(prop);
+        }
     }
 
     getState() {

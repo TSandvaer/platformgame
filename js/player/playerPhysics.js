@@ -9,6 +9,9 @@ class PlayerPhysics {
         const physicsMultiplier = deltaTime / 16.67;
         this.updateStamina(physicsMultiplier);
 
+        // Update damage system (always run, but damage only applies in production mode)
+        this.data.updateDamageSystem(deltaTime, Date.now(), isDevelopmentMode);
+
         if (isDevelopmentMode) {
             return; // No physics in development mode
         }

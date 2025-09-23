@@ -723,6 +723,11 @@
                         <span style="font-size: 11px; color: #aaa;">x</span>
                     </div>
                     <div class="property-row">
+                        <span class="property-label">Damage:</span>
+                        <input type="number" id="propDamageInput" min="0" max="100" step="1" value="0" style="width: 80px;">
+                        <span style="font-size: 11px; color: #aaa;">DPS</span>
+                    </div>
+                    <div class="property-row">
                         <button class="btn small" id="addPropBtn">Add Prop (Click on map)</button>
                     </div>
                     <div class="property-row">
@@ -757,6 +762,11 @@
                             <input type="number" id="propRotation" step="0.1" style="width: 80px;">
                             <span style="font-size: 11px; color: #aaa;">deg</span>
                             <span style="font-size: 10px; color: #888; margin-left: 10px;">Shift+drag to rotate</span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Damage:</span>
+                            <input type="number" id="selectedPropDamage" min="0" max="100" step="1" style="width: 80px;">
+                            <span style="font-size: 11px; color: #aaa;">DPS</span>
                         </div>
                         <div class="property-row">
                             <button class="btn small" id="updateProp">Update Prop</button>

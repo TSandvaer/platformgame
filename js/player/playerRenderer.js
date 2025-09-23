@@ -31,6 +31,12 @@ class PlayerRenderer {
         const spriteOffsetX = (this.data.width - spriteRenderWidth) / 2;
         const spriteOffsetY = this.data.height - spriteRenderHeight + (110 * playerScale);
 
+        // Apply damage visual effect (red tint)
+        if (this.data.isDamaged && this.data.damageTimer > 0) {
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.fillStyle = `rgba(255, 100, 100, ${this.data.damageTimer / 200})`;
+        }
+
         // Flip sprite horizontally if facing left
         if (this.data.facing === 'left') {
             ctx.scale(-1, 1);
@@ -57,9 +63,20 @@ class PlayerRenderer {
     }
 
     renderFallback(ctx) {
+        ctx.save();
+
+        // Apply damage visual effect (red tint)
+        let playerColor = this.data.color;
+        if (this.data.isDamaged && this.data.damageTimer > 0) {
+            const intensity = this.data.damageTimer / 200;
+            playerColor = `rgba(255, ${100 * (1 - intensity)}, ${100 * (1 - intensity)}, 1)`;
+        }
+
         // Render a colored rectangle as fallback
-        ctx.fillStyle = this.data.color;
+        ctx.fillStyle = playerColor;
         ctx.fillRect(this.data.x, this.data.y, this.data.width, this.data.height);
+
+        ctx.restore();
     }
 
     renderDebug(ctx, isDevelopmentMode) {

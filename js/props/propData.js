@@ -180,7 +180,7 @@ class PropData {
         return this.nextPropId++;
     }
 
-    addProp(type, x, y, isObstacle = false, sizeMultiplier = 1.0) {
+    addProp(type, x, y, isObstacle = false, sizeMultiplier = 1.0, damagePerSecond = 0) {
         const propType = this.propTypes[type];
         if (!propType) return null;
 
@@ -195,7 +195,8 @@ class PropData {
             relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
             relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
             sizeMultiplier: sizeMultiplier,  // Resolution-independent size multiplier
-            rotation: 0             // Rotation angle in radians
+            rotation: 0,            // Rotation angle in radians
+            damagePerSecond: damagePerSecond // Damage dealt to player per second
         };
 
         this.props.push(newProp);
@@ -486,6 +487,7 @@ class PropData {
                 sizeMultiplier: this.selectedProp.sizeMultiplier || 1.0,
                 isObstacle: this.selectedProp.isObstacle || false,
                 rotation: this.selectedProp.rotation || 0,
+                damagePerSecond: this.selectedProp.damagePerSecond || 0,
                 groupId: null, // Single props should not inherit group IDs
                 zOrder: this.selectedProp.zOrder || 0,
                 positioning: this.selectedProp.positioning,
@@ -539,6 +541,7 @@ class PropData {
                 relativeY: prop.relativeY,
                 sizeMultiplier: prop.sizeMultiplier || 1.0,
                 rotation: prop.rotation || 0,
+                damagePerSecond: prop.damagePerSecond || 0,
                 groupId: prop.groupId // Preserve grouping
             };
             this.clipboard.push(copiedProp);
@@ -589,7 +592,8 @@ class PropData {
                 relativeX: clipProp.relativeX,
                 relativeY: clipProp.relativeY,
                 sizeMultiplier: clipProp.sizeMultiplier,
-                rotation: clipProp.rotation
+                rotation: clipProp.rotation,
+                damagePerSecond: clipProp.damagePerSecond || 0
             };
 
             // Handle grouping - create new group IDs for pasted groups

@@ -6,7 +6,8 @@
       "Bash(python3:*)",
       "Bash(npx http-server:*)",
       "Bash(node:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(npx serve:*)"
     ],
     "deny": [],
     "ask": []

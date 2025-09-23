@@ -143,8 +143,8 @@ class PropSystem {
     }
 
     // Prop management
-    addProp(type, x, y, isObstacle = false, scale = undefined) {
-        return this.data.addProp(type, x, y, isObstacle, scale);
+    addProp(type, x, y, isObstacle = false, scale = undefined, damagePerSecond = 0) {
+        return this.data.addProp(type, x, y, isObstacle, scale, damagePerSecond);
     }
 
     deleteSelectedProp() {

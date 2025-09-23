@@ -429,6 +429,9 @@ class PlatformRPG {
         if (this.hudSystem && this.hudSystem.isVisible) {
             this.hudSystem.render();
         }
+
+        // Render damage screen flash effect on top of everything
+        this.renderDamageScreenFlash();
     }
 
 
@@ -526,6 +529,23 @@ class PlatformRPG {
 
     renderFeedbackMessages() {
         this.feedbackSystem.render();
+    }
+
+    renderDamageScreenFlash() {
+        // Only show damage flash if player is currently damaged
+        if (!this.playerSystem.data.isDamaged || this.playerSystem.data.damageTimer <= 0) {
+            return;
+        }
+
+        // Calculate flash intensity based on remaining damage timer
+        const intensity = this.playerSystem.data.damageTimer / 200; // 200ms is max damage timer
+        const alpha = intensity * 0.3; // Max alpha of 0.3 for visibility
+
+        // Draw red flash overlay
+        this.ctx.save();
+        this.ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
     }
 
     renderDragSelection() {

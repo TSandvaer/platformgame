@@ -40,6 +40,19 @@ class PropCollisions {
                 }
             }
         });
+
+        // Check collision with damage props
+        this.checkDamageCollisions(player, props, propTypes);
+    }
+
+    checkDamageCollisions(player, props, propTypes) {
+        // Check collision with props that have damage
+        props.filter(prop => prop.damagePerSecond > 0).forEach(prop => {
+            if (this.checkCollision(player, this.getPropBounds(prop, propTypes))) {
+                // Add this prop to the player's damaging props list
+                player.addDamagingProp(prop);
+            }
+        });
     }
 
     getPropBounds(prop, propTypes) {
