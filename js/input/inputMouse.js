@@ -230,6 +230,7 @@ class InputMouse {
         this.dragScrollStartY = e.clientY;
         this.dragScrollCameraStartX = this.game.cameraSystem.x;
         this.dragScrollCameraStartY = this.game.cameraSystem.y;
+        this.game.canvas.className = '';
         this.game.canvas.style.cursor = 'grabbing';
     }
 
@@ -255,6 +256,7 @@ class InputMouse {
     stopDragScrolling() {
         if (this.dragScrolling) {
             this.dragScrolling = false;
+            this.game.canvas.className = '';
             this.game.canvas.style.cursor = 'default';
         }
     }
@@ -316,23 +318,25 @@ class InputMouse {
                 renderPlatform, mouseX, mouseY
             );
             if (resizeHandle) {
-                const cursors = {
-                    'top-left': 'nw-resize',
-                    'top-right': 'ne-resize',
-                    'bottom-left': 'sw-resize',
-                    'bottom-right': 'se-resize',
-                    'left': 'w-resize',
-                    'right': 'e-resize',
-                    'top': 'n-resize',
-                    'bottom': 's-resize'
+                const blueClasses = {
+                    'top-left': 'blue-nw-resize-cursor',
+                    'top-right': 'blue-ne-resize-cursor',
+                    'bottom-left': 'blue-nw-resize-cursor',
+                    'bottom-right': 'blue-ne-resize-cursor',
+                    'left': 'blue-ew-resize-cursor',
+                    'right': 'blue-ew-resize-cursor',
+                    'top': 'blue-ns-resize-cursor',
+                    'bottom': 'blue-ns-resize-cursor'
                 };
-                this.game.canvas.style.cursor = cursors[resizeHandle] || 'default';
+                this.game.canvas.className = blueClasses[resizeHandle] || '';
+                this.game.canvas.style.cursor = '';
                 return;
             }
         }
 
         // Check other cursor states
         if (this.checkPlayerStartHandle(mouseX, mouseY)) {
+            this.game.canvas.className = '';
             this.game.canvas.style.cursor = 'move';
         } else if (this.game.platformSystem.platforms.some(p => {
                    // Get actual position for hover detection
@@ -344,8 +348,10 @@ class InputMouse {
                }) ||
                    this.game.propSystem.props.some(prop =>
                    this.game.propSystem.data.isPointInProp(mouseX, mouseY, prop))) {
-            this.game.canvas.style.cursor = 'pointer';
+            this.game.canvas.className = 'blue-select-cursor';
+            this.game.canvas.style.cursor = '';
         } else {
+            this.game.canvas.className = '';
             this.game.canvas.style.cursor = 'default';
         }
     }

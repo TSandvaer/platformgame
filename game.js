@@ -573,6 +573,7 @@ class PlatformRPG {
 
     updateCursor() {
         // Default cursor
+        this.canvas.className = '';
         this.canvas.style.cursor = 'default';
 
         // Recalculate world coordinates to ensure consistency with mouse handlers
@@ -607,9 +608,10 @@ class PlatformRPG {
             }
         }
 
-        // If there are props under cursor, use move cursor for the topmost one
+        // If there are props under cursor, use blue cursor for the topmost one
         if (propsUnderCursor.length > 0) {
-            this.canvas.style.cursor = 'move';
+            this.canvas.className = 'blue-select-cursor';
+            this.canvas.style.cursor = '';
             return; // Exit early, don't check platforms
         }
 
@@ -623,23 +625,24 @@ class PlatformRPG {
             const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
 
             if (resizeHandle) {
-                // Set appropriate cursor based on resize handle
+                // Set appropriate blue cursor based on resize handle
+                this.canvas.style.cursor = '';
                 switch (resizeHandle) {
                     case 'nw':
                     case 'se':
-                        this.canvas.style.cursor = 'nw-resize';
+                        this.canvas.className = 'blue-nw-resize-cursor';
                         break;
                     case 'ne':
                     case 'sw':
-                        this.canvas.style.cursor = 'ne-resize';
+                        this.canvas.className = 'blue-ne-resize-cursor';
                         break;
                     case 'w':
                     case 'e':
-                        this.canvas.style.cursor = 'ew-resize';
+                        this.canvas.className = 'blue-ew-resize-cursor';
                         break;
                     case 'n':
                     case 's':
-                        this.canvas.style.cursor = 'ns-resize';
+                        this.canvas.className = 'blue-ns-resize-cursor';
                         break;
                 }
                 break; // Stop checking other platforms
@@ -647,7 +650,8 @@ class PlatformRPG {
 
             // Check if mouse is inside platform area
             if (this.platformSystem.isPointInPlatform(worldMouseX, worldMouseY, renderPlatform)) {
-                this.canvas.style.cursor = 'move';
+                this.canvas.className = 'blue-select-cursor';
+                this.canvas.style.cursor = '';
                 break; // Stop checking other platforms once we find one
             }
         }
