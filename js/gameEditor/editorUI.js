@@ -32,6 +32,21 @@ class EditorUI {
             });
         }
 
+        // Production scene selector
+        const productionSceneSelect = document.getElementById('productionSceneSelect');
+        if (productionSceneSelect) {
+            productionSceneSelect.addEventListener('change', (e) => {
+                const sceneId = e.target.value;
+                if (sceneId && this.game.sceneSystem) {
+                    // Load the selected scene and teleport player to its start position
+                    const scene = this.game.sceneSystem.data.getSceneById(sceneId);
+                    if (scene) {
+                        this.game.sceneSystem.loadScene(sceneId, scene.settings.playerStartX, scene.settings.playerStartY);
+                    }
+                }
+            });
+        }
+
         // Dashboard toggle
         const toggleDashboardBtn = document.getElementById('toggleDashboardBtn');
         if (toggleDashboardBtn) {
@@ -98,10 +113,20 @@ class EditorUI {
             }
         });
 
-        // Show/hide back to dev button
+        // Show/hide back to dev button and production scene selector
         const backToDevBtn = document.getElementById('backToDevBtn');
         if (backToDevBtn) {
             backToDevBtn.style.display = isDev ? 'none' : 'inline-block';
+        }
+
+        const productionSceneSelect = document.getElementById('productionSceneSelect');
+        if (productionSceneSelect) {
+            productionSceneSelect.style.display = isDev ? 'none' : 'inline-block';
+
+            // Populate the dropdown with available scenes when entering production mode
+            if (!isDev) {
+                this.populateSceneDropdown();
+            }
         }
 
         // Handle dashboard visibility
@@ -147,6 +172,29 @@ class EditorUI {
                 btn.textContent = 'Add Transition Zone';
                 btn.classList.remove('danger');
             }
+        }
+    }
+
+    populateSceneDropdown() {
+        const dropdown = document.getElementById('productionSceneSelect');
+        if (!dropdown || !this.game.sceneSystem) return;
+
+        // Clear existing options except the first one
+        dropdown.innerHTML = '<option value="">Select Scene...</option>';
+
+        // Get all scenes
+        const scenes = this.game.sceneSystem.data.scenes;
+        scenes.forEach(scene => {
+            const option = document.createElement('option');
+            option.value = scene.id;
+            option.textContent = scene.name;
+            dropdown.appendChild(option);
+        });
+
+        // Set the current scene as selected
+        const currentScene = this.game.sceneSystem.data.getCurrentScene();
+        if (currentScene) {
+            dropdown.value = currentScene.id;
         }
     }
 
