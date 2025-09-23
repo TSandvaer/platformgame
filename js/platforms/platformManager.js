@@ -357,11 +357,20 @@ class PlatformManager {
     }
 
     // UI update methods
-    updatePlatformList() {
+    updatePlatformList(scenePlatforms = null, sceneName = null) {
         const listElement = document.getElementById('platformList');
         if (!listElement) return;
 
-        listElement.innerHTML = this.platformData.platforms.map(platform =>
+        // Use provided scene platforms or fall back to all platforms
+        const platformsToShow = scenePlatforms || this.platformData.platforms;
+
+        // Update scene name in the header
+        const sceneNameElement = document.getElementById('platformSceneName');
+        if (sceneNameElement) {
+            sceneNameElement.textContent = sceneName ? `- ${sceneName}` : '';
+        }
+
+        listElement.innerHTML = platformsToShow.map(platform =>
             `<div class="platform-item ${this.platformData.selectedPlatform && this.platformData.selectedPlatform.id === platform.id ? 'selected' : ''}"
                   data-platform-id="${platform.id}">
                 Platform ${platform.id + 1} (${platform.x}, ${platform.y}) ${platform.width}x${platform.height}

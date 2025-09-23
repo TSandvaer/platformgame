@@ -87,12 +87,14 @@ class SceneManager {
         return this._performSceneLoad(scene, sceneId, playerStartX, playerStartY);
     }
 
-    loadScene(sceneId, playerStartX = null, playerStartY = null) {     
+    loadScene(sceneId, playerStartX = null, playerStartY = null) {
         const scene = this.sceneData.getSceneById(sceneId);
         if (!scene) {
             console.error('Scene not found:', sceneId);
             return false;
         }
+
+        console.log('🎬 Loading scene:', scene.name, 'ID:', sceneId, 'Platforms:', scene.platforms?.length || 0);
 
         const currentScene = this.sceneData.getCurrentScene();
 
@@ -165,8 +167,9 @@ class SceneManager {
         console.log('🔧 PlatformSystem.data before:', this.game.platformSystem.data.platforms);
 
         // Create a deep copy of platforms
-        const platformsCopy = JSON.parse(JSON.stringify(scene.platforms));
+        const platformsCopy = JSON.parse(JSON.stringify(scene.platforms || []));
         console.log('🔧 Platforms copy:', platformsCopy);
+        console.log('🔧 Scene platforms before copy:', scene.platforms);
 
         this.game.platformSystem.platforms = platformsCopy;
 
@@ -175,12 +178,39 @@ class SceneManager {
 
         // Double-check by accessing data directly
         console.log('🔧 Direct access test:', this.game.platformSystem.data.platforms.length, 'platforms in data');
+
+        // Verify platforms were actually loaded
+        if (scene.platforms && scene.platforms.length > 0 && this.game.platformSystem.platforms.length === 0) {
+            console.error('❌ CRITICAL: Platforms failed to load into platformSystem!');
+            console.error('❌ Scene has', scene.platforms.length, 'platforms but platformSystem has 0');
+            console.log('🔄 Attempting emergency reload...');
+
+            // Force reload the platforms
+            const emergencyCopy = JSON.parse(JSON.stringify(scene.platforms));
+            this.game.platformSystem.data.platforms = emergencyCopy;
+            console.log('✅ Emergency reload complete:', this.game.platformSystem.platforms.length, 'platforms now in memory');
+        }
+
         this.game.platformSystem.nextPlatformId = scene.platforms.length > 0 ?
             Math.max(...scene.platforms.map(p => p.id !== undefined ? p.id : 0)) + 1 : 0;
 
         // Load props
-        this.game.propSystem.props = [...scene.props];
+        console.log('🎭 Loading props for scene:', scene.name, 'Props count:', scene.props?.length || 0);
+        this.game.propSystem.props = [...(scene.props || [])];
         this.game.propSystem.data.initializeGroupsFromProps();
+
+        // Verify props were actually loaded
+        if (scene.props && scene.props.length > 0 && this.game.propSystem.props.length === 0) {
+            console.error('❌ CRITICAL: Props failed to load into propSystem!');
+            console.error('❌ Scene has', scene.props.length, 'props but propSystem has 0');
+            console.log('🔄 Attempting emergency reload of props...');
+
+            // Force reload the props
+            const emergencyPropsCopy = JSON.parse(JSON.stringify(scene.props));
+            this.game.propSystem.props = emergencyPropsCopy;
+            this.game.propSystem.data.initializeGroupsFromProps();
+            console.log('✅ Emergency reload complete:', this.game.propSystem.props.length, 'props now in memory');
+        }
 
         // Load background
         if (scene.background && scene.background.name && scene.background.name !== 'none') {
@@ -221,6 +251,16 @@ class SceneManager {
         // Update UI
         this.updateSceneUI();
 
+        // Update platform list to show platforms for the newly loaded scene
+        if (this.game.platformSystem) {
+            this.game.platformSystem.updatePlatformList();
+        }
+
+        // Update props list to show props for the newly loaded scene
+        if (this.game.propSystem) {
+            this.game.propSystem.updatePropList();
+        }
+
         // Update background dropdown to reflect current scene's background
         const backgroundSelect = document.getElementById('backgroundSelect');
         if (backgroundSelect && scene.background) {
@@ -243,6 +283,33 @@ class SceneManager {
             console.log('💾 Platforms in memory:', this.game.platformSystem.platforms.length);
             console.log('💾 Props in memory:', this.game.propSystem.props.length);
             console.log('💾 Scene data before update - platforms:', currentScene.platforms.length, 'props:', currentScene.props.length);
+
+            // Check if we're about to wipe out existing platforms
+            if (currentScene.platforms.length > 0 && this.game.platformSystem.platforms.length === 0) {
+                console.warn('⚠️ WARNING: Attempting to save empty platforms over existing platforms!');
+                console.warn('⚠️ Scene had', currentScene.platforms.length, 'platforms but platformSystem has 0');
+                console.warn('⚠️ This likely means the platforms weren\'t loaded properly into memory');
+
+                // Try to reload the platforms into memory from the scene
+                console.log('🔄 Attempting to reload platforms from scene data...');
+                const platformsCopy = JSON.parse(JSON.stringify(currentScene.platforms));
+                this.game.platformSystem.platforms = platformsCopy;
+                console.log('🔄 Reloaded', this.game.platformSystem.platforms.length, 'platforms into memory');
+            }
+
+            // Check if we're about to wipe out existing props
+            if (currentScene.props.length > 0 && this.game.propSystem.props.length === 0) {
+                console.warn('⚠️ WARNING: Attempting to save empty props over existing props!');
+                console.warn('⚠️ Scene had', currentScene.props.length, 'props but propSystem has 0');
+                console.warn('⚠️ This likely means the props weren\'t loaded properly into memory');
+
+                // Try to reload the props into memory from the scene
+                console.log('🔄 Attempting to reload props from scene data...');
+                const propsCopy = JSON.parse(JSON.stringify(currentScene.props));
+                this.game.propSystem.props = propsCopy;
+                this.game.propSystem.data.initializeGroupsFromProps();
+                console.log('🔄 Reloaded', this.game.propSystem.props.length, 'props into memory');
+            }
 
             console.log('💾 Saving current scene data for:', currentScene.name);
             console.log('💾 Platforms being saved:', this.game.platformSystem.platforms.map(p => ({

@@ -184,7 +184,10 @@ class SceneSystem {
 
                 // Load the last current scene
                 const currentSceneId = completeData.currentSceneId;
+                console.log('🎯 Loading current scene ID:', currentSceneId);
                 if (currentSceneId) {
+                    const sceneToLoad = this.data.getSceneById(currentSceneId);
+                    console.log('🎯 Scene to load:', sceneToLoad?.name, 'Platforms:', sceneToLoad?.platforms?.length);
                     this.manager.loadScene(currentSceneId);
                 } else {
                     const startScene = this.data.getStartScene();

@@ -4,6 +4,7 @@ class PlatformSystem {
         this.renderer = new PlatformRenderer(ctx, onSpritesLoadedCallback);
         this.collisions = new PlatformCollisions();
         this.manager = new PlatformManager(this.data);
+        this.game = null; // Will be set by Game after construction
     }
 
     // Data access methods
@@ -121,7 +122,9 @@ class PlatformSystem {
 
     // UI updates
     updatePlatformList() {
-        this.manager.updatePlatformList();
+        const currentScene = this.game?.sceneSystem?.currentScene;
+        const scenePlatforms = currentScene ? currentScene.platforms : [];
+        this.manager.updatePlatformList(scenePlatforms, currentScene?.name);
     }
 
     updatePlatformProperties() {

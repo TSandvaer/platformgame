@@ -15,7 +15,17 @@ class PropSystem {
     }
 
     set props(value) {
+        console.log('🎭 Setting propSystem.props:', value?.length || 0, 'props');
+        if (value && value.length > 0) {
+            console.log('🎭 Props being set:', value.map(p => ({
+                id: p.id,
+                type: p.type,
+                x: p.x,
+                y: p.y
+            })));
+        }
         this.data.props = value;
+        console.log('🎭 After setting, propSystem.data.props has:', this.data.props?.length || 0, 'props');
     }
 
     get selectedProp() {

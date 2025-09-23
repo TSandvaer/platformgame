@@ -55,6 +55,7 @@ class PlatformRPG {
             this.spritesLoaded.platforms = true;
             this.checkAllSpritesLoaded();
         });
+        this.platformSystem.game = this; // Set game reference
 
         // Initialize prop system
         this.torchParticles = [];

@@ -63,14 +63,23 @@ class GameDataSystem {
         // Try to load from localStorage first
         const savedData = this.storage.loadFromLocalStorage();
         if (savedData && savedData.scenes && savedData.scenes.length > 0) {
-            // Check if scenes have platforms - if not, the data is incomplete
-            const hasPlatforms = savedData.scenes.some(scene => scene.platforms && scene.platforms.length > 0);
-            if (hasPlatforms) {
+            // Log what we found
+            console.log('📂 Found saved data with scenes:', savedData.scenes.map(s => ({
+                id: s.id,
+                name: s.name,
+                platforms: s.platforms ? s.platforms.length : 0
+            })));
+
+            // Check if at least the tutorial scene has platforms (other scenes might legitimately be empty)
+            const tutorialScene = savedData.scenes.find(s => s.name === 'Tutorial' || s.id === 0);
+            const hasTutorialPlatforms = tutorialScene && tutorialScene.platforms && tutorialScene.platforms.length > 0;
+
+            if (hasTutorialPlatforms || savedData.scenes.length > 1) {
                 console.log('✅ Loaded valid game data from localStorage');
                 this.applyGameData(savedData);
                 return;
             } else {
-                console.log('⚠️ localStorage data has empty platforms, loading from file instead');
+                console.log('⚠️ localStorage data appears incomplete, loading from file instead');
             }
         }
 
