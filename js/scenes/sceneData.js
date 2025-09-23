@@ -209,18 +209,11 @@ class SceneData {
 
     importSceneData(data) {
         if (data.scenes && Array.isArray(data.scenes)) {
-            console.log('🔧 Importing scene data, scenes count:', data.scenes.length);
-
             // Migrate/validate each scene to ensure it has all required properties
             this.scenes = data.scenes.map(scene => this.migrateScene(scene));
 
             // Debug: check what we have after migration
             if (this.scenes.length > 0) {
-                console.log('🔧 After migration - First scene:', {
-                    name: this.scenes[0].name,
-                    platformCount: this.scenes[0].platforms ? this.scenes[0].platforms.length : 'undefined',
-                    platforms: this.scenes[0].platforms
-                });
             }
 
             // Note: Removed dangerous auto-replacement logic that was overwriting valid scene data

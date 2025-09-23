@@ -28,8 +28,6 @@ class GameDataImporter {
         reader.onload = (e) => {
             try {
                 const gameData = JSON.parse(e.target.result);
-                console.log(`📤 Importing game data from ${file.name}`);
-
                 // Validate before importing
                 if (this.dataSystem.validator.validateGameData(gameData)) {
                     if (callback) {
@@ -73,14 +71,12 @@ class GameDataImporter {
             // Replace existing scene
             if (confirm(`Scene "${scene.name}" already exists. Replace it?`)) {
                 this.game.sceneSystem.data.scenes[existingSceneIndex] = scene;
-                console.log(`✅ Replaced scene: ${scene.name}`);
             } else {
                 return false;
             }
         } else {
             // Add new scene
             this.game.sceneSystem.data.scenes.push(scene);
-            console.log(`✅ Added new scene: ${scene.name}`);
         }
 
         // Update UI
@@ -203,7 +199,6 @@ class GameDataImporter {
 
         // Update UI
         this.game.platformSystem.updatePlatformList();
-        console.log(`✅ Imported ${platformData.platforms.length} platforms`);
         return true;
     }
 
@@ -227,7 +222,6 @@ class GameDataImporter {
 
         // Update UI
         this.game.propSystem.updatePropList();
-        console.log(`✅ Imported ${propData.props.length} props`);
         return true;
     }
 

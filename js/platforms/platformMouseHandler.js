@@ -23,7 +23,6 @@ class PlatformMouseHandler {
 
             const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
 
-
             if (resizeHandle) {
                 this.platformSystem.isResizing = true;
                 this.platformSystem.resizeHandle = resizeHandle;

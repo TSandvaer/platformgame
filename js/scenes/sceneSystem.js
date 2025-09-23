@@ -13,35 +13,17 @@ class SceneSystem {
 
     // Initialization
     initialize() {
-        console.log('🔧 SceneSystem initializing...');
-        console.log('🔧 Initial scenes count:', this.data.scenes.length);
         if (this.data.scenes.length > 0) {
-            console.log('🔧 First scene platforms:', this.data.scenes[0].platforms);
         }
 
         const loaded = this.loadSavedScenes();
-        console.log('🔧 Scene loading result:', loaded);
-
         // If no saved scenes were loaded, load the default scene
         if (!loaded && this.data.scenes.length > 0) {
-            console.log('🔧 No saved scenes found, loading default scene');
             const defaultScene = this.data.scenes[0];
-            console.log('🔧 Default scene id:', defaultScene.id, 'name:', defaultScene.name);
-            console.log('🔧 Default scene platforms:', defaultScene.platforms);
-            console.log('🔧 Default scene platforms count:', defaultScene.platforms?.length || 0);
             this.manager.loadScene(defaultScene.id);
         } else if (loaded) {
-            console.log('🔧 Saved scenes were loaded successfully');
-            console.log('🔧 Current scene after load:', this.currentScene?.name);
-            console.log('🔧 Current scene platforms:', this.currentScene?.platforms?.length || 0);
         } else {
-            console.log('🔧 No scenes available at all!');
         }
-
-        console.log('🔧 Current scenes:', this.data.scenes.length);
-        console.log('🔧 Current scene:', this.data.getCurrentScene());
-        console.log('🔧 PlatformSystem platforms after init:', this.game.platformSystem.platforms);
-
         // Temporary alert-based debugging to see what's happening
         const currentScene = this.data.getCurrentScene();
         if (currentScene) {
@@ -112,7 +94,6 @@ class SceneSystem {
 
     // Background management
     setSceneBackground(backgroundName) {
-        console.log('🎨 setSceneBackground called with:', backgroundName);
         const currentScene = this.currentScene;
         if (currentScene) {
             // Initialize background property if it doesn't exist
@@ -156,9 +137,6 @@ class SceneSystem {
 
     // Save/Load
     saveScenes() {
-        console.log('🔥 DEBUG: saveScenes() called');
-        console.log('🔥 Current scene before save:', this.data.getCurrentScene()?.name, 'ID:', this.data.currentSceneId);
-
         this.manager.saveCurrentSceneData();
 
         // Use the GameDataSystem to save all game data
@@ -170,12 +148,8 @@ class SceneSystem {
     loadSavedScenes() {
         // First try to load from the GameDataSystem's complete data
         if (this.game.gameDataSystem) {
-            console.log('🔍 Attempting to load from gameDataSystem...');
             const completeData = this.game.gameDataSystem.storage.loadFromLocalStorage();
-            console.log('🔍 Loaded data:', completeData);
             if (completeData && completeData.scenes) {
-                console.log('📂 Loading scenes from complete game data');
-                console.log('📂 Number of scenes:', completeData.scenes.length);
                 this.data.importSceneData({
                     scenes: completeData.scenes,
                     currentSceneId: completeData.currentSceneId,
@@ -184,10 +158,8 @@ class SceneSystem {
 
                 // Load the last current scene
                 const currentSceneId = completeData.currentSceneId;
-                console.log('🎯 Loading current scene ID:', currentSceneId);
                 if (currentSceneId) {
                     const sceneToLoad = this.data.getSceneById(currentSceneId);
-                    console.log('🎯 Scene to load:', sceneToLoad?.name, 'Platforms:', sceneToLoad?.platforms?.length);
                     this.manager.loadScene(currentSceneId);
                 } else {
                     const startScene = this.data.getStartScene();
@@ -214,8 +186,6 @@ class SceneSystem {
             try {
                 const oldScenes = JSON.parse(savedScenes);
                 if (oldScenes.length > 0) {
-                    console.log('🔄 Migrating legacy scene data to new format...');
-
                     // Convert old format to new format
                     this.data.scenes = oldScenes.map((scene, index) => ({
                         id: scene.id || index + 1,
@@ -246,8 +216,6 @@ class SceneSystem {
 
                     // Delete old format to prevent future confusion
                     localStorage.removeItem('platformGame_scenes');
-                    console.log('✅ Legacy data migrated and old format removed');
-
                     // Load the first scene
                     this.manager.loadScene(this.data.scenes[0].id);
                     return true;
@@ -303,7 +271,6 @@ class SceneSystem {
 
     // Transition creation
     startAddingTransition() {
-        console.log('🎯 SceneSystem: Starting transition zone creation');
         this.isAddingTransition = true;
         this.transitionStart = null;
         this.transitionEnd = null;
@@ -341,7 +308,6 @@ class SceneSystem {
         this.isAddingTransition = false;
         this.transitionStart = null;
         this.transitionEnd = null;
-        console.log('🎯 SceneSystem: Cancelled transition zone creation');
     }
 
     renderTransitionPreview(ctx) {

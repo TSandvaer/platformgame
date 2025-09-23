@@ -19,10 +19,7 @@ class PlatformSystem {
             x: p.x,
             y: p.y
         })));
-        console.log('🔧 Before assignment - this.data.platforms:', this.data.platforms);
         this.data.platforms = value;
-        console.log('🔧 After assignment - this.data.platforms:', this.data.platforms);
-        console.log('🔧 Verify assignment - this.data.platforms.length:', this.data.platforms.length);
     }
 
     get selectedPlatform() {

@@ -20,7 +20,6 @@ class PropRenderer {
         const checkAllLoaded = () => {
             if (loadedCount === totalImages) {
                 this.spritesLoaded = true;
-                console.log('🎨 Prop sprites loaded');
                 if (this.onSpritesLoadedCallback) {
                     this.onSpritesLoadedCallback();
                 }
@@ -45,7 +44,6 @@ class PropRenderer {
 
         // Filter props based on whether we're rendering obstacles or not
         const filteredProps = props.filter(prop => prop.isObstacle === renderObstacles);
-
 
         // Sort by z-order (lowest first)
         filteredProps.sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0));

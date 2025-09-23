@@ -80,9 +80,6 @@ class SceneManager {
             console.error('Scene not found:', sceneId);
             return false;
         }
-
-        console.log('🔄 Force loading scene:', scene.name);
-
         // Skip all optimization checks and directly load the scene
         return this._performSceneLoad(scene, sceneId, playerStartX, playerStartY);
     }
@@ -93,9 +90,6 @@ class SceneManager {
             console.error('Scene not found:', sceneId);
             return false;
         }
-
-        console.log('🎬 Loading scene:', scene.name, 'ID:', sceneId, 'Platforms:', scene.platforms?.length || 0);
-
         const currentScene = this.sceneData.getCurrentScene();
 
         // Check if this is an initial load (no platforms loaded yet) or scene has platforms but they aren't loaded
@@ -130,8 +124,6 @@ class SceneManager {
             }
             return true;
         }
-
-        console.log('Loading scene:', scene.name);
         return this._performSceneLoad(scene, sceneId, playerStartX, playerStartY, currentScene);
     }
 
@@ -149,65 +141,40 @@ class SceneManager {
         if (this.game.platformSystem) {
             this.game.platformSystem.clearSelection();
             this.game.platformSystem.updatePlatformProperties();
-            console.log('🧹 Cleared platform selection');
         }
         if (this.game.propSystem) {
             this.game.propSystem.clearSelection();
             this.game.propSystem.updatePropProperties();
-            console.log('🧹 Cleared prop selection');
         }
 
         // Clean up any invalid transition zones in this scene
         this.cleanupInvalidTransitions(scene);
 
         // Load platforms
-        console.log('🔧 DEBUG: Loading scene data');
-        console.log('🔧 Loading platforms for scene:', scene.name, 'ID:', scene.id, 'Platform count:', scene.platforms.length);
-        console.log('🔧 Loading props for scene:', scene.name, 'Prop count:', scene.props.length);
-
         // Removed corruption detection messages
-
-        console.log('🔧 Scene platforms:', scene.platforms);
         console.log('🔧 Platforms being loaded:', scene.platforms.map(p => ({
             id: p.id,
             spriteType: p.spriteType,
             x: p.x,
             y: p.y
         })));
-
-        console.log('🔧 PlatformSystem before:', this.game.platformSystem.platforms);
-        console.log('🔧 PlatformSystem.data before:', this.game.platformSystem.data.platforms);
-
         // Create a deep copy of platforms
         const platformsCopy = JSON.parse(JSON.stringify(scene.platforms || []));
-        console.log('🔧 Platforms copy:', platformsCopy);
-        console.log('🔧 Scene platforms before copy:', scene.platforms);
-
         this.game.platformSystem.platforms = platformsCopy;
-
-        console.log('🔧 PlatformSystem after setter:', this.game.platformSystem.platforms);
-        console.log('🔧 PlatformSystem.data after setter:', this.game.platformSystem.data.platforms);
-
         // Double-check by accessing data directly
-        console.log('🔧 Direct access test:', this.game.platformSystem.data.platforms.length, 'platforms in data');
-
         // Verify platforms were actually loaded
         if (scene.platforms && scene.platforms.length > 0 && this.game.platformSystem.platforms.length === 0) {
             console.error('❌ CRITICAL: Platforms failed to load into platformSystem!');
             console.error('❌ Scene has', scene.platforms.length, 'platforms but platformSystem has 0');
-            console.log('🔄 Attempting emergency reload...');
-
             // Force reload the platforms
             const emergencyCopy = JSON.parse(JSON.stringify(scene.platforms));
             this.game.platformSystem.data.platforms = emergencyCopy;
-            console.log('✅ Emergency reload complete:', this.game.platformSystem.platforms.length, 'platforms now in memory');
         }
 
         this.game.platformSystem.nextPlatformId = scene.platforms.length > 0 ?
             Math.max(...scene.platforms.map(p => p.id !== undefined ? p.id : 0)) + 1 : 0;
 
         // Load props
-        console.log('🎭 Loading props for scene:', scene.name, 'Props count:', scene.props?.length || 0);
         this.game.propSystem.props = [...(scene.props || [])];
         this.game.propSystem.data.initializeGroupsFromProps();
 
@@ -215,21 +182,16 @@ class SceneManager {
         if (scene.props && scene.props.length > 0 && this.game.propSystem.props.length === 0) {
             console.error('❌ CRITICAL: Props failed to load into propSystem!');
             console.error('❌ Scene has', scene.props.length, 'props but propSystem has 0');
-            console.log('🔄 Attempting emergency reload of props...');
-
             // Force reload the props
             const emergencyPropsCopy = JSON.parse(JSON.stringify(scene.props));
             this.game.propSystem.props = emergencyPropsCopy;
             this.game.propSystem.data.initializeGroupsFromProps();
-            console.log('✅ Emergency reload complete:', this.game.propSystem.props.length, 'props now in memory');
         }
 
         // Load background
         if (scene.background && scene.background.name && scene.background.name !== 'none') {
-            console.log('🎨 Scene loading background:', scene.background.name);
             this.game.loadBackground(scene.background.name);
         } else {
-            console.log('🎨 Scene loading no background (none)');
             this.game.loadBackground('none');
         }
 
@@ -277,7 +239,6 @@ class SceneManager {
         const backgroundSelect = document.getElementById('backgroundSelect');
         if (backgroundSelect && scene.background) {
             const backgroundName = scene.background.name || 'none';
-            console.log('🎨 Updating background dropdown to:', backgroundName);
             backgroundSelect.value = backgroundName;
         }
 
@@ -290,12 +251,6 @@ class SceneManager {
     saveCurrentSceneData() {
         const currentScene = this.sceneData.getCurrentScene();
         if (currentScene) {
-            console.log('💾 DEBUG: About to save scene data');
-            console.log('💾 Current scene ID:', currentScene.id, 'Name:', currentScene.name);
-            console.log('💾 Platforms in memory:', this.game.platformSystem.platforms.length);
-            console.log('💾 Props in memory:', this.game.propSystem.props.length);
-            console.log('💾 Scene data before update - platforms:', currentScene.platforms.length, 'props:', currentScene.props.length);
-
             // Check if we're about to wipe out existing platforms
             if (currentScene.platforms.length > 0 && this.game.platformSystem.platforms.length === 0) {
                 console.warn('⚠️ WARNING: Attempting to save empty platforms over existing platforms!');
@@ -303,10 +258,8 @@ class SceneManager {
                 console.warn('⚠️ This likely means the platforms weren\'t loaded properly into memory');
 
                 // Try to reload the platforms into memory from the scene
-                console.log('🔄 Attempting to reload platforms from scene data...');
                 const platformsCopy = JSON.parse(JSON.stringify(currentScene.platforms));
                 this.game.platformSystem.platforms = platformsCopy;
-                console.log('🔄 Reloaded', this.game.platformSystem.platforms.length, 'platforms into memory');
             }
 
             // Check if we're about to wipe out existing props
@@ -316,14 +269,10 @@ class SceneManager {
                 console.warn('⚠️ This likely means the props weren\'t loaded properly into memory');
 
                 // Try to reload the props into memory from the scene
-                console.log('🔄 Attempting to reload props from scene data...');
                 const propsCopy = JSON.parse(JSON.stringify(currentScene.props));
                 this.game.propSystem.props = propsCopy;
                 this.game.propSystem.data.initializeGroupsFromProps();
-                console.log('🔄 Reloaded', this.game.propSystem.props.length, 'props into memory');
             }
-
-            console.log('💾 Saving current scene data for:', currentScene.name);
             console.log('💾 Platforms being saved:', this.game.platformSystem.platforms.map(p => ({
                 id: p.id,
                 spriteType: p.spriteType,
@@ -336,8 +285,6 @@ class SceneManager {
                 this.game.platformSystem.platforms,
                 this.game.propSystem.props
             );
-
-            console.log('💾 Scene data after update - platforms:', currentScene.platforms.length, 'props:', currentScene.props.length);
         }
     }
 
@@ -566,20 +513,8 @@ class SceneManager {
     addTransitionZone(x, y, width, height, targetSceneId, playerStartX, playerStartY) {
         const currentScene = this.sceneData.getCurrentScene();
         if (currentScene) {
-            console.log('🔗 DEBUG: Adding transition zone');
-            console.log('🔗 Current scene ID:', currentScene.id, 'Name:', currentScene.name);
-            console.log('🔗 Target scene ID:', targetSceneId);
-            console.log('🔗 Current scene platforms before save:', currentScene.platforms.length);
-            console.log('🔗 Current scene props before save:', currentScene.props.length);
-            console.log('🔗 Loaded platforms:', this.game.platformSystem.platforms.length);
-            console.log('🔗 Loaded props:', this.game.propSystem.props.length);
-
             // Save current platform/prop data before adding transition
             this.saveCurrentSceneData();
-
-            console.log('🔗 Current scene platforms after save:', currentScene.platforms.length);
-            console.log('🔗 Current scene props after save:', currentScene.props.length);
-
             const zone = this.sceneData.addTransitionZone(currentScene.id, {
                 x, y, width, height,
                 targetSceneId,
@@ -591,10 +526,6 @@ class SceneManager {
             if (this.game && this.game.sceneSystem) {
                 this.game.sceneSystem.saveScenes();
             }
-
-            console.log('🔗 Final current scene platforms:', currentScene.platforms.length);
-            console.log('🔗 Final current scene props:', currentScene.props.length);
-
             return zone;
         }
         return null;
@@ -766,9 +697,6 @@ class SceneManager {
             currentScene.boundaries.top = top;
             currentScene.boundaries.bottom = bottom;
             currentScene.metadata.modified = new Date().toISOString();
-
-            console.log('🟩 Scene boundaries saved to scene data:', currentScene.boundaries);
-
             // Save to localStorage to persist changes
             if (this.game && this.game.sceneSystem) {
                 this.game.sceneSystem.saveScenes();
@@ -896,7 +824,6 @@ class SceneManager {
         });
 
         if (invalidZones.length > 0) {
-            console.log(`🧹 Cleaned up ${invalidZones.length} invalid transition zones from scene "${scene.name}"`);
             // NOTE: Removed automatic save here as it was causing data corruption
             // by saving before scene data was fully loaded. The cleanup will be
             // persisted on the next manual save operation.

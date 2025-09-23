@@ -293,7 +293,6 @@ class InputMouse {
     updateCursor(mouseX, mouseY) {
         // Check if hovering over resize handles for selected platform
         if (this.game.platformSystem.selectedPlatform) {
-            console.log('🖱️ Checking cursor for selected platform:', this.game.platformSystem.selectedPlatform.id);
             // Get actual position based on positioning mode
             const platform = this.game.platformSystem.selectedPlatform;
             const actualPos = this.game.platformSystem.data.getActualPosition(
@@ -306,7 +305,6 @@ class InputMouse {
             const resizeHandle = this.game.platformSystem.getResizeHandle(
                 renderPlatform, mouseX, mouseY
             );
-            console.log('🖱️ Resize handle check result:', resizeHandle, 'at mouse:', mouseX, mouseY);
             if (resizeHandle) {
                 const cursors = {
                     'top-left': 'nw-resize',

@@ -38,8 +38,6 @@ class PropsMouseHandler {
 
         // Set this prop's z-order to be lower than the minimum
         prop.zOrder = minZOrder - 1;
-
-        console.log(`Sent prop ${prop.type} to background with z-order: ${prop.zOrder}`);
     }
 
     bringPropToFront(prop) {
@@ -54,7 +52,5 @@ class PropsMouseHandler {
 
         // Update the next z-order counter to be higher
         this.propSystem.nextPropZOrder = Math.max(this.propSystem.nextPropZOrder, prop.zOrder + 1);
-
-        console.log(`Brought prop ${prop.type} to front with z-order: ${prop.zOrder}`);
     }
 }

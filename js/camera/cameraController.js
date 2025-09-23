@@ -27,8 +27,6 @@ class CameraController {
 
         // Reset any drag state when switching modes
         this.isDragging = false;
-
-        console.log('Camera mode switched to:', newMode);
         return newMode;
     }
 

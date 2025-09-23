@@ -426,8 +426,6 @@ class PropData {
         groupMap.forEach((propIds, groupId) => {
             this.propGroups.set(groupId, propIds);
         });
-
-        console.log(`Initialized ${this.propGroups.size} groups from loaded props`);
     }
 
     // Helper to delete multiple props
@@ -494,7 +492,6 @@ class PropData {
                 relativeX: this.selectedProp.relativeX,
                 relativeY: this.selectedProp.relativeY
             }];
-            console.log('Copied 1 prop to clipboard');
             return true;
         }
 
@@ -658,8 +655,6 @@ class PropData {
                 prop.x += offset;
             });
         });
-
-        console.log(`Aligned ${groups.length} groups to left edge at x=${minX}`);
     }
 
     alignPropsRight() {
@@ -704,8 +699,6 @@ class PropData {
                 prop.x += offset;
             });
         });
-
-        console.log(`Aligned ${groups.length} groups to right edge at x=${maxRight}`);
     }
 
     alignPropsCenter() {
@@ -768,8 +761,6 @@ class PropData {
                 prop.x += offset;
             });
         });
-
-        console.log(`Aligned ${groups.length} groups to center at x=${targetCenterX}`);
     }
 
     alignPropsTop() {
@@ -798,8 +789,6 @@ class PropData {
                 prop.y += offset;
             });
         });
-
-        console.log(`Aligned ${groups.length} groups to top edge at y=${minY}`);
     }
 
     alignPropsBottom() {
@@ -844,8 +833,6 @@ class PropData {
                 prop.y += offset;
             });
         });
-
-        console.log(`Aligned ${groups.length} groups to bottom edge at y=${maxBottom}`);
     }
 
     // Drag selection methods

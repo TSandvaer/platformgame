@@ -39,7 +39,6 @@ class EditorTools {
         // Try modern clipboard API first
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(coordsText).then(() => {
-                console.log('📋 Coordinates copied to clipboard:', coordsText);
                 if (this.editor.ui) {
                     this.editor.ui.showTemporaryMessage(`Copied: ${coordsText}`);
                 }
@@ -65,7 +64,6 @@ class EditorTools {
 
         try {
             document.execCommand('copy');
-            console.log('📋 Coordinates copied to clipboard (fallback):', text);
             if (this.editor.ui) {
                 this.editor.ui.showTemporaryMessage(`Copied: ${text}`);
             }
@@ -97,7 +95,6 @@ class EditorTools {
         if (currentScene) {
             currentScene.settings.playerStartX = snappedPos.x;
             currentScene.settings.playerStartY = snappedPos.y;
-            console.log(`Player start position set to: ${snappedPos.x}, ${snappedPos.y}`);
         }
     }
 
@@ -199,7 +196,6 @@ class EditorTools {
 
     setActiveTool(toolName) {
         this.activeTool = toolName;
-        console.log(`Active tool set to: ${toolName}`);
     }
 
     clearActiveTool() {

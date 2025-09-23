@@ -1,6 +1,5 @@
 class PlatformRPG {
     constructor() {
-        console.log('PlatformRPG constructor called!');
         this.canvas = document.getElementById('gameCanvas');
         if (!this.canvas) {
             console.error('Canvas element not found! Make sure gameCanvas exists in the DOM.');
@@ -46,7 +45,6 @@ class PlatformRPG {
         this.currentBackground = null;
         this.loadAvailableBackgrounds();
 
-
         this.gravity = 0.8;
         this.friction = 0.8;
 
@@ -72,7 +70,6 @@ class PlatformRPG {
         this.startPositionDragOffset = { x: 0, y: 0 };
 
         // Initialize mouse handlers (will be set after viewport and camera are ready)
-
 
         // Camera scrolling during drag
         this.dragScrollTimer = null;
@@ -106,7 +103,6 @@ class PlatformRPG {
 
         this.updateViewport();
 
-
         // Initialize input system
         this.inputSystem = new InputSystem(this);
 
@@ -126,28 +122,22 @@ class PlatformRPG {
         this.init();
     }
 
-
     checkAllSpritesLoaded() {
         if (this.spritesLoaded.platforms && this.spritesLoaded.props) {
             this.allSpritesLoaded = true;
-            console.log('🎨 All sprites loaded, initializing scene system...');
             this.onAllSpritesLoaded();
         }
     }
 
     onAllSpritesLoaded() {
-        console.log('🎨 Platform sprites loaded, initializing scene system...');
-
         // Check if we have pending gameData.json import
         if (this.pendingGameDataImport) {
-            console.log('📦 Loading pending gameData.json import...');
             // Initialize scene system with imported data
             this.sceneSystem.data.importSceneData(this.pendingGameDataImport);
             this.sceneSystem.initialize();
 
             // Save the imported data to localStorage
             this.sceneSystem.saveScenes();
-            console.log('✅ Imported scene data saved to localStorage');
 
             this.pendingGameDataImport = null; // Clear pending data
         } else {
@@ -166,9 +156,6 @@ class PlatformRPG {
         // Update platform UI after everything is loaded
         this.platformSystem.updatePlatformList();
         this.platformSystem.updatePlatformProperties();
-
-        console.log('✅ Scene system fully initialized');
-        console.log('✅ Final platform count:', this.platformSystem.platforms.length);
     }
 
     loadAvailableBackgrounds() {
@@ -184,20 +171,15 @@ class PlatformRPG {
     }
 
     loadBackground(backgroundName) {
-        console.log('🎨 loadBackground called with:', backgroundName);
         if (backgroundName === 'none' || !backgroundName) {
             this.currentBackground = null;
-            console.log('🚫 Setting background to null (none)');
             return;
         }
 
         if (this.backgrounds[backgroundName]) {
             this.currentBackground = this.backgrounds[backgroundName];
-            console.log('✅ Background already loaded, using cached:', backgroundName);
             return;
         }
-
-        console.log('📥 Loading new background:', backgroundName);
 
         // Load background layers based on background type
         const background = {
@@ -287,7 +269,6 @@ class PlatformRPG {
         this.currentBackground = background;
     }
 
-
     applyViewportSettings() {
         const modeSelect = document.getElementById('viewportModeSelect');
         const designWidth = parseInt(document.getElementById('designWidth').value);
@@ -370,7 +351,6 @@ class PlatformRPG {
     }
 
     init() {
-        console.log('Game init() called!');
         // Setup UI button listeners
         this.setupUIListeners();
         this.setupAdditionalListeners();
@@ -442,19 +422,12 @@ class PlatformRPG {
 
     // Setup UI button listeners (not moved to input system)
     setupUIListeners() {
-        console.log('setupUIListeners called!');
-        console.log('Setting up dev mode button...');
         document.getElementById('devModeBtn').addEventListener('click', () => {
             this.setDevelopmentMode(true);
         });
-        console.log('Dev mode button setup complete');
-
-        console.log('Setting up production button...');
         document.getElementById('productionBtn').addEventListener('click', () => {
             this.setDevelopmentMode(false);
         });
-
-        console.log('Setting up dashboard button...');
         document.getElementById('toggleDashboardBtn').addEventListener('click', () => {
             this.toggleDashboard();
         });
@@ -484,28 +457,18 @@ class PlatformRPG {
             this.canvas.height = window.innerHeight;
             this.updateViewport();
         });
-
-        console.log('Reached group button setup section!');
         // Multi-selection and grouping event listeners
         const groupButton = document.getElementById('groupProps');
-        console.log('Group button element found:', groupButton);
         if (groupButton) {
             groupButton.addEventListener('click', () => {
-            console.log('Group button clicked! Selected props:', this.propSystem.selectedProps?.length || 0);
-            console.log('Selected prop IDs:', this.propSystem.selectedProps?.map(p => p.id) || []);
-
             if (this.propSystem.selectedProps?.length < 2) {
-                console.log('Not enough props selected for grouping');
                 alert('Select at least 2 props to create a group');
                 return;
             }
 
             const groupId = this.propSystem.groupSelectedProps();
             if (groupId) {
-                console.log(`Created group ${groupId} with ${this.propSystem.selectedProps.length} props`);
-                console.log('Props after grouping:', this.propSystem.selectedProps.map(p => `ID:${p.id} Group:${p.groupId}`));
             } else {
-                console.log('Grouping failed - groupSelectedProps returned null');
                 alert('Grouping failed');
             }
             });
@@ -514,11 +477,9 @@ class PlatformRPG {
         }
 
         const ungroupButton = document.getElementById('ungroupProps');
-        console.log('Ungroup button element found:', ungroupButton);
         if (ungroupButton) {
             ungroupButton.addEventListener('click', () => {
                 this.propSystem.ungroupSelectedProps();
-                console.log('Ungrouped selected props');
             });
         } else {
             console.error('Ungroup button not found!');
@@ -534,7 +495,6 @@ class PlatformRPG {
             }
         });
     }
-
 
     setDevelopmentMode(isDev) {
         // Delegate to editor system
@@ -567,7 +527,6 @@ class PlatformRPG {
         this.inputSystem.updatePlayerInput();
     }
 
-
     updatePhysics() {
         // Delegate to player system
         this.playerSystem.update(
@@ -585,7 +544,6 @@ class PlatformRPG {
             this.playerSystem.applyBoundaryConstraints(sceneBoundaries);
         }
     }
-
 
     updateCameraOld() {
         // Don't update camera automatically during drag operations
@@ -674,10 +632,8 @@ class PlatformRPG {
             this.viewport.offsetX = 0;
         }
 
-        // Debug logging for camera constraints (can be removed for production)
-        // console.log('🎥 Camera constrained:', { target: { x: targetX, y: targetY }, actual: { x: this.cameraSystem.x, y: this.cameraSystem.y } });
+        // Debug logging for camera constraints (can be removed for production)
     }
-
 
     updateViewport() {
         this.viewport.actualWidth = window.innerWidth - (this.showDashboard ? 300 : 0);
@@ -767,7 +723,6 @@ class PlatformRPG {
 
         // Debug: Log camera position during render
         if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.isDraggingStartPosition) {
-            console.log('Rendering with camera position:', this.cameraSystem.x, this.cameraSystem.y);
         }
 
         // Render platforms using the platform system
@@ -824,8 +779,6 @@ class PlatformRPG {
         // Should work in both development and production modes
         this.renderFeedbackMessages();
     }
-
-
 
     // Prop rendering methods have been moved to propSystem
 
@@ -1036,14 +989,12 @@ class PlatformRPG {
     }
     */
 
-
     updateUI() {
         // Note: scenesList is now handled by the scene system, not here
 
         // Get game data from gameDataSystem
         const gameData = this.gameDataSystem ? this.gameDataSystem.gameData : null;
         if (!gameData) {
-            console.log('Game data not yet loaded');
             return;
         }
 
@@ -1183,7 +1134,6 @@ class PlatformRPG {
             }
         });
 
-
         // Alignment button event listeners
         document.getElementById('alignLeft').addEventListener('click', () => {
             this.propSystem.data.alignPropsLeft();
@@ -1231,20 +1181,11 @@ class PlatformRPG {
         document.getElementById('saveSceneBtn').addEventListener('click', () => {
             const spinner = document.getElementById('saveSpinner');
             const overlay = document.getElementById('sceneSavedOverlay');
-
-            console.log('🔴 SAVE BUTTON CLICKED');
-            console.log('🔴 Current scene:', this.sceneSystem.data.getCurrentScene()?.name);
-            console.log('🔴 Platforms in memory:', this.platformSystem.platforms.length);
-            console.log('🔴 Props in memory:', this.propSystem.props.length);
-
             spinner.style.display = 'inline-block';
 
             // Use setTimeout to ensure spinner shows before save operation
             setTimeout(() => {
-                console.log('🔴 About to call saveScenes()');
                 this.sceneSystem.saveScenes();
-                console.log('🔴 saveScenes() completed');
-
                 spinner.style.display = 'none';
 
                 // Show overlay briefly
@@ -1254,7 +1195,6 @@ class PlatformRPG {
                 }, 1500);
             }, 10);
         });
-
 
         // Scene property inputs - use onchange events for real-time updates
         const sceneNameInput = document.getElementById('sceneName');
@@ -1282,7 +1222,6 @@ class PlatformRPG {
         }
 
     }
-
 
     handleStartPositionDrag() {
         if (!this.isDraggingStartPosition) return;
@@ -1354,8 +1293,6 @@ class PlatformRPG {
 
         // Stop free camera scrolling when switching modes
         this.stopFreeCameraScroll();
-
-        console.log('Camera mode switched to:', this.cameraMode);
     }
 
     focusPlayerOld() {
@@ -1365,8 +1302,6 @@ class PlatformRPG {
 
         // Force render to show immediate camera movement
         this.render();
-
-        console.log('Camera focused on player at:', this.cameraSystem.x);
     }
 
     positionPlayerAtSceneStart() {
@@ -1394,7 +1329,6 @@ class PlatformRPG {
             console.log('No current scene found, player remains at default position');
         }
     }
-
 
     /* Keep for reference - moved to propSystem
     initializePropZOrders() {
@@ -1632,7 +1566,6 @@ class PlatformRPG {
         }
     }
 
-
     /* Keep for reference - moved to propSystem
     deleteSelectedProp() {
         if (!this.propSystem.selectedProp) return;
@@ -1644,7 +1577,6 @@ class PlatformRPG {
         console.log('Prop deleted via Delete key');
     }
     */
-
 
     updateCursor() {
         // Default cursor
@@ -1660,7 +1592,6 @@ class PlatformRPG {
             this.canvas.style.cursor = 'move';
             return;
         }
-
 
         // Check if mouse is over any prop first (props have priority)
         // Find all props under mouse, then check the topmost one
@@ -1694,7 +1625,6 @@ class PlatformRPG {
             // Get actual position for mouse interaction (same as platformMouseHandler)
             const actualPos = this.platformSystem.data.getActualPosition(platform, this.viewport.designWidth, this.viewport.designHeight);
             const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
-
 
             // Check for resize handle first
             const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
@@ -1731,9 +1661,6 @@ class PlatformRPG {
     }
 
     // Platform-related methods have been moved to platformSystem
-
-
-
 
     async savePlatforms() {
         // Use the new scene system for saving
@@ -1778,10 +1705,6 @@ class PlatformRPG {
         }
     }
 
-
-
-
-
     updateSceneBoundaries() {
         const left = parseInt(document.getElementById('boundaryLeft').value) || 0;
         const right = parseInt(document.getElementById('boundaryRight').value) || 2000;
@@ -1799,10 +1722,7 @@ class PlatformRPG {
         }
 
         this.sceneSystem.updateSceneBoundaries(left, right, top, bottom);
-        console.log('🟩 Scene boundaries updated:', { left, right, top, bottom });
     }
-
-
 
     // Context Menu Methods
 
@@ -1877,7 +1797,6 @@ class PlatformRPG {
             this.editorSystem.transitionEnd = value;
         }
     }
-
 
     gameLoop(currentTime = 0) {
         // Calculate delta time in milliseconds

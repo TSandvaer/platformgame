@@ -125,8 +125,7 @@ class CameraManager {
             this.viewport.offsetX = 0;
         }
 
-        // Debug logging for camera constraints (can be removed for production)
-        // console.log('🎥 Camera constrained:', { target: { x: targetX, y: targetY }, actual: { x: this.data.x, y: this.data.y } });
+        // Debug logging for camera constraints (can be removed for production)
     }
 
     focusOnPlayer(player) {
@@ -139,8 +138,6 @@ class CameraManager {
         const targetY = player.y - this.canvas.height / 2;
         this.data.x = Math.max(0, targetX);
         this.data.y = Math.max(0, targetY);
-
-        console.log('Camera focused on player at:', this.data.x);
     }
 
     scrollToKeepInView(target, scrollSpeed = 5) {
@@ -163,7 +160,6 @@ class CameraManager {
         }
 
         if (oldCameraX !== this.data.x) {
-            console.log('Scrolling camera from', oldCameraX, 'to', this.data.x);
         }
     }
 

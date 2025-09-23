@@ -216,19 +216,11 @@ class InputEditor {
     saveScene() {
         const spinner = document.getElementById('saveSpinner');
         const overlay = document.getElementById('sceneSavedOverlay');
-
-        console.log('🔴 SAVE BUTTON CLICKED');
-        console.log('🔴 Current scene:', this.game.sceneSystem.data.getCurrentScene()?.name);
-        console.log('🔴 Platforms in memory:', this.game.platformSystem.platforms.length);
-        console.log('🔴 Props in memory:', this.game.propSystem.props.length);
-
         if (spinner) spinner.style.display = 'inline-block';
 
         // Use setTimeout to ensure spinner shows before save operation
         setTimeout(() => {
-            console.log('🔴 About to call saveScenes()');
             this.game.sceneSystem.saveScenes();
-            console.log('🔴 saveScenes() completed');
 
             if (spinner) spinner.style.display = 'none';
 

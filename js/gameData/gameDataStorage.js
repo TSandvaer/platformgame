@@ -26,7 +26,6 @@ class GameDataStorage {
 
         this.autoSaveTimer = setInterval(() => {
             this.dataSystem.saveCurrentData();
-            console.log('🔄 Auto-saved game data');
         }, this.autoSaveInterval);
     }
 
@@ -59,13 +58,10 @@ class GameDataStorage {
     // Load from localStorage
     loadFromLocalStorage() {
         try {
-            console.log('🔍 Looking for localStorage key:', this.storageKey);
             // Load from the main storage key
             const dataStr = localStorage.getItem(this.storageKey);
-            console.log('🔍 Found data:', dataStr ? `${dataStr.length} characters` : 'null');
             if (dataStr) {
                 const gameData = JSON.parse(dataStr);
-                console.log('📂 Loaded game data from localStorage');
                 console.log('📂 Data structure:', {
                     hasScenes: !!gameData.scenes,
                     sceneCount: gameData.scenes?.length || 0,
@@ -74,8 +70,6 @@ class GameDataStorage {
                 });
                 return gameData;
             }
-
-            console.log('⚠️ No data found in localStorage');
             return null;
         } catch (error) {
             console.error('Error loading from localStorage:', error);
@@ -93,7 +87,6 @@ class GameDataStorage {
             }
 
             const gameData = await response.json();
-            console.log(`📁 Loaded game data from ${filePath}`);
             return gameData;
         } catch (error) {
             console.error(`Error loading from file ${filePath}:`, error);
@@ -106,7 +99,6 @@ class GameDataStorage {
         try {
             localStorage.removeItem(this.storageKey);
             localStorage.removeItem(this.sceneStorageKey);
-            console.log('🗑️ Cleared localStorage data');
             return true;
         } catch (error) {
             console.error('Error clearing localStorage:', error);
@@ -119,14 +111,12 @@ class GameDataStorage {
         // Remove any remaining legacy scene data
         const legacySceneKey = 'platformGame_sceneData';
         if (localStorage.getItem(legacySceneKey)) {
-            console.log('🧹 Removing legacy scene data');
             localStorage.removeItem(legacySceneKey);
         }
 
         // Also remove very old format if it exists
         const oldScenesKey = 'platformGame_scenes';
         if (localStorage.getItem(oldScenesKey)) {
-            console.log('🧹 Removing old scenes format');
             localStorage.removeItem(oldScenesKey);
         }
     }
@@ -164,8 +154,6 @@ class GameDataStorage {
 
         try {
             localStorage.setItem(backupKey, JSON.stringify(gameData));
-            console.log(`💾 Created backup: ${backupKey}`);
-
             // Keep only the last 3 backups
             this.cleanOldBackups();
 
@@ -196,7 +184,6 @@ class GameDataStorage {
         // Remove old backups (keep only 3)
         for (let i = 3; i < backups.length; i++) {
             localStorage.removeItem(backups[i].key);
-            console.log(`🗑️ Removed old backup: ${backups[i].key}`);
         }
     }
 
@@ -206,7 +193,6 @@ class GameDataStorage {
             const dataStr = localStorage.getItem(backupKey);
             if (dataStr) {
                 const gameData = JSON.parse(dataStr);
-                console.log(`♻️ Restored from backup: ${backupKey}`);
                 return gameData;
             }
             return null;

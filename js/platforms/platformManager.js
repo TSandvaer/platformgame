@@ -23,7 +23,6 @@ class PlatformManager {
 
             const resizeHandle = this.getResizeHandle(renderPlatform, mouseX, mouseY);
             if (resizeHandle) {
-                console.log('🔧 Resize handle clicked:', resizeHandle, 'on platform:', platform.id);
                 this.platformData.isResizing = true;
                 this.platformData.resizeHandle = resizeHandle;
                 this.platformData.selectedPlatform = platform;
@@ -43,7 +42,6 @@ class PlatformManager {
             }
 
             if (this.platformData.isPointInPlatform(mouseX, mouseY, renderPlatform)) {
-                console.log('🎯 Platform clicked and selected:', platform.id, 'at', platform.x, platform.y);
                 this.platformData.isDragging = true;
                 this.platformData.selectedPlatform = platform;
                 // Store the drag offset using the difference between mouse and actual rendered position
@@ -61,7 +59,6 @@ class PlatformManager {
 
         // No platform was clicked - deselect current platform
         if (this.platformData.selectedPlatform) {
-            console.log('🎯 Deselecting platform - clicked on background');
             this.platformData.selectedPlatform = null;
             this.updatePlatformProperties();
             this.updatePlatformList();
@@ -196,10 +193,6 @@ class PlatformManager {
               width: resizeState.width,
               height: resizeState.height } :
             this.platformData.selectedPlatform;
-
-        console.log('🔧 Resize - Start State:', resizeState);
-        console.log('🔧 Resize - Mouse:', mouseX, mouseY);
-        console.log('🔧 Resize - Platform before:', this.platformData.selectedPlatform);
         const tileWidth = 32; // Display tile width
         const tileHeight = 32; // Display tile height
         const minSize = tileHeight; // Minimum size should be at least one tile
@@ -272,9 +265,6 @@ class PlatformManager {
             newX = snappedPos.x;
             newY = snappedPos.y;
         }
-
-        console.log('🔧 Resize - New dimensions:', { newX, newY, newWidth, newHeight });
-
         // Update the actual selected platform with new dimensions
         // If we used resizeStartState (rendered coordinates), we need to convert back to raw coordinates
         if (resizeState && resizeState.rawX !== undefined) {
@@ -283,9 +273,6 @@ class PlatformManager {
             const deltaY = newY - resizeState.y;
             const deltaWidth = newWidth - resizeState.width;
             const deltaHeight = newHeight - resizeState.height;
-
-            console.log('🔧 Resize - Deltas:', { deltaX, deltaY, deltaWidth, deltaHeight });
-
             // Apply deltas to the ORIGINAL raw coordinates (not current ones)
             this.platformData.selectedPlatform.x = resizeState.rawX + deltaX;
             this.platformData.selectedPlatform.y = resizeState.rawY + deltaY;
@@ -295,8 +282,6 @@ class PlatformManager {
             // Ensure width and height are never negative or zero
             this.platformData.selectedPlatform.width = Math.max(32, this.platformData.selectedPlatform.width);
             this.platformData.selectedPlatform.height = Math.max(32, this.platformData.selectedPlatform.height);
-
-            console.log('🔧 Resize - Platform after:', this.platformData.selectedPlatform);
         } else {
             // No coordinate transformation needed, use values directly
             this.platformData.selectedPlatform.x = newX;
@@ -408,7 +393,6 @@ class PlatformManager {
             if (yInput) yInput.value = Math.round(this.platformData.selectedPlatform.y || 0);
             if (widthInput) widthInput.value = this.platformData.selectedPlatform.width || 100;
             if (heightInput) heightInput.value = this.platformData.selectedPlatform.height || 20;
-            console.log('🔧 Platform selected - spriteType:', this.platformData.selectedPlatform.spriteType);
             if (spriteTypeInput) spriteTypeInput.value = this.platformData.selectedPlatform.spriteType || 'color';
 
             // Handle positioning properties

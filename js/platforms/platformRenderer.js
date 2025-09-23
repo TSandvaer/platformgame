@@ -80,7 +80,6 @@ class PlatformRenderer {
         const checkAllLoaded = () => {
             if (loadedCount === totalImages) {
                 this.spritesLoaded = true;
-                console.log('🎨 Platform sprites loaded');
                 if (this.onSpritesLoadedCallback) {
                     this.onSpritesLoadedCallback();
                 }

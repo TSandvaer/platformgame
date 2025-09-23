@@ -75,30 +75,25 @@ class GameDataSystem {
             const hasTutorialPlatforms = tutorialScene && tutorialScene.platforms && tutorialScene.platforms.length > 0;
 
             if (hasTutorialPlatforms || savedData.scenes.length > 1) {
-                console.log('✅ Loaded valid game data from localStorage');
                 this.applyGameData(savedData);
                 return;
             } else {
-                console.log('⚠️ localStorage data appears incomplete, loading from file instead');
             }
         }
 
         // Try to load from gameData.json file
         const fileData = await this.storage.loadFromFile('./gameData.json');
         if (fileData) {
-            console.log('✅ Loaded game data from gameData.json');
             this.applyGameData(fileData);
             return;
         }
 
         // Check if scene system already has default scenes before applying empty defaults
         if (this.game.sceneSystem && this.game.sceneSystem.data.scenes.length > 0) {
-            console.log('🆕 SceneSystem already has scenes, not overwriting with empty defaults');
             // Collect current scene data instead of overwriting
             const currentGameData = this.collectCurrentGameData();
             this.gameData = currentGameData;
         } else {
-            console.log('🆕 Starting with default game state');
             this.applyGameData(this.defaultGameData);
         }
     }
@@ -141,8 +136,6 @@ class GameDataSystem {
 
         // Save the imported data to localStorage
         this.storage.saveToLocalStorage(gameData);
-        console.log('💾 Imported data saved to localStorage');
-
         return true;
     }
 
@@ -150,7 +143,6 @@ class GameDataSystem {
     saveCurrentData() {
         const gameData = this.collectCurrentGameData();
         this.storage.saveToLocalStorage(gameData);
-        console.log('💾 Game data saved to localStorage');
     }
 
     // Collect current game state
@@ -235,8 +227,6 @@ class GameDataSystem {
                 this.game.propSystem.props = [];
                 this.game.propSystem.updatePropList();
             }
-
-            console.log('🗑️ All game data cleared');
         }
     }
 }

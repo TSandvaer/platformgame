@@ -9,7 +9,6 @@ class CameraSystem {
     init(canvas, viewport) {
         this.manager.init(canvas, viewport);
         this.controller.init();
-        console.log('📷 Camera system initialized');
     }
 
     // Update camera position based on game state
@@ -109,7 +108,6 @@ class CameraSystem {
     // Scene transitions
     resetForScene() {
         this.data.reset();
-        console.log('📷 Camera reset for scene transition');
     }
 
     // Debug information

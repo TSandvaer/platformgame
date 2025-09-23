@@ -79,7 +79,6 @@ class PropManager {
                     return { handled: true, type: 'multi-drag', prop: topProp };
                 } else if (ctrlPressed) {
                     // Ctrl+click: toggle selection
-                    console.log('Ctrl+click on prop:', topProp.id, 'groupId:', topProp.groupId);
                     if (this.propData.selectedProps.includes(topProp)) {
                         // Remove from selection
                         this.propData.removeFromSelection(topProp);
@@ -97,14 +96,11 @@ class PropManager {
                     return { handled: true, type: 'multi-select', prop: topProp };
                 } else {
                     // Single selection - if prop is grouped, select entire group
-                    console.log('Selecting single prop:', topProp.id, 'groupId:', topProp.groupId);
-
                     if (topProp.groupId) {
                         // Select all props in the same group
                         const groupMembers = this.propData.getPropsInSameGroup(topProp);
                         this.propData.selectedProps = groupMembers;
                         this.propData.selectedProp = topProp; // Set clicked prop as primary
-                        console.log('Selected entire group:', groupMembers.length, 'props');
                     } else {
                         // Single ungrouped prop
                         this.propData.selectedProps = [topProp];
@@ -361,7 +357,6 @@ class PropManager {
 
         this.updatePropList();
     }
-
 
     // Z-order management UI
     movePropToFront() {
