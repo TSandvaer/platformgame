@@ -52,6 +52,12 @@ class PlayerController {
     }
 
     updateDevelopmentControls(deltaTime, propSystem) {
+        // Don't allow movement if player is dead
+        if (this.data.isDead) {
+            this.animator.updateAnimationBasedOnState(false, true);
+            return;
+        }
+
         // Check if we're nudging a prop
         const isNudgingProp = propSystem &&
             (propSystem.selectedProp ||
@@ -121,6 +127,13 @@ class PlayerController {
     }
 
     updateProductionControls() {
+        // Don't allow movement if player is dead
+        if (this.data.isDead) {
+            this.data.velocityX = 0; // Stop any existing momentum
+            this.animator.updateAnimationBasedOnState(false, false);
+            return;
+        }
+
         // Check if player can run (has stamina and not in cooldown)
         const canRun = this.data.stamina > 0 && this.data.staminaExhaustedTimer <= 0;
         const wantsToRun = this.keys['shift'];

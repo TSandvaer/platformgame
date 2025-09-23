@@ -55,6 +55,11 @@ class PlayerData {
         this.isTryingToRun = false; // Whether player is holding shift while moving
         this.staminaExhaustedTimer = 0; // Cooldown timer after stamina depletion
 
+        // Death state
+        this.isDead = false;
+        this.deathTimer = 0; // Timer for death sequence (3 seconds)
+        this.deathStartTime = 0;
+
         // Tracking
         this.lastValidPosition = { x: 100, y: 400 };
     }
@@ -77,6 +82,9 @@ class PlayerData {
         this.isRunning = false;
         this.isTryingToRun = false;
         this.staminaExhaustedTimer = 0;
+        this.isDead = false;
+        this.deathTimer = 0;
+        this.deathStartTime = 0;
         this.lastValidPosition = { x: 100, y: 400 };
 
         // Reset damage system
@@ -156,16 +164,21 @@ class PlayerData {
     }
 
     updateDamageSystem(deltaTime, currentTime, isDevelopmentMode = false) {
-        // Update damage visual timer
+        // Update damage visual timer (but clear it if player is dead)
         if (this.isDamaged && this.damageTimer > 0) {
-            this.damageTimer -= deltaTime;
-            if (this.damageTimer <= 0) {
+            if (this.isDead) {
                 this.isDamaged = false;
+                this.damageTimer = 0;
+            } else {
+                this.damageTimer -= deltaTime;
+                if (this.damageTimer <= 0) {
+                    this.isDamaged = false;
+                }
             }
         }
 
-        // Apply damage from touching props (only in production mode)
-        if (!isDevelopmentMode && this.damagingProps.length > 0 && currentTime - this.lastDamageTime >= this.damageCooldown) {
+        // Apply damage from touching props (only in production mode and if not dead)
+        if (!isDevelopmentMode && !this.isDead && this.damagingProps.length > 0 && currentTime - this.lastDamageTime >= this.damageCooldown) {
             // Find highest damage among all touching props
             const maxDamage = Math.max(...this.damagingProps.map(prop => prop.damagePerSecond));
 
@@ -188,6 +201,39 @@ class PlayerData {
 
             if (this.health >= this.maxHealth) {
                 console.log('Health fully regenerated!');
+            }
+        }
+
+        // Check for death
+        if (this.health <= 0 && !this.isDead) {
+            this.isDead = true;
+            this.deathStartTime = currentTime;
+            this.deathTimer = 3000; // 3 seconds in milliseconds
+            console.log('💀 Player died! Respawning in 3 seconds...');
+        }
+
+        // Handle death timer
+        if (this.isDead && this.deathTimer > 0) {
+            this.deathTimer -= deltaTime;
+            if (this.deathTimer <= 0) {
+                // Respawn player
+                this.isDead = false;
+                this.health = this.maxHealth;
+                this.stamina = this.maxStamina;
+
+                // Reset position to last valid or default spawn
+                if (this.lastValidPosition) {
+                    this.x = this.lastValidPosition.x;
+                    this.y = this.lastValidPosition.y;
+                } else {
+                    this.x = 100;
+                    this.y = 400;
+                }
+
+                this.velocityX = 0;
+                this.velocityY = 0;
+                this.onGround = false;
+                console.log('✨ Player respawned!');
             }
         }
 

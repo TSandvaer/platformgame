@@ -265,6 +265,17 @@ class PlatformRPG {
         }
     }
 
+    updateDeathOverlay() {
+        const deathOverlay = document.getElementById('deathOverlay');
+        if (!deathOverlay) return;
+
+        // Show overlay when player is dead
+        if (this.player.isDead) {
+            deathOverlay.style.display = 'flex';
+        } else {
+            deathOverlay.style.display = 'none';
+        }
+    }
 
     applyCameraBoundaryConstraints(targetX, targetY) {
         const currentScene = this.sceneSystem.currentScene;
@@ -825,6 +836,7 @@ class PlatformRPG {
         this.handleInput();
         this.updatePhysics();
         this.cameraSystem.update(this.player, this.sceneSystem, this.platformSystem, this.propSystem, this.isDraggingStartPosition);
+        this.updateDeathOverlay();
         this.render();
 
         requestAnimationFrame((time) => this.gameLoop(time));
