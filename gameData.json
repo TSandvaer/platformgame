@@ -1355,7 +1355,7 @@
         {
           "id": 2,
           "type": "orc",
-          "x": 1012.8040222571915,
+          "x": 751.380031872678,
           "y": 570,
           "width": 44,
           "height": 59,
@@ -1377,11 +1377,11 @@
             "height": 71.4260407440213
           },
           "currentAnimation": "walk",
-          "frameIndex": 3,
-          "frameTimer": 33.39999999999782,
+          "frameIndex": 2,
+          "frameTimer": 70.79999999999927,
           "frameRate": 150,
-          "facing": "right",
-          "velocityX": 0.6602147717593368,
+          "facing": "left",
+          "velocityX": -0.6661655608186553,
           "velocityY": 0,
           "onGround": true,
           "speed": 2,
@@ -1396,7 +1396,7 @@
           "isDead": false,
           "isDamaged": false,
           "damageTimer": 0,
-          "patrolDirection": 1,
+          "patrolDirection": -1,
           "patrolSpeed": 1,
           "deathTimer": 0,
           "flashTimer": 0
@@ -1404,7 +1404,7 @@
         {
           "id": 5,
           "type": "orc",
-          "x": 1819.8772433707857,
+          "x": 1740.7760333063397,
           "y": 861,
           "width": 44,
           "height": 59,
@@ -1426,11 +1426,11 @@
             "height": 76.52790079716567
           },
           "currentAnimation": "walk",
-          "frameIndex": 6,
-          "frameTimer": 129.29999999999927,
+          "frameIndex": 2,
+          "frameTimer": 133.39999999999964,
           "frameRate": 150,
-          "facing": "left",
-          "velocityX": -0.6602147717593368,
+          "facing": "right",
+          "velocityX": 0.6661655608186553,
           "velocityY": 0,
           "onGround": true,
           "speed": 2,
@@ -1441,13 +1441,13 @@
           "attackTimer": 0,
           "attackDuration": 600,
           "attackCooldown": 1000,
-          "lastAttackTime": 0,
+          "lastAttackTime": 1758734809703,
           "isDead": false,
           "isDamaged": false,
           "damageTimer": 0,
           "deathTimer": 0,
           "flashTimer": 0,
-          "patrolDirection": -1,
+          "patrolDirection": 1,
           "patrolSpeed": 1
         }
       ],
@@ -1493,7 +1493,7 @@
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-24T17:12:09.041Z"
+        "modified": "2025-09-24T17:28:49.450Z"
       }
     },
     {
@@ -1599,11 +1599,11 @@
       },
       "metadata": {
         "created": "2025-09-21T13:12:09.327Z",
-        "modified": "2025-09-24T17:12:29.834Z"
+        "modified": "2025-09-24T17:18:11.599Z"
       }
     }
   ],
-  "currentSceneId": "2",
+  "currentSceneId": "1",
   "startSceneId": "1",
   "characters": [],
   "classes": [],

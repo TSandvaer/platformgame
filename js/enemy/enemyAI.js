@@ -69,18 +69,19 @@ class EnemyAI {
             case 'attacking':
                 // Face the player when attacking (playerCenter already declared above)
                 enemy.facing = playerCenter.x > enemyCenter.x ? 'right' : 'left';
+                enemy.target = playerCenter;
 
-                if (distanceToPlayer > 80) {
-                    // Player moved away, resume chasing
+                if (!playerInAttractionZone) {
+                    // Player left attraction zone, return to idle or patrolling
+                    enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
+                    enemy.target = null;
+                } else if (distanceToPlayer > 80) {
+                    // Player still in attraction zone but moved out of attack range, resume chasing
                     enemy.aiState = 'chasing';
-                } else if (!enemy.isAttacking) {
-                    // Try to attack if not already attacking
-                    const currentTime = Date.now();
-                    if (currentTime - enemy.lastAttackTime > enemy.attackCooldown) {
-                        enemy.lastAttackTime = currentTime;
-                        // Attack will be handled by the animation system
-                    }
+                    enemy.target = playerCenter;
                 }
+                // Note: Attack logic is handled by the combat system in enemySystem.js
+                // We stay in 'attacking' state as long as player is close and in attraction zone
                 break;
         }
     }
@@ -250,7 +251,7 @@ class EnemyAI {
 
     // Combat helper methods
     canAttackPlayer(enemy, player) {
-        if (enemy.isAttacking || enemy.isDead) return false;
+        if (enemy.isDead) return false;
 
         const currentTime = Date.now();
         if (currentTime - enemy.lastAttackTime < enemy.attackCooldown) return false;
