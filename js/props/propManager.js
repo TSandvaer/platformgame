@@ -49,6 +49,8 @@ class PropManager {
                 // Rotation mode - select and start rotating
                 this.propData.selectedProps = [topProp];
                 this.propData.selectedProp = topProp;
+                this.updatePropProperties();
+                this.updatePropList();
                 this.isRotatingProp = true;
                 this.rotationStartY = mouseY;
                 this.rotationStartAngle = topProp.rotation || 0;
@@ -62,6 +64,8 @@ class PropManager {
                     // Start dragging all selected props (including full groups)
                     this.propData.isDraggingMultiple = true;
                     this.propData.selectedProp = topProp; // Set as primary for UI
+                    this.updatePropProperties();
+                    this.updatePropList();
 
                     // Calculate offsets for all props in expanded selection
                     this.propData.multiDragOffsets.clear();
@@ -88,10 +92,14 @@ class PropManager {
                         } else {
                             this.propData.selectedProp = null;
                         }
+                        this.updatePropProperties();
+                        this.updatePropList();
                     } else {
                         // Add to selection
                         this.propData.addToSelection(topProp);
                         this.propData.selectedProp = topProp; // Set as primary
+                        this.updatePropProperties();
+                        this.updatePropList();
                     }
                     return { handled: true, type: 'multi-select', prop: topProp };
                 } else {
@@ -101,10 +109,14 @@ class PropManager {
                         const groupMembers = this.propData.getPropsInSameGroup(topProp);
                         this.propData.selectedProps = groupMembers;
                         this.propData.selectedProp = topProp; // Set clicked prop as primary
+                        this.updatePropProperties();
+                        this.updatePropList();
                     } else {
                         // Single ungrouped prop
                         this.propData.selectedProps = [topProp];
                         this.propData.selectedProp = topProp;
+                        this.updatePropProperties();
+                        this.updatePropList();
                     }
                     this.propData.isDraggingProp = true;
 
@@ -334,6 +346,21 @@ class PropManager {
             if (isObstacleInput) isObstacleInput.checked = this.propData.selectedProp.isObstacle;
             if (damageInput) damageInput.value = this.propData.selectedProp.damagePerSecond || 0;
             if (typeSelect) typeSelect.value = this.propData.selectedProp.type;
+
+            // Update the type display for single or multiple props
+            const selectedPropTypeElement = document.getElementById('selectedPropType');
+            if (selectedPropTypeElement) {
+                if (this.propData.selectedProps.length === 1) {
+                    // Single prop - show its type
+                    selectedPropTypeElement.textContent = this.propData.selectedProp.type;
+                } else if (this.propData.selectedProps.length > 1) {
+                    // Multiple props - show all types separated by comma
+                    const types = this.propData.selectedProps.map(prop => prop.type);
+                    const uniqueTypes = [...new Set(types)]; // Remove duplicates
+                    selectedPropTypeElement.textContent = uniqueTypes.join(', ');
+                }
+            }
+
             if (zOrderDisplay) zOrderDisplay.textContent = this.propData.selectedProp.zOrder || 0;
         } else {
             propertiesDiv.style.display = 'none';

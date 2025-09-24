@@ -20,7 +20,32 @@ class EnemySystem {
     update(deltaTime, player, platforms) {
         if (!this.isInitialized) return;
 
-        for (const enemy of this.data.enemies) {
+        // Use a reverse for loop to safely remove dead enemies
+        for (let i = this.data.enemies.length - 1; i >= 0; i--) {
+            const enemy = this.data.enemies[i];
+
+            // Handle death timer countdown
+            if (enemy.isDead) {
+                enemy.deathTimer -= deltaTime;
+                enemy.flashTimer += deltaTime; // Update flash timer for blinking effect
+                if (enemy.deathTimer <= 0) {
+                    // Remove the corpse
+                    console.log(`Enemy ${enemy.id} corpse removed after 2 seconds`);
+                    this.data.enemies.splice(i, 1);
+                    this.animators.delete(enemy.id);
+
+                    // Update UI if this was the selected enemy
+                    if (this.data.selectedEnemy && this.data.selectedEnemy.id === enemy.id) {
+                        this.data.selectedEnemy = null;
+                        if (window.uiEventHandler) {
+                            window.uiEventHandler.updateEnemyList();
+                            window.uiEventHandler.updateEnemyProperties();
+                        }
+                    }
+                    continue; // Skip to next enemy since this one was removed
+                }
+            }
+
             // Update AI (includes physics and platform collision detection)
             this.ai.update(enemy, deltaTime, player, platforms);
 
@@ -36,8 +61,10 @@ class EnemySystem {
             animator.updateDamageState(deltaTime);
             animator.updateAnimationBasedOnState(Math.abs(enemy.velocityX) > 0.5);
 
-            // Handle combat
-            this.handleCombat(enemy, player, animator);
+            // Handle combat (only if enemy is alive)
+            if (!enemy.isDead) {
+                this.handleCombat(enemy, player, animator);
+            }
         }
     }
 
@@ -103,8 +130,10 @@ class EnemySystem {
         if (enemy.health <= 0) {
             enemy.health = 0;
             enemy.isDead = true;
+            enemy.deathTimer = 2000; // 2 seconds in milliseconds
+            enemy.flashTimer = 0; // Initialize flash timer for death effect
             animator.startDeath();
-            console.log(`Enemy ${enemy.id} died`);
+            console.log(`Enemy ${enemy.id} died - corpse will disappear in 2 seconds`);
         } else {
             animator.takeDamage();
         }

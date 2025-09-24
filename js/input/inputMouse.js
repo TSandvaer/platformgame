@@ -15,6 +15,25 @@ class InputMouse {
         this.setupMouseListeners();
     }
 
+    handlePlayerAttack(mouseX, mouseY) {
+        if (!this.game.player || this.game.player.isAttacking) return;
+
+        // Calculate direction from player to mouse
+        const playerCenterX = this.game.player.x + this.game.player.width / 2;
+        const playerCenterY = this.game.player.y + this.game.player.height / 2;
+
+        // Determine facing direction based on mouse position
+        if (mouseX > playerCenterX) {
+            this.game.player.facing = 'right';
+        } else {
+            this.game.player.facing = 'left';
+        }
+
+        // Trigger attack through the player system
+        this.game.playerSystem.controller.startAttack();
+        console.log('🎯 Player attacking towards mouse, facing:', this.game.player.facing);
+    }
+
     setupMouseListeners() {
         // Canvas mouse events
         this.game.canvas.addEventListener('mousedown', (e) => this.handleCanvasMouseDown(e));
@@ -31,7 +50,18 @@ class InputMouse {
 
     handleCanvasMouseDown(e) {
         console.log('🎯 Canvas mouse down, development mode:', this.game.isDevelopmentMode);
-        if (!this.game.isDevelopmentMode) return;
+
+        // In production mode, handle player attack first (no other interactions)
+        if (!this.game.isDevelopmentMode) {
+            if (e.button === 0 && this.game.player) {
+                const rect = this.game.canvas.getBoundingClientRect();
+                const clientMouseX = e.clientX - rect.left;
+                const clientMouseY = e.clientY - rect.top;
+                const worldCoords = this.game.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
+                this.handlePlayerAttack(worldCoords.x, worldCoords.y);
+            }
+            return;
+        }
 
         // Hide context menu on any click (left click)
         if (e.button === 0) {
@@ -129,6 +159,21 @@ class InputMouse {
                     window.uiEventHandler.updateEnemyList();
                     window.uiEventHandler.updateEnemyProperties();
                 }
+            }
+
+            // Handle player attack in development mode - only if nothing else was handled and not in editor modes
+            if (e.button === 0 && this.game.player &&
+                !platformResult.handled &&
+                (!propResult || !propResult.handled) &&
+                !enemyHandled &&
+                !this.game.enemySystem.mouseHandler.enemyPlacementMode &&
+                !this.game.enemySystem.mouseHandler.isDrawingAttractionZone &&
+                !this.game.enemySystem.mouseHandler.isDrawingMovementZone &&
+                !this.game.isAddingPlatform &&
+                !this.game.sceneSystem.isAddingTransition) {
+
+                this.handlePlayerAttack(mouseX, mouseY);
+                console.log('🎯 Player attack in development mode');
             }
         }
     }

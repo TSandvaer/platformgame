@@ -32,6 +32,12 @@ class EnemyRenderer {
     renderSprite(enemy, frame, viewport, camera) {
         this.ctx.save();
 
+        // Check if dead enemy should be visible (blinking effect)
+        if (enemy.isDead && !this.shouldRenderDeadEnemy(enemy)) {
+            this.ctx.restore();
+            return;
+        }
+
         // Apply camera and viewport transformation
         let renderX = enemy.x;
         let renderY = enemy.y;
@@ -81,6 +87,12 @@ class EnemyRenderer {
 
     renderFallback(enemy, viewport, camera) {
         this.ctx.save();
+
+        // Check if dead enemy should be visible (blinking effect)
+        if (enemy.isDead && !this.shouldRenderDeadEnemy(enemy)) {
+            this.ctx.restore();
+            return;
+        }
 
         // Use direct world coordinates like player renderer (camera transformation handled elsewhere)
         let renderX = enemy.x;
@@ -275,5 +287,21 @@ class EnemyRenderer {
         this.ctx.fillText('SELECTED', renderX + renderWidth / 2, renderY - 8);
 
         this.ctx.restore();
+    }
+
+    shouldRenderDeadEnemy(enemy) {
+        // Create blinking effect - enemy blinks faster as death timer gets lower
+        const blinkInterval = 150; // Base blink speed in milliseconds
+        const fastBlinkThreshold = 500; // Start fast blinking in last 500ms
+
+        let currentBlinkInterval = blinkInterval;
+        if (enemy.deathTimer <= fastBlinkThreshold) {
+            // Fast blinking in the final moments (75ms intervals)
+            currentBlinkInterval = 75;
+        }
+
+        // Use flashTimer to determine if enemy should be visible
+        // Math.floor(enemy.flashTimer / interval) % 2 creates alternating 0 and 1
+        return Math.floor(enemy.flashTimer / currentBlinkInterval) % 2 === 0;
     }
 }

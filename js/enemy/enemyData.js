@@ -90,6 +90,8 @@ class EnemyData {
             isDead: false,
             isDamaged: false,
             damageTimer: 0,
+            deathTimer: 0,
+            flashTimer: 0,
 
             // Patrol state
             patrolDirection: 1, // 1 for right, -1 for left

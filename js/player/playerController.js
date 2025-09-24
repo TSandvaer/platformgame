@@ -18,18 +18,8 @@ class PlayerController {
             return true; // Handled
         }
 
-        // Handle Ctrl key for attack (but not in development mode with props selected)
-        if (key === 'Control' && !this.data.isAttacking) {
-            // Don't attack if in development mode and props are selected
-            const hasSelectedProps = isDevelopmentMode && propSystem &&
-                (propSystem.selectedProp ||
-                 (propSystem.selectedProps && propSystem.selectedProps.length > 0));
-
-            if (!hasSelectedProps) {
-                this.startAttack();
-                return true; // Handled
-            }
-        }
+        // Ctrl key attack disabled - now using mouse click for attacks
+        // (keeping this comment for reference - attacks now handled by mouse input)
 
         return false; // Not handled
     }

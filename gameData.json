@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-22"
+    "lastModified": "2025-09-24"
   },
   "scenes": [
     {
@@ -12,7 +12,7 @@
       "platforms": [
         {
           "id": 0,
-          "x": 3,
+          "x": 5.283621837550072,
           "y": 920,
           "width": 1152,
           "height": 32,
@@ -66,9 +66,9 @@
         },
         {
           "id": 9,
-          "x": 494.03011514614695,
-          "y": 630.3346852607835,
-          "width": 672,
+          "x": 517.28362183755,
+          "y": 629.482488190211,
+          "width": 640,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "grass",
@@ -80,8 +80,8 @@
       "props": [
         {
           "id": 2,
-          "x": 1033.555809655966,
-          "y": 590.0988143155906,
+          "x": 1071.8106188465486,
+          "y": 591.8020752159503,
           "type": "barrel",
           "isObstacle": true,
           "positioning": "absolute",
@@ -91,8 +91,8 @@
         },
         {
           "id": 3,
-          "x": 353.98759964570417,
-          "y": 775.2612931798051,
+          "x": 346.3348095659876,
+          "y": 749.7519929140832,
           "type": "crate",
           "isObstacle": true,
           "positioning": "absolute",
@@ -132,7 +132,7 @@
         },
         {
           "id": 7,
-          "x": 899.0416297608504,
+          "x": 898.1894326902778,
           "y": 599.1054030115147,
           "type": "smallPot",
           "isObstacle": false,
@@ -143,8 +143,8 @@
         },
         {
           "id": 8,
-          "x": 813.3410097431356,
-          "y": 585.6563330380868,
+          "x": 805.6882196634189,
+          "y": 587.3569530558017,
           "type": "bigPot",
           "isObstacle": false,
           "positioning": "absolute",
@@ -212,7 +212,7 @@
         },
         {
           "id": 14,
-          "x": 664.5447298494244,
+          "x": 665.3950398582817,
           "y": 537.3569530558016,
           "type": "signPostMultidirectional",
           "isObstacle": false,
@@ -272,11 +272,11 @@
         },
         {
           "id": 19,
-          "x": 883.9418672930124,
-          "y": 817.1409277745156,
+          "x": 883.9418672930126,
+          "y": 818.8415477922305,
           "type": "signWall",
           "isObstacle": false,
-          "zOrder": -4,
+          "zOrder": -21,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
@@ -296,7 +296,7 @@
         },
         {
           "id": 21,
-          "x": 930.5596007046388,
+          "x": 929.7092906957814,
           "y": 843.716970052848,
           "type": "signPaper2",
           "isObstacle": false,
@@ -333,10 +333,10 @@
         {
           "id": 24,
           "x": 2431.501328609389,
-          "y": 634.1718334809566,
+          "y": 632.4712134632418,
           "type": "tree1",
           "isObstacle": false,
-          "zOrder": 2,
+          "zOrder": -16,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
@@ -344,8 +344,8 @@
         },
         {
           "id": 25,
-          "x": 960.5447298494244,
-          "y": 555.3569530558016,
+          "x": 958.8441098317096,
+          "y": 548.5544729849424,
           "type": "bigCrate",
           "isObstacle": false,
           "zOrder": 1,
@@ -368,11 +368,11 @@
         },
         {
           "id": 27,
-          "x": 889.715117957317,
-          "y": 792.9788374290772,
+          "x": 887.164187930745,
+          "y": 822.7396877390861,
           "type": "torch",
           "isObstacle": false,
-          "zOrder": 1,
+          "zOrder": 2,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
@@ -380,8 +380,8 @@
         },
         {
           "id": 28,
-          "x": 385.2285208148804,
-          "y": 772.5438441098318,
+          "x": 983.8467670504872,
+          "y": 825.2630646589903,
           "type": "torch",
           "isObstacle": false,
           "zOrder": 1,
@@ -441,19 +441,20 @@
         {
           "id": 35,
           "type": "fenceBoard1",
-          "x": 1188.7333923826395,
-          "y": 870.7705934455272,
+          "x": 1187.8793082503519,
+          "y": 870.7743675689576,
           "isObstacle": false,
-          "zOrder": 1,
+          "zOrder": 3,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "rotation": 0.11930758988015897
         },
         {
           "id": 36,
           "type": "fenceBoard2",
-          "x": 1191.2843224092119,
+          "x": 1187.032772364925,
           "y": 885.2258635961028,
           "isObstacle": false,
           "zOrder": 2,
@@ -503,7 +504,7 @@
         {
           "id": 43,
           "type": "fenceBoard3",
-          "x": 1259.3091231178032,
+          "x": 1260.1594331266606,
           "y": 869.9202834366697,
           "isObstacle": false,
           "zOrder": 6,
@@ -530,7 +531,7 @@
           "id": 46,
           "type": "fencePoleSpiked",
           "x": 1433.6226749335694,
-          "y": 865.2550930026574,
+          "y": 869.2550930026574,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -544,7 +545,7 @@
           "id": 47,
           "type": "fenceBoardShort",
           "x": 1448.9282550930025,
-          "y": 877.159433126661,
+          "y": 881.159433126661,
           "isObstacle": false,
           "zOrder": -8,
           "positioning": "absolute",
@@ -558,7 +559,7 @@
           "id": 48,
           "type": "fenceBoardShort",
           "x": 1448.9282550930025,
-          "y": 895.0159433126663,
+          "y": 899.0159433126663,
           "isObstacle": false,
           "zOrder": -9,
           "positioning": "absolute",
@@ -572,7 +573,7 @@
           "id": 49,
           "type": "fencePoleSpiked",
           "x": 1466.784765279008,
-          "y": 864.4047829937999,
+          "y": 868.4047829937999,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -586,7 +587,7 @@
           "id": 50,
           "type": "fenceBoardShort",
           "x": 1482.090345438441,
-          "y": 876.3091231178036,
+          "y": 880.3091231178036,
           "isObstacle": false,
           "zOrder": 2,
           "positioning": "absolute",
@@ -600,7 +601,7 @@
           "id": 51,
           "type": "fenceBoardShort",
           "x": 1482.090345438441,
-          "y": 894.1656333038088,
+          "y": 898.1656333038088,
           "isObstacle": false,
           "zOrder": 3,
           "positioning": "absolute",
@@ -614,7 +615,7 @@
           "id": 52,
           "type": "fencePoleSpiked",
           "x": 1499.096545615589,
-          "y": 865.2550930026573,
+          "y": 869.2550930026573,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -628,7 +629,7 @@
           "id": 53,
           "type": "fenceBoardShort",
           "x": 1514.4021257750221,
-          "y": 877.1594331266609,
+          "y": 881.1594331266609,
           "isObstacle": false,
           "zOrder": 2,
           "positioning": "absolute",
@@ -642,7 +643,7 @@
           "id": 54,
           "type": "fenceBoardShort",
           "x": 1514.4021257750221,
-          "y": 895.0159433126663,
+          "y": 899.0159433126663,
           "isObstacle": false,
           "zOrder": 3,
           "positioning": "absolute",
@@ -656,7 +657,7 @@
           "id": 55,
           "type": "fencePoleSpiked",
           "x": 1532.2586359610277,
-          "y": 864.4047829937999,
+          "y": 868.4047829937999,
           "isObstacle": false,
           "zOrder": 4,
           "positioning": "absolute",
@@ -670,7 +671,7 @@
           "id": 56,
           "type": "fenceBoardShort",
           "x": 1547.5642161204607,
-          "y": 876.3091231178036,
+          "y": 880.3091231178036,
           "isObstacle": false,
           "zOrder": 5,
           "positioning": "absolute",
@@ -684,7 +685,7 @@
           "id": 57,
           "type": "fenceBoardShort",
           "x": 1547.5642161204607,
-          "y": 894.1656333038087,
+          "y": 898.1656333038087,
           "isObstacle": false,
           "zOrder": 6,
           "positioning": "absolute",
@@ -698,7 +699,7 @@
           "id": 58,
           "type": "fencePoleSpiked",
           "x": 1563.7201062887511,
-          "y": 864.4047829937999,
+          "y": 868.4047829937999,
           "isObstacle": false,
           "zOrder": 10,
           "positioning": "absolute",
@@ -933,7 +934,7 @@
           "id": 82,
           "type": "grass7",
           "x": 218.71990604815028,
-          "y": 894.5619495008808,
+          "y": 895.4122595097382,
           "isObstacle": false,
           "zOrder": 2,
           "positioning": "absolute",
@@ -945,7 +946,7 @@
         {
           "id": 83,
           "type": "grass8",
-          "x": 324.6975924838521,
+          "x": 324.69759248385213,
           "y": 902.4539048737522,
           "isObstacle": false,
           "zOrder": 3,
@@ -958,20 +959,21 @@
         {
           "id": 84,
           "type": "grass9",
-          "x": 69.90017615971817,
-          "y": 901.3264826776277,
+          "x": 70,
+          "y": 901,
           "isObstacle": false,
           "zOrder": 4,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "damagePerSecond": 20
         },
         {
           "id": 85,
           "type": "crate",
-          "x": 261.8954827280779,
+          "x": 262.7457927369353,
           "y": 814.6501328609389,
           "isObstacle": true,
           "zOrder": 1,
@@ -1023,7 +1025,7 @@
         {
           "id": 89,
           "type": "stone3",
-          "x": 127,
+          "x": 127.8503100088574,
           "y": 896,
           "isObstacle": true,
           "zOrder": 5,
@@ -1036,8 +1038,8 @@
         {
           "id": 90,
           "type": "stone2",
-          "x": -15,
-          "y": 878,
+          "x": -16.700620017714858,
+          "y": 875.4490699734276,
           "isObstacle": true,
           "zOrder": 6,
           "positioning": "absolute",
@@ -1208,7 +1210,7 @@
           "x": 2363.0161376120523,
           "y": 783.88928255093,
           "isObstacle": false,
-          "zOrder": 29,
+          "zOrder": -15,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
@@ -1292,6 +1294,159 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0
+        },
+        {
+          "id": 111,
+          "type": "trainingTargetDoll",
+          "x": 2755.4558138602324,
+          "y": 790.0367623210389,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": -0.22292237453693375
+        },
+        {
+          "id": 112,
+          "type": "grass9",
+          "x": 280,
+          "y": 901,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0
+        },
+        {
+          "id": 113,
+          "type": "pumpkin1",
+          "x": 2433,
+          "y": 873,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 10
+        },
+        {
+          "id": 114,
+          "type": "mossyBrickWall",
+          "x": 3227.776793622674,
+          "y": 857.2010628875112,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0
+        }
+      ],
+      "enemies": [
+        {
+          "id": 2,
+          "type": "orc",
+          "x": 1004.4344207253444,
+          "y": 570,
+          "width": 44,
+          "height": 59,
+          "health": 100,
+          "maxHealth": 100,
+          "damage": 20,
+          "isMoving": true,
+          "movementZone": {
+            "enabled": true,
+            "startX": 529.7431355181577,
+            "endX": 1132.6129317980515,
+            "y": 629.482488190211
+          },
+          "attractionZone": {
+            "enabled": true,
+            "x": 524.6412754650133,
+            "y": 560.4428697962799,
+            "width": 628.3790965456157,
+            "height": 71.4260407440213
+          },
+          "currentAnimation": "walk",
+          "frameIndex": 3,
+          "frameTimer": 25,
+          "frameRate": 150,
+          "facing": "right",
+          "velocityX": 0.701991481292165,
+          "velocityY": 0,
+          "onGround": true,
+          "speed": 2,
+          "aiState": "patrolling",
+          "target": null,
+          "lastPlayerPosition": null,
+          "isAttacking": false,
+          "attackTimer": 0,
+          "attackDuration": 600,
+          "attackCooldown": 1000,
+          "lastAttackTime": 0,
+          "isDead": false,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "patrolDirection": 1,
+          "patrolSpeed": 1
+        },
+        {
+          "id": 5,
+          "type": "orc",
+          "x": 1663.4360237814117,
+          "y": 861,
+          "width": 44,
+          "height": 59,
+          "health": 100,
+          "maxHealth": 100,
+          "damage": 20,
+          "isMoving": true,
+          "movementZone": {
+            "enabled": true,
+            "startX": 1615.5890168290523,
+            "endX": 1889.3888396811337,
+            "y": 920
+          },
+          "attractionZone": {
+            "enabled": true,
+            "x": 760.1824623560674,
+            "y": 841.8954827280779,
+            "width": 1278.8662533215233,
+            "height": 76.52790079716567
+          },
+          "currentAnimation": "walk",
+          "frameIndex": 3,
+          "frameTimer": 133.5,
+          "frameRate": 150,
+          "facing": "left",
+          "velocityX": -0.701991481292165,
+          "velocityY": 0,
+          "onGround": true,
+          "speed": 2,
+          "aiState": "patrolling",
+          "target": null,
+          "lastPlayerPosition": null,
+          "isAttacking": false,
+          "attackTimer": 0,
+          "attackDuration": 600,
+          "attackCooldown": 1000,
+          "lastAttackTime": 0,
+          "isDead": false,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "deathTimer": 0,
+          "flashTimer": 0,
+          "patrolDirection": -1,
+          "patrolSpeed": 1
         }
       ],
       "background": {
@@ -1336,7 +1491,7 @@
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-22T19:25:08.777Z"
+        "modified": "2025-09-24T16:32:23.301Z"
       }
     },
     {
@@ -1367,10 +1522,49 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5
+        },
+        {
+          "id": 11,
+          "x": 954.0425531914893,
+          "y": 520.8510638297872,
+          "width": 150,
+          "height": 20,
+          "color": "#4ECDC4",
+          "spriteType": "color",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5
         }
       ],
-      "props": [        
+      "props": [
+        {
+          "id": 1,
+          "type": "barrel",
+          "x": 545.5319148936171,
+          "y": 800.8510638297872,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        },
+        {
+          "id": 2,
+          "type": "barrel",
+          "x": 625.5319148936171,
+          "y": 799.1489361702127,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0
+        }
       ],
+      "enemies": [],
       "background": {
         "name": "The Dawn",
         "layers": []
@@ -1403,14 +1597,24 @@
       },
       "metadata": {
         "created": "2025-09-21T13:12:09.327Z",
-        "modified": "2025-09-22T05:39:37.877Z"
+        "modified": "2025-09-24T10:16:10.594Z"
       }
     }
   ],
-  "currentSceneId": 1,
+  "currentSceneId": "1",
   "startSceneId": 1,
   "characters": [],
   "classes": [],
   "weapons": [],
-  "items": []
+  "items": [],
+  "gameSettings": {
+    "hud": {
+      "position": {
+        "x": 11,
+        "y": 162
+      },
+      "width": 230,
+      "height": 97
+    }
+  }
 }
