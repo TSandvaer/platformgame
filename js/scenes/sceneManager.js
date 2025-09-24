@@ -333,16 +333,25 @@ class SceneManager {
                 this.game.propSystem.data.initializeGroupsFromProps();
             }
 
-            // Check if enemy system is initialized before saving enemy data
-            if (this.game.enemySystem && this.game.enemySystem.isInitialized) {
+            // Check if enemy system is initialized and not in the middle of removing enemies
+            if (this.game.enemySystem && this.game.enemySystem.isInitialized && !this.game.enemySystem.isRemovingEnemies) {
                 console.log('💾 Enemies being saved:', this.game.enemySystem.data.enemies.length, 'enemies');
+                console.log('💾 Enemy IDs being saved:', this.game.enemySystem.data.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'})`));
             } else {
-                // Don't save enemy data if enemy system isn't initialized - preserve existing enemy data
-                console.log('💾 Enemy system not initialized - preserving existing enemy data in scene');
+                // Don't save enemy data if enemy system isn't initialized or is removing enemies - preserve existing enemy data
+                const reason = !this.game.enemySystem ? 'not exists' :
+                              !this.game.enemySystem.isInitialized ? 'not initialized' :
+                              this.game.enemySystem.isRemovingEnemies ? 'removing enemies' : 'unknown';
+                console.log(`💾 Enemy system ${reason} - preserving existing enemy data in scene`);
+                console.log('💾 Enemy system state:', {
+                    exists: !!this.game.enemySystem,
+                    initialized: this.game.enemySystem?.isInitialized,
+                    isRemoving: this.game.enemySystem?.isRemovingEnemies,
+                    enemyCount: this.game.enemySystem?.data?.enemies?.length || 0
+                });
                 if (currentScene.enemies && currentScene.enemies.length > 0) {
                     console.log('💾 Preserving', currentScene.enemies.length, 'enemies from scene data');
-                    // Keep the existing enemy data instead of overwriting with empty array
-                    // The updateSceneData call below will use currentScene.enemies instead of this.game.enemySystem.data.enemies
+                    console.log('💾 Scene enemy IDs:', currentScene.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'})`));
                 }
             }
             console.log('💾 Platforms being saved:', this.game.platformSystem.platforms.map(p => ({
@@ -352,10 +361,20 @@ class SceneManager {
                 y: p.y
             })));
 
-            // Use current enemy data if enemy system is initialized, otherwise preserve existing enemy data
-            const enemyDataToSave = (this.game.enemySystem && this.game.enemySystem.isInitialized)
+            // Use current enemy data if enemy system is initialized and not removing enemies, otherwise preserve existing enemy data
+            let enemyDataToSave = (this.game.enemySystem && this.game.enemySystem.isInitialized && !this.game.enemySystem.isRemovingEnemies)
                 ? this.game.enemySystem.data.enemies
                 : currentScene.enemies;
+
+            // CRITICAL: Validate enemy data before saving to prevent accidental clearing
+            if (currentScene.enemies && currentScene.enemies.length > 0 &&
+                (!enemyDataToSave || enemyDataToSave.length === 0)) {
+                console.error('🚨 CRITICAL: Preventing save of empty enemy array!');
+                console.error('🚨 Scene had', currentScene.enemies.length, 'enemies but trying to save', enemyDataToSave?.length || 0);
+                console.error('🚨 This would clear all enemies - preserving existing enemy data instead');
+                console.error('🚨 Current scene enemies:', currentScene.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'})`));
+                enemyDataToSave = currentScene.enemies; // Preserve existing enemies
+            }
 
             this.sceneData.updateSceneData(
                 currentScene.id,

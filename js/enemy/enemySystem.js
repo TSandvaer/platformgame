@@ -8,6 +8,7 @@ class EnemySystem {
         this.animators = new Map();
         this.mouseHandler = null;
         this.isInitialized = false;
+        this.isRemovingEnemies = false; // Flag to prevent saves during enemy removal
     }
 
     initialize(ctx, platformSystem, viewport, camera) {
@@ -29,10 +30,17 @@ class EnemySystem {
                 enemy.deathTimer -= deltaTime;
                 enemy.flashTimer += deltaTime; // Update flash timer for blinking effect
                 if (enemy.deathTimer <= 0) {
+                    // Set flag to prevent saves during enemy removal
+                    this.isRemovingEnemies = true;
+
                     // Remove the corpse
-                    console.log(`Enemy ${enemy.id} corpse removed after 2 seconds`);
+                    console.log(`🗑️ Enemy ${enemy.id} corpse removed after 2 seconds`);
+                    console.log(`🗑️ Enemies before removal:`, this.data.enemies.length, 'total,', this.data.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'})`));
+
                     this.data.enemies.splice(i, 1);
                     this.animators.delete(enemy.id);
+
+                    console.log(`🗑️ Enemies after removal:`, this.data.enemies.length, 'total,', this.data.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'})`));
 
                     // Update UI if this was the selected enemy
                     if (this.data.selectedEnemy && this.data.selectedEnemy.id === enemy.id) {
@@ -42,6 +50,9 @@ class EnemySystem {
                             window.uiEventHandler.updateEnemyProperties();
                         }
                     }
+
+                    // Clear flag after removal is complete
+                    this.isRemovingEnemies = false;
                     continue; // Skip to next enemy since this one was removed
                 }
             }
