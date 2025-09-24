@@ -215,8 +215,18 @@ class SceneData {
 
     importSceneData(data) {
         if (data.scenes && Array.isArray(data.scenes)) {
+            console.log('🔍 IMPORT DEBUG: Raw scene data from localStorage:');
+            data.scenes.forEach((scene, i) => {
+                console.log(`🔍 Scene ${i} "${scene.name}" enemies:`, scene.enemies);
+            });
+
             // Migrate/validate each scene to ensure it has all required properties
             this.scenes = data.scenes.map(scene => this.migrateScene(scene));
+
+            console.log('🔍 IMPORT DEBUG: After migration:');
+            this.scenes.forEach((scene, i) => {
+                console.log(`🔍 Scene ${i} "${scene.name}" enemies:`, scene.enemies);
+            });
 
             // Debug: check what we have after migration
             if (this.scenes.length > 0) {
@@ -235,9 +245,12 @@ class SceneData {
 
     // Ensure a scene has all required properties with defaults
     migrateScene(scene) {
+        console.log(`🔍 MIGRATE DEBUG: Before migrating scene "${scene.name}":`, { enemies: scene.enemies });
+
         const defaults = {
             platforms: [],
             props: [],
+            enemies: [],
             background: {
                 name: 'none',
                 layers: []
@@ -264,17 +277,21 @@ class SceneData {
         };
 
         // Merge with defaults to ensure all properties exist
-        return {
+        const migratedScene = {
             id: scene.id,
             name: scene.name || 'Unnamed Scene',
             description: scene.description || '',
             platforms: scene.platforms || defaults.platforms,
             props: scene.props || defaults.props,
+            enemies: scene.enemies || defaults.enemies,
             background: { ...defaults.background, ...(scene.background || {}) },
             transitions: { ...defaults.transitions, ...(scene.transitions || {}) },
             boundaries: { ...defaults.boundaries, ...(scene.boundaries || {}) },
             settings: { ...defaults.settings, ...(scene.settings || {}) },
             metadata: { ...defaults.metadata, ...(scene.metadata || {}) }
         };
+
+        console.log(`🔍 MIGRATE DEBUG: After migrating scene "${scene.name}":`, { enemies: migratedScene.enemies });
+        return migratedScene;
     }
 }

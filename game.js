@@ -264,6 +264,14 @@ class PlatformRPG {
         // Initialize enemy system now that viewport and camera are ready
         this.enemySystem.initialize(this.ctx, this.platformSystem, this.viewport, this.cameraSystem.camera);
 
+        // Reload enemies from current scene now that enemy system is ready
+        const currentScene = this.sceneSystem.currentScene;
+        if (currentScene && currentScene.enemies && currentScene.enemies.length > 0) {
+            console.log('🎯 Reloading', currentScene.enemies.length, 'enemies from scene after enemy system initialization');
+            this.enemySystem.data.enemies = [...currentScene.enemies];
+            this.enemySystem.animators.clear(); // Clear animators, they'll be recreated
+        }
+
         // Then set development mode (which will call sceneSystem.updateUI())
 
         // Update platform UI after everything is loaded

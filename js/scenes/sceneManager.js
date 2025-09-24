@@ -295,7 +295,7 @@ class SceneManager {
             }
 
             // Check if we're about to wipe out existing enemies
-            if (currentScene.enemies && currentScene.enemies.length > 0 && this.game.enemySystem.data.enemies.length === 0) {
+            if (currentScene.enemies && currentScene.enemies.length > 0 && (!this.game.enemySystem.data.enemies || this.game.enemySystem.data.enemies.length === 0)) {
                 console.warn('⚠️ WARNING: Attempting to save empty enemies over existing enemies!');
                 console.warn('⚠️ Scene had', currentScene.enemies.length, 'enemies but enemySystem has 0');
                 console.warn('⚠️ This likely means the enemies weren\'t loaded properly into memory');
@@ -304,6 +304,7 @@ class SceneManager {
                 const enemiesCopy = JSON.parse(JSON.stringify(currentScene.enemies));
                 this.game.enemySystem.data.enemies = enemiesCopy;
                 this.game.enemySystem.animators.clear(); // Clear animators, they'll be recreated
+                console.log('🔧 Restored', enemiesCopy.length, 'enemies to enemySystem from scene data');
             }
             console.log('💾 Platforms being saved:', this.game.platformSystem.platforms.map(p => ({
                 id: p.id,
