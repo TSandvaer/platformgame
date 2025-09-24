@@ -44,16 +44,7 @@ class InputEditor {
     }
 
     setupSceneEditorListeners() {
-        const createSceneBtn = document.getElementById('createSceneBtn');
-        if (createSceneBtn) {
-            createSceneBtn.addEventListener('click', () => {
-                const name = prompt('Scene name:', 'New Scene');
-                const description = prompt('Scene description:', '');
-                if (name !== null) {
-                    this.game.sceneSystem.createScene(name, description);
-                }
-            });
-        }
+        // Scene creation is now handled by uiEventHandler.js to avoid duplicate listeners
 
         const saveSceneBtn = document.getElementById('saveSceneBtn');
         if (saveSceneBtn) {

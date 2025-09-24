@@ -109,19 +109,30 @@ class SceneData {
     }
 
     deleteScene(sceneId) {
-        const index = this.scenes.findIndex(scene => scene.id === sceneId);
+        console.log(`🎯 Attempting to delete scene with ID: ${sceneId} (type: ${typeof sceneId})`);
+        console.log(`🎯 Available scenes:`, this.scenes.map(s => ({ id: s.id, name: s.name, idType: typeof s.id })));
+
+        const index = this.scenes.findIndex(scene => scene.id == sceneId || scene.id === String(sceneId) || String(scene.id) === String(sceneId));
+        console.log(`🎯 Found scene at index: ${index}, total scenes: ${this.scenes.length}`);
+
         if (index !== -1 && this.scenes.length > 1) { // Don't delete the last scene
+            const deletedScene = this.scenes[index];
             this.scenes.splice(index, 1);
+            console.log(`🎯 Deleted scene: ${deletedScene.name}, remaining scenes: ${this.scenes.length}`);
 
             // Update current/start scene if deleted
-            if (this.currentSceneId === sceneId) {
+            if (this.currentSceneId == sceneId || String(this.currentSceneId) === String(sceneId)) {
                 this.currentSceneId = this.scenes[0].id;
+                console.log(`🎯 Updated currentSceneId to: ${this.currentSceneId}`);
             }
-            if (this.startSceneId === sceneId) {
+            if (this.startSceneId == sceneId || String(this.startSceneId) === String(sceneId)) {
                 this.startSceneId = this.scenes[0].id;
+                console.log(`🎯 Updated startSceneId to: ${this.startSceneId}`);
             }
             return true;
         }
+
+        console.log(`🎯 Scene deletion failed - index: ${index}, scenes length: ${this.scenes.length}`);
         return false;
     }
 

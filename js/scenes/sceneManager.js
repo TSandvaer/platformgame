@@ -518,7 +518,10 @@ class SceneManager {
             this.game.sceneSystem.saveScenes();
         }
 
-        this.updateSceneUI();
+        // Load the newly created scene to display it in the dashboard
+        this.loadScene(newScene.id);
+
+        console.log(`🎯 Created and loaded new scene: "${newScene.name}"`);
         return newScene;
     }
 
@@ -540,6 +543,13 @@ class SceneManager {
     }
 
     deleteScene(sceneId) {
+        const scene = this.sceneData.getSceneById(sceneId);
+        if (!scene) return false;
+
+        // Show confirmation dialog
+        const confirmed = confirm(`Are you sure you want to delete the scene "${scene.name}"?\n\nThis action cannot be undone.`);
+        if (!confirmed) return false;
+
         if (this.sceneData.deleteScene(sceneId)) {
             // Load the first available scene
             const firstScene = this.sceneData.scenes[0];
@@ -553,6 +563,7 @@ class SceneManager {
             }
 
             this.updateSceneUI();
+            console.log(`🎯 Scene "${scene.name}" deleted successfully`);
             return true;
         }
         return false;
