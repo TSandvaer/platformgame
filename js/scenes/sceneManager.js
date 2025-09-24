@@ -570,7 +570,23 @@ class SceneManager {
     }
 
     setStartScene(sceneId) {
-        return this.sceneData.setStartScene(sceneId);
+        const scene = this.sceneData.getSceneById(sceneId);
+        if (!scene) {
+            console.error(`🎯 Cannot set start scene - scene with ID ${sceneId} not found`);
+            return false;
+        }
+
+        const success = this.sceneData.setStartScene(sceneId);
+        if (success) {
+            // Immediately save to localStorage
+            if (this.game && this.game.sceneSystem) {
+                this.game.sceneSystem.saveScenes();
+            }
+
+            this.updateSceneUI();
+            console.log(`🎯 Set "${scene.name}" as the start scene`);
+        }
+        return success;
     }
 
     // Transition zone management

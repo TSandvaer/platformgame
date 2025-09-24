@@ -7,8 +7,8 @@
   "scenes": [
     {
       "id": 1,
-      "name": "Tutorial",
-      "description": "Starting scene with basic platforms",
+      "name": "Showcase",
+      "description": "Showcase scene for prop placement etc.",
       "platforms": [
         {
           "id": 0,
@@ -91,7 +91,7 @@
         },
         {
           "id": 3,
-          "x": 346.3348095659876,
+          "x": 345.4844995571302,
           "y": 749.7519929140832,
           "type": "crate",
           "isObstacle": true,
@@ -344,8 +344,8 @@
         },
         {
           "id": 25,
-          "x": 958.8441098317096,
-          "y": 548.5544729849424,
+          "x": 957.9937998228522,
+          "y": 561.3091231178033,
           "type": "bigCrate",
           "isObstacle": false,
           "zOrder": 1,
@@ -1355,7 +1355,7 @@
         {
           "id": 2,
           "type": "orc",
-          "x": 1004.4344207253444,
+          "x": 1012.8040222571915,
           "y": 570,
           "width": 44,
           "height": 59,
@@ -1378,10 +1378,10 @@
           },
           "currentAnimation": "walk",
           "frameIndex": 3,
-          "frameTimer": 25,
+          "frameTimer": 33.39999999999782,
           "frameRate": 150,
           "facing": "right",
-          "velocityX": 0.701991481292165,
+          "velocityX": 0.6602147717593368,
           "velocityY": 0,
           "onGround": true,
           "speed": 2,
@@ -1397,12 +1397,14 @@
           "isDamaged": false,
           "damageTimer": 0,
           "patrolDirection": 1,
-          "patrolSpeed": 1
+          "patrolSpeed": 1,
+          "deathTimer": 0,
+          "flashTimer": 0
         },
         {
           "id": 5,
           "type": "orc",
-          "x": 1663.4360237814117,
+          "x": 1819.8772433707857,
           "y": 861,
           "width": 44,
           "height": 59,
@@ -1424,11 +1426,11 @@
             "height": 76.52790079716567
           },
           "currentAnimation": "walk",
-          "frameIndex": 3,
-          "frameTimer": 133.5,
+          "frameIndex": 6,
+          "frameTimer": 129.29999999999927,
           "frameRate": 150,
           "facing": "left",
-          "velocityX": -0.701991481292165,
+          "velocityX": -0.6602147717593368,
           "velocityY": 0,
           "onGround": true,
           "speed": 2,
@@ -1450,7 +1452,7 @@
         }
       ],
       "background": {
-        "name": "DarkForest",
+        "name": "The Dawn",
         "layers": []
       },
       "transitions": {
@@ -1491,12 +1493,12 @@
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-24T16:32:23.301Z"
+        "modified": "2025-09-24T17:12:09.041Z"
       }
     },
     {
       "id": 2,
-      "name": "Scene1",
+      "name": "test scene",
       "description": "",
       "platforms": [
         {
@@ -1597,12 +1599,12 @@
       },
       "metadata": {
         "created": "2025-09-21T13:12:09.327Z",
-        "modified": "2025-09-24T10:16:10.594Z"
+        "modified": "2025-09-24T17:12:29.834Z"
       }
     }
   ],
-  "currentSceneId": "1",
-  "startSceneId": 1,
+  "currentSceneId": "2",
+  "startSceneId": "1",
   "characters": [],
   "classes": [],
   "weapons": [],

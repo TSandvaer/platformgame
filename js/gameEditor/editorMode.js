@@ -59,6 +59,16 @@ class EditorMode {
 
         // Cancel any ongoing editing operations
         this.cancelAllEditOperations();
+
+        // Load the start scene for production gameplay
+        if (this.game.sceneSystem) {
+            const success = this.game.sceneSystem.startGame();
+            if (success) {
+                console.log('🎯 Production mode: Loaded start scene for gameplay');
+            } else {
+                console.warn('🎯 Production mode: No start scene found, staying on current scene');
+            }
+        }
     }
 
     enableEditing() {
