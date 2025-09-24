@@ -195,7 +195,46 @@ class SceneManager {
         if (this.game.enemySystem && this.game.enemySystem.data) {
             this.game.enemySystem.data.enemies = [...(scene.enemies || [])];
             this.game.enemySystem.animators.clear(); // Clear animators, they'll be recreated
+
+            // Update nextEnemyId to prevent ID conflicts
+            if (scene.enemies && scene.enemies.length > 0) {
+                this.game.enemySystem.data.nextEnemyId = Math.max(...scene.enemies.map(e => e.id || 0)) + 1;
+            }
+
             console.log('🎯 Loaded', scene.enemies?.length || 0, 'enemies for scene', scene.name);
+
+            // Update enemy UI to reflect loaded enemies
+            if (window.uiEventHandler) {
+                window.uiEventHandler.updateEnemyList();
+                window.uiEventHandler.updateEnemyProperties();
+            }
+        }
+
+        // Verify enemies were actually loaded
+        if (scene.enemies && scene.enemies.length > 0 && (!this.game.enemySystem.data.enemies || this.game.enemySystem.data.enemies.length === 0)) {
+            console.error('❌ CRITICAL: Enemies failed to load into enemySystem!');
+            console.error('❌ Scene has', scene.enemies.length, 'enemies but enemySystem has 0');
+            console.error('❌ Scene enemies data:', scene.enemies);
+            console.error('❌ EnemySystem.data:', this.game.enemySystem.data);
+            // Force reload the enemies
+            if (this.game.enemySystem && this.game.enemySystem.data) {
+                const emergencyEnemiesCopy = JSON.parse(JSON.stringify(scene.enemies));
+                this.game.enemySystem.data.enemies = emergencyEnemiesCopy;
+                this.game.enemySystem.animators.clear();
+
+                // Update nextEnemyId to prevent ID conflicts
+                if (scene.enemies && scene.enemies.length > 0) {
+                    this.game.enemySystem.data.nextEnemyId = Math.max(...scene.enemies.map(e => e.id || 0)) + 1;
+                }
+
+                console.log('🔧 Emergency reload completed, enemies:', this.game.enemySystem.data.enemies.length);
+
+                // Update enemy UI after emergency reload
+                if (window.uiEventHandler) {
+                    window.uiEventHandler.updateEnemyList();
+                    window.uiEventHandler.updateEnemyProperties();
+                }
+            }
         }
 
         // Verify props were actually loaded
@@ -294,17 +333,17 @@ class SceneManager {
                 this.game.propSystem.data.initializeGroupsFromProps();
             }
 
-            // Check if we're about to wipe out existing enemies
-            if (currentScene.enemies && currentScene.enemies.length > 0 && (!this.game.enemySystem.data.enemies || this.game.enemySystem.data.enemies.length === 0)) {
-                console.warn('⚠️ WARNING: Attempting to save empty enemies over existing enemies!');
-                console.warn('⚠️ Scene had', currentScene.enemies.length, 'enemies but enemySystem has 0');
-                console.warn('⚠️ This likely means the enemies weren\'t loaded properly into memory');
-
-                // Try to reload the enemies into memory from the scene
-                const enemiesCopy = JSON.parse(JSON.stringify(currentScene.enemies));
-                this.game.enemySystem.data.enemies = enemiesCopy;
-                this.game.enemySystem.animators.clear(); // Clear animators, they'll be recreated
-                console.log('🔧 Restored', enemiesCopy.length, 'enemies to enemySystem from scene data');
+            // Check if enemy system is initialized before saving enemy data
+            if (this.game.enemySystem && this.game.enemySystem.isInitialized) {
+                console.log('💾 Enemies being saved:', this.game.enemySystem.data.enemies.length, 'enemies');
+            } else {
+                // Don't save enemy data if enemy system isn't initialized - preserve existing enemy data
+                console.log('💾 Enemy system not initialized - preserving existing enemy data in scene');
+                if (currentScene.enemies && currentScene.enemies.length > 0) {
+                    console.log('💾 Preserving', currentScene.enemies.length, 'enemies from scene data');
+                    // Keep the existing enemy data instead of overwriting with empty array
+                    // The updateSceneData call below will use currentScene.enemies instead of this.game.enemySystem.data.enemies
+                }
             }
             console.log('💾 Platforms being saved:', this.game.platformSystem.platforms.map(p => ({
                 id: p.id,
@@ -313,11 +352,16 @@ class SceneManager {
                 y: p.y
             })));
 
+            // Use current enemy data if enemy system is initialized, otherwise preserve existing enemy data
+            const enemyDataToSave = (this.game.enemySystem && this.game.enemySystem.isInitialized)
+                ? this.game.enemySystem.data.enemies
+                : currentScene.enemies;
+
             this.sceneData.updateSceneData(
                 currentScene.id,
                 this.game.platformSystem.platforms,
                 this.game.propSystem.props,
-                this.game.enemySystem.data.enemies
+                enemyDataToSave
             );
         }
     }

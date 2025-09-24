@@ -266,10 +266,25 @@ class PlatformRPG {
 
         // Reload enemies from current scene now that enemy system is ready
         const currentScene = this.sceneSystem.currentScene;
+        console.log('🎯 DEBUG: currentScene:', currentScene);
+        console.log('🎯 DEBUG: currentScene.enemies:', currentScene?.enemies);
+        console.log('🎯 DEBUG: currentScene.enemies.length:', currentScene?.enemies?.length);
+
         if (currentScene && currentScene.enemies && currentScene.enemies.length > 0) {
             console.log('🎯 Reloading', currentScene.enemies.length, 'enemies from scene after enemy system initialization');
             this.enemySystem.data.enemies = [...currentScene.enemies];
             this.enemySystem.animators.clear(); // Clear animators, they'll be recreated
+
+            // Update enemy UI to reflect loaded enemies
+            if (window.uiEventHandler) {
+                window.uiEventHandler.updateEnemyList();
+                window.uiEventHandler.updateEnemyProperties();
+            }
+        } else {
+            console.log('🎯 DEBUG: Not reloading enemies - condition failed');
+            console.log('🎯 DEBUG: currentScene exists:', !!currentScene);
+            console.log('🎯 DEBUG: currentScene.enemies exists:', !!(currentScene?.enemies));
+            console.log('🎯 DEBUG: currentScene.enemies.length > 0:', !!(currentScene?.enemies?.length > 0));
         }
 
         // Then set development mode (which will call sceneSystem.updateUI())

@@ -159,6 +159,12 @@
             color: white;
         }
 
+        .item.selected {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
         .prop-item.selected {
             background-color: #4CAF50;
             color: white;
@@ -977,7 +983,14 @@
                                 <input type="checkbox" id="enemyAttractionEnabled">
                                 Attraction Zone
                             </label>
-                            <button class="btn small" id="drawAttractionZone" style="margin-left: 10px;">Draw Zone</button>
+                            <button class="btn small" id="drawAttractionZone" style="margin-left: 10px;">Draw Attraction Zone</button>
+                        </div>
+                        <div class="property-row">
+                            <label>
+                                <input type="checkbox" id="enemyMovementEnabled">
+                                Movement Zone
+                            </label>
+                            <button class="btn small" id="drawMovementZone" style="margin-left: 10px;">Draw Movement Zone</button>
                         </div>
                         <div class="property-row">
                             <button class="btn small" id="updateEnemy">Update Enemy</button>

@@ -3,7 +3,7 @@ class EnemyRenderer {
         this.ctx = ctx;
     }
 
-    renderEnemy(enemy, animator, viewport, camera, isDevelopmentMode) {
+    renderEnemy(enemy, animator, viewport, camera, isDevelopmentMode, selectedEnemy = null) {
         if (!animator.isReady()) {
             // Fallback to rendering a colored rectangle if sprites aren't loaded
             this.renderFallback(enemy, viewport, camera);
@@ -17,6 +17,11 @@ class EnemyRenderer {
         }
 
         this.renderSprite(enemy, frame, viewport, camera);
+
+        // Render selection indicator if this enemy is selected
+        if (selectedEnemy && selectedEnemy.id === enemy.id) {
+            this.renderSelectionIndicator(enemy, viewport, camera);
+        }
 
         // Render debug info in development mode
         if (isDevelopmentMode) {
@@ -237,6 +242,37 @@ class EnemyRenderer {
         this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         this.ctx.lineWidth = 1;
         this.ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+        this.ctx.restore();
+    }
+
+    renderSelectionIndicator(enemy, viewport, camera) {
+        this.ctx.save();
+
+        // Apply camera and viewport transformation
+        let renderX = enemy.x;
+        let renderY = enemy.y;
+        let renderWidth = enemy.width;
+        let renderHeight = enemy.height;
+
+        if (viewport && camera) {
+            renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
+            renderY = (enemy.y - camera.y) * viewport.scaleY + viewport.offsetY;
+            renderWidth = enemy.width * viewport.scaleX;
+            renderHeight = enemy.height * viewport.scaleY;
+        }
+
+        // Draw selection outline (bright green)
+        this.ctx.strokeStyle = '#00FF00';
+        this.ctx.lineWidth = 3;
+        this.ctx.setLineDash([]);
+        this.ctx.strokeRect(renderX - 3, renderY - 3, renderWidth + 6, renderHeight + 6);
+
+        // Draw selection indicator above enemy
+        this.ctx.fillStyle = '#00FF00';
+        this.ctx.font = 'bold 12px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('SELECTED', renderX + renderWidth / 2, renderY - 8);
 
         this.ctx.restore();
     }

@@ -142,7 +142,7 @@ class EnemyAI {
             enemy.patrolDirection = 1;
         }
 
-        return enemy.patrolDirection * enemy.patrolSpeed;
+        return enemy.patrolDirection * enemy.speed;
     }
 
     calculateChaseMovement(enemy) {

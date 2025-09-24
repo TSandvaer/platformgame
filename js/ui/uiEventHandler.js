@@ -238,6 +238,7 @@ class UIEventHandler {
                 selectedEnemy.speed = parseFloat(document.getElementById('enemySpeed').value);
                 selectedEnemy.isMoving = document.getElementById('enemyIsMoving').checked;
                 selectedEnemy.attractionZone.enabled = document.getElementById('enemyAttractionEnabled').checked;
+                selectedEnemy.movementZone.enabled = document.getElementById('enemyMovementEnabled').checked;
 
                 this.updateEnemyList();
             }
@@ -275,6 +276,29 @@ class UIEventHandler {
             }
         });
 
+        document.getElementById('drawMovementZone').addEventListener('click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                const success = this.game.enemySystem.startMovementZoneDrawing(selectedEnemy);
+                if (success) {
+                    // Update button state to show drawing mode is active
+                    const button = document.getElementById('drawMovementZone');
+                    button.textContent = 'Drawing... (drag on map)';
+                    button.classList.add('danger');
+                    button.disabled = true;
+
+                    // Set up a way to reset button state when drawing is finished
+                    this.checkMovementZoneDrawingComplete();
+
+                    console.log('🎯 Started movement zone drawing mode for enemy', selectedEnemy.id);
+                } else {
+                    alert('Failed to start movement zone drawing. Make sure an enemy is selected.');
+                }
+            } else {
+                alert('Please select an enemy first.');
+            }
+        });
+
         // Context menu event listeners
     }
 
@@ -285,7 +309,7 @@ class UIEventHandler {
                 // Drawing is finished, reset button state
                 const button = document.getElementById('drawAttractionZone');
                 if (button) {
-                    button.textContent = 'Draw Zone';
+                    button.textContent = 'Draw Attraction Zone';
                     button.classList.remove('danger');
                     button.disabled = false;
                 }
@@ -295,6 +319,27 @@ class UIEventHandler {
 
                 clearInterval(checkInterval);
                 console.log('🎯 Attraction zone drawing completed, button reset');
+            }
+        }, 100); // Check every 100ms
+    }
+
+    checkMovementZoneDrawingComplete() {
+        // Poll to check if drawing is finished
+        const checkInterval = setInterval(() => {
+            if (!this.game.enemySystem.isDrawingMovementZone) {
+                // Drawing is finished, reset button state
+                const button = document.getElementById('drawMovementZone');
+                if (button) {
+                    button.textContent = 'Draw Movement Zone';
+                    button.classList.remove('danger');
+                    button.disabled = false;
+                }
+
+                // Update the UI to reflect the new movement zone settings
+                this.updateEnemyProperties();
+
+                clearInterval(checkInterval);
+                console.log('🎯 Movement zone drawing completed, button reset');
             }
         }, 100); // Check every 100ms
     }
@@ -397,6 +442,7 @@ class UIEventHandler {
             const speedInput = document.getElementById('enemySpeed');
             const isMovingInput = document.getElementById('enemyIsMoving');
             const attractionEnabledInput = document.getElementById('enemyAttractionEnabled');
+            const movementEnabledInput = document.getElementById('enemyMovementEnabled');
 
             if (xInput) xInput.value = Math.round(selectedEnemy.x);
             if (yInput) yInput.value = Math.round(selectedEnemy.y);
@@ -405,6 +451,7 @@ class UIEventHandler {
             if (speedInput) speedInput.value = selectedEnemy.speed;
             if (isMovingInput) isMovingInput.checked = selectedEnemy.isMoving;
             if (attractionEnabledInput) attractionEnabledInput.checked = selectedEnemy.attractionZone.enabled;
+            if (movementEnabledInput) movementEnabledInput.checked = selectedEnemy.movementZone.enabled;
         } else {
             propertiesDiv.style.display = 'none';
         }

@@ -33,6 +33,16 @@ class EditorSystem {
         // Update related systems
         this.game.cameraSystem.setDevelopmentMode(isDev);
 
+        // Clear enemy selection when switching modes
+        if (this.game.enemySystem) {
+            this.game.enemySystem.selectEnemy(null);
+            // Update UI to reflect cleared selection
+            if (window.uiEventHandler) {
+                window.uiEventHandler.updateEnemyList();
+                window.uiEventHandler.updateEnemyProperties();
+            }
+        }
+
         // Clear invalid zones cache when switching modes
         if (this.game.sceneSystem && this.game.sceneSystem.manager) {
             this.game.sceneSystem.manager.invalidZonesChecked = new Set();

@@ -106,13 +106,28 @@ class InputMouse {
 
             // Handle enemy interaction if no prop interaction occurred
             // Allow enemy placement even during drag-select operations
+            let enemyHandled = false;
             if (!propResult || !propResult.handled || propResult.type === 'drag-select') {
                 console.log('🎯 Handling enemy mouse down at', mouseX, mouseY, 'placement mode:', this.game.enemySystem.enemyPlacementMode);
-                this.game.enemySystem.handleMouseDown(
+                const enemyResult = this.game.enemySystem.handleMouseDown(
                     mouseX, mouseY,
                     e.ctrlKey || e.metaKey,
                     e.shiftKey
                 );
+                enemyHandled = enemyResult && enemyResult.handled;
+            }
+
+            // Clear enemy selection if not clicking on an enemy and not in placement/drawing modes
+            if (!enemyHandled &&
+                !this.game.enemySystem.mouseHandler.enemyPlacementMode &&
+                !this.game.enemySystem.mouseHandler.isDrawingAttractionZone &&
+                !this.game.enemySystem.mouseHandler.isDrawingMovementZone) {
+                this.game.enemySystem.selectEnemy(null);
+                // Update UI to reflect cleared selection
+                if (window.uiEventHandler) {
+                    window.uiEventHandler.updateEnemyList();
+                    window.uiEventHandler.updateEnemyProperties();
+                }
             }
         }
     }

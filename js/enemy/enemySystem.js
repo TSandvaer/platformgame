@@ -113,10 +113,11 @@ class EnemySystem {
     render(viewport, camera, isDevelopmentMode) {
         if (!this.isInitialized || !this.renderer) return;
 
+        const selectedEnemy = this.getSelectedEnemy();
         for (const enemy of this.data.enemies) {
             const animator = this.animators.get(enemy.id);
             if (animator) {
-                this.renderer.renderEnemy(enemy, animator, viewport, camera, isDevelopmentMode);
+                this.renderer.renderEnemy(enemy, animator, viewport, camera, isDevelopmentMode, selectedEnemy);
                 this.renderer.renderHealthBar(enemy, viewport, camera);
             }
         }
@@ -124,6 +125,7 @@ class EnemySystem {
         // Render attraction zone drawing preview
         if (this.mouseHandler) {
             this.mouseHandler.renderAttractionZonePreview(this.renderer.ctx);
+            this.mouseHandler.renderMovementZonePreview(this.renderer.ctx);
         }
     }
 
@@ -246,5 +248,24 @@ class EnemySystem {
 
     get isDrawingAttractionZone() {
         return this.mouseHandler ? this.mouseHandler.isDrawingAttractionZone : false;
+    }
+
+    // Movement zone drawing methods
+    startMovementZoneDrawing(enemy) {
+        if (this.mouseHandler) {
+            this.mouseHandler.startMovementZoneDrawingMode(enemy);
+            return true;
+        }
+        return false;
+    }
+
+    cancelMovementZoneDrawing() {
+        if (this.mouseHandler) {
+            this.mouseHandler.cancelMovementZoneDrawing();
+        }
+    }
+
+    get isDrawingMovementZone() {
+        return this.mouseHandler ? this.mouseHandler.isDrawingMovementZone : false;
     }
 }

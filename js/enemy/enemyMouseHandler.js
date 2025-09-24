@@ -11,6 +11,12 @@ class EnemyMouseHandler {
         this.attractionZoneStart = null;
         this.attractionZoneEnd = null;
         this.targetEnemy = null; // Enemy whose attraction zone is being drawn
+
+        // Movement zone drawing state
+        this.isDrawingMovementZone = false;
+        this.movementZoneStart = null;
+        this.movementZoneEnd = null;
+        this.movementTargetEnemy = null; // Enemy whose movement zone is being drawn
     }
 
     handleMouseDown(worldMouseX, worldMouseY, ctrlPressed = false, shiftPressed = false) {
@@ -20,6 +26,12 @@ class EnemyMouseHandler {
         if (this.isDrawingAttractionZone) {
             this.startAttractionZoneDrawing(worldMouseX, worldMouseY);
             return { handled: true, type: 'attractionZoneStart' };
+        }
+
+        // Check if movement zone drawing mode is active
+        if (this.isDrawingMovementZone) {
+            this.startMovementZoneDrawing(worldMouseX, worldMouseY);
+            return { handled: true, type: 'movementZoneStart' };
         }
 
         // Check if enemy placement mode is active
@@ -46,6 +58,12 @@ class EnemyMouseHandler {
             return true;
         }
 
+        // Update movement zone drawing
+        if (this.isDrawingMovementZone && this.movementZoneStart) {
+            this.movementZoneEnd = { x: worldMouseX, y: worldMouseY };
+            return true;
+        }
+
         return false;
     }
 
@@ -54,6 +72,12 @@ class EnemyMouseHandler {
         if (this.isDrawingAttractionZone && this.attractionZoneStart && this.attractionZoneEnd) {
             this.finishAttractionZoneDrawing();
             return { handled: true, type: 'attractionZoneFinish' };
+        }
+
+        // Finish movement zone drawing
+        if (this.isDrawingMovementZone && this.movementZoneStart && this.movementZoneEnd) {
+            this.finishMovementZoneDrawing();
+            return { handled: true, type: 'movementZoneFinish' };
         }
 
         return { handled: false };
@@ -208,6 +232,105 @@ class EnemyMouseHandler {
         // Fill with semi-transparent color
         ctx.fillStyle = 'rgba(255, 255, 0, 0.1)';
         ctx.fillRect(renderX, renderY, renderWidth, renderHeight);
+
+        ctx.restore();
+    }
+
+    // Movement zone drawing methods
+    startMovementZoneDrawing(mouseX, mouseY) {
+        this.movementZoneStart = { x: mouseX, y: mouseY };
+        this.movementZoneEnd = { x: mouseX, y: mouseY };
+        console.log('🎯 Started movement zone drawing at', mouseX, mouseY);
+    }
+
+    finishMovementZoneDrawing() {
+        if (!this.movementTargetEnemy || !this.movementZoneStart || !this.movementZoneEnd) {
+            this.cancelMovementZoneDrawing();
+            return;
+        }
+
+        // Calculate horizontal line bounds for movement zone
+        const startX = Math.min(this.movementZoneStart.x, this.movementZoneEnd.x);
+        const endX = Math.max(this.movementZoneStart.x, this.movementZoneEnd.x);
+        const y = this.movementTargetEnemy.y + this.movementTargetEnemy.height; // Use enemy ground level
+
+        // Update enemy movement zone
+        this.movementTargetEnemy.movementZone.startX = startX;
+        this.movementTargetEnemy.movementZone.endX = endX;
+        this.movementTargetEnemy.movementZone.y = y;
+        this.movementTargetEnemy.movementZone.enabled = true;
+
+        console.log(`🎯 Movement zone set for enemy ${this.movementTargetEnemy.id}:`, { startX, endX, y });
+
+        // Reset drawing state
+        this.cancelMovementZoneDrawing();
+
+        // Update UI if available
+        if (window.uiEventHandler) {
+            window.uiEventHandler.updateEnemyProperties();
+        }
+    }
+
+    cancelMovementZoneDrawing() {
+        this.isDrawingMovementZone = false;
+        this.movementZoneStart = null;
+        this.movementZoneEnd = null;
+        this.movementTargetEnemy = null;
+        console.log('🎯 Movement zone drawing cancelled');
+    }
+
+    // Public methods to control movement zone drawing mode
+    startMovementZoneDrawingMode(enemy) {
+        if (!enemy) {
+            console.error('Cannot start movement zone drawing: no enemy selected');
+            return;
+        }
+
+        this.movementTargetEnemy = enemy;
+        this.isDrawingMovementZone = true;
+        console.log('🎯 Movement zone drawing mode started for enemy', enemy.id);
+    }
+
+    // Render preview while drawing
+    renderMovementZonePreview(ctx) {
+        if (!this.isDrawingMovementZone || !this.movementZoneStart || !this.movementZoneEnd) return;
+
+        ctx.save();
+
+        // Calculate horizontal line bounds
+        const startX = Math.min(this.movementZoneStart.x, this.movementZoneEnd.x);
+        const endX = Math.max(this.movementZoneStart.x, this.movementZoneEnd.x);
+        const y = this.movementTargetEnemy ? this.movementTargetEnemy.y + this.movementTargetEnemy.height : this.movementZoneStart.y;
+
+        // Apply camera transformation if available
+        let renderStartX = startX;
+        let renderEndX = endX;
+        let renderY = y;
+
+        if (this.viewport && this.camera) {
+            renderStartX = (startX - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
+            renderEndX = (endX - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
+            renderY = (y - this.camera.y) * this.viewport.scaleY + this.viewport.offsetY;
+        }
+
+        // Draw preview line (cyan like the existing movement zone)
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 5]);
+        ctx.beginPath();
+        ctx.moveTo(renderStartX, renderY);
+        ctx.lineTo(renderEndX, renderY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Draw zone markers
+        ctx.fillStyle = 'cyan';
+        ctx.beginPath();
+        ctx.arc(renderStartX, renderY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(renderEndX, renderY, 6, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.restore();
     }
