@@ -210,6 +210,16 @@ class SceneData {
                 existingEnemies: scene.enemies?.length || 0
             });
 
+            // CRITICAL: Log if we're about to clear enemies
+            if (scene.enemies && scene.enemies.length > 0 && (!enemies || enemies.length === 0)) {
+                console.error('🚨🚨🚨 CRITICAL: About to clear enemies from scene data!');
+                console.error('🚨 Scene had', scene.enemies.length, 'enemies');
+                console.error('🚨 New data has', enemies?.length || 0, 'enemies');
+                console.error('🚨 Existing enemies:', scene.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible !== false ? 'visible' : 'hidden'})`));
+                console.error('🚨 New enemies:', enemies ? enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible ? 'visible' : 'hidden'})`) : 'NULL');
+                console.error('🚨 Call stack:', new Error().stack);
+            }
+
             // Update platforms, props, and enemies, but preserve all other scene data
             scene.platforms = JSON.parse(JSON.stringify(platforms));
             scene.props = JSON.parse(JSON.stringify(props));

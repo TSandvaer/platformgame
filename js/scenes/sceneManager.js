@@ -193,8 +193,15 @@ class SceneManager {
 
         // Load enemies
         if (this.game.enemySystem && this.game.enemySystem.data) {
+            console.log('🔄 CRITICAL: Loading enemies from scene');
+            console.log('🔄 Current enemies in memory:', this.game.enemySystem.data.enemies.length);
+            console.log('🔄 Scene enemies to load:', scene.enemies ? scene.enemies.length : 'NULL/UNDEFINED');
+            console.log('🔄 Scene enemy data:', scene.enemies ? scene.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible !== false ? 'visible' : 'hidden'})`) : 'NONE');
+
             this.game.enemySystem.data.enemies = [...(scene.enemies || [])];
             this.game.enemySystem.animators.clear(); // Clear animators, they'll be recreated
+
+            console.log('🔄 After loading - enemies in memory:', this.game.enemySystem.data.enemies.length);
 
             // Update nextEnemyId to prevent ID conflicts
             if (scene.enemies && scene.enemies.length > 0) {

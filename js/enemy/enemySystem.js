@@ -25,13 +25,12 @@ class EnemySystem {
             const enemy = this.data.enemies[i];
 
             // Handle death timer countdown
-            if (enemy.isDead) {
+            if (enemy.isDead && enemy.isVisible) {
                 enemy.deathTimer -= deltaTime;
                 enemy.flashTimer += deltaTime; // Update flash timer for blinking effect
                 if (enemy.deathTimer <= 0) {
-                    // Hide the corpse instead of removing from data
+                    // Hide the corpse instead of removing from data (only once)
                     console.log(`👻 Enemy ${enemy.id} corpse hidden after 2 seconds - preserved in data for revival`);
-                    console.log(`👻 Enemy will be invisible but remain in storage`);
 
                     enemy.isVisible = false;
                     this.animators.delete(enemy.id); // Clean up animator for performance
@@ -44,7 +43,6 @@ class EnemySystem {
                             window.uiEventHandler.updateEnemyProperties();
                         }
                     }
-                    // Continue processing this enemy since it's still in the array
                 }
             }
 
