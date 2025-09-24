@@ -275,6 +275,9 @@ class PlatformRPG {
             this.enemySystem.data.enemies = [...currentScene.enemies];
             this.enemySystem.animators.clear(); // Clear animators, they'll be recreated
 
+            // Revive all enemies on reload
+            this.reviveAllEnemies();
+
             // Update enemy UI to reflect loaded enemies
             if (window.uiEventHandler) {
                 window.uiEventHandler.updateEnemyList();
@@ -968,6 +971,33 @@ class PlatformRPG {
         if (this.editorSystem) {
             this.editorSystem.transitionEnd = value;
         }
+    }
+
+    reviveAllEnemies() {
+        // Revive all enemies by resetting their health and clearing death state
+        this.enemySystem.data.enemies.forEach(enemy => {
+            enemy.health = 100;
+            enemy.maxHealth = 100;
+            enemy.isDead = false;
+            enemy.isDamaged = false;
+            enemy.damageTimer = 0;
+            enemy.deathTimer = 0;
+            enemy.flashTimer = 0;
+            enemy.isAttacking = false;
+            enemy.attackTimer = 0;
+
+            // Reset animation state to idle
+            enemy.currentAnimation = 'idle';
+            enemy.frameIndex = 0;
+            enemy.frameTimer = 0;
+
+            // Reset AI state
+            enemy.aiState = 'idle';
+            enemy.target = null;
+            enemy.lastPlayerPosition = null;
+        });
+
+        console.log(`🎯 Revived ${this.enemySystem.data.enemies.length} enemies - all health reset to 100`);
     }
 
     gameLoop(currentTime = 0) {
