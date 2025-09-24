@@ -210,35 +210,11 @@ class SceneData {
                 existingEnemies: scene.enemies?.length || 0
             });
 
-            // CRITICAL: Additional validation to prevent accidental enemy clearing
-            if (scene.enemies && scene.enemies.length > 0 && enemies.length === 0) {
-                console.error('🚨 CRITICAL: updateSceneData trying to save empty enemy array!');
-                console.error('🚨 Scene had', scene.enemies.length, 'enemies, but received 0 enemies to save');
-                console.error('🚨 Existing enemies:', scene.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'})`));
-                console.error('🚨 This is likely a bug - preserving existing enemies');
-
-                // Create backup of current enemies before any change
-                if (!scene._enemyBackup) {
-                    scene._enemyBackup = JSON.parse(JSON.stringify(scene.enemies));
-                    console.log('🔧 Created enemy backup for recovery');
-                }
-
-                // Don't update enemies array if we're trying to clear it suspiciously
-                scene.platforms = JSON.parse(JSON.stringify(platforms));
-                scene.props = JSON.parse(JSON.stringify(props));
-                // Keep existing enemies, don't overwrite with empty array
-            } else {
-                // Update platforms, props, and enemies, but preserve all other scene data
-                scene.platforms = JSON.parse(JSON.stringify(platforms));
-                scene.props = JSON.parse(JSON.stringify(props));
-                scene.enemies = JSON.parse(JSON.stringify(enemies));
-                console.log(`📝 Scene data updated successfully: enemies = ${enemies.length}, IDs:`, enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'})`));
-
-                // Create backup when we have a valid enemy save
-                if (enemies.length > 0) {
-                    scene._enemyBackup = JSON.parse(JSON.stringify(enemies));
-                }
-            }
+            // Update platforms, props, and enemies, but preserve all other scene data
+            scene.platforms = JSON.parse(JSON.stringify(platforms));
+            scene.props = JSON.parse(JSON.stringify(props));
+            scene.enemies = JSON.parse(JSON.stringify(enemies));
+            console.log(`📝 Scene data updated successfully: enemies = ${enemies.length}, IDs:`, enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible ? 'visible' : 'hidden'})`));
 
             scene.metadata.modified = new Date().toISOString();
 

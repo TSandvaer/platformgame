@@ -92,6 +92,7 @@ class EnemyData {
             damageTimer: 0,
             deathTimer: 0,
             flashTimer: 0,
+            isVisible: true, // New visibility flag to control rendering without removing from data
 
             // Patrol state
             patrolDirection: 1, // 1 for right, -1 for left
@@ -167,6 +168,10 @@ class EnemyData {
                 enemy.maxHealth = enemyData.maxHealth || enemy.maxHealth;
                 enemy.damage = enemyData.damage || enemy.damage;
                 enemy.isMoving = enemyData.isMoving || false;
+
+                // Backward compatibility: default isVisible to true if not present
+                enemy.isVisible = enemyData.isVisible !== undefined ? enemyData.isVisible : true;
+
                 if (enemyData.movementZone) {
                     enemy.movementZone = { ...enemy.movementZone, ...enemyData.movementZone };
                 }

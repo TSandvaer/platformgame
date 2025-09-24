@@ -985,6 +985,7 @@ class PlatformRPG {
             enemy.flashTimer = 0;
             enemy.isAttacking = false;
             enemy.attackTimer = 0;
+            enemy.isVisible = true; // Restore visibility for all enemies
 
             // Reset animation state to idle
             enemy.currentAnimation = 'idle';
@@ -997,7 +998,7 @@ class PlatformRPG {
             enemy.lastPlayerPosition = null;
         });
 
-        console.log(`🎯 Revived ${this.enemySystem.data.enemies.length} enemies - all health reset to 100`);
+        console.log(`🎯 Revived ${this.enemySystem.data.enemies.length} enemies - all health reset to 100 and made visible`);
     }
 
     gameLoop(currentTime = 0) {

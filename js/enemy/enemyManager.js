@@ -24,6 +24,9 @@ class EnemyManager {
     // Get enemy at specific coordinates (for selection)
     getEnemyAtPosition(x, y, tolerance = 10) {
         for (const enemy of this.data.enemies) {
+            // Only return visible enemies
+            if (!enemy.isVisible) continue;
+
             if (x >= enemy.x - tolerance && x <= enemy.x + enemy.width + tolerance &&
                 y >= enemy.y - tolerance && y <= enemy.y + enemy.height + tolerance) {
                 return enemy;
