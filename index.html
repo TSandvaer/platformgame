@@ -927,6 +927,65 @@
                 </div>
             </div>
 
+            <div class="section">
+                <h3>Scene Enemies</h3>
+                <div class="platform-editor" id="enemyEditor">
+                    <h4>Enemy Manager</h4>
+                    <div class="property-row">
+                        <span class="property-label">Enemy Type:</span>
+                        <select id="enemyTypeSelect" style="width: 100px;">
+                            <option value="orc">Orc</option>
+                        </select>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small" id="addEnemyBtn">Add Enemy (Click on map)</button>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small danger" id="clearEnemiesBtn">Clear All Enemies</button>
+                    </div>
+
+                    <div id="enemyList"></div>
+
+                    <div id="enemyProperties" style="display: none;">
+                        <h4>Selected Enemy</h4>
+                        <div class="property-row">
+                            <span class="property-label">X:</span>
+                            <input type="number" id="enemyX" min="0">
+                            <span class="property-label">Y:</span>
+                            <input type="number" id="enemyY" min="0">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Health:</span>
+                            <input type="number" id="enemyHealth" min="1" max="200" step="1" style="width: 80px;">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Damage:</span>
+                            <input type="number" id="enemyDamage" min="1" max="50" step="1" style="width: 80px;">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Speed:</span>
+                            <input type="number" id="enemySpeed" min="0.5" max="10" step="0.5" style="width: 80px;">
+                        </div>
+                        <div class="property-row">
+                            <label>
+                                <input type="checkbox" id="enemyIsMoving">
+                                Moving Enemy
+                            </label>
+                        </div>
+                        <div class="property-row">
+                            <label>
+                                <input type="checkbox" id="enemyAttractionEnabled">
+                                Attraction Zone
+                            </label>
+                            <button class="btn small" id="drawAttractionZone" style="margin-left: 10px;">Draw Zone</button>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="updateEnemy">Update Enemy</button>
+                            <button class="btn small danger" id="deleteEnemy">Delete Enemy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="section">
                 <h3>Characters</h3>
@@ -1006,6 +1065,16 @@
     <script src="js/player/playerController.js"></script>
     <script src="js/player/playerRenderer.js"></script>
     <script src="js/player/playerSystem.js"></script>
+
+    <!-- Enemy System Scripts -->
+    <script src="js/enemy/enemyData.js"></script>
+    <script src="js/enemy/enemyAnimator.js"></script>
+    <script src="js/enemy/enemyRenderer.js"></script>
+    <script src="js/enemy/enemyAI.js"></script>
+    <script src="js/enemy/enemyCollisions.js"></script>
+    <script src="js/enemy/enemyManager.js"></script>
+    <script src="js/enemy/enemyMouseHandler.js"></script>
+    <script src="js/enemy/enemySystem.js"></script>
 
     <!-- Input System Scripts -->
     <script src="js/input/inputKeyboard.js"></script>

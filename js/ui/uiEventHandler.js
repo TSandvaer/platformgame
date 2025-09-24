@@ -140,6 +140,20 @@ class UIEventHandler {
             }
         });
 
+        // Enemy controls
+        document.getElementById('addEnemyBtn').addEventListener('click', () => {
+            console.log('🎯 Add Enemy button clicked');
+            this.game.enemySystem.toggleEnemyPlacement();
+        });
+
+        document.getElementById('clearEnemiesBtn').addEventListener('click', () => {
+            if (confirm('Clear all enemies? This cannot be undone.')) {
+                this.game.enemySystem.clearAllEnemies();
+                this.updateEnemyList();
+                this.updateEnemyProperties();
+            }
+        });
+
     }
 
     setupAdditionalListeners() {
@@ -212,7 +226,77 @@ class UIEventHandler {
             this.game.propSystem.updatePropList();
         });
 
+        // Enemy properties event listeners
+        document.getElementById('updateEnemy').addEventListener('click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                selectedEnemy.x = parseInt(document.getElementById('enemyX').value);
+                selectedEnemy.y = parseInt(document.getElementById('enemyY').value);
+                selectedEnemy.maxHealth = parseInt(document.getElementById('enemyHealth').value);
+                selectedEnemy.health = selectedEnemy.maxHealth; // Reset current health to max
+                selectedEnemy.damage = parseInt(document.getElementById('enemyDamage').value);
+                selectedEnemy.speed = parseFloat(document.getElementById('enemySpeed').value);
+                selectedEnemy.isMoving = document.getElementById('enemyIsMoving').checked;
+                selectedEnemy.attractionZone.enabled = document.getElementById('enemyAttractionEnabled').checked;
+
+                this.updateEnemyList();
+            }
+        });
+
+        document.getElementById('deleteEnemy').addEventListener('click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy && confirm('Delete this enemy? This cannot be undone.')) {
+                this.game.enemySystem.removeEnemyFromScene(selectedEnemy.id);
+                this.updateEnemyList();
+                this.updateEnemyProperties();
+            }
+        });
+
+        document.getElementById('drawAttractionZone').addEventListener('click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                const success = this.game.enemySystem.startAttractionZoneDrawing(selectedEnemy);
+                if (success) {
+                    // Update button state to show drawing mode is active
+                    const button = document.getElementById('drawAttractionZone');
+                    button.textContent = 'Drawing... (drag on map)';
+                    button.classList.add('danger');
+                    button.disabled = true;
+
+                    // Set up a way to reset button state when drawing is finished
+                    this.checkAttractionZoneDrawingComplete();
+
+                    console.log('🎯 Started attraction zone drawing mode for enemy', selectedEnemy.id);
+                } else {
+                    alert('Failed to start attraction zone drawing. Make sure an enemy is selected.');
+                }
+            } else {
+                alert('Please select an enemy first.');
+            }
+        });
+
         // Context menu event listeners
+    }
+
+    checkAttractionZoneDrawingComplete() {
+        // Poll to check if drawing is finished
+        const checkInterval = setInterval(() => {
+            if (!this.game.enemySystem.isDrawingAttractionZone) {
+                // Drawing is finished, reset button state
+                const button = document.getElementById('drawAttractionZone');
+                if (button) {
+                    button.textContent = 'Draw Zone';
+                    button.classList.remove('danger');
+                    button.disabled = false;
+                }
+
+                // Update the UI to reflect the new attraction zone settings
+                this.updateEnemyProperties();
+
+                clearInterval(checkInterval);
+                console.log('🎯 Attraction zone drawing completed, button reset');
+            }
+        }, 100); // Check every 100ms
     }
 
     setupSceneEditorListeners() {
@@ -270,11 +354,71 @@ class UIEventHandler {
 
     }
 
+    // Enemy UI methods
+    updateEnemyList() {
+        const listElement = document.getElementById('enemyList');
+        if (!listElement) return;
+
+        listElement.innerHTML = this.game.enemySystem.data.enemies.map(enemy => {
+            const isSelected = this.game.enemySystem.getSelectedEnemy() === enemy;
+            return `<div class="item ${isSelected ? 'selected' : ''}" data-enemy-id="${enemy.id}">
+                <div class="item-name">${enemy.type} (${Math.round(enemy.x)}, ${Math.round(enemy.y)})</div>
+                <div class="item-details">HP: ${enemy.health}/${enemy.maxHealth}, DMG: ${enemy.damage}</div>
+            </div>`;
+        }).join('');
+
+        // Add click listeners to enemy items
+        listElement.querySelectorAll('[data-enemy-id]').forEach(item => {
+            item.addEventListener('click', () => {
+                const enemyId = parseInt(item.dataset.enemyId);
+                const enemy = this.game.enemySystem.data.getEnemyById(enemyId);
+                if (enemy) {
+                    this.game.enemySystem.selectEnemy(enemy);
+                    this.updateEnemyProperties();
+                    this.updateEnemyList();
+                }
+            });
+        });
+    }
+
+    updateEnemyProperties() {
+        const propertiesDiv = document.getElementById('enemyProperties');
+        if (!propertiesDiv) return;
+
+        const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+        if (selectedEnemy) {
+            propertiesDiv.style.display = 'block';
+
+            // Update input values
+            const xInput = document.getElementById('enemyX');
+            const yInput = document.getElementById('enemyY');
+            const healthInput = document.getElementById('enemyHealth');
+            const damageInput = document.getElementById('enemyDamage');
+            const speedInput = document.getElementById('enemySpeed');
+            const isMovingInput = document.getElementById('enemyIsMoving');
+            const attractionEnabledInput = document.getElementById('enemyAttractionEnabled');
+
+            if (xInput) xInput.value = Math.round(selectedEnemy.x);
+            if (yInput) yInput.value = Math.round(selectedEnemy.y);
+            if (healthInput) healthInput.value = selectedEnemy.maxHealth;
+            if (damageInput) damageInput.value = selectedEnemy.damage;
+            if (speedInput) speedInput.value = selectedEnemy.speed;
+            if (isMovingInput) isMovingInput.checked = selectedEnemy.isMoving;
+            if (attractionEnabledInput) attractionEnabledInput.checked = selectedEnemy.attractionZone.enabled;
+        } else {
+            propertiesDiv.style.display = 'none';
+        }
+    }
+
     // Initialize all event listeners
     initialize() {
         this.setupUIListeners();
         this.setupPlatformEditorListeners();
         this.setupAdditionalListeners();
         this.setupSceneEditorListeners();
+
+        // Initialize enemy UI
+        this.updateEnemyList();
+        this.updateEnemyProperties();
     }
 }

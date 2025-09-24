@@ -35,6 +35,7 @@ class PropData {
             woodenPoleArm: {tileX: 30.53,tileY: 1.16,width: 32,height: 24,name: 'woodenPoleArm'},
             bannerPole: { tileX: 17.78, tileY: 7.16, width: 48, height: 91, name: 'Banner Pole' },
             poleBarrier: { tileX: 27.25, tileY: 0.56, width: 47, height: 47, name: 'Pole Barrier' },
+            
             // Fences & Walls
             fenceNail: { tileX: 2.56, tileY: 3.41, width: 5, height: 6, name: 'Fence Nail' },
             fencePole1: {tileX: 1.09,tileY: 2.94,width: 8,height: 35,name: 'Fence Pole1'},

@@ -30,6 +30,7 @@ class InputMouse {
     }
 
     handleCanvasMouseDown(e) {
+        console.log('🎯 Canvas mouse down, development mode:', this.game.isDevelopmentMode);
         if (!this.game.isDevelopmentMode) return;
 
         // Hide context menu on any click (left click)
@@ -65,12 +66,14 @@ class InputMouse {
 
         // Handle transition zone creation
         if (this.game.sceneSystem.isAddingTransition) {
+            console.log('🎯 Handling transition zone creation, stopping');
             this.game.sceneSystem.setTransitionStart(mouseX, mouseY);
             return;
         }
 
         // Handle platform addition
         if (this.game.isAddingPlatform) {
+            console.log('🎯 Handling platform addition, stopping');
             this.handlePlatformCreation(mouseX, mouseY);
             return;
         }
@@ -82,13 +85,16 @@ class InputMouse {
         }
 
         // Handle platform interaction
+        console.log('🎯 About to handle platform interaction at', mouseX, mouseY);
         const platformResult = this.game.platformSystem.handleMouseDown(
             mouseX, mouseY, this.game.cameraSystem.camera, this.game.viewport
         );
+        console.log('🎯 Platform result:', platformResult);
 
         if (!platformResult.handled) {
             // Handle prop interaction
-            this.game.propSystem.handleMouseDown(
+            console.log('🎯 About to handle prop interaction');
+            const propResult = this.game.propSystem.handleMouseDown(
                 mouseX, mouseY,
                 this.game.platformSystem,
                 e.ctrlKey || e.metaKey,
@@ -96,6 +102,18 @@ class InputMouse {
                 this.game.viewport,
                 this.game.cameraSystem.camera
             );
+            console.log('🎯 Prop result:', propResult);
+
+            // Handle enemy interaction if no prop interaction occurred
+            // Allow enemy placement even during drag-select operations
+            if (!propResult || !propResult.handled || propResult.type === 'drag-select') {
+                console.log('🎯 Handling enemy mouse down at', mouseX, mouseY, 'placement mode:', this.game.enemySystem.enemyPlacementMode);
+                this.game.enemySystem.handleMouseDown(
+                    mouseX, mouseY,
+                    e.ctrlKey || e.metaKey,
+                    e.shiftKey
+                );
+            }
         }
     }
 
@@ -113,6 +131,9 @@ class InputMouse {
 
         // Handle prop operations
         this.game.propSystem.handleMouseUp(e.ctrlKey || e.metaKey, this.game.viewport);
+
+        // Handle enemy operations
+        this.game.enemySystem.handleMouseUp(e.ctrlKey || e.metaKey);
 
         // Stop dragging player start position
         this.game.isDraggingStartPosition = false;
@@ -163,6 +184,9 @@ class InputMouse {
 
         // Handle prop dragging
         this.game.propSystem.handleMouseMove(mouseX, mouseY, this.game.viewport, this.game.cameraSystem.camera);
+
+        // Handle enemy dragging
+        this.game.enemySystem.handleMouseMove(mouseX, mouseY);
 
         // Update cursor based on what we're hovering over
         this.updateCursor(mouseX, mouseY);

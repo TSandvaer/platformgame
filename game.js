@@ -60,6 +60,9 @@ class PlatformRPG {
             this.checkAllSpritesLoaded();
         });
 
+        // Initialize enemy system (mouse handler will be initialized later)
+        this.enemySystem = new EnemySystem();
+
         // Initialize scene system
         this.sceneSystem = new SceneSystem(this);
 
@@ -98,8 +101,119 @@ class PlatformRPG {
         this.gameDataSystem = new GameDataSystem(this);
         this.gameDataSystem.initialize();
 
+        // Add development helper methods to window for testing
+        if (this.isDevelopmentMode) {
+            window.addTestEnemy = (x, y, type = 'orc') => {
+                // If no position specified, place on the first platform
+                if (x === undefined || y === undefined) {
+                    if (this.platformSystem.platforms.length > 0) {
+                        const platform = this.platformSystem.platforms[0];
+                        x = platform.x + 100; // 100 pixels from left edge
+                        y = platform.y - 59; // Just above the platform (enemy height is 59)
+                        console.log(`Placing enemy on platform at (${x}, ${y}) - platform top is ${platform.y}`);
+                    } else {
+                        x = 200;
+                        y = 200;
+                        console.log('No platforms found, using default position');
+                    }
+                }
+
+                console.log('Platform count:', this.platformSystem.platforms.length);
+                console.log('Platforms:', this.platformSystem.platforms.map(p => ({x: p.x, y: p.y, w: p.width, h: p.height})));
+                const enemy = this.enemySystem.addEnemyToScene(x, y, type);
+                console.log('Added test enemy:', enemy);
+                console.log('Enemy bottom will be at:', enemy.y + enemy.height, 'platform top is:', this.platformSystem.platforms[0]?.y);
+                return enemy;
+            };
+            window.clearEnemies = () => {
+                this.enemySystem.clearAllEnemies();
+                console.log('Cleared all enemies');
+            };
+            window.getEnemyStats = () => {
+                const stats = this.enemySystem.getEnemyStats();
+                console.log('Enemy stats:', stats);
+                return stats;
+            };
+            window.movePlayerToEnemies = () => {
+                const enemies = this.enemySystem.data.enemies;
+                if (enemies.length > 0) {
+                    const enemy = enemies[0];
+                    this.playerSystem.data.x = enemy.x - 100;
+                    this.playerSystem.data.y = enemy.y;
+                    console.log(`Moved player near enemy at (${this.playerSystem.data.x}, ${this.playerSystem.data.y})`);
+                } else {
+                    console.log('No enemies to move to');
+                }
+            };
+            window.getEnemyPositions = () => {
+                const enemies = this.enemySystem.data.enemies.map(e => ({
+                    id: e.id,
+                    x: e.x,
+                    y: e.y,
+                    bottom: e.y + e.height,
+                    isDead: e.isDead,
+                    currentAnimation: e.currentAnimation
+                }));
+                console.log('Enemy positions:', enemies);
+                return enemies;
+            };
+            window.checkPositions = () => {
+                console.log('Player position:', this.playerSystem.data.x, this.playerSystem.data.y);
+                console.log('Camera position:', this.cameraSystem.camera.x, this.cameraSystem.camera.y);
+                console.log('Canvas size:', this.canvas.width, this.canvas.height);
+                console.log('Viewport:', this.viewport);
+
+                const enemies = this.enemySystem.data.enemies;
+                if (enemies.length > 0) {
+                    const enemy = enemies[0];
+                    console.log('First enemy at:', enemy.x, enemy.y, 'to', enemy.x + enemy.width, enemy.y + enemy.height);
+                }
+            };
+            window.addEnemyOnPlatform = (x = 1000) => {
+                // Find the platform that contains this x coordinate
+                let bestPlatform = null;
+                for (const platform of this.platformSystem.platforms) {
+                    if (x >= platform.x && x <= platform.x + platform.width) {
+                        bestPlatform = platform;
+                        break;
+                    }
+                }
+
+                if (!bestPlatform && this.platformSystem.platforms.length > 0) {
+                    // If no platform found at exact x, use the closest one
+                    bestPlatform = this.platformSystem.platforms[0];
+                    x = bestPlatform.x + 100;
+                }
+
+                if (bestPlatform) {
+                    // Spawn enemy HIGH ABOVE the platform so it falls down and lands properly
+                    const y = bestPlatform.y - 200; // Spawn 200 pixels above platform
+                    console.log(`Platform top at: ${bestPlatform.y}`);
+                    console.log(`Spawning enemy 200px above platform at: ${y} (will fall down)`);
+
+                    const enemy = this.enemySystem.addEnemyToScene(x, y, 'orc');
+
+                    // Let enemy fall naturally - DO NOT force grounded
+                    if (enemy) {
+                        enemy.onGround = false; // Allow falling
+                        enemy.velocityY = 0; // Start with no velocity
+
+                        // Enable attraction zone so enemy will chase player
+                        enemy.attractionZone.enabled = true;
+
+                        console.log(`Enemy spawned at: ${enemy.y}, will fall to platform at: ${bestPlatform.y}`);
+                    }
+                    return enemy;
+                } else {
+                    console.log('No platforms found');
+                    return null;
+                }
+            };
+        }
+
         // Initialize UI Event Handler
         this.uiEventHandler = new UIEventHandler(this);
+        window.uiEventHandler = this.uiEventHandler; // Make globally accessible
 
         // Initialize feedback system
         this.feedbackSystem = new FeedbackSystem(this);
@@ -146,6 +260,9 @@ class PlatformRPG {
 
         // Initialize camera system with canvas and viewport
         this.cameraSystem.init(this.canvas, this.viewport);
+
+        // Initialize enemy system now that viewport and camera are ready
+        this.enemySystem.initialize(this.ctx, this.platformSystem, this.viewport, this.cameraSystem.camera);
 
         // Then set development mode (which will call sceneSystem.updateUI())
 
@@ -253,6 +370,9 @@ class PlatformRPG {
         if (sceneBoundaries) {
             this.playerSystem.applyBoundaryConstraints(sceneBoundaries);
         }
+
+        // Update enemy system
+        this.enemySystem.update(this.deltaTime, this.playerSystem.data, this.platformSystem.platforms);
 
         // Update HUD with current player stats
         if (this.hudSystem && this.playerSystem) {
@@ -399,6 +519,9 @@ class PlatformRPG {
         // Render obstacle props after removing transformations
         // They need special handling for proper coordinate transformation
         this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport, this.cameraSystem.camera);
+
+        // Render enemies AFTER obstacle props so they appear on top
+        this.enemySystem.render(this.viewport, this.cameraSystem.camera, this.isDevelopmentMode);
 
         // Render torch particles after obstacle props (they need the same transformation)
         this.propSystem.renderParticles(this.viewport, this.cameraSystem.camera, this.platformSystem.platforms);

@@ -22,6 +22,10 @@ class SceneData {
                 { id: 4, x: 1200, y: 400, width: 300, height: 50, color: '#4ECDC4', spriteType: 'color', positioning: 'absolute', relativeX: 0.5, relativeY: 0.5 }
             ];
 
+            // Initialize empty arrays for other scene elements
+            defaultScene.props = defaultScene.props || [];
+            defaultScene.enemies = defaultScene.enemies || [];
+
             this.currentSceneId = defaultScene.id;
             this.startSceneId = defaultScene.id;
         }
@@ -34,6 +38,7 @@ class SceneData {
             description: description,
             platforms: [],
             props: [],
+            enemies: [],
             background: {
                 name: 'none',
                 layers: []
@@ -184,12 +189,13 @@ class SceneData {
         return scene ? scene.transitions.zones : [];
     }
 
-    updateSceneData(sceneId, platforms, props) {
+    updateSceneData(sceneId, platforms, props, enemies = []) {
         const scene = this.getSceneById(sceneId);
         if (scene) {
-            // Update platforms and props, but preserve all other scene data
+            // Update platforms, props, and enemies, but preserve all other scene data
             scene.platforms = JSON.parse(JSON.stringify(platforms));
             scene.props = JSON.parse(JSON.stringify(props));
+            scene.enemies = JSON.parse(JSON.stringify(enemies));
             scene.metadata.modified = new Date().toISOString();
 
             // Note: settings (including playerStartX/Y), transitions, boundaries, etc.
