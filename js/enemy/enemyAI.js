@@ -151,11 +151,14 @@ class EnemyAI {
         const enemyCenter = enemy.x + enemy.width / 2;
         const targetX = enemy.target.x;
 
-        // Simple AI: move towards target
+        // Use running speed (2.5x normal speed) when chasing/attracted to player
+        const runningSpeed = enemy.speed * 2.5;
+
+        // Simple AI: move towards target at running speed
         if (targetX > enemyCenter + 10) {
-            return enemy.speed;
+            return runningSpeed;
         } else if (targetX < enemyCenter - 10) {
-            return -enemy.speed;
+            return -runningSpeed;
         }
 
         return 0;

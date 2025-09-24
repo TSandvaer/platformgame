@@ -117,11 +117,12 @@ class InputMouse {
                 enemyHandled = enemyResult && enemyResult.handled;
             }
 
-            // Clear enemy selection if not clicking on an enemy and not in placement/drawing modes
+            // Clear enemy selection if not clicking on an enemy and not in placement/drawing/dragging modes
             if (!enemyHandled &&
                 !this.game.enemySystem.mouseHandler.enemyPlacementMode &&
                 !this.game.enemySystem.mouseHandler.isDrawingAttractionZone &&
-                !this.game.enemySystem.mouseHandler.isDrawingMovementZone) {
+                !this.game.enemySystem.mouseHandler.isDrawingMovementZone &&
+                !this.game.enemySystem.mouseHandler.isDraggingEnemy) {
                 this.game.enemySystem.selectEnemy(null);
                 // Update UI to reflect cleared selection
                 if (window.uiEventHandler) {
@@ -247,7 +248,8 @@ class InputMouse {
         // Handle operations that need to continue outside canvas
         if (this.game.platformSystem.isDragging ||
             this.game.platformSystem.isResizing ||
-            this.game.propSystem.isDraggingProp) {
+            this.game.propSystem.isDraggingProp ||
+            this.game.enemySystem.isDraggingEnemy) {
             this.handleCanvasMouseMove(e);
         }
     }
@@ -258,7 +260,8 @@ class InputMouse {
         // Handle operations that need to end outside canvas
         if (this.game.platformSystem.isDragging ||
             this.game.platformSystem.isResizing ||
-            this.game.propSystem.isDraggingProp) {
+            this.game.propSystem.isDraggingProp ||
+            this.game.enemySystem.isDraggingEnemy) {
             this.handleCanvasMouseUp(e);
         }
     }

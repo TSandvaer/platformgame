@@ -268,4 +268,8 @@ class EnemySystem {
     get isDrawingMovementZone() {
         return this.mouseHandler ? this.mouseHandler.isDrawingMovementZone : false;
     }
+
+    get isDraggingEnemy() {
+        return this.mouseHandler ? this.mouseHandler.isDraggingEnemy : false;
+    }
 }

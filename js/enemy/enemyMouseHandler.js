@@ -17,6 +17,17 @@ class EnemyMouseHandler {
         this.movementZoneStart = null;
         this.movementZoneEnd = null;
         this.movementTargetEnemy = null; // Enemy whose movement zone is being drawn
+
+        // Enemy dragging state
+        this.isDraggingEnemy = false;
+        this.dragOffset = { x: 0, y: 0 };
+        this.draggedEnemy = null;
+
+        // Click vs drag detection
+        this.mouseDownStarted = false;
+        this.mouseDownPosition = { x: 0, y: 0 };
+        this.potentialDragEnemy = null;
+        this.dragThreshold = 5; // pixels to move before starting drag
     }
 
     handleMouseDown(worldMouseX, worldMouseY, ctrlPressed = false, shiftPressed = false) {
@@ -41,17 +52,46 @@ class EnemyMouseHandler {
             return { handled: true, type: 'placement' };
         }
 
-        // Check for enemy selection
+        // Check for potential enemy interaction
         const enemy = this.enemySystem.getEnemyAtPosition(worldMouseX, worldMouseY, 10);
         if (enemy) {
-            this.enemySystem.selectEnemy(enemy);
-            return { handled: true, type: 'selection', enemy: enemy };
+            // Prepare for potential drag, but don't select yet
+            this.mouseDownStarted = true;
+            this.mouseDownPosition = { x: worldMouseX, y: worldMouseY };
+            this.potentialDragEnemy = enemy;
+            this.dragOffset = {
+                x: worldMouseX - enemy.x,
+                y: worldMouseY - enemy.y
+            };
+
+            return { handled: true, type: 'potential-drag', enemy: enemy };
         }
 
         return { handled: false };
     }
 
     handleMouseMove(worldMouseX, worldMouseY) {
+        // Check if we should start dragging based on mouse movement
+        if (this.mouseDownStarted && this.potentialDragEnemy && !this.isDraggingEnemy) {
+            const deltaX = Math.abs(worldMouseX - this.mouseDownPosition.x);
+            const deltaY = Math.abs(worldMouseY - this.mouseDownPosition.y);
+
+            if (deltaX > this.dragThreshold || deltaY > this.dragThreshold) {
+                // Start dragging - mouse moved far enough
+                this.isDraggingEnemy = true;
+                this.draggedEnemy = this.potentialDragEnemy;
+                this.potentialDragEnemy = null;
+                console.log('🎯 Started dragging enemy', this.draggedEnemy.id);
+            }
+        }
+
+        // Update enemy dragging
+        if (this.isDraggingEnemy && this.draggedEnemy) {
+            this.draggedEnemy.x = worldMouseX - this.dragOffset.x;
+            this.draggedEnemy.y = worldMouseY - this.dragOffset.y;
+            return true;
+        }
+
         // Update attraction zone drawing
         if (this.isDrawingAttractionZone && this.attractionZoneStart) {
             this.attractionZoneEnd = { x: worldMouseX, y: worldMouseY };
@@ -68,6 +108,45 @@ class EnemyMouseHandler {
     }
 
     handleMouseUp(ctrlPressed = false) {
+        // Handle click vs drag completion
+        if (this.mouseDownStarted) {
+            if (this.isDraggingEnemy && this.draggedEnemy) {
+                // Finish enemy dragging
+                this.isDraggingEnemy = false;
+
+                // Update UI to reflect new position
+                if (window.uiEventHandler) {
+                    window.uiEventHandler.updateEnemyProperties();
+                    window.uiEventHandler.updateEnemyList();
+                }
+
+                const draggedEnemy = this.draggedEnemy;
+                this.draggedEnemy = null;
+                this.dragOffset = { x: 0, y: 0 };
+                this.mouseDownStarted = false;
+                this.potentialDragEnemy = null;
+
+                return { handled: true, type: 'drag-complete', enemy: draggedEnemy };
+            } else if (this.potentialDragEnemy) {
+                // This was a click without drag - select the enemy
+                const enemyToSelect = this.potentialDragEnemy;
+                this.enemySystem.selectEnemy(enemyToSelect);
+
+                // Update UI to reflect selection
+                if (window.uiEventHandler) {
+                    window.uiEventHandler.updateEnemyProperties();
+                    window.uiEventHandler.updateEnemyList();
+                }
+
+                // Reset state
+                this.mouseDownStarted = false;
+                this.potentialDragEnemy = null;
+                this.dragOffset = { x: 0, y: 0 };
+
+                return { handled: true, type: 'selection', enemy: enemyToSelect };
+            }
+        }
+
         // Finish attraction zone drawing
         if (this.isDrawingAttractionZone && this.attractionZoneStart && this.attractionZoneEnd) {
             this.finishAttractionZoneDrawing();
@@ -277,6 +356,16 @@ class EnemyMouseHandler {
         this.movementZoneEnd = null;
         this.movementTargetEnemy = null;
         console.log('🎯 Movement zone drawing cancelled');
+    }
+
+    // Cancel any ongoing enemy interaction
+    cancelEnemyInteraction() {
+        this.mouseDownStarted = false;
+        this.potentialDragEnemy = null;
+        this.isDraggingEnemy = false;
+        this.draggedEnemy = null;
+        this.dragOffset = { x: 0, y: 0 };
+        console.log('🎯 Enemy interaction cancelled');
     }
 
     // Public methods to control movement zone drawing mode

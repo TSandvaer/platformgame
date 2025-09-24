@@ -141,8 +141,18 @@ class EnemyAnimator {
 
         if (isMoving || Math.abs(this.enemy.velocityX) > 0.5) {
             this.setAnimation('walk');
+
+            // Speed up animation when running (chasing/attacking states)
+            if (this.enemy.aiState === 'chasing' || this.enemy.aiState === 'attacking') {
+                // Use faster animation speed when running (2x speed)
+                this.enemy.frameRate = 75; // Faster than default 150
+            } else {
+                // Normal walking speed
+                this.enemy.frameRate = 150; // Default walking speed
+            }
         } else {
             this.setAnimation('idle');
+            this.enemy.frameRate = 150; // Default idle speed
         }
     }
 
