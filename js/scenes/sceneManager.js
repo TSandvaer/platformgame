@@ -365,9 +365,31 @@ class SceneManager {
             })));
 
             // Use current enemy data if enemy system is initialized, otherwise preserve existing enemy data
-            let enemyDataToSave = (this.game.enemySystem && this.game.enemySystem.isInitialized)
-                ? this.game.enemySystem.data.enemies
-                : currentScene.enemies;
+            let enemyDataToSave;
+
+            if (this.game.enemySystem && this.game.enemySystem.isInitialized) {
+                const currentEnemyData = this.game.enemySystem.data.enemies;
+
+                // CRITICAL: Never save empty enemy array if the scene previously had enemies
+                // This prevents race conditions where enemies are temporarily cleared during death processing
+                if (currentScene.enemies && currentScene.enemies.length > 0 &&
+                    (!currentEnemyData || currentEnemyData.length === 0)) {
+
+                    console.warn('🚨 RACE CONDITION PREVENTED: Refusing to save empty enemy array when scene had enemies');
+                    console.warn('🚨 Scene previously had:', currentScene.enemies.length, 'enemies');
+                    console.warn('🚨 Current memory has:', currentEnemyData ? currentEnemyData.length : 'null', 'enemies');
+                    console.warn('🚨 Preserving existing enemy data to prevent corruption');
+
+                    // Preserve existing enemy data instead of overwriting with empty array
+                    enemyDataToSave = currentScene.enemies;
+                } else {
+                    // Safe to use current enemy data
+                    enemyDataToSave = currentEnemyData;
+                }
+            } else {
+                // Enemy system not initialized - preserve existing enemy data
+                enemyDataToSave = currentScene.enemies;
+            }
 
             console.log('💾 Final enemy data to save:', enemyDataToSave ? enemyDataToSave.length : 'null', 'enemies');
 
