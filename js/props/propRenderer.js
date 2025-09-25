@@ -264,6 +264,13 @@ class PropRenderer {
             this.ctx.shadowColor = `rgba(255, 140, 40, ${glowIntensity})`;
             this.ctx.shadowBlur = 25;
 
+            // Draw base flame with deep red/orange tint (bottom third)
+            this.ctx.save();
+            this.ctx.globalCompositeOperation = 'multiply';
+            this.ctx.fillStyle = `rgba(200, 60, 20, 0.8)`; // Deep red-orange
+            this.ctx.fillRect(flameX, flameY + flameHeight * 0.6, flameWidth, flameHeight * 0.4);
+            this.ctx.restore();
+
             // Draw flame sprite (21x21 source frame)
             this.ctx.drawImage(
                 flameSprite.image,
@@ -272,6 +279,24 @@ class PropRenderer {
                 flameX, flameY,
                 flameWidth, flameHeight
             );
+
+            // Add warm color overlay layers to create realistic flame colors
+            this.ctx.save();
+            this.ctx.globalCompositeOperation = 'multiply';
+
+            // Bottom: Deep red-orange base
+            this.ctx.fillStyle = `rgba(180, 40, 10, 0.7)`;
+            this.ctx.fillRect(flameX, flameY + flameHeight * 0.7, flameWidth, flameHeight * 0.3);
+
+            // Middle: Bright orange-yellow
+            this.ctx.fillStyle = `rgba(220, 120, 30, 0.6)`;
+            this.ctx.fillRect(flameX, flameY + flameHeight * 0.3, flameWidth, flameHeight * 0.4);
+
+            // Top: Yellow (let original white show through more)
+            this.ctx.fillStyle = `rgba(255, 200, 80, 0.4)`;
+            this.ctx.fillRect(flameX, flameY, flameWidth, flameHeight * 0.4);
+
+            this.ctx.restore();
 
             // Add second layer of softer, wider glow for cozy halo effect
             this.ctx.shadowColor = `rgba(255, 180, 80, ${glowIntensity * 0.4})`;
