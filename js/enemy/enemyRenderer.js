@@ -7,20 +7,24 @@ class EnemyRenderer {
         if (!animator.isReady()) {
             // Fallback to rendering a colored rectangle if sprites aren't loaded
             this.renderFallback(enemy, viewport, camera);
-            return;
+        } else {
+            const frame = animator.getCurrentFrame();
+            if (!frame) {
+                this.renderFallback(enemy, viewport, camera);
+            } else {
+                this.renderSprite(enemy, frame, viewport, camera);
+            }
         }
-
-        const frame = animator.getCurrentFrame();
-        if (!frame) {
-            this.renderFallback(enemy, viewport, camera);
-            return;
-        }
-
-        this.renderSprite(enemy, frame, viewport, camera);
 
         // Render selection indicator if this enemy is selected
         if (selectedEnemy && selectedEnemy.id === enemy.id) {
             this.renderSelectionIndicator(enemy, viewport, camera);
+        }
+
+        // Render fleeing text if enemy is fleeing
+        if (enemy.aiState === 'fleeing') {
+            console.log(`Rendering FLEEING text for enemy ${enemy.id}`);
+            this.renderFleeingText(enemy, viewport, camera);
         }
 
         // Render debug info in development mode
@@ -285,6 +289,57 @@ class EnemyRenderer {
         this.ctx.font = 'bold 12px Arial';
         this.ctx.textAlign = 'center';
         this.ctx.fillText('SELECTED', renderX + renderWidth / 2, renderY - 8);
+
+        this.ctx.restore();
+    }
+
+    renderFleeingText(enemy, viewport, camera) {
+        console.log(`DEBUG: renderFleeingText called for enemy ${enemy.id}, viewport exists: ${!!viewport}, camera exists: ${!!camera}`);
+        this.ctx.save();
+
+        // Apply camera and viewport transformation
+        let renderX = enemy.x;
+        let renderY = enemy.y;
+        let renderWidth = enemy.width;
+
+        if (viewport && camera) {
+            renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
+            renderY = (enemy.y - camera.y) * viewport.scaleY + viewport.offsetY;
+            renderWidth = enemy.width * viewport.scaleX;
+        }
+
+        // Text properties
+        const fontSize = 14 * (viewport ? viewport.scaleX : 1);
+        this.ctx.font = `bold ${fontSize}px Arial`;
+        this.ctx.textAlign = 'center';
+
+        // Position text above enemy
+        const textX = renderX + renderWidth / 2;
+        const textY = renderY - 25 * (viewport ? viewport.scaleY : 1);
+
+        // Draw text background for better visibility
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        const textMetrics = this.ctx.measureText('FLEEING');
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize;
+        const paddingX = 6;
+        const paddingY = 4;
+
+        this.ctx.fillRect(
+            textX - textWidth / 2 - paddingX,
+            textY - textHeight + paddingY,
+            textWidth + paddingX * 2,
+            textHeight + paddingY
+        );
+
+        // Draw text with yellow color to indicate fleeing
+        this.ctx.fillStyle = '#FFFF00';
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeText('FLEEING', textX, textY);
+        this.ctx.fillText('FLEEING', textX, textY);
+
+        console.log(`DEBUG: Drew FLEEING text at position (${textX}, ${textY}) for enemy ${enemy.id}`);
 
         this.ctx.restore();
     }

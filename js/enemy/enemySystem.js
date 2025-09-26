@@ -24,6 +24,12 @@ class EnemySystem {
         for (let i = this.data.enemies.length - 1; i >= 0; i--) {
             const enemy = this.data.enemies[i];
 
+            // Backward compatibility: ensure fleeHealthThreshold is set for existing enemies
+            if (enemy.fleeHealthThreshold === undefined || enemy.fleeHealthThreshold === null) {
+                enemy.fleeHealthThreshold = 0.4;
+                console.log(`Fixed missing fleeHealthThreshold for enemy ${enemy.id}`);
+            }
+
             // Handle death timer countdown
             if (enemy.isDead && enemy.isVisible) {
                 enemy.deathTimer -= deltaTime;
@@ -130,7 +136,9 @@ class EnemySystem {
 
     damageEnemy(enemy, damage, animator) {
         enemy.health -= damage;
-        console.log(`Enemy ${enemy.id} took ${damage} damage, health: ${enemy.health}/${enemy.maxHealth}`);
+        const healthPercentage = enemy.health / enemy.maxHealth;
+        console.log(`Enemy ${enemy.id} took ${damage} damage, health: ${enemy.health}/${enemy.maxHealth} (${Math.round(healthPercentage * 100)}%)`);
+        console.log(`Enemy ${enemy.id} flee threshold: ${Math.round((enemy.fleeHealthThreshold || 0.4) * 100)}%, should flee: ${healthPercentage <= (enemy.fleeHealthThreshold || 0.4)}`);
 
         if (enemy.health <= 0) {
             enemy.health = 0;

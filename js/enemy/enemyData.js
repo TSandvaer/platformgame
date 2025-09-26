@@ -9,6 +9,7 @@ class EnemyData {
                 spriteFolder: 'sprites/Tiny RPG assets/Characters(100x100)/Orc/Orc',
                 defaultHealth: 100,
                 defaultDamage: 20,
+                fleeHealthThreshold: 0.4, // Flee when health drops below 40%
                 width: 44,
                 height: 59,
                 scale: 1.25,
@@ -75,9 +76,11 @@ class EnemyData {
             speed: 2,
 
             // AI state
-            aiState: 'idle', // idle, patrolling, chasing, attacking
+            aiState: 'idle', // idle, patrolling, chasing, attacking, fleeing, returning_to_zone, returning_to_position
             target: null,
             lastPlayerPosition: null,
+            fleeHealthThreshold: typeData.fleeHealthThreshold || 0.4,
+            originalPosition: null, // Store original position for returning after fleeing
 
             // Combat state
             isAttacking: false,
@@ -171,6 +174,9 @@ class EnemyData {
 
                 // Backward compatibility: default isVisible to true if not present
                 enemy.isVisible = enemyData.isVisible !== undefined ? enemyData.isVisible : true;
+
+                // Backward compatibility: ensure fleeHealthThreshold is set for existing enemies
+                enemy.fleeHealthThreshold = enemyData.fleeHealthThreshold || typeData.fleeHealthThreshold || 0.4;
 
                 if (enemyData.movementZone) {
                     enemy.movementZone = { ...enemy.movementZone, ...enemyData.movementZone };
