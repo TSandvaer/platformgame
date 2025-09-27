@@ -38,6 +38,13 @@ class PlayerData {
         this.stamina = 100;
         this.maxStamina = 100;
 
+        // Combat stats
+        this.attackDamage = 25;
+
+        // Movement stats
+        this.runSpeed = 8; // Running speed (different from walk speed)
+        this.staminaRegenRate = 5; // Stamina per second regeneration rate
+
         // Damage system
         this.isDamaged = false;
         this.damageTimer = 0;
@@ -50,6 +57,10 @@ class PlayerData {
         this.healthRegenRate = 50; // HP per second regeneration rate (fast for testing)
         this.lastHealthRegenTime = 0;
         this.healthRegenCooldown = 100; // 100ms between regen ticks
+
+        // Stamina regeneration system
+        this.lastStaminaRegenTime = 0;
+        this.staminaRegenCooldown = 100; // 100ms between stamina regen ticks
 
         // Running state
         this.isRunning = false;
@@ -101,6 +112,9 @@ class PlayerData {
 
         // Reset health regeneration
         this.lastHealthRegenTime = 0;
+
+        // Reset stamina regeneration
+        this.lastStaminaRegenTime = 0;
     }
 
     setPosition(x, y) {
@@ -213,6 +227,16 @@ class PlayerData {
             if (this.health >= this.maxHealth) {
                 console.log('Health fully regenerated!');
             }
+        }
+
+        // Stamina regeneration (when not running and stamina is not full)
+        if (this.stamina < this.maxStamina && !this.isRunning &&
+            currentTime - this.lastStaminaRegenTime >= this.staminaRegenCooldown) {
+
+            // Calculate stamina regen amount for this interval
+            const staminaRegenAmount = (this.staminaRegenRate * this.staminaRegenCooldown) / 1000;
+            this.stamina = Math.min(this.maxStamina, this.stamina + staminaRegenAmount);
+            this.lastStaminaRegenTime = currentTime;
         }
 
         // Check for death

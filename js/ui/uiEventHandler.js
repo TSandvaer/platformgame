@@ -38,6 +38,9 @@ class UIEventHandler {
             this.game.viewportSystem.handleResize();
         });
 
+        // Player controls event listeners
+        this.setupPlayerControlListeners();
+
         // Multi-selection and grouping event listeners
         const groupButton = document.getElementById('groupProps');
         if (groupButton) {
@@ -482,6 +485,160 @@ class UIEventHandler {
         } else {
             propertiesDiv.style.display = 'none';
         }
+    }
+
+    setupPlayerControlListeners() {
+        // Load current player values into the controls
+        this.loadPlayerValues();
+
+        // Apply Settings button
+        const applyBtn = document.getElementById('applyPlayerSettings');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.applyPlayerSettings();
+            });
+        }
+
+        // Reset Settings button
+        const resetBtn = document.getElementById('resetPlayerSettings');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetPlayerSettings();
+            });
+        }
+
+        // Full Heal button
+        const healBtn = document.getElementById('healPlayer');
+        if (healBtn) {
+            healBtn.addEventListener('click', () => {
+                this.healPlayer();
+            });
+        }
+
+        // Restore Stamina button
+        const staminaBtn = document.getElementById('restoreStamina');
+        if (staminaBtn) {
+            staminaBtn.addEventListener('click', () => {
+                this.restoreStamina();
+            });
+        }
+
+        // Real-time updates on input changes
+        const inputs = [
+            'playerMaxHealth', 'playerHealthRegen', 'playerMaxStamina', 'playerStaminaRegen',
+            'playerAttackDamage', 'playerWalkSpeed', 'playerRunSpeed', 'playerJumpForce'
+        ];
+
+        inputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', () => {
+                    // Apply immediately for responsive feedback
+                    this.applyPlayerSettings();
+                });
+            }
+        });
+    }
+
+    loadPlayerValues() {
+        if (!this.game.playerSystem || !this.game.playerSystem.data) return;
+
+        const player = this.game.playerSystem.data;
+
+        // Load current values into inputs
+        const maxHealthInput = document.getElementById('playerMaxHealth');
+        const healthRegenInput = document.getElementById('playerHealthRegen');
+        const maxStaminaInput = document.getElementById('playerMaxStamina');
+        const staminaRegenInput = document.getElementById('playerStaminaRegen');
+        const attackDamageInput = document.getElementById('playerAttackDamage');
+        const walkSpeedInput = document.getElementById('playerWalkSpeed');
+        const runSpeedInput = document.getElementById('playerRunSpeed');
+        const jumpForceInput = document.getElementById('playerJumpForce');
+
+        if (maxHealthInput) maxHealthInput.value = player.maxHealth;
+        if (healthRegenInput) healthRegenInput.value = player.healthRegenRate;
+        if (maxStaminaInput) maxStaminaInput.value = player.maxStamina;
+        if (staminaRegenInput) staminaRegenInput.value = 5; // Default stamina regen
+        if (attackDamageInput) attackDamageInput.value = 25; // Default attack damage
+        if (walkSpeedInput) walkSpeedInput.value = player.speed;
+        if (runSpeedInput) runSpeedInput.value = player.speed * 2; // Default run speed is 2x walk
+        if (jumpForceInput) jumpForceInput.value = Math.abs(player.jumpPower);
+    }
+
+    applyPlayerSettings() {
+        if (!this.game.playerSystem || !this.game.playerSystem.data) return;
+
+        const player = this.game.playerSystem.data;
+
+        // Get values from inputs
+        const maxHealth = parseFloat(document.getElementById('playerMaxHealth')?.value) || 100;
+        const healthRegen = parseFloat(document.getElementById('playerHealthRegen')?.value) || 0;
+        const maxStamina = parseFloat(document.getElementById('playerMaxStamina')?.value) || 100;
+        const staminaRegen = parseFloat(document.getElementById('playerStaminaRegen')?.value) || 5;
+        const attackDamage = parseFloat(document.getElementById('playerAttackDamage')?.value) || 25;
+        const walkSpeed = parseFloat(document.getElementById('playerWalkSpeed')?.value) || 5;
+        const runSpeed = parseFloat(document.getElementById('playerRunSpeed')?.value) || 10;
+        const jumpForce = parseFloat(document.getElementById('playerJumpForce')?.value) || 15;
+
+        // Apply the values
+        player.maxHealth = maxHealth;
+        player.healthRegenRate = healthRegen;
+        player.maxStamina = maxStamina;
+        // Note: staminaRegenRate and attackDamage would need to be added to PlayerData
+        player.speed = walkSpeed;
+        player.jumpPower = -Math.abs(jumpForce); // Jump power is negative
+
+        // Store run speed for running system (would need to be implemented)
+        player.runSpeed = runSpeed;
+        player.attackDamage = attackDamage;
+        player.staminaRegenRate = staminaRegen;
+
+        // Update current health/stamina if they exceed new maximums
+        if (player.health > maxHealth) player.health = maxHealth;
+        if (player.stamina > maxStamina) player.stamina = maxStamina;
+
+        console.log('🎮 Player settings applied:', {
+            maxHealth, healthRegen, maxStamina, staminaRegen,
+            attackDamage, walkSpeed, runSpeed, jumpForce
+        });
+    }
+
+    resetPlayerSettings() {
+        // Reset to default values
+        document.getElementById('playerMaxHealth').value = 100;
+        document.getElementById('playerHealthRegen').value = 0;
+        document.getElementById('playerMaxStamina').value = 100;
+        document.getElementById('playerStaminaRegen').value = 5;
+        document.getElementById('playerAttackDamage').value = 25;
+        document.getElementById('playerWalkSpeed').value = 5;
+        document.getElementById('playerRunSpeed').value = 10;
+        document.getElementById('playerJumpForce').value = 15;
+
+        // Apply the reset values
+        this.applyPlayerSettings();
+
+        console.log('🔄 Player settings reset to defaults');
+    }
+
+    healPlayer() {
+        if (!this.game.playerSystem || !this.game.playerSystem.data) return;
+
+        const player = this.game.playerSystem.data;
+        player.health = player.maxHealth;
+        player.isDead = false;
+        player.deathTimer = 0;
+
+        console.log('🩹 Player fully healed!');
+    }
+
+    restoreStamina() {
+        if (!this.game.playerSystem || !this.game.playerSystem.data) return;
+
+        const player = this.game.playerSystem.data;
+        player.stamina = player.maxStamina;
+        player.staminaExhaustedTimer = 0;
+
+        console.log('⚡ Player stamina restored!');
     }
 
     // Initialize all event listeners
