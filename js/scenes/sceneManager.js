@@ -334,11 +334,17 @@ class SceneManager {
     saveCurrentSceneData() {
         const currentScene = this.sceneData.getCurrentScene();
         if (currentScene) {
+            // Check if we're in initial loading phase (systems not fully initialized)
+            const isInitialLoading = !this.game.allSpritesLoaded ||
+                                   (this.game.enemySystem && !this.game.enemySystem.isInitialized);
+
             // Check if we're about to wipe out existing platforms
             if (currentScene.platforms.length > 0 && this.game.platformSystem.platforms.length === 0) {
-                console.warn('⚠️ WARNING: Attempting to save empty platforms over existing platforms!');
-                console.warn('⚠️ Scene had', currentScene.platforms.length, 'platforms but platformSystem has 0');
-                console.warn('⚠️ This likely means the platforms weren\'t loaded properly into memory');
+                if (!isInitialLoading) {
+                    console.warn('⚠️ WARNING: Attempting to save empty platforms over existing platforms!');
+                    console.warn('⚠️ Scene had', currentScene.platforms.length, 'platforms but platformSystem has 0');
+                    console.warn('⚠️ This likely means the platforms weren\'t loaded properly into memory');
+                }
 
                 // Try to reload the platforms into memory from the scene
                 const platformsCopy = JSON.parse(JSON.stringify(currentScene.platforms));
@@ -347,9 +353,11 @@ class SceneManager {
 
             // Check if we're about to wipe out existing props
             if (currentScene.props.length > 0 && this.game.propSystem.props.length === 0) {
-                console.warn('⚠️ WARNING: Attempting to save empty props over existing props!');
-                console.warn('⚠️ Scene had', currentScene.props.length, 'props but propSystem has 0');
-                console.warn('⚠️ This likely means the props weren\'t loaded properly into memory');
+                if (!isInitialLoading) {
+                    console.warn('⚠️ WARNING: Attempting to save empty props over existing props!');
+                    console.warn('⚠️ Scene had', currentScene.props.length, 'props but propSystem has 0');
+                    console.warn('⚠️ This likely means the props weren\'t loaded properly into memory');
+                }
 
                 // Try to reload the props into memory from the scene
                 const propsCopy = JSON.parse(JSON.stringify(currentScene.props));
@@ -413,9 +421,11 @@ class SceneManager {
             // Check if we're about to wipe out existing lootables
             if (currentScene.lootables && currentScene.lootables.length > 0 &&
                 (!this.game.lootableSystem?.lootables || this.game.lootableSystem.lootables.length === 0)) {
-                console.warn('⚠️ WARNING: Attempting to save empty lootables over existing lootables!');
-                console.warn('⚠️ Scene had', currentScene.lootables.length, 'lootables but lootableSystem has 0');
-                console.warn('⚠️ This likely means the lootables weren\'t loaded properly into memory');
+                if (!isInitialLoading) {
+                    console.warn('⚠️ WARNING: Attempting to save empty lootables over existing lootables!');
+                    console.warn('⚠️ Scene had', currentScene.lootables.length, 'lootables but lootableSystem has 0');
+                    console.warn('⚠️ This likely means the lootables weren\'t loaded properly into memory');
+                }
 
                 // Try to reload the lootables into memory from the scene
                 const lootablesCopy = JSON.parse(JSON.stringify(currentScene.lootables));

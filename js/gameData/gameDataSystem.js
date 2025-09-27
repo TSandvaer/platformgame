@@ -299,7 +299,8 @@ class GameDataSystem {
             items: this.gameData.items || [],
             gameSettings: {
                 hud: hudSettings
-            }
+            },
+            playerSettings: this.gameData.playerSettings || this.defaultGameData.playerSettings
         };
     }
 

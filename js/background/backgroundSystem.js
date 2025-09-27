@@ -21,6 +21,7 @@ class BackgroundSystem {
             'Mountains2',
             'MountainWaterfall',
             'Parallax_Backgrounds_Cave',
+            'Parallax_Forest_Background_Blue',
             'The Dawn'
         ];
     }
@@ -106,6 +107,20 @@ class BackgroundSystem {
                 ];
                 // console.log('🏞️ Loading Parallax_Backgrounds_Cave with paths:', layerPaths);
                 break;
+            case 'Parallax_Forest_Background_Blue':
+                layerPaths = [
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/01_Mist.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/02_Bushes.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/03_Particles.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/04_Forest.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/05_Particles.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/06_Forest.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/07_Forest.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/08_Forest.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/09_Forest.png',
+                    'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/10_Sky.png'
+                ];
+                break;
             case 'The Dawn':
                 layerPaths = [];
                 for (let i = 1; i <= 8; i++) {
@@ -153,8 +168,8 @@ class BackgroundSystem {
         }
 
         const background = this.currentBackground;
-        // Debug logging for cave background
-        if (background.name === 'Parallax_Backgrounds_Cave') {
+        // Debug logging for parallax backgrounds
+        if (background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') {
             console.log(`🏞️ Rendering ${background.name}: ${background.layersLoaded}/${background.totalLayers} layers loaded`);
             console.log(`🏞️ Background layers array length:`, background.layers.length);
             background.layers.forEach((layer, index) => {
@@ -163,11 +178,14 @@ class BackgroundSystem {
         }
 
         // Render each background layer with different parallax speeds
-        // For cave background, use a custom layer strategy since each layer is a full opaque image
+        // For parallax backgrounds, use a custom layer strategy since each layer is a full opaque image
         let layersToRender;
         if (background.name === 'Parallax_Backgrounds_Cave') {
             // For cave: render background + selected foreground layers with different blend modes
             layersToRender = [0, 1, 2, 3, 4, 5, 6, 7]; // Try all layers with special handling
+        } else if (background.name === 'Parallax_Forest_Background_Blue') {
+            // For forest: render all layers naturally (they have transparency)
+            layersToRender = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]; // Sky to foreground (back to front)
         } else {
             layersToRender = [...Array(background.layers.length).keys()];
         }
@@ -176,13 +194,13 @@ class BackgroundSystem {
             const index = layersToRender[i];
             const layer = background.layers[index];
             if (!layer.complete || !layer.naturalWidth) {
-                if (background.name === 'Parallax_Backgrounds_Cave') {
+                if (background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') {
                     console.log(`🏞️ Skipping layer ${index}: complete=${layer.complete}, naturalWidth=${layer.naturalWidth}`);
                 }
                 return; // Skip if not loaded
             }
 
-            if (background.name === 'Parallax_Backgrounds_Cave') {
+            if (background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') {
                 console.log(`🏞️ Actually drawing layer ${index}: ${layer.naturalWidth}x${layer.naturalHeight}`);
             }
 
@@ -218,7 +236,7 @@ class BackgroundSystem {
             for (let i = 0; i < tilesNeeded; i++) {
                 const x = startX + (i * scaledWidth);
 
-                if (background.name === 'Parallax_Backgrounds_Cave' && i === 0) {
+                if ((background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') && i === 0) {
                     console.log(`🏞️ Layer ${index} drawing: x=${x}, y=0, width=${scaledWidth}, height=${this.canvas.height}, tilesNeeded=${tilesNeeded}`);
                     console.log(`🏞️ Drawing with image src: ${layer.src}`);
                 }
@@ -235,6 +253,10 @@ class BackgroundSystem {
                             this.ctx.globalCompositeOperation = 'multiply';
                             this.ctx.globalAlpha = 0.7; // Slight transparency to blend better
                         }
+                    } else if (background.name === 'Parallax_Forest_Background_Blue') {
+                        // Natural forest background rendering - layers have built-in transparency
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        this.ctx.globalAlpha = 1.0; // Use full alpha, let layer transparency handle blending
 
                         this.ctx.drawImage(
                             layer,
@@ -256,7 +278,7 @@ class BackgroundSystem {
                         );
                     }
 
-                    if (background.name === 'Parallax_Backgrounds_Cave' && i === 0) {
+                    if ((background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') && i === 0) {
                         console.log(`🏞️ Layer ${index} drawImage successful`);
                     }
                 } catch (error) {
