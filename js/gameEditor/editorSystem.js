@@ -54,8 +54,8 @@ class EditorSystem {
             this.game.propSystem.updatePropList();
             this.game.sceneSystem.updateUI();
         } else {
-            // Production mode - start with the designated start scene
-            this.game.sceneSystem.startGame();
+            // Production mode - position player at current scene start position
+            this.game.positionPlayerAtSceneStart();
         }
     }
 
