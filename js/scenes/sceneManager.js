@@ -427,8 +427,33 @@ class SceneManager {
             // Handle lootable data
             let lootableDataToSave = [];
             if (this.game.lootableSystem && this.game.lootableSystem.lootables) {
-                lootableDataToSave = this.game.lootableSystem.lootables;
-                console.log('💾 Lootables being saved:', lootableDataToSave.length, 'lootables');
+                const currentLootableData = this.game.lootableSystem.lootables;
+
+                // CRITICAL: Detect if lootables have been collected during gameplay
+                // This prevents collected coins/hearts from being permanently lost from scene data
+                const originalCount = currentScene.lootables ? currentScene.lootables.length : 0;
+                const currentCount = currentLootableData.length;
+
+                if (originalCount > 0 && currentCount < originalCount) {
+                    // Lootables have been collected - preserve original configuration
+                    console.warn('🚨 LOOTABLE PROTECTION: Detected collected lootables');
+                    console.warn('🚨 Scene originally had:', originalCount, 'lootables');
+                    console.warn('🚨 Current memory has:', currentCount, 'lootables');
+                    console.warn('🚨 Preserving original lootable configuration to prevent permanent loss');
+
+                    lootableDataToSave = currentScene.lootables;
+                } else if (currentCount > originalCount) {
+                    // New lootables have been added in the editor - save current state
+                    console.log('💾 New lootables detected - saving current state');
+                    console.log('💾 Original:', originalCount, 'lootables, Current:', currentCount, 'lootables');
+
+                    lootableDataToSave = currentLootableData;
+                } else {
+                    // Same count or starting fresh - save current state
+                    lootableDataToSave = currentLootableData;
+                }
+
+                console.log('💾 Final lootable data to save:', lootableDataToSave.length, 'lootables');
             }
 
             this.sceneData.updateSceneData(
