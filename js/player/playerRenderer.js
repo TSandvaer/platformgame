@@ -23,13 +23,18 @@ class PlayerRenderer {
     renderSprite(ctx, frame) {
         ctx.save();
 
-        // Calculate sprite render dimensions
-        const baseSpriteSize = 256;
-        const playerScale = this.data.width / 35; // Scale based on original player width
-        const spriteRenderWidth = baseSpriteSize * playerScale;
-        const spriteRenderHeight = baseSpriteSize * playerScale;
-        const spriteOffsetX = (this.data.width - spriteRenderWidth) / 2;
-        const spriteOffsetY = this.data.height - spriteRenderHeight + (110 * playerScale);
+        // Disable image smoothing for crisp pixel art
+        ctx.imageSmoothingEnabled = false;
+
+        // Calculate sprite render dimensions with pixel-perfect scaling
+        const baseSpriteSize = 100; // Match actual sprite dimensions (100x100)
+        const playerScale = (this.data.width / 35) * 2.56; // Scale to maintain original size (256/100 = 2.56)
+
+        // Round dimensions to avoid fractional pixels for sharper rendering
+        const spriteRenderWidth = Math.round(baseSpriteSize * playerScale);
+        const spriteRenderHeight = Math.round(baseSpriteSize * playerScale);
+        const spriteOffsetX = Math.round((this.data.width - spriteRenderWidth) / 2);
+        const spriteOffsetY = Math.round(this.data.height - spriteRenderHeight + (43 * playerScale)); // Adjusted for 100px sprite (110/2.56 ≈ 43)
 
         // Handle kill effects
         let renderY = this.data.y + spriteOffsetY;
@@ -77,6 +82,9 @@ class PlayerRenderer {
 
     renderFallback(ctx) {
         ctx.save();
+
+        // Disable image smoothing for crisp fallback rendering
+        ctx.imageSmoothingEnabled = false;
 
         // Handle kill effects for fallback rendering
         let renderY = this.data.y;

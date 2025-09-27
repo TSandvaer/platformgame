@@ -36,6 +36,9 @@ class EnemyRenderer {
     renderSprite(enemy, frame, viewport, camera) {
         this.ctx.save();
 
+        // Disable image smoothing for crisp pixel art
+        this.ctx.imageSmoothingEnabled = false;
+
         // Check if dead enemy should be visible (blinking effect)
         if (enemy.isDead && !this.shouldRenderDeadEnemy(enemy)) {
             this.ctx.restore();
@@ -50,19 +53,19 @@ class EnemyRenderer {
             renderY = (enemy.y - camera.y) * viewport.scaleY + viewport.offsetY;
         }
 
-        // Calculate sprite render dimensions
-        const baseSpriteSize = 256;
-        const enemyScale = enemy.width / 35; // Scale based on enemy width
-        const spriteRenderWidth = baseSpriteSize * enemyScale;
-        const spriteRenderHeight = baseSpriteSize * enemyScale;
-        const spriteOffsetX = (enemy.width - spriteRenderWidth) / 2;
-        const spriteOffsetY = enemy.height - spriteRenderHeight + (110 * enemyScale);
+        // Calculate sprite render dimensions with pixel-perfect scaling
+        const baseSpriteSize = 100; // Match actual sprite dimensions (100x100)
+        const enemyScale = (enemy.width / 35) * 2.56; // Scale to maintain original size (256/100 = 2.56)
+        const spriteRenderWidth = Math.round(baseSpriteSize * enemyScale);
+        const spriteRenderHeight = Math.round(baseSpriteSize * enemyScale);
+        const spriteOffsetX = Math.round((enemy.width - spriteRenderWidth) / 2);
+        const spriteOffsetY = Math.round(enemy.height - spriteRenderHeight + (43 * enemyScale)); // Adjusted for 100px sprite (110/2.56 ≈ 43)
 
-        // Apply viewport scaling to offsets
-        const scaledOffsetX = spriteOffsetX * (viewport ? viewport.scaleX : 1);
-        const scaledOffsetY = spriteOffsetY * (viewport ? viewport.scaleY : 1);
-        const scaledWidth = spriteRenderWidth * (viewport ? viewport.scaleX : 1);
-        const scaledHeight = spriteRenderHeight * (viewport ? viewport.scaleY : 1);
+        // Apply viewport scaling to offsets with pixel-perfect rounding
+        const scaledOffsetX = Math.round(spriteOffsetX * (viewport ? viewport.scaleX : 1));
+        const scaledOffsetY = Math.round(spriteOffsetY * (viewport ? viewport.scaleY : 1));
+        const scaledWidth = Math.round(spriteRenderWidth * (viewport ? viewport.scaleX : 1));
+        const scaledHeight = Math.round(spriteRenderHeight * (viewport ? viewport.scaleY : 1));
 
         // Flip sprite horizontally if facing left
         if (enemy.facing === 'left') {
@@ -91,6 +94,9 @@ class EnemyRenderer {
 
     renderFallback(enemy, viewport, camera) {
         this.ctx.save();
+
+        // Disable image smoothing for crisp fallback rendering
+        this.ctx.imageSmoothingEnabled = false;
 
         // Check if dead enemy should be visible (blinking effect)
         if (enemy.isDead && !this.shouldRenderDeadEnemy(enemy)) {
