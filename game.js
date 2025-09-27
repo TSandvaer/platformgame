@@ -326,6 +326,13 @@ class PlatformRPG {
         this.gameLoop();
         this.updateUI();
 
+        // Respawn all destroyed props on game start
+        setTimeout(() => {
+            if (this.propSystem) {
+                this.propSystem.respawnAllProps();
+            }
+        }, 1000); // Delay to ensure everything is loaded
+
         // Game data will be loaded after scene system is initialized in checkAllSpritesLoaded()
     }
 
@@ -399,6 +406,40 @@ class PlatformRPG {
 
         // Update enemy system
         this.enemySystem.update(this.deltaTime, this.playerSystem.data, this.platformSystem.platforms);
+
+        // Check player attacks on props (only in production mode)
+        if (!this.isDevelopmentMode) {
+            const propAttackCollisions = this.propSystem.checkPlayerAttackCollisions(this.playerSystem.data);
+            propAttackCollisions.forEach(collision => {
+                const prop = collision.prop;
+                // Ensure prop has damage immunity to prevent multiple hits per attack
+                if (!prop.isDamaged) {
+                    console.log(`Player (facing ${this.playerSystem.data.facing}) attacked prop ${prop.id} for ${collision.damage} damage`);
+                    const wasDestroyed = this.propSystem.damageProp(prop.id, collision.damage);
+
+                    // Add brief damage immunity to prevent multiple hits per attack
+                    prop.isDamaged = true;
+                    prop.damageTimer = 300; // 300ms immunity
+
+                    if (wasDestroyed) {
+                        console.log(`Prop ${prop.id} was destroyed!`);
+                    }
+                }
+            });
+        }
+
+        // Update prop damage immunity timers
+        this.propSystem.data.props.forEach(prop => {
+            if (prop.isDamaged && prop.damageTimer > 0) {
+                prop.damageTimer -= this.deltaTime;
+                if (prop.damageTimer <= 0) {
+                    prop.isDamaged = false;
+                }
+            }
+        });
+
+        // Update prop destruction animations
+        this.propSystem.updateDestruction(this.deltaTime);
 
         // Update HUD with current player stats
         if (this.hudSystem && this.playerSystem) {

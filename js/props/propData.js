@@ -181,7 +181,7 @@ class PropData {
         return this.nextPropId++;
     }
 
-    addProp(type, x, y, isObstacle = false, sizeMultiplier = 1.0, damagePerSecond = 0) {
+    addProp(type, x, y, isObstacle = false, sizeMultiplier = 1.0, damagePerSecond = 0, destroyable = false, maxDurability = 100) {
         const propType = this.propTypes[type];
         if (!propType) return null;
 
@@ -197,7 +197,19 @@ class PropData {
             relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
             sizeMultiplier: sizeMultiplier,  // Resolution-independent size multiplier
             rotation: 0,            // Rotation angle in radians
-            damagePerSecond: damagePerSecond // Damage dealt to player per second
+            damagePerSecond: damagePerSecond, // Damage dealt to player per second
+            // Destruction system properties
+            destroyable: destroyable,
+            maxDurability: destroyable ? maxDurability : 0,
+            currentDurability: destroyable ? maxDurability : 0,
+            isDestroying: false,
+            destructionFrameIndex: 0,
+            destructionTimer: 0,
+            destructionFrameRate: 150, // milliseconds per frame
+            isDestroyed: false,
+            isVisible: true,
+            isDamaged: false,
+            damageTimer: 0
         };
 
         this.props.push(newProp);
@@ -922,5 +934,131 @@ class PropData {
         }
 
         return propsInRect;
+    }
+
+    // Destruction system methods
+    damageProp(propId, damage) {
+        const prop = this.getPropById(propId);
+        if (!prop || !prop.destroyable || prop.isDestroying) return false;
+
+        // Ensure the prop has proper destruction properties
+        this.ensureDestructionProperties(prop);
+
+        prop.currentDurability = Math.max(0, prop.currentDurability - damage);
+        console.log(`Damaged prop ${propId}: ${prop.currentDurability}/${prop.maxDurability} durability remaining`);
+
+        if (prop.currentDurability <= 0) {
+            this.startDestruction(prop);
+            return true; // Prop was destroyed
+        }
+        return false; // Prop was damaged but not destroyed
+    }
+
+    startDestruction(prop) {
+        if (!prop || !prop.destroyable || prop.isDestroying) return;
+
+        prop.isDestroying = true;
+        prop.destructionFrameIndex = 0;
+        prop.destructionTimer = 0;
+        prop.currentDurability = 0;
+    }
+
+    updateDestruction(prop, deltaTime) {
+        if (!prop.isDestroying) return false;
+
+        prop.destructionTimer += deltaTime;
+
+        if (prop.destructionTimer >= prop.destructionFrameRate) {
+            prop.destructionTimer = 0;
+            prop.destructionFrameIndex++;
+
+            // Check if destruction animation is complete
+            const hasDestructionSprite = this.hasDestructionSprite(prop.type);
+            const maxFrames = hasDestructionSprite ? 5 : 6; // 5 for sprite animation, 6 for blink effect (3 blinks)
+
+            if (prop.destructionFrameIndex >= maxFrames) {
+                // Instead of deleting, mark as destroyed and make invisible
+                prop.isDestroyed = true;
+                prop.isVisible = false;
+                prop.isDestroying = false;
+                console.log(`Prop ${prop.id} destroyed but preserved for respawn`);
+                return true; // Prop was destroyed (but not removed)
+            }
+        }
+
+        return false; // Still destroying
+    }
+
+    hasDestructionSprite(propType) {
+        // For now, only barrel has a destruction sprite
+        // This can be expanded later for other prop types
+        return propType === 'barrel';
+    }
+
+    // Update all props with destruction animations
+    updateAllDestruction(deltaTime) {
+        const propsToRemove = [];
+
+        for (const prop of this.props) {
+            if (prop.isDestroying) {
+                const wasRemoved = this.updateDestruction(prop, deltaTime);
+                if (wasRemoved) {
+                    // Prop was already removed by updateDestruction, no need to track
+                    break; // Break since the array was modified
+                }
+            }
+        }
+    }
+
+    // Ensure prop has all required destruction properties
+    ensureDestructionProperties(prop) {
+        if (prop.destroyable && (prop.maxDurability === undefined || prop.currentDurability === undefined)) {
+            prop.maxDurability = prop.maxDurability || 100;
+            prop.currentDurability = prop.currentDurability !== undefined ? prop.currentDurability : prop.maxDurability;
+            prop.isDestroying = prop.isDestroying || false;
+            prop.destructionFrameIndex = prop.destructionFrameIndex || 0;
+            prop.destructionTimer = prop.destructionTimer || 0;
+            prop.destructionFrameRate = prop.destructionFrameRate || 150;
+            prop.isDestroyed = prop.isDestroyed || false;
+            prop.isVisible = prop.isVisible !== false; // Default to visible
+            prop.isDamaged = prop.isDamaged || false;
+            prop.damageTimer = prop.damageTimer || 0;
+            console.log('Initialized destruction properties for prop:', prop);
+        }
+    }
+
+    // Reset all destroyable props to full durability (called on game reload)
+    respawnAllProps() {
+        let respawnedCount = 0;
+        let restoredCount = 0;
+
+        for (const prop of this.props) {
+            if (prop.destroyable) {
+                // Reset ALL destroyable props to full durability
+                const wasDestroyed = prop.isDestroyed;
+                const wasDamaged = prop.currentDurability < prop.maxDurability;
+
+                prop.currentDurability = prop.maxDurability;
+                prop.isDestroyed = false;
+                prop.isVisible = true;
+                prop.isDestroying = false;
+                prop.destructionFrameIndex = 0;
+                prop.destructionTimer = 0;
+                prop.isDamaged = false;
+                prop.damageTimer = 0;
+
+                if (wasDestroyed) {
+                    respawnedCount++;
+                } else if (wasDamaged) {
+                    restoredCount++;
+                }
+            }
+        }
+
+        if (respawnedCount > 0 || restoredCount > 0) {
+            console.log(`🔄 Respawned ${respawnedCount} destroyed props, restored ${restoredCount} damaged props to full durability`);
+        }
+
+        return respawnedCount + restoredCount;
     }
 }

@@ -122,6 +122,27 @@ class InputEditor {
             });
         }
 
+        const testDamagePropBtn = document.getElementById('testDamageProp');
+        if (testDamagePropBtn) {
+            testDamagePropBtn.addEventListener('click', () => {
+                console.log('🔨 Test damage button clicked');
+                if (this.game.propSystem.selectedProp && this.game.propSystem.selectedProp.destroyable) {
+                    console.log('Damaging selected prop:', this.game.propSystem.selectedProp.id);
+                    const wasDestroyed = this.game.propSystem.damageProp(this.game.propSystem.selectedProp.id, 25);
+                    if (wasDestroyed) {
+                        console.log('Prop was destroyed!');
+                    } else {
+                        console.log('Prop was damaged, durability now:', this.game.propSystem.selectedProp.currentDurability);
+                    }
+                    this.game.propSystem.updatePropProperties();
+                    this.game.propSystem.updatePropList();
+                } else {
+                    console.log('No destroyable prop selected');
+                    alert('Please select a destroyable prop first');
+                }
+            });
+        }
+
         // Prop positioning inputs
         const propInputs = ['propX', 'propY', 'propWidth', 'propHeight', 'propScale'];
         propInputs.forEach(id => {

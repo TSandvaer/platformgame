@@ -231,13 +231,15 @@ class PropManager {
     }
 
     placeProp(mouseX, mouseY) {
-        // Get prop type, obstacle setting, size, and damage from UI
+        // Get prop type, obstacle setting, size, damage, and destroyable from UI
         const propTypeSelect = document.getElementById('propTypeSelect');
         const obstacleCheck = document.getElementById('propObstacleCheck');
         const sizeInput = document.getElementById('propSizeInput');
         const damageInput = document.getElementById('propDamageInput');
+        const destroyableCheck = document.getElementById('propDestroyableCheck');
+        const durabilityInput = document.getElementById('propDurabilityInput');
 
-        if (!propTypeSelect || !obstacleCheck || !sizeInput || !damageInput) {
+        if (!propTypeSelect || !obstacleCheck || !sizeInput || !damageInput || !destroyableCheck || !durabilityInput) {
             console.error('UI elements not found for prop placement');
             return;
         }
@@ -246,6 +248,8 @@ class PropManager {
         const isObstacle = obstacleCheck.checked;
         const sizeMultiplier = parseFloat(sizeInput.value) || 1.0;
         const damagePerSecond = parseFloat(damageInput.value) || 0;
+        const destroyable = destroyableCheck.checked;
+        const maxDurability = parseFloat(durabilityInput.value) || 100;
 
         this.propData.addProp(
             propType,
@@ -253,7 +257,9 @@ class PropManager {
             mouseY,
             isObstacle,
             sizeMultiplier,
-            damagePerSecond
+            damagePerSecond,
+            destroyable,
+            maxDurability
         );
 
         // Exit placement mode
@@ -290,10 +296,15 @@ class PropManager {
             const isPrimary = this.propData.selectedProp && this.propData.selectedProp.id === prop.id;
             const groupInfo = prop.groupId ? ` [Group ${prop.groupId}]` : '';
 
+            const durabilityInfo = prop.destroyable ?
+                ` [💔 ${Math.ceil(prop.currentDurability)}/${prop.maxDurability}]` : '';
+            const isDestroyingInfo = prop.isDestroying ? ' [💥 DESTROYING]' : '';
+            const isDestroyedInfo = prop.isDestroyed ? ' [☠️ DESTROYED]' : '';
+
             return `<div class="prop-item ${isPrimary ? 'selected' : ''} ${isSelected ? 'multi-selected' : ''}"
                       data-prop-id="${prop.id}">
                     ${propType.name} (${Math.round(prop.x)}, ${Math.round(prop.y)})
-                    ${prop.isObstacle ? ' [Obstacle]' : ''}${prop.damagePerSecond > 0 ? ` [🔥 ${prop.damagePerSecond} DPS]` : ''}${groupInfo}
+                    ${prop.isObstacle ? ' [Obstacle]' : ''}${prop.damagePerSecond > 0 ? ` [🔥 ${prop.damagePerSecond} DPS]` : ''}${durabilityInfo}${isDestroyingInfo}${isDestroyedInfo}${groupInfo}
                     Z: ${prop.zOrder || 0}
                 </div>`;
         }).join('');
@@ -330,6 +341,9 @@ class PropManager {
             const damageInput = document.getElementById('selectedPropDamage');
             const typeSelect = document.getElementById('propTypeSelect');
             const zOrderDisplay = document.getElementById('propZOrder');
+            const destroyableInput = document.getElementById('selectedPropDestroyable');
+            const durabilityInput = document.getElementById('selectedPropDurability');
+            const maxDurabilityInput = document.getElementById('selectedPropMaxDurability');
 
             if (xInput) xInput.value = Math.round(this.propData.selectedProp.x);
             if (yInput) yInput.value = Math.round(this.propData.selectedProp.y);
@@ -346,6 +360,15 @@ class PropManager {
             if (isObstacleInput) isObstacleInput.checked = this.propData.selectedProp.isObstacle;
             if (damageInput) damageInput.value = this.propData.selectedProp.damagePerSecond || 0;
             if (typeSelect) typeSelect.value = this.propData.selectedProp.type;
+            if (destroyableInput) destroyableInput.checked = this.propData.selectedProp.destroyable || false;
+            if (durabilityInput) {
+                const currentDurability = this.propData.selectedProp.currentDurability;
+                durabilityInput.value = currentDurability !== undefined ? Math.ceil(currentDurability) : 100;
+            }
+            if (maxDurabilityInput) {
+                const maxDurability = this.propData.selectedProp.maxDurability;
+                maxDurabilityInput.value = maxDurability !== undefined ? maxDurability : 100;
+            }
 
             // Update the type display for single or multiple props
             const selectedPropTypeElement = document.getElementById('selectedPropType');
@@ -377,6 +400,9 @@ class PropManager {
         const isObstacleInput = document.getElementById('selectedPropObstacle');
         const damageInput = document.getElementById('selectedPropDamage');
         const typeSelect = document.getElementById('propTypeSelect');
+        const destroyableInput = document.getElementById('selectedPropDestroyable');
+        const durabilityInput = document.getElementById('selectedPropDurability');
+        const maxDurabilityInput = document.getElementById('selectedPropMaxDurability');
 
         if (xInput) this.propData.selectedProp.x = parseInt(xInput.value);
         if (yInput) this.propData.selectedProp.y = parseInt(yInput.value);
@@ -388,8 +414,47 @@ class PropManager {
         if (isObstacleInput) this.propData.selectedProp.isObstacle = isObstacleInput.checked;
         if (damageInput) this.propData.selectedProp.damagePerSecond = parseFloat(damageInput.value) || 0;
         if (typeSelect) this.propData.selectedProp.type = typeSelect.value;
+        if (destroyableInput) {
+            const wasDestroyable = this.propData.selectedProp.destroyable;
+            this.propData.selectedProp.destroyable = destroyableInput.checked;
+
+            // If prop just became destroyable, initialize durability
+            if (!wasDestroyable && destroyableInput.checked) {
+                this.propData.selectedProp.maxDurability = 100;
+                this.propData.selectedProp.currentDurability = 100;
+                // Initialize destruction properties if they don't exist
+                this.propData.selectedProp.isDestroying = false;
+                this.propData.selectedProp.destructionFrameIndex = 0;
+                this.propData.selectedProp.destructionTimer = 0;
+                this.propData.selectedProp.destructionFrameRate = 150;
+                console.log('Prop made destroyable:', this.propData.selectedProp);
+            } else if (wasDestroyable && !destroyableInput.checked) {
+                // If prop is no longer destroyable, reset values
+                this.propData.selectedProp.maxDurability = 0;
+                this.propData.selectedProp.currentDurability = 0;
+                this.propData.selectedProp.isDestroying = false;
+            }
+
+            // Ensure the prop has all required destruction properties
+            this.propData.ensureDestructionProperties(this.propData.selectedProp);
+        }
+        if (maxDurabilityInput && this.propData.selectedProp.destroyable) {
+            const newMaxDurability = parseFloat(maxDurabilityInput.value) || 100;
+            this.propData.selectedProp.maxDurability = newMaxDurability;
+            // Adjust current durability if it exceeds new max
+            if (this.propData.selectedProp.currentDurability > newMaxDurability) {
+                this.propData.selectedProp.currentDurability = newMaxDurability;
+            }
+        }
+        if (durabilityInput && this.propData.selectedProp.destroyable) {
+            this.propData.selectedProp.currentDurability = Math.min(
+                parseFloat(durabilityInput.value) || 0,
+                this.propData.selectedProp.maxDurability
+            );
+        }
 
         this.updatePropList();
+        this.updatePropProperties(); // Update the UI to reflect the changes
     }
 
     // Z-order management UI

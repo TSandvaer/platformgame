@@ -7,7 +7,8 @@ class PropRenderer {
 
         // Initialize prop-specific sprites
         this.propSprites = {
-            torchFlame: { image: null, frameWidth: 21, frameHeight: 21, totalFrames: 6 }
+            torchFlame: { image: null, frameWidth: 21, frameHeight: 21, totalFrames: 6 },
+            barrelDestruction: { image: null, frameWidth: 0, frameHeight: 0, totalFrames: 5 }
         };
         this.spritesLoaded = false;
         this.loadSprites();
@@ -15,7 +16,7 @@ class PropRenderer {
 
     loadSprites() {
         let loadedCount = 0;
-        const totalImages = 1; // Only torch flame for props
+        const totalImages = 2; // Torch flame and barrel destruction
 
         const checkAllLoaded = () => {
             if (loadedCount === totalImages) {
@@ -34,16 +35,40 @@ class PropRenderer {
         };
         torchFlameImg.onerror = () => {
             console.error('Failed to load torch flame sprite');
+            loadedCount++;
+            checkAllLoaded();
         };
         torchFlameImg.src = 'sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
         this.propSprites.torchFlame.image = torchFlameImg;
+
+        // Load barrel destruction animation
+        const barrelDestructionImg = new Image();
+        barrelDestructionImg.onload = () => {
+            // Calculate frame dimensions from the loaded image
+            // The image shows 5 frames horizontally
+            this.propSprites.barrelDestruction.frameWidth = barrelDestructionImg.width / 5;
+            this.propSprites.barrelDestruction.frameHeight = barrelDestructionImg.height;
+            loadedCount++;
+            checkAllLoaded();
+        };
+        barrelDestructionImg.onerror = () => {
+            console.error('Failed to load barrel destruction sprite');
+            loadedCount++;
+            checkAllLoaded();
+        };
+        barrelDestructionImg.src = 'sprites/prop destruction animations/barrel_destruction.png';
+        this.propSprites.barrelDestruction.image = barrelDestructionImg;
     }
 
     renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = [], viewport, camera) {
         if (!this.platformSprites.villageProps.image) return;
 
-        // Filter props based on whether we're rendering obstacles or not
-        const filteredProps = props.filter(prop => prop.isObstacle === renderObstacles);
+        // Filter props based on whether we're rendering obstacles or not, and visibility
+        const filteredProps = props.filter(prop => {
+            const obstacleMatch = prop.isObstacle === renderObstacles;
+            const isVisible = prop.isVisible !== false; // Default to visible if property doesn't exist
+            return obstacleMatch && isVisible;
+        });
 
         // Sort by z-order (lowest first)
         filteredProps.sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0));
@@ -64,6 +89,11 @@ class PropRenderer {
             }
 
             this.drawProp(renderProp, propTypes, isDevelopmentMode, selectedProp, selectedProps, renderObstacles ? viewport : null);
+
+            // Render durability bar after the prop (but only for obstacle props - foreground rendering)
+            if (renderObstacles && prop.destroyable) {
+                this.renderDurabilityBar(prop, propTypes, viewport, camera);
+            }
         });
     }
 
@@ -139,14 +169,47 @@ class PropRenderer {
             }
         }
 
-        // Draw the prop sprite
-        this.ctx.drawImage(
-            tileset.image,
-            sourceX, sourceY,
-            propType.width, propType.height,  // Extract actual prop dimensions from tileset
-            prop.x, prop.y,
-            renderWidth, renderHeight
-        );
+        // Check if prop is being destroyed and has a destruction animation
+        if (prop.isDestroying && prop.type === 'barrel' && this.propSprites.barrelDestruction.image) {
+            // Render barrel destruction animation
+            const destructionSprite = this.propSprites.barrelDestruction;
+            const frameIndex = Math.min(prop.destructionFrameIndex, destructionSprite.totalFrames - 1);
+            const frameX = frameIndex * destructionSprite.frameWidth;
+
+            this.ctx.drawImage(
+                destructionSprite.image,
+                frameX, 0,
+                destructionSprite.frameWidth, destructionSprite.frameHeight,
+                prop.x, prop.y,
+                renderWidth, renderHeight
+            );
+        } else if (prop.isDestroying) {
+            // Generic blink effect for props without destruction sprites
+            const blinkFrame = prop.destructionFrameIndex;
+            const isVisible = blinkFrame % 2 === 0; // Blink on/off every frame
+
+            if (isVisible) {
+                // Draw normal sprite with reduced opacity
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.drawImage(
+                    tileset.image,
+                    sourceX, sourceY,
+                    propType.width, propType.height,
+                    prop.x, prop.y,
+                    renderWidth, renderHeight
+                );
+                this.ctx.globalAlpha = 1.0;
+            }
+        } else {
+            // Draw the normal prop sprite
+            this.ctx.drawImage(
+                tileset.image,
+                sourceX, sourceY,
+                propType.width, propType.height,  // Extract actual prop dimensions from tileset
+                prop.x, prop.y,
+                renderWidth, renderHeight
+            );
+        }
 
         // Development mode: show prop boundaries (while still in rotation context)
         if (isDevelopmentMode) {
@@ -196,6 +259,63 @@ class PropRenderer {
         if (propType.hasGlow) {
             this.renderLampGlow(prop, renderWidth, renderHeight, viewportScale);
         }
+    }
+
+    renderDurabilityBar(prop, propTypes, viewport, camera) {
+        // Only render durability bar if prop is destroyable and has taken damage
+        if (!prop.destroyable) return;
+
+        // Debug logging
+        if (prop.currentDurability === undefined || prop.maxDurability === undefined) {
+            console.warn('Prop has undefined durability values:', prop);
+            return;
+        }
+
+        if (prop.currentDurability >= prop.maxDurability) return;
+
+        this.ctx.save();
+
+        // Apply camera and viewport transformation
+        let renderX = prop.x;
+        let renderY = prop.y;
+        let renderWidth = 0;
+
+        const propType = propTypes[prop.type];
+        if (propType) {
+            const sizeMultiplier = prop.sizeMultiplier !== undefined ? prop.sizeMultiplier : 1.0;
+            renderWidth = propType.width * sizeMultiplier;
+
+            if (viewport && camera) {
+                renderX = (prop.x - camera.x) * viewport.scaleX + viewport.offsetX;
+                renderY = (prop.y - camera.y) * viewport.scaleY + viewport.offsetY;
+                renderWidth = renderWidth * viewport.scaleX;
+            }
+        }
+
+        // Durability bar dimensions
+        const barWidth = renderWidth || 40; // Default width if no prop type found
+        const barHeight = 6;
+        const barX = renderX;
+        const barY = renderY - 15;
+
+        // Background
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Durability bar
+        const durabilityPercentage = prop.currentDurability / prop.maxDurability;
+        const durabilityColor = durabilityPercentage > 0.5 ? '#4CAF50' :
+                               durabilityPercentage > 0.25 ? '#FFC107' : '#F44336';
+
+        this.ctx.fillStyle = durabilityColor;
+        this.ctx.fillRect(barX, barY, barWidth * durabilityPercentage, barHeight);
+
+        // Border
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+        this.ctx.restore();
     }
 
     renderTorchFlame(prop, renderWidth, renderHeight, flameScale) {

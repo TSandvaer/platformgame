@@ -89,6 +89,9 @@ class EnemyCollisions {
         const enemyBounds = this.getEnemyBounds(enemy);
 
         for (const prop of props) {
+            // Skip destroyed/invisible props
+            if (prop.isDestroyed || prop.isVisible === false) continue;
+
             const propBounds = this.getPropBounds(prop);
 
             if (this.boundsIntersect(enemyBounds, propBounds)) {

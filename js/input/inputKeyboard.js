@@ -45,6 +45,7 @@ class InputKeyboard {
 
         // Handle development mode keyboard shortcuts
         if (this.game.isDevelopmentMode) {
+            console.log('🔧 Development mode - handling key:', e.key);
             this.handleDevelopmentKeys(e);
         }
     }
@@ -90,6 +91,13 @@ class InputKeyboard {
         // Handle Escape key
         if (e.key === 'Escape') {
             this.handleEscape();
+        }
+
+        // Handle 'X' key to damage/destroy selected props
+        if (e.key.toLowerCase() === 'x') {
+            console.log('🎯 X key detected in development mode');
+            e.preventDefault();
+            this.handlePropDamage();
         }
 
         // Handle arrow key nudging for selected props
@@ -225,6 +233,68 @@ class InputKeyboard {
         if (nudged) {
             e.preventDefault();
         }
+    }
+
+    handlePropDamage() {
+        console.log('🔨 X key pressed - attempting to damage props');
+
+        // Get current mouse position for feedback message
+        const mousePos = this.game.inputSystem.mouse.getMousePosition();
+        const worldCoords = this.game.cameraSystem.screenToWorld(mousePos.x, mousePos.y);
+
+        let damagedCount = 0;
+        let destroyedCount = 0;
+
+        // Debug: Check what props are selected
+        console.log('Selected prop:', this.game.propSystem.selectedProp);
+        console.log('Selected props array:', this.game.propSystem.selectedProps);
+
+        // Damage selected props
+        if (this.game.propSystem.selectedProps && this.game.propSystem.selectedProps.length > 0) {
+            console.log('Processing selected props array with', this.game.propSystem.selectedProps.length, 'props');
+            for (const prop of this.game.propSystem.selectedProps) {
+                console.log('Checking prop:', prop.id, 'destroyable:', prop.destroyable);
+                if (prop.destroyable) {
+                    const wasDestroyed = this.game.propSystem.damageProp(prop.id, 25); // 25 durability damage per press
+                    if (wasDestroyed) {
+                        destroyedCount++;
+                    } else {
+                        damagedCount++;
+                    }
+                } else {
+                    console.log('Prop', prop.id, 'is not destroyable');
+                }
+            }
+        } else if (this.game.propSystem.selectedProp) {
+            console.log('Processing single selected prop:', this.game.propSystem.selectedProp.id, 'destroyable:', this.game.propSystem.selectedProp.destroyable);
+            if (this.game.propSystem.selectedProp.destroyable) {
+                const wasDestroyed = this.game.propSystem.damageProp(this.game.propSystem.selectedProp.id, 25);
+                if (wasDestroyed) {
+                    destroyedCount++;
+                } else {
+                    damagedCount++;
+                }
+            } else {
+                console.log('Selected prop is not destroyable');
+            }
+        } else {
+            console.log('No props selected');
+        }
+
+        // Show feedback message
+        if (destroyedCount > 0 && damagedCount > 0) {
+            this.game.showFeedbackMessage(`💥 Destroyed ${destroyedCount}, damaged ${damagedCount} prop(s)`, worldCoords.x, worldCoords.y);
+        } else if (destroyedCount > 0) {
+            this.game.showFeedbackMessage(`💥 Destroyed ${destroyedCount} prop(s)`, worldCoords.x, worldCoords.y);
+        } else if (damagedCount > 0) {
+            this.game.showFeedbackMessage(`💔 Damaged ${damagedCount} prop(s)`, worldCoords.x, worldCoords.y);
+        } else {
+            this.game.showFeedbackMessage('❌ No destroyable props selected', worldCoords.x, worldCoords.y);
+        }
+
+        // Update UI to reflect changes
+        this.game.propSystem.updatePropProperties();
+        this.game.propSystem.updatePropList();
     }
 
     isKeyPressed(key) {

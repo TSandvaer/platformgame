@@ -752,6 +752,17 @@
                         <span style="font-size: 11px; color: #aaa;">DPS</span>
                     </div>
                     <div class="property-row">
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="propDestroyableCheck">
+                            <span>Destroyable (can be damaged)</span>
+                        </label>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Durability:</span>
+                        <input type="number" id="propDurabilityInput" min="1" max="1000" step="1" value="100" style="width: 80px;">
+                        <span style="font-size: 11px; color: #aaa;">durability</span>
+                    </div>
+                    <div class="property-row">
                         <button class="btn small" id="addPropBtn">Add Prop (Click on map)</button>
                     </div>
                     <div class="property-row">
@@ -793,8 +804,24 @@
                             <span style="font-size: 11px; color: #aaa;">DPS</span>
                         </div>
                         <div class="property-row">
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="selectedPropDestroyable">
+                                <span>Destroyable</span>
+                            </label>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Durability:</span>
+                            <input type="number" id="selectedPropDurability" min="0" max="1000" step="1" style="width: 60px;">
+                            <span style="font-size: 11px; color: #aaa;">/</span>
+                            <input type="number" id="selectedPropMaxDurability" min="1" max="1000" step="1" style="width: 60px;">
+                            <span style="font-size: 11px; color: #aaa;">durability</span>
+                        </div>
+                        <div class="property-row">
                             <button class="btn small" id="updateProp">Update Prop</button>
                             <button class="btn small danger" id="deleteProp">Delete Prop</button>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="testDamageProp">🔨 Test Damage (25)</button>
                         </div>
                         <div class="property-row">
                             <button class="btn small" id="sendToBackground">Send to Background</button>

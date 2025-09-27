@@ -1,7 +1,7 @@
 class PropCollisions {
     checkPlayerPropCollisions(player, props, propTypes) {
-        // Check collision with obstacle props - 4-sided collision
-        props.filter(prop => prop.isObstacle).forEach(prop => {
+        // Check collision with obstacle props - 4-sided collision (exclude destroyed/invisible props)
+        props.filter(prop => prop.isObstacle && !prop.isDestroyed && prop.isVisible !== false).forEach(prop => {
             if (this.checkCollision(player, this.getPropBounds(prop, propTypes))) {
                 const bounds = this.getPropBounds(prop, propTypes);
 
@@ -46,8 +46,8 @@ class PropCollisions {
     }
 
     checkDamageCollisions(player, props, propTypes) {
-        // Check collision with props that have damage
-        props.filter(prop => prop.damagePerSecond > 0).forEach(prop => {
+        // Check collision with props that have damage (exclude destroyed/invisible props)
+        props.filter(prop => prop.damagePerSecond > 0 && !prop.isDestroyed && prop.isVisible !== false).forEach(prop => {
             if (this.checkCollision(player, this.getPropBounds(prop, propTypes))) {
                 // Add this prop to the player's damaging props list
                 player.addDamagingProp(prop);

@@ -143,8 +143,8 @@ class PropSystem {
     }
 
     // Prop management
-    addProp(type, x, y, isObstacle = false, scale = undefined, damagePerSecond = 0) {
-        return this.data.addProp(type, x, y, isObstacle, scale, damagePerSecond);
+    addProp(type, x, y, isObstacle = false, scale = undefined, damagePerSecond = 0, destroyable = false, maxDurability = 100) {
+        return this.data.addProp(type, x, y, isObstacle, scale, damagePerSecond, destroyable, maxDurability);
     }
 
     deleteSelectedProp() {
@@ -356,5 +356,97 @@ class PropSystem {
         this.data.nudgeSelectedProps(deltaX, deltaY);
         this.manager.updatePropProperties();
         this.manager.updatePropList();
+    }
+
+    // Destruction system methods
+    damageProp(propId, damage) {
+        return this.data.damageProp(propId, damage);
+    }
+
+    destroyProp(propId) {
+        const prop = this.data.getPropById(propId);
+        if (prop) {
+            this.data.startDestruction(prop);
+        }
+    }
+
+    // Update destruction animations - call this in the main game loop
+    updateDestruction(deltaTime) {
+        this.data.updateAllDestruction(deltaTime);
+    }
+
+    // Check if player attack hits any destroyable props
+    checkPlayerAttackCollisions(player) {
+        if (!player.isAttacking || player.isDead) return [];
+
+        const collisions = [];
+        const attackRange = this.getPlayerAttackRange(player);
+
+        for (const prop of this.data.props) {
+            if (!prop.destroyable || prop.isDestroying || prop.isDestroyed || prop.isVisible === false) continue;
+
+            const propBounds = this.getPropBounds(prop);
+            if (this.boundsIntersect(attackRange, propBounds)) {
+                collisions.push({
+                    type: 'playerAttackProp',
+                    player: player,
+                    prop: prop,
+                    damage: 25 // Default player damage to props
+                });
+            }
+        }
+
+        return collisions;
+    }
+
+    // Get player attack range (similar to enemy collision system)
+    getPlayerAttackRange(player) {
+        const attackReach = 60; // Player attack reach
+        const attackWidth = 40; // Attack width
+
+        // Player uses 'facing' property, not 'facingDirection'
+        if (player.facing === 'right') {
+            return {
+                left: player.x + player.width,
+                right: player.x + player.width + attackReach,
+                top: player.y,
+                bottom: player.y + player.height
+            };
+        } else {
+            return {
+                left: player.x - attackReach,
+                right: player.x,
+                top: player.y,
+                bottom: player.y + player.height
+            };
+        }
+    }
+
+    // Get prop bounds for collision detection
+    getPropBounds(prop) {
+        const propType = this.data.propTypes[prop.type];
+        const sizeMultiplier = prop.sizeMultiplier || 1.0;
+        const width = propType ? propType.width * sizeMultiplier : 40;
+        const height = propType ? propType.height * sizeMultiplier : 40;
+
+        return {
+            left: prop.x,
+            right: prop.x + width,
+            top: prop.y,
+            bottom: prop.y + height
+        };
+    }
+
+    // Check if two bounds intersect
+    boundsIntersect(bounds1, bounds2) {
+        return bounds1.left < bounds2.right &&
+               bounds1.right > bounds2.left &&
+               bounds1.top < bounds2.bottom &&
+               bounds1.bottom > bounds2.top;
+    }
+
+    // Respawn all destroyed props (called on game start/reload)
+    respawnAllProps() {
+        return this.data.respawnAllProps();
     }
 }
