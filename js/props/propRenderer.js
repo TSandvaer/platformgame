@@ -75,8 +75,16 @@ class PropRenderer {
 
         // Render each prop using actual positions
         filteredProps.forEach(prop => {
-            // Get actual position based on positioning mode
-            const actualPos = this.getActualPosition(prop, viewport);
+            // For falling debris, use debris coordinates instead of normal position
+            let actualPos;
+            if (prop.isFallingDebris && prop.debrisX !== undefined && prop.debrisY !== undefined) {
+                // Create temporary prop with debris coordinates for position calculation
+                const debrisProp = { ...prop, x: prop.debrisX, y: prop.debrisY };
+                actualPos = this.getActualPosition(debrisProp, viewport);
+            } else {
+                // Get actual position based on positioning mode
+                actualPos = this.getActualPosition(prop, viewport);
+            }
             let renderProp = { ...prop, x: actualPos.x, y: actualPos.y };
 
             // If rendering obstacles (which are outside all transforms),
@@ -86,12 +94,14 @@ class PropRenderer {
                 const screenX = (actualPos.x - camera.x) * viewport.scaleX + viewport.offsetX;
                 const screenY = (actualPos.y - camera.y) * viewport.scaleY + viewport.offsetY;
                 renderProp = { ...prop, x: screenX, y: screenY };
+
             }
 
             this.drawProp(renderProp, propTypes, isDevelopmentMode, selectedProp, selectedProps, renderObstacles ? viewport : null);
 
             // Render durability bar after the prop (but only for obstacle props - foreground rendering)
-            if (renderObstacles && prop.destroyable) {
+            // Don't render durability bar for falling debris or destroyed props
+            if (renderObstacles && prop.destroyable && !prop.isFallingDebris && !prop.isDestroyed) {
                 this.renderDurabilityBar(prop, propTypes, viewport, camera);
             }
         });
@@ -181,6 +191,25 @@ class PropRenderer {
                 frameX, 0,
                 destructionSprite.frameWidth, destructionSprite.frameHeight,
                 prop.x, prop.y,
+                renderWidth, renderHeight
+            );
+        } else if (prop.isFallingDebris && prop.type === 'barrel' && prop.debrisX !== undefined && prop.debrisY !== undefined && this.propSprites.barrelDestruction.image) {
+            // Render falling debris (last frame of destruction animation)
+            const destructionSprite = this.propSprites.barrelDestruction;
+            const lastFrameIndex = destructionSprite.totalFrames - 1; // Last frame (debris)
+            const frameX = Math.floor(lastFrameIndex * destructionSprite.frameWidth);
+
+            // For falling debris, use the already-transformed coordinates from the prop
+            // The camera transforms are handled by the caller (renderProps method)
+            let renderX = prop.x;
+            let renderY = prop.y;
+
+
+            this.ctx.drawImage(
+                destructionSprite.image,
+                frameX, 0,
+                Math.floor(destructionSprite.frameWidth), Math.floor(destructionSprite.frameHeight),
+                Math.floor(renderX), Math.floor(renderY),
                 renderWidth, renderHeight
             );
         } else if (prop.isDestroying) {

@@ -439,7 +439,7 @@ class PlatformRPG {
         });
 
         // Update prop destruction animations
-        this.propSystem.updateDestruction(this.deltaTime);
+        this.propSystem.updateDestruction(this.deltaTime, this.platformSystem);
 
         // Update HUD with current player stats
         if (this.hudSystem && this.playerSystem) {

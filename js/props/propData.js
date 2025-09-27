@@ -977,11 +977,33 @@ class PropData {
             const maxFrames = hasDestructionSprite ? 5 : 6; // 5 for sprite animation, 6 for blink effect (3 blinks)
 
             if (prop.destructionFrameIndex >= maxFrames) {
-                // Instead of deleting, mark as destroyed and make invisible
-                prop.isDestroyed = true;
-                prop.isVisible = false;
-                prop.isDestroying = false;
-                console.log(`Prop ${prop.id} destroyed but preserved for respawn`);
+                // For props with destruction sprites, start falling debris phase
+                if (hasDestructionSprite) {
+                    prop.isDestroying = false;
+                    prop.isFallingDebris = true;
+                                prop.debrisVelocityY = -0.8; // Reduced upward velocity to start falling sooner
+                    prop.debrisGravity = 0.04; // Much slower gravity for graceful fall like embers
+
+                    // Store original position to restore after debris animation
+                    prop.originalX = prop.x;
+                    prop.originalY = prop.y;
+
+                    // Use separate debris position that doesn't affect the stored prop position
+                    prop.debrisX = prop.x;
+                    prop.debrisY = prop.y - 10; // Start debris slightly higher up
+
+                    // Keep the prop at original position while debris animates separately
+                    // Don't modify prop.x or prop.y anymore
+
+                    console.log(`Starting falling debris for ${prop.type} prop ${prop.id} - storing original pos (${prop.originalX}, ${prop.originalY})`);
+                    console.log(`Debris will render at (${prop.debrisX}, ${prop.debrisY})`);
+                } else {
+                    // For props without destruction sprites, just mark as destroyed
+                    prop.isDestroyed = true;
+                    prop.isVisible = false;
+                    prop.isDestroying = false;
+                    console.log(`Prop ${prop.id} destroyed but preserved for respawn`);
+                }
                 return true; // Prop was destroyed (but not removed)
             }
         }
@@ -996,7 +1018,7 @@ class PropData {
     }
 
     // Update all props with destruction animations
-    updateAllDestruction(deltaTime) {
+    updateAllDestruction(deltaTime, platformSystem = null) {
         const propsToRemove = [];
 
         for (const prop of this.props) {
@@ -1006,8 +1028,98 @@ class PropData {
                     // Prop was already removed by updateDestruction, no need to track
                     break; // Break since the array was modified
                 }
+            } else if (prop.isFallingDebris) {
+                this.updateFallingDebris(prop, deltaTime, platformSystem);
             }
         }
+    }
+
+    // Update falling debris physics
+    updateFallingDebris(prop, deltaTime, platformSystem) {
+        if (!prop.isFallingDebris) return;
+
+        // If debris has landed, only update the landing timer, not physics
+        if (prop.debrisHasLanded) {
+            if (prop.debrisLandingTimer) {
+                        prop.debrisLandingTimer -= deltaTime;
+                if (prop.debrisLandingTimer <= 0) {
+                    console.log(`🎨 Debris timer expired for prop ${prop.id} - stopping debris rendering and destroying`);
+                    // Stop falling debris rendering first
+                    prop.isFallingDebris = false;
+                    console.log(`🎯 DEBRIS STOPPED for prop ${prop.id} - isFallingDebris set to FALSE`);
+                    prop.debrisHasLanded = false;
+                    // Clear debris coordinates
+                    delete prop.debrisX;
+                    delete prop.debrisY;
+                    // Then restore original position and destroy
+                    prop.x = prop.originalX;
+                    prop.y = prop.originalY;
+                    prop.isDestroyed = true;
+                    prop.isVisible = false;
+                    console.log(`🎨 Prop ${prop.id} destroyed - isFallingDebris: ${prop.isFallingDebris}, isVisible: ${prop.isVisible}`);
+                }
+            }
+            return;
+        }
+
+        // Apply gravity to debris position (not prop position)
+        prop.debrisVelocityY += prop.debrisGravity;
+        prop.debrisY += prop.debrisVelocityY;
+
+        // Check for platform collision (debris is small, only 10% of original height)
+        const propType = this.propTypes[prop.type];
+        const sizeMultiplier = prop.sizeMultiplier || 1.0;
+        const originalHeight = propType ? propType.height * sizeMultiplier : 40;
+        const debrisHeight = originalHeight * 0.1;
+        const debrisBottom = prop.debrisY + debrisHeight;
+
+        // Find closest platform below debris (using debris position)
+        let groundY = this.findGroundForDebris(prop, debrisHeight, platformSystem);
+
+        if (debrisBottom >= groundY) {
+            // Debris hit ground
+            prop.debrisY = groundY - debrisHeight;
+
+            // Apply barrel-specific offset correction to make debris sit properly on platform
+            if (prop.type === 'barrel') {
+                prop.debrisY -= 25; // Move barrel debris up by 10 pixels
+            }
+
+            prop.debrisVelocityY = 0;
+            prop.debrisHasLanded = true; // Stop physics updates
+
+            // Add a brief pause before disappearing so player can see it land
+            if (!prop.debrisLandingTimer) {
+                prop.debrisLandingTimer = 500; // 500ms delay before disappearing
+            }
+        }
+    }
+
+    // Find ground level for falling debris
+    findGroundForDebris(prop, debrisHeight, platformSystem) {
+        let closestPlatformY = 1000; // Start with large value, fall back to 600 if no platforms found
+
+        if (platformSystem && platformSystem.platforms) {
+            const propType = this.propTypes[prop.type];
+            const sizeMultiplier = prop.sizeMultiplier || 1.0;
+            const width = propType ? propType.width * sizeMultiplier : 40;
+            const debrisCenter = prop.debrisX + width / 2;
+
+            for (const platform of platformSystem.platforms) {
+                // Check if debris center is over platform
+                const tolerance = 10;
+
+                const inRange = debrisCenter >= platform.x - tolerance &&
+                               debrisCenter <= platform.x + platform.width + tolerance;
+                const belowDebris = platform.y >= prop.debrisY;
+
+                if (inRange && belowDebris && platform.y < closestPlatformY) {
+                    closestPlatformY = platform.y;
+                }
+            }
+        }
+
+        return closestPlatformY < 1000 ? closestPlatformY : 600;
     }
 
     // Ensure prop has all required destruction properties
@@ -1046,6 +1158,25 @@ class PropData {
                 prop.destructionTimer = 0;
                 prop.isDamaged = false;
                 prop.damageTimer = 0;
+
+                // Reset falling debris state
+                prop.isFallingDebris = false;
+                prop.debrisHasLanded = false;
+                prop.debrisLandingTimer = 0;
+                prop.debrisVelocityY = 0;
+                prop.debrisGravity = 0;
+
+                // Restore original position if it was saved during debris animation
+                if (prop.originalX !== undefined && prop.originalY !== undefined) {
+                    prop.x = prop.originalX;
+                    prop.y = prop.originalY;
+                    delete prop.originalX;
+                    delete prop.originalY;
+                }
+
+                // Clean up debris coordinates
+                delete prop.debrisX;
+                delete prop.debrisY;
 
                 if (wasDestroyed) {
                     respawnedCount++;

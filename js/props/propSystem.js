@@ -371,8 +371,8 @@ class PropSystem {
     }
 
     // Update destruction animations - call this in the main game loop
-    updateDestruction(deltaTime) {
-        this.data.updateAllDestruction(deltaTime);
+    updateDestruction(deltaTime, platformSystem = null) {
+        this.data.updateAllDestruction(deltaTime, platformSystem);
     }
 
     // Check if player attack hits any destroyable props
