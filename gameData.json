@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-24"
+    "lastModified": "2025-09-27"
   },
   "scenes": [
     {
@@ -79,25 +79,15 @@
       ],
       "props": [
         {
-          "id": 2,
-          "x": 1071.8106188465486,
-          "y": 591.8020752159503,
-          "type": "barrel",
-          "isObstacle": true,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.2
-        },
-        {
           "id": 3,
-          "x": 345.4844995571302,
-          "y": 749.7519929140832,
+          "x": 314.02302922940663,
+          "y": 721.6917626217895,
           "type": "crate",
           "isObstacle": true,
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "debris": []
         },
         {
           "id": 4,
@@ -107,7 +97,8 @@
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "debris": []
         },
         {
           "id": 5,
@@ -117,40 +108,44 @@
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "debris": []
         },
         {
           "id": 6,
-          "x": 861.3410097431356,
-          "y": 588.6563330380868,
+          "x": 853.6882196634191,
+          "y": 592.0575730735164,
           "type": "mediumPot",
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.2
+          "sizeMultiplier": 1.2,
+          "debris": []
         },
         {
           "id": 7,
-          "x": 898.1894326902778,
-          "y": 599.1054030115147,
+          "x": 890.5366426105613,
+          "y": 602.5066430469443,
           "type": "smallPot",
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.2
+          "sizeMultiplier": 1.2,
+          "debris": []
         },
         {
           "id": 8,
-          "x": 805.6882196634189,
-          "y": 587.3569530558017,
+          "x": 798.0354295837024,
+          "y": 590.7581930912313,
           "type": "bigPot",
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.4
+          "sizeMultiplier": 1.4,
+          "debris": []
         },
         {
           "id": 9,
@@ -161,7 +156,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 10,
@@ -173,7 +169,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 11,
@@ -185,7 +182,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 12,
@@ -196,7 +194,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 13,
@@ -208,7 +207,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 14,
@@ -220,7 +220,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 15,
@@ -232,7 +233,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 16,
@@ -244,7 +246,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 17,
@@ -256,19 +259,21 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 18,
-          "x": 429.9397697077059,
-          "y": 684.0575730735163,
+          "x": 405.28077945084146,
+          "y": 644.093002657219,
           "type": "crate",
           "isObstacle": true,
           "zOrder": 8,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1
+          "sizeMultiplier": 1,
+          "debris": []
         },
         {
           "id": 19,
@@ -280,7 +285,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 20,
@@ -292,7 +298,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 21,
@@ -304,7 +311,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 22,
@@ -316,19 +324,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
-        },
-        {
-          "id": 23,
-          "x": 460.94186729301236,
-          "y": 857.1409277745156,
-          "type": "bush1",
-          "isObstacle": false,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 24,
@@ -340,19 +337,39 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 2
+          "sizeMultiplier": 2,
+          "debris": []
         },
         {
           "id": 25,
-          "x": 957.9937998228522,
-          "y": 561.3091231178033,
+          "x": 958,
+          "y": 561,
           "type": "bigCrate",
-          "isObstacle": false,
+          "isObstacle": true,
           "zOrder": 1,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": [],
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isFallingDebris": false,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0
         },
         {
           "id": 26,
@@ -364,7 +381,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 27,
@@ -376,7 +394,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.6
+          "sizeMultiplier": 1.6,
+          "debris": []
         },
         {
           "id": 28,
@@ -388,7 +407,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 30,
@@ -400,7 +420,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 31,
@@ -412,7 +433,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 32,
@@ -424,7 +446,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 33,
@@ -436,7 +459,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 35,
@@ -449,7 +473,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0.11930758988015897
+          "rotation": 0.11930758988015897,
+          "debris": []
         },
         {
           "id": 36,
@@ -461,7 +486,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 37,
@@ -473,7 +499,8 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "sizeMultiplier": 1.5
+          "sizeMultiplier": 1.5,
+          "debris": []
         },
         {
           "id": 41,
@@ -486,7 +513,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 42,
@@ -499,7 +527,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": -0.09353410097431379
+          "rotation": -0.09353410097431379,
+          "debris": []
         },
         {
           "id": 43,
@@ -512,7 +541,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0.09353410097431265
+          "rotation": 0.09353410097431265,
+          "debris": []
         },
         {
           "id": 45,
@@ -525,13 +555,14 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 46,
           "type": "fencePoleSpiked",
           "x": 1433.6226749335694,
-          "y": 869.2550930026574,
+          "y": 870.1054030115148,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -539,13 +570,14 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 47,
           "type": "fenceBoardShort",
           "x": 1448.9282550930025,
-          "y": 881.159433126661,
+          "y": 882.0097431355184,
           "isObstacle": false,
           "zOrder": -8,
           "positioning": "absolute",
@@ -553,13 +585,14 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 48,
           "type": "fenceBoardShort",
           "x": 1448.9282550930025,
-          "y": 899.0159433126663,
+          "y": 899.8662533215237,
           "isObstacle": false,
           "zOrder": -9,
           "positioning": "absolute",
@@ -567,54 +600,13 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 49,
           "type": "fencePoleSpiked",
           "x": 1466.784765279008,
-          "y": 868.4047829937999,
-          "isObstacle": false,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0,
-          "groupId": 6
-        },
-        {
-          "id": 50,
-          "type": "fenceBoardShort",
-          "x": 1482.090345438441,
-          "y": 880.3091231178036,
-          "isObstacle": false,
-          "zOrder": 2,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0,
-          "groupId": 6
-        },
-        {
-          "id": 51,
-          "type": "fenceBoardShort",
-          "x": 1482.090345438441,
-          "y": 898.1656333038088,
-          "isObstacle": false,
-          "zOrder": 3,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0,
-          "groupId": 6
-        },
-        {
-          "id": 52,
-          "type": "fencePoleSpiked",
-          "x": 1499.096545615589,
           "y": 869.2550930026573,
           "isObstacle": false,
           "zOrder": 1,
@@ -623,12 +615,13 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
-          "id": 53,
+          "id": 50,
           "type": "fenceBoardShort",
-          "x": 1514.4021257750221,
+          "x": 1482.090345438441,
           "y": 881.1594331266609,
           "isObstacle": false,
           "zOrder": 2,
@@ -637,13 +630,14 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
-          "id": 54,
+          "id": 51,
           "type": "fenceBoardShort",
-          "x": 1514.4021257750221,
-          "y": 899.0159433126663,
+          "x": 1482.090345438441,
+          "y": 899.0159433126662,
           "isObstacle": false,
           "zOrder": 3,
           "positioning": "absolute",
@@ -651,13 +645,59 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
+        },
+        {
+          "id": 52,
+          "type": "fencePoleSpiked",
+          "x": 1499.096545615589,
+          "y": 870.1054030115147,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "groupId": 6,
+          "debris": []
+        },
+        {
+          "id": 53,
+          "type": "fenceBoardShort",
+          "x": 1514.4021257750221,
+          "y": 882.0097431355183,
+          "isObstacle": false,
+          "zOrder": 2,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "groupId": 6,
+          "debris": []
+        },
+        {
+          "id": 54,
+          "type": "fenceBoardShort",
+          "x": 1514.4021257750221,
+          "y": 899.8662533215237,
+          "isObstacle": false,
+          "zOrder": 3,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 55,
           "type": "fencePoleSpiked",
           "x": 1532.2586359610277,
-          "y": 868.4047829937999,
+          "y": 869.2550930026573,
           "isObstacle": false,
           "zOrder": 4,
           "positioning": "absolute",
@@ -665,13 +705,14 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 56,
           "type": "fenceBoardShort",
           "x": 1547.5642161204607,
-          "y": 880.3091231178036,
+          "y": 881.1594331266609,
           "isObstacle": false,
           "zOrder": 5,
           "positioning": "absolute",
@@ -679,13 +720,14 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 57,
           "type": "fenceBoardShort",
           "x": 1547.5642161204607,
-          "y": 898.1656333038087,
+          "y": 899.0159433126661,
           "isObstacle": false,
           "zOrder": 6,
           "positioning": "absolute",
@@ -693,13 +735,14 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 58,
           "type": "fencePoleSpiked",
           "x": 1563.7201062887511,
-          "y": 868.4047829937999,
+          "y": 869.2550930026573,
           "isObstacle": false,
           "zOrder": 10,
           "positioning": "absolute",
@@ -707,7 +750,8 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "groupId": 6
+          "groupId": 6,
+          "debris": []
         },
         {
           "id": 59,
@@ -720,7 +764,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 62,
@@ -733,7 +778,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "rotation": -1.5730735163861824
+          "rotation": -1.5730735163861824,
+          "debris": []
         },
         {
           "id": 63,
@@ -746,7 +792,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "rotation": -1.5730735163861824
+          "rotation": -1.5730735163861824,
+          "debris": []
         },
         {
           "id": 64,
@@ -759,7 +806,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": -1.5730735163861829
+          "rotation": -1.5730735163861829,
+          "debris": []
         },
         {
           "id": 65,
@@ -772,7 +820,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": -1.5730735163861824
+          "rotation": -1.5730735163861824,
+          "debris": []
         },
         {
           "id": 66,
@@ -785,7 +834,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.2,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 67,
@@ -798,7 +848,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 70,
@@ -811,7 +862,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 71,
@@ -824,7 +876,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 72,
@@ -837,7 +890,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 73,
@@ -850,7 +904,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 74,
@@ -863,7 +918,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 75,
@@ -876,7 +932,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 78,
@@ -889,7 +946,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 79,
@@ -902,7 +960,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 80,
@@ -915,7 +974,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 81,
@@ -928,7 +988,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 82,
@@ -941,7 +1002,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 83,
@@ -954,13 +1016,14 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 84,
           "type": "grass9",
-          "x": 70,
-          "y": 901,
+          "x": 42.79007971656333,
+          "y": 903.5509300265721,
           "isObstacle": false,
           "zOrder": 4,
           "positioning": "absolute",
@@ -968,20 +1031,22 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "damagePerSecond": 20
+          "damagePerSecond": 20,
+          "debris": []
         },
         {
           "id": 85,
           "type": "crate",
-          "x": 262.7457927369353,
-          "y": 814.6501328609389,
+          "x": 238.93711248892822,
+          "y": 805.2967227635078,
           "isObstacle": true,
           "zOrder": 1,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 86,
@@ -994,7 +1059,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 87,
@@ -1007,7 +1073,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 0.7,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 88,
@@ -1020,7 +1087,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 89,
@@ -1033,7 +1101,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 90,
@@ -1046,7 +1115,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 91,
@@ -1059,7 +1129,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 92,
@@ -1072,7 +1143,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0.39114260407440155
+          "rotation": 0.39114260407440155,
+          "debris": []
         },
         {
           "id": 93,
@@ -1085,7 +1157,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 94,
@@ -1098,7 +1171,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1,
-          "rotation": -0.2125775022143489
+          "rotation": -0.2125775022143489,
+          "debris": []
         },
         {
           "id": 95,
@@ -1111,7 +1185,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 96,
@@ -1124,7 +1199,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0.24658990256864513
+          "rotation": 0.24658990256864513,
+          "debris": []
         },
         {
           "id": 97,
@@ -1137,7 +1213,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 98,
@@ -1150,7 +1227,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": -3.9029229406554475
+          "rotation": -3.9029229406554475,
+          "debris": []
         },
         {
           "id": 99,
@@ -1163,7 +1241,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 100,
@@ -1176,7 +1255,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 101,
@@ -1189,7 +1269,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 102,
@@ -1202,7 +1283,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 103,
@@ -1215,7 +1297,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 104,
@@ -1228,7 +1311,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 105,
@@ -1241,7 +1325,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 106,
@@ -1254,7 +1339,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 107,
@@ -1267,7 +1353,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 108,
@@ -1280,7 +1367,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 0.7,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 110,
@@ -1293,7 +1381,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "debris": []
         },
         {
           "id": 111,
@@ -1306,7 +1395,8 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": -0.22292237453693375
+          "rotation": -0.22292237453693375,
+          "debris": []
         },
         {
           "id": 112,
@@ -1320,7 +1410,8 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "damagePerSecond": 0
+          "damagePerSecond": 0,
+          "debris": []
         },
         {
           "id": 113,
@@ -1334,7 +1425,8 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "damagePerSecond": 10
+          "damagePerSecond": 10,
+          "debris": []
         },
         {
           "id": 114,
@@ -1348,15 +1440,80 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "damagePerSecond": 0
+          "damagePerSecond": 0,
+          "debris": []
+        },
+        {
+          "id": 115,
+          "type": "barrel",
+          "x": 1078.9007971656335,
+          "y": 579.8944198405669,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "debris": [],
+          "isFallingDebris": false,
+          "fallingVelocityY": 0,
+          "fallingVelocityX": 0,
+          "gravity": 0.4,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0
+        },
+        {
+          "id": 116,
+          "type": "barrel",
+          "x": 442.62798937112495,
+          "y": 871.5507528786538,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isFallingDebris": false,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0
         }
       ],
       "enemies": [
         {
           "id": 2,
           "type": "orc",
-          "x": 751.380031872678,
-          "y": 570,
+          "x": 519.3642685569615,
+          "y": 570.482488190211,
           "width": 44,
           "height": 59,
           "health": 100,
@@ -1377,14 +1534,14 @@
             "height": 71.4260407440213
           },
           "currentAnimation": "walk",
-          "frameIndex": 2,
-          "frameTimer": 70.79999999999927,
+          "frameIndex": 1,
+          "frameTimer": 29.200000000000728,
           "frameRate": 150,
-          "facing": "left",
-          "velocityX": -0.6661655608186553,
+          "facing": "right",
+          "velocityX": 1.0351991648378773,
           "velocityY": 0,
           "onGround": true,
-          "speed": 2,
+          "speed": 3,
           "aiState": "patrolling",
           "target": null,
           "lastPlayerPosition": null,
@@ -1392,19 +1549,25 @@
           "attackTimer": 0,
           "attackDuration": 600,
           "attackCooldown": 1000,
-          "lastAttackTime": 0,
+          "lastAttackTime": 1758997636777,
           "isDead": false,
           "isDamaged": false,
           "damageTimer": 0,
-          "patrolDirection": -1,
+          "patrolDirection": 1,
           "patrolSpeed": 1,
           "deathTimer": 0,
-          "flashTimer": 0
+          "flashTimer": 0,
+          "isVisible": true,
+          "fleeHealthThreshold": 0.4,
+          "originalPosition": {
+            "x": 814.3808652495607,
+            "y": 570
+          }
         },
         {
           "id": 5,
           "type": "orc",
-          "x": 1740.7760333063397,
+          "x": 1545.4719297744161,
           "y": 861,
           "width": 44,
           "height": 59,
@@ -1414,23 +1577,23 @@
           "isMoving": true,
           "movementZone": {
             "enabled": true,
-            "startX": 1615.5890168290523,
-            "endX": 1889.3888396811337,
+            "startX": 1386.0053144375554,
+            "endX": 1892.7900797165632,
             "y": 920
           },
           "attractionZone": {
             "enabled": true,
-            "x": 760.1824623560674,
-            "y": 841.8954827280779,
-            "width": 1278.8662533215233,
-            "height": 76.52790079716567
+            "x": 717.0173501322752,
+            "y": 681.1868910540301,
+            "width": 1366.4481842338355,
+            "height": 235.53587245349877
           },
           "currentAnimation": "walk",
-          "frameIndex": 2,
-          "frameTimer": 133.39999999999964,
+          "frameIndex": 3,
+          "frameTimer": 137.8000000000011,
           "frameRate": 150,
-          "facing": "right",
-          "velocityX": 0.6661655608186553,
+          "facing": "left",
+          "velocityX": -0.690807261331804,
           "velocityY": 0,
           "onGround": true,
           "speed": 2,
@@ -1441,18 +1604,69 @@
           "attackTimer": 0,
           "attackDuration": 600,
           "attackCooldown": 1000,
-          "lastAttackTime": 1758734809703,
+          "lastAttackTime": 1758997602012,
           "isDead": false,
           "isDamaged": false,
           "damageTimer": 0,
           "deathTimer": 0,
           "flashTimer": 0,
-          "patrolDirection": 1,
-          "patrolSpeed": 1
+          "patrolDirection": -1,
+          "patrolSpeed": 1,
+          "isVisible": true,
+          "fleeHealthThreshold": 0.4,
+          "originalPosition": {
+            "x": 1597.5957569218717,
+            "y": 861
+          },
+          "fleeRecoveryTime": null
+        }
+      ],
+      "lootables": [
+        {
+          "id": 6,
+          "type": "heart",
+          "x": 545.0487156775908,
+          "y": 818.9371124889282,
+          "isVisible": true
+        },
+        {
+          "id": 7,
+          "type": "coin",
+          "x": 371.58547387068205,
+          "y": 830.8414526129318,
+          "isVisible": true
+        },
+        {
+          "id": 8,
+          "type": "coin",
+          "x": 394.5438441098317,
+          "y": 818.9371124889283,
+          "isVisible": true
+        },
+        {
+          "id": 9,
+          "type": "coin",
+          "x": 421.7537643932684,
+          "y": 807.8830823737821,
+          "isVisible": true
+        },
+        {
+          "id": 10,
+          "type": "coin",
+          "x": 445.5624446412755,
+          "y": 818.0868024800709,
+          "isVisible": true
+        },
+        {
+          "id": 11,
+          "type": "coin",
+          "x": 466.82019486271037,
+          "y": 840.1948627103632,
+          "isVisible": true
         }
       ],
       "background": {
-        "name": "The Dawn",
+        "name": "Mountains1",
         "layers": []
       },
       "transitions": {
@@ -1493,7 +1707,7 @@
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-24T17:28:49.450Z"
+        "modified": "2025-09-27T18:31:34.743Z"
       }
     },
     {
@@ -1504,7 +1718,7 @@
         {
           "id": 9,
           "x": 3,
-          "y": 923,
+          "y": 669.607617360496,
           "width": 416,
           "height": 32,
           "color": "#4ECDC4",
@@ -1515,8 +1729,8 @@
         },
         {
           "id": 10,
-          "x": 419,
-          "y": 846.5279007971657,
+          "x": 436.0062001771479,
+          "y": 554.0212577502215,
           "width": 320,
           "height": 32,
           "color": "#4ECDC4",
@@ -1536,14 +1750,28 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5
+        },
+        {
+          "id": 12,
+          "x": 650,
+          "y": 964,
+          "width": 1344,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "lava",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 10000,
+          "killEffect": "sink"
         }
       ],
       "props": [
         {
           "id": 1,
           "type": "barrel",
-          "x": 545.5319148936171,
-          "y": 800.8510638297872,
+          "x": 531.9269547518987,
+          "y": 507.49411077398565,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -1555,8 +1783,8 @@
         {
           "id": 2,
           "type": "barrel",
-          "x": 625.5319148936171,
-          "y": 799.1489361702127,
+          "x": 611.9269547518987,
+          "y": 505.7919831144111,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -1567,8 +1795,9 @@
         }
       ],
       "enemies": [],
+      "lootables": [],
       "background": {
-        "name": "The Dawn",
+        "name": "Stone cave 1",
         "layers": []
       },
       "transitions": {
@@ -1592,14 +1821,14 @@
         "bottom": 1000
       },
       "settings": {
-        "playerStartX": 96,
-        "playerStartY": 851,
+        "playerStartX": 103,
+        "playerStartY": 571,
         "gravity": 0.8,
         "playerSpeed": 5
       },
       "metadata": {
         "created": "2025-09-21T13:12:09.327Z",
-        "modified": "2025-09-24T17:18:11.599Z"
+        "modified": "2025-09-27T09:44:47.116Z"
       }
     }
   ],
@@ -1612,11 +1841,11 @@
   "gameSettings": {
     "hud": {
       "position": {
-        "x": 11,
-        "y": 162
+        "x": 8,
+        "y": 158
       },
-      "width": 230,
-      "height": 97
+      "width": 231,
+      "height": 122
     }
   }
 }

@@ -20,6 +20,7 @@ class BackgroundSystem {
             'Mountains1',
             'Mountains2',
             'MountainWaterfall',
+            'Parallax_Backgrounds_Cave',
             'The Dawn'
         ];
     }
@@ -92,6 +93,19 @@ class BackgroundSystem {
                     'backgrounds/MountainWaterfall/layers/ground.png'
                 ];
                 break;
+            case 'Parallax_Backgrounds_Cave':
+                layerPaths = [
+                    'backgrounds/Parallax_Backgrounds_Cave/0.png',
+                    'backgrounds/Parallax_Backgrounds_Cave/1.png',
+                    'backgrounds/Parallax_Backgrounds_Cave/2.png',
+                    'backgrounds/Parallax_Backgrounds_Cave/3.png',
+                    'backgrounds/Parallax_Backgrounds_Cave/4.png',
+                    'backgrounds/Parallax_Backgrounds_Cave/5.png',
+                    'backgrounds/Parallax_Backgrounds_Cave/6.png',
+                    'backgrounds/Parallax_Backgrounds_Cave/7.png'
+                ];
+                // console.log('🏞️ Loading Parallax_Backgrounds_Cave with paths:', layerPaths);
+                break;
             case 'The Dawn':
                 layerPaths = [];
                 for (let i = 1; i <= 8; i++) {
@@ -110,9 +124,11 @@ class BackgroundSystem {
             const img = new Image();
             img.onload = () => {
                 background.layersLoaded++;
+                console.log(`✅ Background layer loaded: ${path} (${background.layersLoaded}/${background.totalLayers})`);
+                console.log(`   Image dimensions: ${img.naturalWidth}x${img.naturalHeight}`);
             };
             img.onerror = (error) => {
-                console.warn(`Failed to load background layer: ${path}`);
+                console.error(`❌ Failed to load background layer: ${path}`, error);
             };
             img.src = path;
             background.layers.push(img);
@@ -128,26 +144,59 @@ class BackgroundSystem {
 
         if (!this.currentBackground || !this.currentBackground.layers.length) {
             // Render a default sky color instead of transparent
+            console.log('🏞️ No background or no layers, rendering sky blue');
+            console.log('🏞️ currentBackground:', this.currentBackground);
+            console.log('🏞️ layers length:', this.currentBackground?.layers?.length);
             this.ctx.fillStyle = '#87CEEB'; // Sky blue
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             return;
         }
 
         const background = this.currentBackground;
+        // Debug logging for cave background
+        if (background.name === 'Parallax_Backgrounds_Cave') {
+            console.log(`🏞️ Rendering ${background.name}: ${background.layersLoaded}/${background.totalLayers} layers loaded`);
+            console.log(`🏞️ Background layers array length:`, background.layers.length);
+            background.layers.forEach((layer, index) => {
+                console.log(`🏞️ Layer ${index}: complete=${layer.complete}, naturalWidth=${layer.naturalWidth}, naturalHeight=${layer.naturalHeight}`);
+            });
+        }
 
         // Render each background layer with different parallax speeds
-        background.layers.forEach((layer, index) => {
-            if (!layer.complete || !layer.naturalWidth) return; // Skip if not loaded
+        // For cave background, use a custom layer strategy since each layer is a full opaque image
+        let layersToRender;
+        if (background.name === 'Parallax_Backgrounds_Cave') {
+            // For cave: render background + selected foreground layers with different blend modes
+            layersToRender = [0, 1, 2, 3, 4, 5, 6, 7]; // Try all layers with special handling
+        } else {
+            layersToRender = [...Array(background.layers.length).keys()];
+        }
+
+        for (let i = 0; i < layersToRender.length; i++) {
+            const index = layersToRender[i];
+            const layer = background.layers[index];
+            if (!layer.complete || !layer.naturalWidth) {
+                if (background.name === 'Parallax_Backgrounds_Cave') {
+                    console.log(`🏞️ Skipping layer ${index}: complete=${layer.complete}, naturalWidth=${layer.naturalWidth}`);
+                }
+                return; // Skip if not loaded
+            }
+
+            if (background.name === 'Parallax_Backgrounds_Cave') {
+                console.log(`🏞️ Actually drawing layer ${index}: ${layer.naturalWidth}x${layer.naturalHeight}`);
+            }
 
             // Calculate parallax offset for this layer
-            // Layers closer to the back (lower index) move slower
-            const parallaxSpeed = (index + 1) * 0.1; // 0.1, 0.2, 0.3, etc.
-            // Scale the camera offset by viewport scale to maintain consistent parallax
-            // Use safety fallback for viewport scale in case it's not initialized
-            const viewportScale = this.game.viewport?.scaleX || 1;
+            // Background layers (lower index) move slower, foreground layers (higher index) move faster
+            // For 8 layers (0-7), we want speeds like: 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8
+            const totalLayers = background.layers.length;
+            const parallaxSpeed = (index + 1) / (totalLayers + 2); // Creates speeds from ~0.11 to ~0.8
+
+            // Get camera position
             const cameraX = this.game.cameraSystem?.x || 0;
-            const scaledCameraX = cameraX * viewportScale;
-            const parallaxOffset = scaledCameraX * parallaxSpeed;
+
+            // Calculate parallax offset - background layers move slower than camera
+            const parallaxOffset = cameraX * parallaxSpeed;
 
             // Calculate how many times we need to repeat the image to fill the screen
             const imageWidth = layer.naturalWidth;
@@ -157,6 +206,10 @@ class BackgroundSystem {
             const scale = this.canvas.height / imageHeight;
             const scaledWidth = imageWidth * scale;
 
+            if (background.name === 'Parallax_Backgrounds_Cave') {
+                console.log(`🏞️ Layer ${index} scaling: canvas=${this.canvas.width}x${this.canvas.height}, image=${imageWidth}x${imageHeight}, scale=${scale}, scaledWidth=${scaledWidth}`);
+            }
+
             // Calculate starting position to ensure seamless repetition
             const startX = -parallaxOffset % scaledWidth;
             const tilesNeeded = Math.ceil((this.canvas.width + scaledWidth) / scaledWidth);
@@ -164,13 +217,57 @@ class BackgroundSystem {
             // Draw repeated background tiles - always fill entire canvas
             for (let i = 0; i < tilesNeeded; i++) {
                 const x = startX + (i * scaledWidth);
-                this.ctx.drawImage(
-                    layer,
-                    x, 0,  // Always start at Y=0 (top of canvas)
-                    scaledWidth, this.canvas.height  // Always fill full canvas height
-                );
+
+                if (background.name === 'Parallax_Backgrounds_Cave' && i === 0) {
+                    console.log(`🏞️ Layer ${index} drawing: x=${x}, y=0, width=${scaledWidth}, height=${this.canvas.height}, tilesNeeded=${tilesNeeded}`);
+                    console.log(`🏞️ Drawing with image src: ${layer.src}`);
+                }
+
+                try {
+                    if (background.name === 'Parallax_Backgrounds_Cave') {
+                        // Special handling for cave background layers
+                        if (index === 0) {
+                            // Layer 0: Base background - draw normally
+                            this.ctx.globalCompositeOperation = 'source-over';
+                            this.ctx.globalAlpha = 1.0;
+                        } else {
+                            // Layers 1-7: Use multiply blend mode to darken and add depth
+                            this.ctx.globalCompositeOperation = 'multiply';
+                            this.ctx.globalAlpha = 0.7; // Slight transparency to blend better
+                        }
+
+                        this.ctx.drawImage(
+                            layer,
+                            x, 0,
+                            scaledWidth, this.canvas.height
+                        );
+
+                        if (i === 0) {
+                            console.log(`🏞️ Layer ${index} drawn with blend mode: ${this.ctx.globalCompositeOperation}, alpha: ${this.ctx.globalAlpha}`);
+                        }
+                    } else {
+                        // For other backgrounds, use normal drawing
+                        this.ctx.globalCompositeOperation = 'source-over';
+                        this.ctx.globalAlpha = 1.0;
+                        this.ctx.drawImage(
+                            layer,
+                            x, 0,
+                            scaledWidth, this.canvas.height
+                        );
+                    }
+
+                    if (background.name === 'Parallax_Backgrounds_Cave' && i === 0) {
+                        console.log(`🏞️ Layer ${index} drawImage successful`);
+                    }
+                } catch (error) {
+                    console.error(`🏞️ Error drawing layer ${index}:`, error);
+                }
+
+                // Reset alpha and blending for next layer
+                this.ctx.globalAlpha = 1.0;
+                this.ctx.globalCompositeOperation = 'source-over';
             }
-        });
+        }
     }
 
     populateDropdown() {
