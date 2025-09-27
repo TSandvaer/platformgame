@@ -17,6 +17,7 @@ class BackgroundSystem {
         this.availableBackgrounds = [
             'none',
             'DarkForest',
+            'Dawn2',
             'Dynamic_Space_Nebula_Aqua_Pink',
             'Dynamic_Space_Nebula_Blue',
             'Dynamic_Space_Nebula_Red',
@@ -24,10 +25,10 @@ class BackgroundSystem {
             'Dynamic_Space_Stars_Small_2',
             'Dynamic_Space_Stars_Big_1_1',
             'Dynamic_Space_Stars_Big_1_2',
+            'Flay_Night_4_BG',
             'Mountains1',
             'Mountains2',
             'MountainWaterfall',
-            'Parallax_Backgrounds_Cave',
             'Parallax_Forest_Background_Blue',
             'The Dawn'
         ];
@@ -68,6 +69,12 @@ class BackgroundSystem {
                     'backgrounds/DarkForest/layers/plant.png'
                 ];
                 break;
+            case 'Dawn2':
+                layerPaths = [];
+                for (let i = 1; i <= 8; i++) {
+                    layerPaths.push(`backgrounds/Dawn2/Layers/${i}.png`);
+                }
+                break;
             case 'Dynamic_Space_Nebula_Aqua_Pink':
                 layerPaths = [
                     'backgrounds/Dynamic Space Background/Nebula Aqua-Pink.png'
@@ -103,6 +110,11 @@ class BackgroundSystem {
                     'backgrounds/Dynamic Space Background/Stars-Big_1_2_PC.png'
                 ];
                 break;
+            case 'Flay_Night_4_BG':
+                layerPaths = [
+                    'backgrounds/Flay Night 4 BG/Flat Night 4 BG.png'
+                ];
+                break;
             case 'Mountains1':
                 layerPaths = [
                     'backgrounds/Mountains1/layers/sky.png',
@@ -135,19 +147,6 @@ class BackgroundSystem {
                     'backgrounds/MountainWaterfall/layers/rocks.png',
                     'backgrounds/MountainWaterfall/layers/ground.png'
                 ];
-                break;
-            case 'Parallax_Backgrounds_Cave':
-                layerPaths = [
-                    'backgrounds/Parallax_Backgrounds_Cave/0.png',
-                    'backgrounds/Parallax_Backgrounds_Cave/1.png',
-                    'backgrounds/Parallax_Backgrounds_Cave/2.png',
-                    'backgrounds/Parallax_Backgrounds_Cave/3.png',
-                    'backgrounds/Parallax_Backgrounds_Cave/4.png',
-                    'backgrounds/Parallax_Backgrounds_Cave/5.png',
-                    'backgrounds/Parallax_Backgrounds_Cave/6.png',
-                    'backgrounds/Parallax_Backgrounds_Cave/7.png'
-                ];
-                // console.log('🏞️ Loading Parallax_Backgrounds_Cave with paths:', layerPaths);
                 break;
             case 'Parallax_Forest_Background_Blue':
                 layerPaths = [
@@ -220,10 +219,7 @@ class BackgroundSystem {
         // Render each background layer with different parallax speeds
         // For parallax backgrounds, use a custom layer strategy since each layer is a full opaque image
         let layersToRender;
-        if (background.name === 'Parallax_Backgrounds_Cave') {
-            // For cave: render background + selected foreground layers with different blend modes
-            layersToRender = [0, 1, 2, 3, 4, 5, 6, 7]; // Try all layers with special handling
-        } else if (background.name === 'Parallax_Forest_Background_Blue') {
+        if (background.name === 'Parallax_Forest_Background_Blue') {
             // For forest: render all layers naturally (they have transparency)
             layersToRender = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]; // Sky to foreground (back to front)
         } else {
@@ -268,18 +264,7 @@ class BackgroundSystem {
 
 
                 try {
-                    if (background.name === 'Parallax_Backgrounds_Cave') {
-                        // Special handling for cave background layers
-                        if (index === 0) {
-                            // Layer 0: Base background - draw normally
-                            this.ctx.globalCompositeOperation = 'source-over';
-                            this.ctx.globalAlpha = 1.0;
-                        } else {
-                            // Layers 1-7: Use multiply blend mode to darken and add depth
-                            this.ctx.globalCompositeOperation = 'multiply';
-                            this.ctx.globalAlpha = 0.7; // Slight transparency to blend better
-                        }
-                    } else if (background.name === 'Parallax_Forest_Background_Blue') {
+                    if (background.name === 'Parallax_Forest_Background_Blue') {
                         // Natural forest background rendering - layers have built-in transparency
                         this.ctx.globalCompositeOperation = 'source-over';
                         this.ctx.globalAlpha = 1.0; // Use full alpha, let layer transparency handle blending
