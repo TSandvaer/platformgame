@@ -31,6 +31,23 @@ class PlayerRenderer {
         const spriteOffsetX = (this.data.width - spriteRenderWidth) / 2;
         const spriteOffsetY = this.data.height - spriteRenderHeight + (110 * playerScale);
 
+        // Handle kill effects
+        let renderY = this.data.y + spriteOffsetY;
+        let renderHeight = spriteRenderHeight;
+        let sourceY = frame.sourceY;
+        let sourceHeight = frame.frameHeight;
+
+        // Apply sink effect if player is dead and sinking
+        if (this.data.isDead && this.data.killEffect === 'sink' && this.data.sinkAmount > 0) {
+            // Move the player down by the sink amount
+            renderY += this.data.sinkAmount;
+
+            // Reduce the visible height by clipping the bottom of the sprite
+            const sinkRatio = this.data.sinkAmount / this.data.height;
+            renderHeight = spriteRenderHeight * (1 - sinkRatio);
+            sourceHeight = frame.frameHeight * (1 - sinkRatio);
+        }
+
         // Note: Damage visual effect now handled by hurt animation sprite
 
         // Flip sprite horizontally if facing left
@@ -38,20 +55,20 @@ class PlayerRenderer {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 frame.image,
-                frame.sourceX, frame.sourceY,
-                frame.frameWidth, frame.frameHeight,
+                frame.sourceX, sourceY,
+                frame.frameWidth, sourceHeight,
                 -(this.data.x + spriteOffsetX + spriteRenderWidth),
-                this.data.y + spriteOffsetY,
-                spriteRenderWidth, spriteRenderHeight
+                renderY,
+                spriteRenderWidth, renderHeight
             );
         } else {
             ctx.drawImage(
                 frame.image,
-                frame.sourceX, frame.sourceY,
-                frame.frameWidth, frame.frameHeight,
+                frame.sourceX, sourceY,
+                frame.frameWidth, sourceHeight,
                 this.data.x + spriteOffsetX,
-                this.data.y + spriteOffsetY,
-                spriteRenderWidth, spriteRenderHeight
+                renderY,
+                spriteRenderWidth, renderHeight
             );
         }
 
@@ -61,9 +78,19 @@ class PlayerRenderer {
     renderFallback(ctx) {
         ctx.save();
 
+        // Handle kill effects for fallback rendering
+        let renderY = this.data.y;
+        let renderHeight = this.data.height;
+
+        // Apply sink effect if player is dead and sinking
+        if (this.data.isDead && this.data.killEffect === 'sink' && this.data.sinkAmount > 0) {
+            renderY += this.data.sinkAmount;
+            renderHeight = Math.max(0, this.data.height - this.data.sinkAmount);
+        }
+
         // Render a colored rectangle as fallback (damage effect handled by hurt animation)
         ctx.fillStyle = this.data.color;
-        ctx.fillRect(this.data.x, this.data.y, this.data.width, this.data.height);
+        ctx.fillRect(this.data.x, renderY, this.data.width, renderHeight);
 
         ctx.restore();
     }

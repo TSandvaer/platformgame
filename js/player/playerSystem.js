@@ -34,6 +34,11 @@ class PlayerSystem {
         this.animator.update(deltaTime, isDevelopmentMode);
     }
 
+    // Check if player should render behind platforms (for sink effect)
+    shouldRenderBehindPlatforms() {
+        return this.data.isDead && this.data.killEffect === 'sink';
+    }
+
     // Render the player
     render(ctx, isDevelopmentMode) {
         this.renderer.render(ctx);

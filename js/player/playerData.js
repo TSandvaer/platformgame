@@ -60,6 +60,8 @@ class PlayerData {
         this.isDead = false;
         this.deathTimer = 0; // Timer for death sequence (3 seconds)
         this.deathStartTime = 0;
+        this.killEffect = 'normal'; // Current kill effect: 'normal' or 'sink'
+        this.sinkAmount = 0; // How much player has sunk into platform (for sink effect)
 
         // Tracking
         this.lastValidPosition = { x: 100, y: 400 };
@@ -86,6 +88,8 @@ class PlayerData {
         this.isDead = false;
         this.deathTimer = 0;
         this.deathStartTime = 0;
+        this.killEffect = 'normal';
+        this.sinkAmount = 0;
         this.lastValidPosition = { x: 100, y: 400 };
 
         // Reset damage system
@@ -217,17 +221,41 @@ class PlayerData {
             this.deathStartTime = currentTime;
             this.deathTimer = 3000; // 3 seconds in milliseconds
 
+            // Determine kill effect from the deadliest platform
+            const allDamageSources = [...this.damagingProps, ...this.damagingPlatforms];
+            if (allDamageSources.length > 0) {
+                // Find the source with highest damage
+                const deadliestSource = allDamageSources.reduce((max, current) =>
+                    current.damagePerSecond > max.damagePerSecond ? current : max
+                );
+
+                // Set kill effect from platform (props don't have kill effects, default to normal)
+                this.killEffect = deadliestSource.killEffect || 'normal';
+            } else {
+                this.killEffect = 'normal';
+            }
+
+            this.sinkAmount = 0; // Reset sink amount
+
             // Trigger death animation
             this.currentAnimation = 'death';
             this.frameIndex = 0;
             this.frameTimer = 0;
 
-            console.log('💀 Player died! Respawning in 3 seconds...');
+            console.log(`💀 Player died with ${this.killEffect} effect! Respawning in 3 seconds...`);
         }
 
-        // Handle death timer
+        // Handle death timer and kill effects
         if (this.isDead && this.deathTimer > 0) {
             this.deathTimer -= deltaTime;
+
+            // Handle sink effect during death
+            if (this.killEffect === 'sink') {
+                // Gradually sink into the platform over the death timer duration
+                const sinkProgress = (3000 - this.deathTimer) / 3000; // 0 to 1
+                this.sinkAmount = Math.min(this.height * 0.8, sinkProgress * this.height * 0.8); // Sink up to 80% of height
+            }
+
             if (this.deathTimer <= 0) {
                 // Respawn player
                 this.isDead = false;

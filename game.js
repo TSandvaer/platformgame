@@ -528,14 +528,21 @@ class PlatformRPG {
         if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.isDraggingStartPosition) {
         }
 
+        // Render player behind platforms if sinking
+        if (this.playerSystem.shouldRenderBehindPlatforms()) {
+            this.playerSystem.render(this.ctx, this.isDevelopmentMode);
+        }
+
         // Render platforms using the platform system
         this.platformSystem.renderPlatforms(this.isDevelopmentMode, this.viewport);
 
         // Render props (background props first, then obstacle props)
         this.propSystem.renderBackgroundProps(this.isDevelopmentMode, this.viewport);
 
-        // Render player using the player system
-        this.playerSystem.render(this.ctx, this.isDevelopmentMode);
+        // Render player normally if not sinking
+        if (!this.playerSystem.shouldRenderBehindPlatforms()) {
+            this.playerSystem.render(this.ctx, this.isDevelopmentMode);
+        }
 
         this.ctx.restore();
 

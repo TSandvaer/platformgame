@@ -388,6 +388,7 @@ class PlatformManager {
             const relativeXInput = document.getElementById('platformRelativeX');
             const relativeYInput = document.getElementById('platformRelativeY');
             const damageInput = document.getElementById('platformDamage');
+            const killEffectInput = document.getElementById('platformKillEffect');
             const relativeRow = document.getElementById('relativePositionRow');
 
             if (xInput) xInput.value = Math.round(this.platformData.selectedPlatform.x || 0);
@@ -396,6 +397,7 @@ class PlatformManager {
             if (heightInput) heightInput.value = this.platformData.selectedPlatform.height || 20;
             if (spriteTypeInput) spriteTypeInput.value = this.platformData.selectedPlatform.spriteType || 'color';
             if (damageInput) damageInput.value = this.platformData.selectedPlatform.damagePerSecond || 0;
+            if (killEffectInput) killEffectInput.value = this.platformData.selectedPlatform.killEffect || 'normal';
 
             // Handle positioning properties
             const positioning = this.platformData.selectedPlatform.positioning || 'absolute';
@@ -424,6 +426,7 @@ class PlatformManager {
         const relativeXInput = document.getElementById('platformRelativeX');
         const relativeYInput = document.getElementById('platformRelativeY');
         const damageInput = document.getElementById('platformDamage');
+        const killEffectInput = document.getElementById('platformKillEffect');
 
         if (xInput) this.platformData.selectedPlatform.x = parseInt(xInput.value);
         if (yInput) this.platformData.selectedPlatform.y = parseInt(yInput.value);
@@ -431,6 +434,7 @@ class PlatformManager {
         if (heightInput) this.platformData.selectedPlatform.height = Math.min(32, Math.max(10, parseInt(heightInput.value)));
         if (spriteTypeInput) this.platformData.selectedPlatform.spriteType = spriteTypeInput.value;
         if (damageInput) this.platformData.selectedPlatform.damagePerSecond = Math.max(0, parseFloat(damageInput.value) || 0);
+        if (killEffectInput) this.platformData.selectedPlatform.killEffect = killEffectInput.value;
 
         // Handle positioning properties
         if (positioningInput) this.platformData.selectedPlatform.positioning = positioningInput.value;
