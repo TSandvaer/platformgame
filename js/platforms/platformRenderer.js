@@ -121,6 +121,23 @@ class PlatformRenderer {
         }
 
         if (isDevelopmentMode) {
+            // Draw damage indicator for platforms with damage > 0
+            if (platform.damagePerSecond > 0) {
+                this.ctx.strokeStyle = '#FF4444';
+                this.ctx.lineWidth = 3;
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.strokeRect(platform.x - 2, platform.y - 2, platform.width + 4, platform.height + 4);
+                this.ctx.setLineDash([]);
+
+                // Draw damage text indicator
+                this.ctx.fillStyle = '#FF4444';
+                this.ctx.font = '12px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(`🔥 ${platform.damagePerSecond} DPS`,
+                    platform.x + platform.width / 2,
+                    platform.y - 8);
+            }
+
             if (isSelected) {
                 this.ctx.strokeStyle = '#FFD700';
                 this.ctx.lineWidth = 2;

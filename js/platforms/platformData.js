@@ -27,7 +27,8 @@ class PlatformData {
             spriteType: 'color',
             positioning: 'absolute', // 'absolute', 'relative', 'screen-relative'
             relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
-            relativeY: 0.5          // Relative position (0-1) for screen-relative mode
+            relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
+            damagePerSecond: 0      // Damage dealt to player per second when standing on platform
         };
 
         this.platforms.push(newPlatform);

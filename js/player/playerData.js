@@ -43,6 +43,7 @@ class PlayerData {
         this.damageTimer = 0;
         this.damageCooldown = 500; // 500ms between damage applications
         this.damagingProps = [];   // Array of props currently causing damage
+        this.damagingPlatforms = []; // Array of platforms currently causing damage
         this.lastDamageTime = 0;
 
         // Health regeneration system
@@ -91,6 +92,7 @@ class PlayerData {
         this.isDamaged = false;
         this.damageTimer = 0;
         this.damagingProps = [];
+        this.damagingPlatforms = [];
         this.lastDamageTime = 0;
 
         // Reset health regeneration
@@ -177,21 +179,26 @@ class PlayerData {
             }
         }
 
-        // Apply damage from touching props (only in production mode and if not dead)
-        if (!isDevelopmentMode && !this.isDead && this.damagingProps.length > 0 && currentTime - this.lastDamageTime >= this.damageCooldown) {
-            // Find highest damage among all touching props
-            const maxDamage = Math.max(...this.damagingProps.map(prop => prop.damagePerSecond));
+        // Apply damage from touching props and platforms (only in production mode and if not dead)
+        if (!isDevelopmentMode && !this.isDead && (this.damagingProps.length > 0 || this.damagingPlatforms.length > 0) && currentTime - this.lastDamageTime >= this.damageCooldown) {
+            // Find highest damage among all touching props and platforms
+            const propDamages = this.damagingProps.map(prop => prop.damagePerSecond);
+            const platformDamages = this.damagingPlatforms.map(platform => platform.damagePerSecond);
+            const allDamages = [...propDamages, ...platformDamages];
 
-            if (maxDamage > 0) {
-                // Calculate damage for this interval (damage per second * time interval)
-                const damageAmount = (maxDamage * this.damageCooldown) / 1000;
-                this.takeDamage(damageAmount);
-                this.lastDamageTime = currentTime;
+            if (allDamages.length > 0) {
+                const maxDamage = Math.max(...allDamages);
+                if (maxDamage > 0) {
+                    // Calculate damage for this interval (damage per second * time interval)
+                    const damageAmount = (maxDamage * this.damageCooldown) / 1000;
+                    this.takeDamage(damageAmount);
+                    this.lastDamageTime = currentTime;
+                }
             }
         }
 
         // Health regeneration (when not taking damage and health is not full)
-        if (this.health < this.maxHealth && this.damagingProps.length === 0 &&
+        if (this.health < this.maxHealth && this.damagingProps.length === 0 && this.damagingPlatforms.length === 0 &&
             currentTime - this.lastHealthRegenTime >= this.healthRegenCooldown) {
 
             // Calculate regen amount for this interval
@@ -243,13 +250,20 @@ class PlayerData {
             }
         }
 
-        // Clear damaging props list (will be repopulated by collision detection)
+        // Clear damaging props and platforms lists (will be repopulated by collision detection)
         this.damagingProps = [];
+        this.damagingPlatforms = [];
     }
 
     addDamagingProp(prop) {
         if (prop.damagePerSecond > 0) {
             this.damagingProps.push(prop);
+        }
+    }
+
+    addDamagingPlatform(platform) {
+        if (platform.damagePerSecond > 0) {
+            this.damagingPlatforms.push(platform);
         }
     }
 

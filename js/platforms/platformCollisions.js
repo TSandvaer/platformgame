@@ -8,6 +8,11 @@ class PlatformCollisions {
                     player.y = platform.y - player.height;
                     player.velocityY = 0;
                     player.onGround = true;
+
+                    // Check if this platform causes damage when player stands on it
+                    if (platform.damagePerSecond > 0) {
+                        player.addDamagingPlatform(platform);
+                    }
                 }
             }
         });
