@@ -168,6 +168,68 @@ class LootableSystem {
         this.renderer.updateAnimations(this.data.lootableTypes);
     }
 
+    // Check for player-coin collisions (called from game loop)
+    checkPlayerCollisions(player) {
+        if (!player || this.data.lootables.length === 0) return [];
+
+        const collectedCoins = [];
+
+        // Check each coin for collision with player
+        for (let i = this.data.lootables.length - 1; i >= 0; i--) {
+            const lootable = this.data.lootables[i];
+
+            // Only check coins that are visible
+            if (lootable.type === 'coin' && lootable.isVisible) {
+                const lootableType = this.data.lootableTypes[lootable.type];
+
+                // Simple bounding box collision
+                if (this.isPlayerTouchingLootable(player, lootable, lootableType)) {
+                    // Collect the coin
+                    collectedCoins.push({
+                        x: lootable.x,
+                        y: lootable.y,
+                        type: lootable.type
+                    });
+
+                    // Remove coin from array
+                    this.data.lootables.splice(i, 1);
+
+                    // Clear selection if this coin was selected
+                    if (this.data.selectedLootable === lootable) {
+                        this.data.selectedLootable = null;
+                    }
+                    this.data.selectedLootables = this.data.selectedLootables.filter(l => l !== lootable);
+                }
+            }
+        }
+
+        // Update UI if coins were collected
+        if (collectedCoins.length > 0) {
+            this.manager.updateLootableList();
+            this.manager.updateLootableProperties();
+        }
+
+        return collectedCoins;
+    }
+
+    // Check if player is touching a lootable
+    isPlayerTouchingLootable(player, lootable, lootableType) {
+        const playerLeft = player.x;
+        const playerRight = player.x + player.width;
+        const playerTop = player.y;
+        const playerBottom = player.y + player.height;
+
+        const lootableLeft = lootable.x;
+        const lootableRight = lootable.x + lootableType.width;
+        const lootableTop = lootable.y;
+        const lootableBottom = lootable.y + lootableType.height;
+
+        return !(playerRight < lootableLeft ||
+                 playerLeft > lootableRight ||
+                 playerBottom < lootableTop ||
+                 playerTop > lootableBottom);
+    }
+
     // Copy/paste methods
     copySelectedLootables() {
         return this.data.copySelectedLootables();

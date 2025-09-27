@@ -24,8 +24,14 @@ class HUDSystem {
         // Player stats (will be connected to player system later)
         this.playerStats = {
             health: { current: 100, max: 100 },
-            stamina: { current: 100, max: 100 }
+            stamina: { current: 100, max: 100 },
+            coins: 0
         };
+
+        // Coin display settings
+        this.coinIconSize = 16;
+        this.coinIcon = null;
+        this.loadCoinIcon();
 
         // Colors
         this.colors = {
@@ -53,6 +59,18 @@ class HUDSystem {
 
         // Load saved settings from gameData
         this.loadSettings();
+    }
+
+    loadCoinIcon() {
+        const coinImg = new Image();
+        coinImg.onload = () => {
+            this.coinIcon = coinImg;
+            console.log('💰 Coin icon loaded for HUD');
+        };
+        coinImg.onerror = () => {
+            console.error('💰 Failed to load coin icon for HUD');
+        };
+        coinImg.src = 'sprites/Coins/gold/gold.png';
     }
 
     setupGearClickHandler() {
@@ -203,6 +221,10 @@ class HUDSystem {
         this.playerStats.stamina.max = maxStamina;
     }
 
+    updateCoinCount(coinCount) {
+        this.playerStats.coins = Math.max(0, coinCount);
+    }
+
     render() {
         this.ctx.save();
 
@@ -241,6 +263,9 @@ class HUDSystem {
             this.colors.stamina,
             this.colors.staminaBg
         );
+
+        // Draw coin counter
+        this.drawCoinCounter();
 
         // Development mode visual feedback
         if (this.game.isDevelopmentMode) {
@@ -302,6 +327,30 @@ class HUDSystem {
         this.ctx.font = '10px Arial';
         this.ctx.textAlign = 'center';
         this.ctx.fillText(`${Math.round(current)}/${max}`, x + this.barWidth / 2, y + this.barHeight / 2);
+    }
+
+    drawCoinCounter() {
+        const coinY = this.position.y + this.barOffsetY + (this.barSpacing * 2);
+        const iconX = this.position.x + this.barOffsetX - 55;
+        const textX = iconX + this.coinIconSize + 5;
+
+        // Draw coin icon if loaded
+        if (this.coinIcon) {
+            this.ctx.drawImage(
+                this.coinIcon,
+                iconX,
+                coinY,
+                this.coinIconSize,
+                this.coinIconSize
+            );
+        }
+
+        // Draw coin count text
+        this.ctx.fillStyle = this.colors.text;
+        this.ctx.font = 'bold 12px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(`${this.playerStats.coins}`, textX, coinY + this.coinIconSize / 2);
     }
 
     drawGearIcon() {

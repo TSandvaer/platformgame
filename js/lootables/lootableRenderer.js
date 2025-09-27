@@ -9,7 +9,11 @@ class LootableRenderer {
         this.spritesLoaded = false;
         this.onSpritesLoadedCallback = null;
         this.loadedSprites = 0;
-        this.totalSprites = 2;
+        this.totalSprites = 3; // coin, heart, pickup effect
+
+        // Pickup effects
+        this.pickupEffects = [];
+        this.pickupEffectSprite = null;
 
         // Animation state for sprite sheets
         this.animationState = {
@@ -57,6 +61,24 @@ class LootableRenderer {
             console.error('💖 Failed to load heart sprite');
         };
         heartImg.src = 'sprites/Heart/heart_rotating2.png';
+
+        // Load pickup effect sprite (sprite sheet with 8 frames, 256x32, 1 row)
+        const pickupImg = new Image();
+        pickupImg.onload = () => {
+            console.log('✨ Pickup effect sprite loaded successfully');
+            this.pickupEffectSprite = {
+                image: pickupImg,
+                frameWidth: 32, // 256px ÷ 8 frames = 32px per frame
+                frameHeight: 32,
+                totalFrames: 8,
+                animationSpeed: 80 // ms per frame for smooth animation
+            };
+            this.checkAllLoaded();
+        };
+        pickupImg.onerror = () => {
+            console.error('✨ Failed to load pickup effect sprite');
+        };
+        pickupImg.src = 'sprites/Coins/pick_up_effect.png';
     }
 
     checkAllLoaded() {
@@ -121,6 +143,65 @@ class LootableRenderer {
                 this.animationState.heart.lastFrameTime = currentTime;
             }
         }
+    }
+
+    // Add pickup effect at position
+    addPickupEffect(x, y) {
+        this.pickupEffects.push({
+            x: x,
+            y: y,
+            startTime: Date.now(),
+            duration: 640, // 8 frames × 80ms = 640ms total animation
+            currentFrame: 0,
+            lastFrameTime: Date.now()
+        });
+    }
+
+    // Update and remove expired pickup effects
+    updatePickupEffects() {
+        const currentTime = Date.now();
+
+        this.pickupEffects = this.pickupEffects.filter(effect => {
+            // Update animation frame
+            if (this.pickupEffectSprite && (currentTime - effect.lastFrameTime) >= this.pickupEffectSprite.animationSpeed) {
+                effect.currentFrame++;
+                effect.lastFrameTime = currentTime;
+
+                // If we've shown all frames, remove the effect
+                if (effect.currentFrame >= this.pickupEffectSprite.totalFrames) {
+                    return false; // Remove this effect
+                }
+            }
+
+            // Also remove if duration exceeded (fallback)
+            return (currentTime - effect.startTime) < effect.duration;
+        });
+    }
+
+    // Render pickup effects
+    renderPickupEffects(viewport, camera) {
+        if (!this.pickupEffectSprite) return;
+
+        this.pickupEffects.forEach(effect => {
+            // Apply viewport and camera transformations
+            let renderX = effect.x;
+            let renderY = effect.y;
+
+            if (viewport && camera) {
+                renderX = (effect.x - camera.x) * viewport.scaleX + viewport.offsetX;
+                renderY = (effect.y - camera.y) * viewport.scaleY + viewport.offsetY;
+            }
+
+            // Calculate source position for current frame (horizontal sprite sheet)
+            const sourceX = effect.currentFrame * this.pickupEffectSprite.frameWidth;
+            const sourceY = 0; // Single row
+
+            this.ctx.drawImage(
+                this.pickupEffectSprite.image,
+                sourceX, sourceY, this.pickupEffectSprite.frameWidth, this.pickupEffectSprite.frameHeight, // Source rectangle
+                Math.floor(renderX), Math.floor(renderY), this.pickupEffectSprite.frameWidth, this.pickupEffectSprite.frameHeight // Destination
+            );
+        });
     }
 
     // Draw individual lootable

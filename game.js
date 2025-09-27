@@ -454,6 +454,29 @@ class PlatformRPG {
         // Update lootable animations
         if (this.lootableSystem) {
             this.lootableSystem.update();
+
+            // Check for coin collections
+            const collectedCoins = this.lootableSystem.checkPlayerCollisions(this.player);
+            if (collectedCoins.length > 0) {
+                // Add pickup effects for each collected coin
+                collectedCoins.forEach(coin => {
+                    this.lootableSystem.renderer.addPickupEffect(coin.x, coin.y);
+                });
+
+                // Update coin count in game state (for now, just track locally)
+                if (!this.collectedCoins) this.collectedCoins = 0;
+                this.collectedCoins += collectedCoins.length;
+
+                // Update HUD
+                if (this.hudSystem) {
+                    this.hudSystem.updateCoinCount(this.collectedCoins);
+                }
+
+                console.log(`💰 Collected ${collectedCoins.length} coins! Total: ${this.collectedCoins}`);
+            }
+
+            // Update pickup effects
+            this.lootableSystem.renderer.updatePickupEffects();
         }
 
         // Update HUD with current player stats
@@ -615,6 +638,9 @@ class PlatformRPG {
         // Render lootables after obstacle props (they need the same transformation)
         if (this.lootableSystem) {
             this.lootableSystem.renderLootables(this.isDevelopmentMode, this.viewport, this.cameraSystem.camera);
+
+            // Render pickup effects on top of lootables
+            this.lootableSystem.renderer.renderPickupEffects(this.viewport, this.cameraSystem.camera);
         }
 
         // Render enemies AFTER obstacle props so they appear on top and can be selected
