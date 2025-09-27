@@ -331,24 +331,15 @@ class EnemyAI {
         const zone = enemy.movementZone;
         const enemyCenter = enemy.x + enemy.width / 2;
 
-        // Debug logging for enemy 5 patrol movement
-        if (enemy.id === 5) {
-            console.log(`Enemy 5 PATROL: center=${Math.round(enemyCenter)}, zone=[${zone.startX}, ${zone.endX}], direction=${enemy.patrolDirection}`);
-        }
 
         // Check if we've reached the patrol boundaries
         if (enemy.patrolDirection > 0 && enemyCenter >= zone.endX) {
             enemy.patrolDirection = -1;
-            if (enemy.id === 5) console.log(`Enemy 5 reached right boundary, turning left`);
         } else if (enemy.patrolDirection < 0 && enemyCenter <= zone.startX) {
             enemy.patrolDirection = 1;
-            if (enemy.id === 5) console.log(`Enemy 5 reached left boundary, turning right`);
         }
 
         const movement = enemy.patrolDirection * enemy.speed;
-        if (enemy.id === 5) {
-            console.log(`Enemy 5 PATROL movement: ${movement} (direction: ${enemy.patrolDirection}, speed: ${enemy.speed})`);
-        }
 
         return movement;
     }

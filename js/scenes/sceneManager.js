@@ -301,12 +301,6 @@ class SceneManager {
             this.game.propSystem.updatePropList();
         }
 
-        // Update background dropdown to reflect current scene's background
-        const backgroundSelect = document.getElementById('backgroundSelect');
-        if (backgroundSelect && scene.background) {
-            const backgroundName = scene.background.name || 'none';
-            backgroundSelect.value = backgroundName;
-        }
 
         // Debug: Log transition zones in the loaded scene
         this.logTransitionZones();
@@ -727,6 +721,15 @@ class SceneManager {
                     </div>
                 </div>
                 <div class="property-group">
+                    <label>Background:</label>
+                    <div class="input-row">
+                        <select id="backgroundSelect" style="width: 150px;">
+                            <option value="none">None</option>
+                        </select>
+                        <button class="btn small" id="applyBackground">Apply</button>
+                    </div>
+                </div>
+                <div class="property-group">
                     <h4>Scene Boundaries</h4>
                     <div class="input-row">
                         <label>Left:</label>
@@ -748,6 +751,33 @@ class SceneManager {
                     <button data-action="add-transition" class="btn-small">Add Transition Zone</button>
                 </div>
             `;
+
+            // Populate the background dropdown with available backgrounds
+            if (this.game.backgroundSystem) {
+                this.game.backgroundSystem.populateDropdown();
+            }
+
+            // Set the background dropdown to the current scene's background
+            const backgroundSelect = document.getElementById('backgroundSelect');
+            if (backgroundSelect && currentScene.background) {
+                const backgroundName = currentScene.background.name || 'none';
+                backgroundSelect.value = backgroundName;
+            }
+
+            // Set up background apply button event listener (since controls are dynamically created)
+            const applyBackgroundBtn = document.getElementById('applyBackground');
+            if (applyBackgroundBtn) {
+                // Remove any existing event listener to avoid duplicates
+                applyBackgroundBtn.replaceWith(applyBackgroundBtn.cloneNode(true));
+                const newApplyBtn = document.getElementById('applyBackground');
+                newApplyBtn.addEventListener('click', () => {
+                    const selectedBackground = document.getElementById('backgroundSelect').value;
+                    if (this.game.sceneSystem && this.game.sceneSystem.setSceneBackground) {
+                        this.game.sceneSystem.setSceneBackground(selectedBackground);
+                    }
+                });
+            }
+
             this.updateTransitionsList();
         } else {
             propertiesDiv.style.display = 'none';

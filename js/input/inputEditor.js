@@ -8,7 +8,6 @@ class InputEditor {
         this.setupPlatformEditorListeners();
         this.setupSceneEditorListeners();
         this.setupPropsEditorListeners();
-        this.setupBackgroundEditorListeners();
         this.setupViewportEditorListeners();
         this.setupImportExportListeners();
     }
@@ -142,15 +141,6 @@ class InputEditor {
         }
     }
 
-    setupBackgroundEditorListeners() {
-        const applyBackgroundBtn = document.getElementById('applyBackground');
-        if (applyBackgroundBtn) {
-            applyBackgroundBtn.addEventListener('click', () => {
-                const selectedBackground = document.getElementById('backgroundSelect').value;
-                this.game.sceneSystem.setSceneBackground(selectedBackground);
-            });
-        }
-    }
 
     setupViewportEditorListeners() {
         const applyViewportBtn = document.getElementById('applyViewport');

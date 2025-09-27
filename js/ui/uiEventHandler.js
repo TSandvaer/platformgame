@@ -97,11 +97,7 @@ class UIEventHandler {
 
         // Game data export/import is now handled by gameDataSystem in its initialize method
 
-        // Background controls
-        document.getElementById('applyBackground').addEventListener('click', () => {
-            const selectedBackground = document.getElementById('backgroundSelect').value;
-            this.game.sceneSystem.setSceneBackground(selectedBackground);
-        });
+        // Background controls are now handled dynamically in scene properties
 
         // Viewport controls
         document.getElementById('applyViewport').addEventListener('click', () => {

@@ -85,7 +85,6 @@ class EditorUI {
         const devPanels = [
             'coordinates',
             'platformEditor',
-            'backgroundEditor',
             'viewportEditor',
             'propsEditor',
             'sceneProperties'
