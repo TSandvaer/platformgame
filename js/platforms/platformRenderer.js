@@ -60,7 +60,7 @@ class PlatformRenderer {
             limestone: { tileset: 'tileset', tileX: 4, tileY: 3 }, // Limestone texture
 
             // Special/Magic textures
-            lava: { tileset: 'tileset', tileX: 7, tileY: 2 }, // Lava/hot texture
+            lava: { tileset: 'tileset', tileX: 7, tileY: 13 }, // Lava/hot texture
             magic: { tileset: 'tileset', tileX: 5, tileY: 2 }, // Magical/glowing texture
             water: { tileset: 'tileset', tileX: 4, tileY: 2 }, // Water texture
 
