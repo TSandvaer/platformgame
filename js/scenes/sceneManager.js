@@ -54,7 +54,9 @@ class SceneManager {
                 } else if (action === 'remove-transition') {
                     e.stopPropagation();
                     const zoneId = e.target.dataset.zoneId;
-                    this.game.sceneSystem.removeTransitionZone(zoneId);
+                    console.log('🗑️ Removing transition zone:', zoneId);
+                    const result = this.game.sceneSystem.removeTransitionZone(zoneId);
+                    console.log('🗑️ Remove result:', result);
                     this.game.sceneSystem.updateUI();
                 }
             });
@@ -888,7 +890,7 @@ class SceneManager {
                     <br>Position: (${zone.x}, ${zone.y}) Size: ${zone.width}x${zone.height}
                     <br>Player Start: (${zone.playerStartX}, ${zone.playerStartY})
                 </div>
-                <button data-action="remove-transition" data-zone-id="${zone.id}" class="btn-small btn-danger">Remove</button>
+                <button data-action="remove-transition" data-zone-id="${zone.id}" class="btn small" style="background-color: #dc3545; color: white;">Remove</button>
             </div>`;
         }).join('');
     }

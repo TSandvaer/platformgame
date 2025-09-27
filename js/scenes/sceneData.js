@@ -187,13 +187,31 @@ class SceneData {
 
     removeTransitionZone(sceneId, zoneId) {
         const scene = this.getSceneById(sceneId);
+        console.log('🗑️ removeTransitionZone: sceneId=', sceneId, 'zoneId=', zoneId, 'type=', typeof zoneId);
         if (scene) {
+            console.log('🗑️ Scene found, zones:', scene.transitions.zones.map(z => ({id: z.id, type: typeof z.id})));
             const index = scene.transitions.zones.findIndex(zone => zone.id === zoneId);
+            console.log('🗑️ Index found:', index);
             if (index !== -1) {
                 scene.transitions.zones.splice(index, 1);
                 scene.metadata.modified = new Date().toISOString();
+                console.log('🗑️ Zone removed successfully');
                 return true;
+            } else {
+                console.log('🗑️ Zone not found - trying type conversion');
+                // Try converting zoneId to number if it's a string
+                const numericZoneId = parseInt(zoneId);
+                const indexNumeric = scene.transitions.zones.findIndex(zone => zone.id === numericZoneId);
+                console.log('🗑️ Numeric index found:', indexNumeric);
+                if (indexNumeric !== -1) {
+                    scene.transitions.zones.splice(indexNumeric, 1);
+                    scene.metadata.modified = new Date().toISOString();
+                    console.log('🗑️ Zone removed successfully with numeric conversion');
+                    return true;
+                }
             }
+        } else {
+            console.log('🗑️ Scene not found');
         }
         return false;
     }
