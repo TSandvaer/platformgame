@@ -810,6 +810,15 @@ class SceneManager {
                     </div>
                 </div>
                 <div class="property-group">
+                    <label>Default Background Color:</label>
+                    <div class="input-row">
+                        <select id="defaultBackgroundColor" onchange="game.sceneSystem.manager.updateDefaultBackgroundColor(this.value)">
+                            <option value="#87CEEB" ${(currentScene.settings.defaultBackgroundColor || '#87CEEB') === '#87CEEB' ? 'selected' : ''}>Sky Blue</option>
+                            <option value="#000000" ${currentScene.settings.defaultBackgroundColor === '#000000' ? 'selected' : ''}>Black</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="property-group">
                     <h4>Scene Boundaries</h4>
                     <div class="input-row">
                         <label>Left:</label>
@@ -912,6 +921,19 @@ class SceneManager {
             currentScene.settings.playerStartX = startX;
             currentScene.settings.playerStartY = startY;
             currentScene.metadata.modified = new Date().toISOString();
+        }
+    }
+
+    updateDefaultBackgroundColor(color) {
+        const currentScene = this.sceneData.getCurrentScene();
+        if (currentScene) {
+            currentScene.settings.defaultBackgroundColor = color;
+            currentScene.metadata.modified = new Date().toISOString();
+
+            // Save scenes to persist the change
+            if (this.game && this.game.sceneSystem) {
+                this.game.sceneSystem.saveScenes();
+            }
         }
     }
 

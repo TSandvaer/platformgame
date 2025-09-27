@@ -61,6 +61,7 @@ class SceneData {
             settings: {
                 playerStartX: 100,
                 playerStartY: 100,
+                defaultBackgroundColor: '#87CEEB', // Sky blue default
                 gravity: 0.8,
                 playerSpeed: 5
             },

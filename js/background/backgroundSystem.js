@@ -17,6 +17,13 @@ class BackgroundSystem {
         this.availableBackgrounds = [
             'none',
             'DarkForest',
+            'Dynamic_Space_Nebula_Aqua_Pink',
+            'Dynamic_Space_Nebula_Blue',
+            'Dynamic_Space_Nebula_Red',
+            'Dynamic_Space_Stars_Small_1',
+            'Dynamic_Space_Stars_Small_2',
+            'Dynamic_Space_Stars_Big_1_1',
+            'Dynamic_Space_Stars_Big_1_2',
             'Mountains1',
             'Mountains2',
             'MountainWaterfall',
@@ -59,6 +66,41 @@ class BackgroundSystem {
                     'backgrounds/DarkForest/layers/ground_2.png',
                     'backgrounds/DarkForest/layers/ground_1.png',
                     'backgrounds/DarkForest/layers/plant.png'
+                ];
+                break;
+            case 'Dynamic_Space_Nebula_Aqua_Pink':
+                layerPaths = [
+                    'backgrounds/Dynamic Space Background/Nebula Aqua-Pink.png'
+                ];
+                break;
+            case 'Dynamic_Space_Nebula_Blue':
+                layerPaths = [
+                    'backgrounds/Dynamic Space Background/Nebula Blue.png'
+                ];
+                break;
+            case 'Dynamic_Space_Nebula_Red':
+                layerPaths = [
+                    'backgrounds/Dynamic Space Background/Nebula Red.png'
+                ];
+                break;
+            case 'Dynamic_Space_Stars_Small_1':
+                layerPaths = [
+                    'backgrounds/Dynamic Space Background/Stars Small_1.png'
+                ];
+                break;
+            case 'Dynamic_Space_Stars_Small_2':
+                layerPaths = [
+                    'backgrounds/Dynamic Space Background/Stars Small_2.png'
+                ];
+                break;
+            case 'Dynamic_Space_Stars_Big_1_1':
+                layerPaths = [
+                    'backgrounds/Dynamic Space Background/Stars-Big_1_1_PC.png'
+                ];
+                break;
+            case 'Dynamic_Space_Stars_Big_1_2':
+                layerPaths = [
+                    'backgrounds/Dynamic Space Background/Stars-Big_1_2_PC.png'
                 ];
                 break;
             case 'Mountains1':
@@ -158,23 +200,21 @@ class BackgroundSystem {
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
         if (!this.currentBackground || !this.currentBackground.layers.length) {
-            // Render a default sky color instead of transparent
-            console.log('🏞️ No background or no layers, rendering sky blue');
-            console.log('🏞️ currentBackground:', this.currentBackground);
-            console.log('🏞️ layers length:', this.currentBackground?.layers?.length);
-            this.ctx.fillStyle = '#87CEEB'; // Sky blue
+            // Get default background color from current scene settings
+            const currentScene = this.game.sceneSystem?.data?.getCurrentScene();
+            const defaultColor = currentScene?.settings?.defaultBackgroundColor || '#87CEEB'; // Fallback to sky blue
+
+            this.ctx.fillStyle = defaultColor;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             return;
         }
 
         const background = this.currentBackground;
-        // Debug logging for parallax backgrounds
-        if (background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') {
-            console.log(`🏞️ Rendering ${background.name}: ${background.layersLoaded}/${background.totalLayers} layers loaded`);
-            console.log(`🏞️ Background layers array length:`, background.layers.length);
-            background.layers.forEach((layer, index) => {
-                console.log(`🏞️ Layer ${index}: complete=${layer.complete}, naturalWidth=${layer.naturalWidth}, naturalHeight=${layer.naturalHeight}`);
-            });
+
+        // Special handling for space backgrounds - fill with black first
+        if (background.name && background.name.startsWith('Dynamic_Space_')) {
+            this.ctx.fillStyle = '#000000'; // Black space background
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
 
         // Render each background layer with different parallax speeds
@@ -194,14 +234,7 @@ class BackgroundSystem {
             const index = layersToRender[i];
             const layer = background.layers[index];
             if (!layer.complete || !layer.naturalWidth) {
-                if (background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') {
-                    console.log(`🏞️ Skipping layer ${index}: complete=${layer.complete}, naturalWidth=${layer.naturalWidth}`);
-                }
                 return; // Skip if not loaded
-            }
-
-            if (background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') {
-                console.log(`🏞️ Actually drawing layer ${index}: ${layer.naturalWidth}x${layer.naturalHeight}`);
             }
 
             // Calculate parallax offset for this layer
@@ -224,9 +257,6 @@ class BackgroundSystem {
             const scale = this.canvas.height / imageHeight;
             const scaledWidth = imageWidth * scale;
 
-            if (background.name === 'Parallax_Backgrounds_Cave') {
-                console.log(`🏞️ Layer ${index} scaling: canvas=${this.canvas.width}x${this.canvas.height}, image=${imageWidth}x${imageHeight}, scale=${scale}, scaledWidth=${scaledWidth}`);
-            }
 
             // Calculate starting position to ensure seamless repetition
             const startX = -parallaxOffset % scaledWidth;
@@ -236,10 +266,6 @@ class BackgroundSystem {
             for (let i = 0; i < tilesNeeded; i++) {
                 const x = startX + (i * scaledWidth);
 
-                if ((background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') && i === 0) {
-                    console.log(`🏞️ Layer ${index} drawing: x=${x}, y=0, width=${scaledWidth}, height=${this.canvas.height}, tilesNeeded=${tilesNeeded}`);
-                    console.log(`🏞️ Drawing with image src: ${layer.src}`);
-                }
 
                 try {
                     if (background.name === 'Parallax_Backgrounds_Cave') {
@@ -264,9 +290,6 @@ class BackgroundSystem {
                             scaledWidth, this.canvas.height
                         );
 
-                        if (i === 0) {
-                            console.log(`🏞️ Layer ${index} drawn with blend mode: ${this.ctx.globalCompositeOperation}, alpha: ${this.ctx.globalAlpha}`);
-                        }
                     } else {
                         // For other backgrounds, use normal drawing
                         this.ctx.globalCompositeOperation = 'source-over';
@@ -278,9 +301,6 @@ class BackgroundSystem {
                         );
                     }
 
-                    if ((background.name === 'Parallax_Backgrounds_Cave' || background.name === 'Parallax_Forest_Background_Blue') && i === 0) {
-                        console.log(`🏞️ Layer ${index} drawImage successful`);
-                    }
                 } catch (error) {
                     console.error(`🏞️ Error drawing layer ${index}:`, error);
                 }
