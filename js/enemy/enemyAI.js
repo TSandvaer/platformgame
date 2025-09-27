@@ -402,61 +402,62 @@ class EnemyAI {
     }
 
     applyPhysics(enemy, physicsMultiplier, platforms) {
-        // Only apply gravity if not on ground
-        if (!enemy.onGround) {
-            enemy.velocityY += this.gravity * physicsMultiplier;
-        }
+        // Reset ground status - will be set to true if enemy is on a platform
+        enemy.onGround = false;
 
         // Update horizontal position
         enemy.x += enemy.velocityX * physicsMultiplier;
 
-        // Only update vertical position if not on ground
-        if (!enemy.onGround) {
-            enemy.y += enemy.velocityY * physicsMultiplier;
-        }
+        // Always update vertical position (gravity will be applied if needed)
+        enemy.y += enemy.velocityY * physicsMultiplier;
 
         // Apply friction
         enemy.velocityX *= this.friction;
 
-        // Check platform collisions if not grounded
-        if (!enemy.onGround && platforms && platforms.length > 0) {
+        // Check platform collisions and update ground status
+        if (platforms && platforms.length > 0) {
             this.checkPlatformCollisions(enemy, platforms);
+        }
+
+        // Apply gravity if not on ground (after platform collision check)
+        if (!enemy.onGround) {
+            enemy.velocityY += this.gravity * physicsMultiplier;
         }
     }
 
     checkPlatformCollisions(enemy, platforms) {
-        // Only log when enemy is getting close to platforms
         const enemyBottom = enemy.y + enemy.height;
+        const tolerance = 2; // Small tolerance for floating point precision
 
-        // Find ALL platforms enemy overlaps horizontally that are below it
-        // Priority: platforms closer to the bottom of the screen (higher Y values)
-        const allOverlappingPlatforms = platforms.filter(p =>
-            enemy.x + enemy.width > p.x && enemy.x < p.x + p.width &&
-            p.y > enemy.y
-        ).sort((a, b) => b.y - a.y); // Sort by Y position (LOWEST/BOTTOM first)
+        // Find platforms that enemy overlaps horizontally
+        const overlappingPlatforms = platforms.filter(p =>
+            enemy.x + enemy.width > p.x && enemy.x < p.x + p.width
+        ).sort((a, b) => a.y - b.y); // Sort by Y position (topmost first)
 
-        // Prefer platforms that are closer to the bottom (visible ground platforms)
-        const overlappingPlatforms = allOverlappingPlatforms;
-
-        if (overlappingPlatforms.length > 0 && enemyBottom > overlappingPlatforms[0].y - 200) {
-            console.log(`🎯 Enemy ${enemy.id} near platforms! Enemy: (${Math.round(enemy.x)}, ${Math.round(enemy.y)}) bottom=${Math.round(enemyBottom)} velocity=${Math.round(enemy.velocityY)}`);
-            console.log(`🎯 Platforms below enemy:`, overlappingPlatforms.map((p, idx) => `Platform ${p.id || idx} at y=${p.y}`).join(', '));
-        }
-
-        // Check collision with platforms in order from LOWEST to HIGHEST (bottom platforms first)
+        // Check if enemy is standing on any platform
         for (const platform of overlappingPlatforms) {
             const platformTop = platform.y;
 
-            // Check if enemy is falling and would land on platform
-            if (enemy.velocityY > 0 && enemyBottom >= platformTop && platformTop > enemy.y) {
-                // Land on platform - position enemy ON TOP of platform
+            // Check if enemy is standing on platform (within tolerance)
+            if (enemyBottom >= platformTop - tolerance && enemyBottom <= platformTop + tolerance) {
+                // Enemy is on the platform
                 enemy.y = platformTop - enemy.height;
                 enemy.velocityY = 0;
                 enemy.onGround = true;
-                console.log(`🎯 Enemy ${enemy.id} LANDED on Platform ${platform.id || '?'} at y=${platformTop}! Enemy final position: y=${enemy.y}, bottom=${enemy.y + enemy.height}`);
-                break; // Stop checking other platforms once landed
+                return; // Found ground, no need to check other platforms
+            }
+
+            // Check if enemy is falling and would collide with platform
+            if (enemy.velocityY > 0 && enemyBottom >= platformTop && enemy.y < platformTop) {
+                // Land on platform
+                enemy.y = platformTop - enemy.height;
+                enemy.velocityY = 0;
+                enemy.onGround = true;
+                return; // Landed, no need to check other platforms
             }
         }
+
+        // If we get here, enemy is not on any platform (will fall due to gravity)
     }
 
     // Utility methods
