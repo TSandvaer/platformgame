@@ -152,11 +152,8 @@ class PlayerPhysics {
         if (this.data.y < bounds.top) {
             this.data.y = bounds.top;
             this.data.velocityY = 0;
-        } else if (this.data.y + this.data.height > bounds.bottom) {
-            this.data.y = bounds.bottom - this.data.height;
-            this.data.velocityY = 0;
-            this.data.onGround = true;
         }
+        // Note: Removed bottom boundary constraint - players should fall through and die
     }
 
     checkWorldBounds() {
@@ -164,8 +161,12 @@ class PlayerPhysics {
         const playerBottom = this.data.y + this.data.height;
 
         if (playerBottom > 2000) { // Far below any reasonable game area
-            console.warn('🎮 Player fell off the world! Respawning...');
-            this.respawnPlayer();
+            // Only trigger death if player is not already dead
+            if (!this.data.isDead) {
+                console.warn('🎮 Player fell off the world! Dying...');
+                // Trigger death instead of direct respawn
+                this.data.health = 0;
+            }
         }
     }
 
