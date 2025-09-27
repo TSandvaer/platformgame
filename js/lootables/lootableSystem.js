@@ -165,6 +165,7 @@ class LootableSystem {
     // Animation updates
     update() {
         this.data.updateAnimations();
+        this.renderer.updateAnimations(this.data.lootableTypes);
     }
 
     // Copy/paste methods

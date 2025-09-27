@@ -21,16 +21,18 @@ class LootableData {
                 width: 32,
                 height: 32,
                 animated: true,
-                animationFrames: 8,
-                animationSpeed: 150, // ms per frame
-                spritePath: 'sprites/Coins/gold'
+                animationFrames: 14,
+                animationSpeed: 100, // ms per frame
+                spritePath: 'sprites/Coins/gold/golden.rotate'
             },
             heart: {
                 name: 'Heart',
-                width: 32,
-                height: 32,
-                animated: false,
-                spritePath: 'sprites/heart'
+                width: 20, // 60px ÷ 3 = 20px per frame
+                height: 20, // 60px ÷ 3 = 20px per frame
+                animated: true,
+                animationFrames: 7,
+                animationSpeed: 150, // ms per frame
+                spritePath: 'sprites/Heart/heart_rotating2'
             }
         };
     }

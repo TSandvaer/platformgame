@@ -10,6 +10,18 @@ class LootableRenderer {
         this.onSpritesLoadedCallback = null;
         this.loadedSprites = 0;
         this.totalSprites = 2;
+
+        // Animation state for sprite sheets
+        this.animationState = {
+            coin: {
+                currentFrame: 0,
+                lastFrameTime: 0
+            },
+            heart: {
+                currentFrame: 0,
+                lastFrameTime: 0
+            }
+        };
     }
 
     // Load lootable sprites
@@ -27,19 +39,24 @@ class LootableRenderer {
             };
             this.checkAllLoaded();
         };
-        coinImg.src = 'sprites/Coins/gold.rotate.gif';
+        coinImg.src = 'sprites/Coins/gold/golden.rotate.png';
 
-        // Load heart sprite (static)
+        // Load heart sprite (animated)
         const heartImg = new Image();
         heartImg.onload = () => {
+            console.log('💖 Heart sprite loaded successfully');
             this.sprites.heart = {
                 image: heartImg,
-                width: 32,
-                height: 32
+                width: 20, // 60px ÷ 3 = 20px per frame
+                height: 20, // 60px ÷ 3 = 20px per frame
+                animated: true
             };
             this.checkAllLoaded();
         };
-        heartImg.src = 'sprites/Heart/Heart.png';
+        heartImg.onerror = () => {
+            console.error('💖 Failed to load heart sprite');
+        };
+        heartImg.src = 'sprites/Heart/heart_rotating2.png';
     }
 
     checkAllLoaded() {
@@ -79,6 +96,33 @@ class LootableRenderer {
         }
     }
 
+    // Update animation frames
+    updateAnimations(lootableTypes) {
+        const currentTime = Date.now();
+
+        // Update coin animation
+        if (this.animationState.coin && lootableTypes.coin && lootableTypes.coin.animated) {
+            const timeSinceLastFrame = currentTime - this.animationState.coin.lastFrameTime;
+
+            if (timeSinceLastFrame >= lootableTypes.coin.animationSpeed) {
+                this.animationState.coin.currentFrame =
+                    (this.animationState.coin.currentFrame + 1) % lootableTypes.coin.animationFrames;
+                this.animationState.coin.lastFrameTime = currentTime;
+            }
+        }
+
+        // Update heart animation
+        if (this.animationState.heart && lootableTypes.heart && lootableTypes.heart.animated) {
+            const timeSinceLastFrame = currentTime - this.animationState.heart.lastFrameTime;
+
+            if (timeSinceLastFrame >= lootableTypes.heart.animationSpeed) {
+                this.animationState.heart.currentFrame =
+                    (this.animationState.heart.currentFrame + 1) % lootableTypes.heart.animationFrames;
+                this.animationState.heart.lastFrameTime = currentTime;
+            }
+        }
+    }
+
     // Draw individual lootable
     drawLootable(lootable, lootableTypes, isDevelopmentMode, selectedLootable, selectedLootables) {
         const lootableType = lootableTypes[lootable.type];
@@ -93,12 +137,43 @@ class LootableRenderer {
         this.ctx.save();
 
         if (lootableType.animated && sprite.animated) {
-            // Render animated lootable (animated GIF - browser handles animation)
-            this.ctx.drawImage(
-                sprite.image,
-                Math.floor(lootable.x), Math.floor(lootable.y),
-                sprite.width, sprite.height
-            );
+            // Render animated sprite sheet
+            if ((lootable.type === 'coin' && this.animationState.coin) ||
+                (lootable.type === 'heart' && this.animationState.heart)) {
+
+                const animState = this.animationState[lootable.type];
+                const frameIndex = animState.currentFrame;
+                const frameWidth = sprite.width;
+                const frameHeight = sprite.height;
+
+                let sourceX, sourceY;
+
+                if (lootable.type === 'heart') {
+                    // Heart sprite sheet is arranged in a 3x3 grid (3 columns, 3 rows) with 7 total frames
+                    const framesPerRow = 3;
+                    const col = frameIndex % framesPerRow;
+                    const row = Math.floor(frameIndex / framesPerRow);
+                    sourceX = col * frameWidth;
+                    sourceY = row * frameHeight;
+                } else {
+                    // Coin is horizontal layout
+                    sourceX = frameIndex * frameWidth;
+                    sourceY = 0;
+                }
+
+                this.ctx.drawImage(
+                    sprite.image,
+                    sourceX, sourceY, frameWidth, frameHeight, // Source rectangle (frame from sprite sheet)
+                    Math.floor(lootable.x), Math.floor(lootable.y), frameWidth, frameHeight // Destination
+                );
+            } else {
+                // Fallback for other animated types
+                this.ctx.drawImage(
+                    sprite.image,
+                    Math.floor(lootable.x), Math.floor(lootable.y),
+                    sprite.width, sprite.height
+                );
+            }
         } else {
             // Render static lootable (like heart)
             this.ctx.drawImage(
