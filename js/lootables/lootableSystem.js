@@ -168,33 +168,51 @@ class LootableSystem {
         this.renderer.updateAnimations(this.data.lootableTypes);
     }
 
-    // Check for player-coin collisions (called from game loop)
+    // Check for player-lootable collisions (called from game loop)
     checkPlayerCollisions(player) {
         if (!player || this.data.lootables.length === 0) return [];
 
-        const collectedCoins = [];
+        const collectedLootables = [];
 
-        // Check each coin for collision with player
+        // Check each lootable for collision with player
         for (let i = this.data.lootables.length - 1; i >= 0; i--) {
             const lootable = this.data.lootables[i];
 
-            // Only check coins that are visible
-            if (lootable.type === 'coin' && lootable.isVisible) {
+            // Only check lootables that are visible
+            if (lootable.isVisible) {
                 const lootableType = this.data.lootableTypes[lootable.type];
 
-                // Simple bounding box collision
-                if (this.isPlayerTouchingLootable(player, lootable, lootableType)) {
-                    // Collect the coin
-                    collectedCoins.push({
+                // Check collection conditions based on lootable type
+                let canCollect = false;
+
+                if (lootable.type === 'coin') {
+                    canCollect = true; // Coins can always be collected
+                } else if (lootable.type === 'heart') {
+                    // Hearts can only be collected if player health is below maximum
+                    canCollect = player.health < player.maxHealth;
+                }
+
+                // Simple bounding box collision and collection condition
+                if (canCollect && this.isPlayerTouchingLootable(player, lootable, lootableType)) {
+                    // Collect the lootable
+                    collectedLootables.push({
                         x: lootable.x,
                         y: lootable.y,
                         type: lootable.type
                     });
 
-                    // Remove coin from array
+                    // Apply lootable effects
+                    if (lootable.type === 'heart') {
+                        // Heal player for 20 HP
+                        const healAmount = 20;
+                        player.health = Math.min(player.maxHealth, player.health + healAmount);
+                        console.log(`💖 Heart collected! Healed for ${healAmount} HP. Health: ${player.health}/${player.maxHealth}`);
+                    }
+
+                    // Remove lootable from array
                     this.data.lootables.splice(i, 1);
 
-                    // Clear selection if this coin was selected
+                    // Clear selection if this lootable was selected
                     if (this.data.selectedLootable === lootable) {
                         this.data.selectedLootable = null;
                     }
@@ -203,13 +221,13 @@ class LootableSystem {
             }
         }
 
-        // Update UI if coins were collected
-        if (collectedCoins.length > 0) {
+        // Update UI if lootables were collected
+        if (collectedLootables.length > 0) {
             this.manager.updateLootableList();
             this.manager.updateLootableProperties();
         }
 
-        return collectedCoins;
+        return collectedLootables;
     }
 
     // Check if player is touching a lootable

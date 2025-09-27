@@ -455,24 +455,33 @@ class PlatformRPG {
         if (this.lootableSystem) {
             this.lootableSystem.update();
 
-            // Check for coin collections
-            const collectedCoins = this.lootableSystem.checkPlayerCollisions(this.player);
-            if (collectedCoins.length > 0) {
-                // Add pickup effects for each collected coin
-                collectedCoins.forEach(coin => {
-                    this.lootableSystem.renderer.addPickupEffect(coin.x, coin.y);
+            // Check for lootable collections (coins and hearts)
+            const collectedLootables = this.lootableSystem.checkPlayerCollisions(this.player);
+            if (collectedLootables.length > 0) {
+                // Add pickup effects for each collected lootable
+                collectedLootables.forEach(lootable => {
+                    this.lootableSystem.renderer.addPickupEffect(lootable.x, lootable.y);
                 });
 
-                // Update coin count in game state (for now, just track locally)
-                if (!this.collectedCoins) this.collectedCoins = 0;
-                this.collectedCoins += collectedCoins.length;
+                // Update coin count for coins only
+                const collectedCoins = collectedLootables.filter(lootable => lootable.type === 'coin');
+                if (collectedCoins.length > 0) {
+                    if (!this.collectedCoins) this.collectedCoins = 0;
+                    this.collectedCoins += collectedCoins.length;
 
-                // Update HUD
-                if (this.hudSystem) {
-                    this.hudSystem.updateCoinCount(this.collectedCoins);
+                    // Update HUD
+                    if (this.hudSystem) {
+                        this.hudSystem.updateCoinCount(this.collectedCoins);
+                    }
+
+                    console.log(`💰 Collected ${collectedCoins.length} coins! Total: ${this.collectedCoins}`);
                 }
 
-                console.log(`💰 Collected ${collectedCoins.length} coins! Total: ${this.collectedCoins}`);
+                // Log heart collections
+                const collectedHearts = collectedLootables.filter(lootable => lootable.type === 'heart');
+                if (collectedHearts.length > 0) {
+                    console.log(`💖 Collected ${collectedHearts.length} hearts!`);
+                }
             }
 
             // Update pickup effects

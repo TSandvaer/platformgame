@@ -28,6 +28,16 @@ class GameDataSystem {
                     width: 220,
                     height: 80
                 }
+            },
+            playerSettings: {
+                maxHealth: 100,
+                healthRegen: 0,
+                maxStamina: 100,
+                staminaRegen: 5,
+                attackDamage: 25,
+                walkSpeed: 5,
+                runSpeed: 10,
+                jumpForce: 15
             }
         };
 
@@ -42,8 +52,9 @@ class GameDataSystem {
         this.importer.initialize();
         this.validator.initialize();
 
-        // Load saved data from localStorage (especially gameSettings)
+        // Load saved data from localStorage (especially gameSettings and playerSettings)
         this.loadSavedGameSettings();
+        this.loadSavedPlayerSettings();
 
         // Set up event listeners
         this.setupEventListeners();
@@ -70,6 +81,41 @@ class GameDataSystem {
             }
         } catch (error) {
             console.error('Error loading game settings:', error);
+        }
+    }
+
+    // Load just the playerSettings from localStorage (not full game data)
+    loadSavedPlayerSettings() {
+        try {
+            const savedData = this.storage.loadFromLocalStorage();
+            if (savedData && savedData.playerSettings) {
+                // Apply only the playerSettings
+                this.gameData.playerSettings = savedData.playerSettings;
+
+                // Apply player settings immediately if player system exists
+                if (this.game.playerSystem && this.game.playerSystem.data) {
+                    const player = this.game.playerSystem.data;
+                    const settings = savedData.playerSettings;
+
+                    // Apply saved settings to player
+                    player.maxHealth = settings.maxHealth || 100;
+                    player.healthRegenRate = settings.healthRegen || 0;
+                    player.maxStamina = settings.maxStamina || 100;
+                    player.staminaRegenRate = settings.staminaRegen || 5;
+                    player.attackDamage = settings.attackDamage || 25;
+                    player.speed = settings.walkSpeed || 5;
+                    player.runSpeed = settings.runSpeed || 10;
+                    player.jumpPower = -Math.abs(settings.jumpForce || 15);
+
+                    // Ensure current health/stamina don't exceed new maximums
+                    if (player.health > player.maxHealth) player.health = player.maxHealth;
+                    if (player.stamina > player.maxStamina) player.stamina = player.maxStamina;
+
+                    console.log('🎮 Loaded saved player settings:', settings);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading player settings:', error);
         }
     }
 
@@ -209,6 +255,16 @@ class GameDataSystem {
 
         // Update only gameSettings in localStorage
         this.storage.updateGameSettings(this.gameData.gameSettings);
+    }
+
+    updatePlayerSettings(playerSettings) {
+        if (!playerSettings) return;
+
+        // Update the in-memory gameData
+        this.gameData.playerSettings = { ...this.gameData.playerSettings, ...playerSettings };
+
+        // Update only playerSettings in localStorage
+        this.storage.updatePlayerSettings(this.gameData.playerSettings);
     }
 
     // Collect current game state

@@ -545,7 +545,13 @@ class UIEventHandler {
 
         const player = this.game.playerSystem.data;
 
-        // Load current values into inputs
+        // Try to load saved settings first, then fall back to current player values
+        let settings = null;
+        if (this.game.gameDataSystem && this.game.gameDataSystem.gameData.playerSettings) {
+            settings = this.game.gameDataSystem.gameData.playerSettings;
+        }
+
+        // Load values into inputs (use saved settings if available, otherwise current player values)
         const maxHealthInput = document.getElementById('playerMaxHealth');
         const healthRegenInput = document.getElementById('playerHealthRegen');
         const maxStaminaInput = document.getElementById('playerMaxStamina');
@@ -555,14 +561,14 @@ class UIEventHandler {
         const runSpeedInput = document.getElementById('playerRunSpeed');
         const jumpForceInput = document.getElementById('playerJumpForce');
 
-        if (maxHealthInput) maxHealthInput.value = player.maxHealth;
-        if (healthRegenInput) healthRegenInput.value = player.healthRegenRate;
-        if (maxStaminaInput) maxStaminaInput.value = player.maxStamina;
-        if (staminaRegenInput) staminaRegenInput.value = 5; // Default stamina regen
-        if (attackDamageInput) attackDamageInput.value = 25; // Default attack damage
-        if (walkSpeedInput) walkSpeedInput.value = player.speed;
-        if (runSpeedInput) runSpeedInput.value = player.speed * 2; // Default run speed is 2x walk
-        if (jumpForceInput) jumpForceInput.value = Math.abs(player.jumpPower);
+        if (maxHealthInput) maxHealthInput.value = settings?.maxHealth || player.maxHealth || 100;
+        if (healthRegenInput) healthRegenInput.value = settings?.healthRegen || player.healthRegenRate || 0;
+        if (maxStaminaInput) maxStaminaInput.value = settings?.maxStamina || player.maxStamina || 100;
+        if (staminaRegenInput) staminaRegenInput.value = settings?.staminaRegen || player.staminaRegenRate || 5;
+        if (attackDamageInput) attackDamageInput.value = settings?.attackDamage || player.attackDamage || 25;
+        if (walkSpeedInput) walkSpeedInput.value = settings?.walkSpeed || player.speed || 5;
+        if (runSpeedInput) runSpeedInput.value = settings?.runSpeed || player.runSpeed || 10;
+        if (jumpForceInput) jumpForceInput.value = settings?.jumpForce || Math.abs(player.jumpPower) || 15;
     }
 
     applyPlayerSettings() {
@@ -580,27 +586,37 @@ class UIEventHandler {
         const runSpeed = parseFloat(document.getElementById('playerRunSpeed')?.value) || 10;
         const jumpForce = parseFloat(document.getElementById('playerJumpForce')?.value) || 15;
 
-        // Apply the values
+        // Apply the values to player
         player.maxHealth = maxHealth;
         player.healthRegenRate = healthRegen;
         player.maxStamina = maxStamina;
-        // Note: staminaRegenRate and attackDamage would need to be added to PlayerData
+        player.staminaRegenRate = staminaRegen;
         player.speed = walkSpeed;
         player.jumpPower = -Math.abs(jumpForce); // Jump power is negative
-
-        // Store run speed for running system (would need to be implemented)
         player.runSpeed = runSpeed;
         player.attackDamage = attackDamage;
-        player.staminaRegenRate = staminaRegen;
 
         // Update current health/stamina if they exceed new maximums
         if (player.health > maxHealth) player.health = maxHealth;
         if (player.stamina > maxStamina) player.stamina = maxStamina;
 
-        console.log('🎮 Player settings applied:', {
-            maxHealth, healthRegen, maxStamina, staminaRegen,
-            attackDamage, walkSpeed, runSpeed, jumpForce
-        });
+        // Save to localStorage via gameDataSystem
+        const playerSettings = {
+            maxHealth,
+            healthRegen,
+            maxStamina,
+            staminaRegen,
+            attackDamage,
+            walkSpeed,
+            runSpeed,
+            jumpForce
+        };
+
+        if (this.game.gameDataSystem) {
+            this.game.gameDataSystem.updatePlayerSettings(playerSettings);
+        }
+
+        console.log('🎮 Player settings applied and saved:', playerSettings);
     }
 
     resetPlayerSettings() {
