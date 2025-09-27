@@ -36,7 +36,8 @@ class PlatformRPG {
         // Sprite loading coordination
         this.spritesLoaded = {
             platforms: false,
-            props: false
+            props: false,
+            lootables: false
         };
         this.allSpritesLoaded = false;
 
@@ -59,6 +60,15 @@ class PlatformRPG {
             this.spritesLoaded.props = true;
             this.checkAllSpritesLoaded();
         });
+
+        // Initialize lootable system
+        console.log('🍯 Initializing lootable system...');
+        this.lootableSystem = new LootableSystem(this.ctx, () => {
+            console.log('🍯 Lootable sprites loaded');
+            this.spritesLoaded.lootables = true;
+            this.checkAllSpritesLoaded();
+        });
+        console.log('🍯 Lootable system initialized:', !!this.lootableSystem);
 
         // Initialize enemy system (mouse handler will be initialized later)
         this.enemySystem = new EnemySystem();
@@ -441,6 +451,11 @@ class PlatformRPG {
         // Update prop destruction animations
         this.propSystem.updateDestruction(this.deltaTime, this.platformSystem);
 
+        // Update lootable animations
+        if (this.lootableSystem) {
+            this.lootableSystem.update();
+        }
+
         // Update HUD with current player stats
         if (this.hudSystem && this.playerSystem) {
             this.hudSystem.updatePlayerStats(
@@ -596,6 +611,11 @@ class PlatformRPG {
 
         // Render torch particles after obstacle props (they need the same transformation)
         this.propSystem.renderParticles(this.viewport, this.cameraSystem.camera, this.platformSystem.platforms);
+
+        // Render lootables after obstacle props (they need the same transformation)
+        if (this.lootableSystem) {
+            this.lootableSystem.renderLootables(this.isDevelopmentMode, this.viewport, this.cameraSystem.camera);
+        }
 
         // Render enemies AFTER obstacle props so they appear on top and can be selected
         this.enemySystem.render(this.viewport, this.cameraSystem.camera, this.isDevelopmentMode);
@@ -756,29 +776,38 @@ class PlatformRPG {
     }
 
     renderDragSelection() {
-        if (!this.propSystem.isDragSelecting) return;
+        // Handle prop drag selection
+        if (this.propSystem.isDragSelecting) {
+            const rect = this.propSystem.dragSelectionRect;
+            if (rect) {
+                // Apply camera transformation for world coordinates
+                this.ctx.save();
+                this.cameraSystem.applyTransform(this.ctx);
 
-        const rect = this.propSystem.dragSelectionRect;
-        if (!rect) return;
+                // Draw selection rectangle
+                this.ctx.strokeStyle = '#0099FF'; // Blue selection color
+                this.ctx.fillStyle = 'rgba(0, 153, 255, 0.1)'; // Semi-transparent blue fill
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([5, 5]); // Dashed line
 
-        // Apply camera transformation for world coordinates
-        this.ctx.save();
-        this.cameraSystem.applyTransform(this.ctx);
+                // Fill and stroke the rectangle
+                this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+                this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
 
-        // Draw selection rectangle
-        this.ctx.strokeStyle = '#0099FF'; // Blue selection color
-        this.ctx.fillStyle = 'rgba(0, 153, 255, 0.1)'; // Semi-transparent blue fill
-        this.ctx.lineWidth = 2;
-        this.ctx.setLineDash([5, 5]); // Dashed line
+                // Reset line dash
+                this.ctx.setLineDash([]);
 
-        // Fill and stroke the rectangle
-        this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-        this.ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+                this.ctx.restore();
+            }
+        }
 
-        // Reset line dash
-        this.ctx.setLineDash([]);
-
-        this.ctx.restore();
+        // Handle lootable drag selection
+        if (this.lootableSystem && this.lootableSystem.data.isDragSelecting) {
+            this.ctx.save();
+            this.cameraSystem.applyTransform(this.ctx);
+            this.lootableSystem.renderDragSelection();
+            this.ctx.restore();
+        }
     }
 
     renderTransitionZoneDrag() {

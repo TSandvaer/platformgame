@@ -136,6 +136,37 @@ class UIEventHandler {
             }
         });
 
+        // Lootable controls
+        const toggleLootablePlacementBtn = document.getElementById('toggleLootablePlacement');
+        if (toggleLootablePlacementBtn) {
+            toggleLootablePlacementBtn.addEventListener('click', () => {
+                if (this.game.lootableSystem) {
+                    this.game.lootableSystem.toggleLootablePlacement();
+                }
+            });
+        }
+
+        const lootableTypeSelect = document.getElementById('lootableTypeSelect');
+        if (lootableTypeSelect && this.game.lootableSystem) {
+            lootableTypeSelect.addEventListener('change', (e) => {
+                this.game.lootableSystem.currentLootableType = e.target.value;
+            });
+        }
+
+        const clearLootablesBtn = document.getElementById('clearLootablesBtn');
+        if (clearLootablesBtn) {
+            clearLootablesBtn.addEventListener('click', () => {
+                if (confirm('Clear all lootables? This cannot be undone.')) {
+                    if (this.game.lootableSystem) {
+                        this.game.lootableSystem.lootables = [];
+                        this.game.lootableSystem.selectedLootable = null;
+                        this.game.lootableSystem.updateLootableList();
+                        this.game.lootableSystem.updateLootableProperties();
+                    }
+                }
+            });
+        }
+
         // Enemy controls
         document.getElementById('addEnemyBtn').addEventListener('click', () => {
             console.log('🎯 Add Enemy button clicked');

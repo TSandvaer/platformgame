@@ -72,6 +72,47 @@ class EditorUI {
             });
         }
 
+        // Editor tab navigation
+        this.setupEditorTabs();
+    }
+
+    setupEditorTabs() {
+        const tabs = document.querySelectorAll('.editor-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetEditor = tab.dataset.editor;
+                this.switchToEditor(targetEditor);
+
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    }
+
+    switchToEditor(editorId) {
+        // Hide all editors
+        const editors = [
+            'sceneProperties',
+            'viewportEditor',
+            'propsEditor',
+            'lootablesEditor',
+            'platformEditor',
+            'enemyEditor'
+        ];
+
+        editors.forEach(id => {
+            const editor = document.getElementById(id);
+            if (editor) {
+                editor.style.display = 'none';
+            }
+        });
+
+        // Show the selected editor
+        const targetEditor = document.getElementById(editorId);
+        if (targetEditor) {
+            targetEditor.style.display = 'block';
+        }
     }
 
     updateUIVisibility(isDev) {
@@ -87,6 +128,7 @@ class EditorUI {
             'platformEditor',
             'viewportEditor',
             'propsEditor',
+            'lootablesEditor',
             'sceneProperties'
         ];
 

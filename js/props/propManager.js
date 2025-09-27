@@ -63,6 +63,7 @@ class PropManager {
 
                     // Start dragging all selected props (including full groups)
                     this.propData.isDraggingMultiple = true;
+                    this.propData.cancelDragSelection(); // Cancel any ongoing drag selection
                     this.propData.selectedProp = topProp; // Set as primary for UI
                     this.updatePropProperties();
                     this.updatePropList();
@@ -119,6 +120,7 @@ class PropManager {
                         this.updatePropList();
                     }
                     this.propData.isDraggingProp = true;
+                    this.propData.cancelDragSelection(); // Cancel any ongoing drag selection
 
                     // Calculate drag offset using actual position
                     const actualPos = this.propData.getActualPosition(topProp, viewport.designWidth, viewport.designHeight);
@@ -140,8 +142,8 @@ class PropManager {
     }
 
     handleMouseMove(mouseX, mouseY, viewport, camera) {
-        if (this.propData.isDragSelecting) {
-            // Update drag selection rectangle
+        if (this.propData.isDragSelecting && !this.propData.isDraggingProp && !this.propData.isDraggingMultiple) {
+            // Update drag selection rectangle - only if not currently dragging props
             this.propData.updateDragSelection(mouseX, mouseY);
             return true;
         } else if (this.isRotatingProp && this.propData.selectedProp) {

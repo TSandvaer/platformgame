@@ -105,6 +105,14 @@ class InputKeyboard {
             (this.game.propSystem.selectedProps && this.game.propSystem.selectedProps.length > 0)) {
             this.handlePropNudging(e);
         }
+
+        // Handle lootable keyboard shortcuts
+        if (this.game.lootableSystem) {
+            const lootableHandled = this.game.lootableSystem.handleKeyDown(e);
+            if (lootableHandled) {
+                e.preventDefault();
+            }
+        }
     }
 
     handleCopy() {
@@ -125,10 +133,41 @@ class InputKeyboard {
         // Copy selected props
         if (this.game.propSystem.selectedProps && this.game.propSystem.selectedProps.length > 0) {
             this.game.propSystem.copySelectedProps();
+            // Clear other clipboards to prevent conflicts
+            if (this.game.lootableSystem) {
+                this.game.lootableSystem.data.clipboard = [];
+            }
             this.game.showFeedbackMessage(`Copied ${this.game.propSystem.selectedProps.length} prop(s)`, worldCoords.x, worldCoords.y);
+            return; // Don't check other systems
         } else if (this.game.propSystem.selectedProp) {
             this.game.propSystem.copySelectedProps();
+            // Clear other clipboards to prevent conflicts
+            if (this.game.lootableSystem) {
+                this.game.lootableSystem.data.clipboard = [];
+            }
             this.game.showFeedbackMessage('Copied 1 prop', worldCoords.x, worldCoords.y);
+            return; // Don't check other systems
+        }
+
+        // Copy selected lootables
+        if (this.game.lootableSystem) {
+            if (this.game.lootableSystem.selectedLootables && this.game.lootableSystem.selectedLootables.length > 0) {
+                this.game.lootableSystem.copySelectedLootables();
+                // Clear other clipboards to prevent conflicts
+                if (this.game.propSystem.data) {
+                    this.game.propSystem.data.clipboard = [];
+                }
+                this.game.showFeedbackMessage(`Copied ${this.game.lootableSystem.selectedLootables.length} lootable(s)`, worldCoords.x, worldCoords.y);
+                return; // Don't check other systems
+            } else if (this.game.lootableSystem.selectedLootable) {
+                this.game.lootableSystem.copySelectedLootables();
+                // Clear other clipboards to prevent conflicts
+                if (this.game.propSystem.data) {
+                    this.game.propSystem.data.clipboard = [];
+                }
+                this.game.showFeedbackMessage('Copied 1 lootable', worldCoords.x, worldCoords.y);
+                return; // Don't check other systems
+            }
         }
     }
 
@@ -152,6 +191,15 @@ class InputKeyboard {
             const count = this.game.propSystem.copiedProps.length;
             this.game.propSystem.pasteProps(worldCoords.x, worldCoords.y);
             this.game.showFeedbackMessage(`Pasted ${count} prop(s)`, worldCoords.x, worldCoords.y);
+            return;
+        }
+
+        // Try to paste lootables
+        if (this.game.lootableSystem && this.game.lootableSystem.data.clipboard && this.game.lootableSystem.data.clipboard.length > 0) {
+            const pastedLootables = this.game.lootableSystem.pasteLootables(worldCoords.x, worldCoords.y);
+            if (pastedLootables.length > 0) {
+                this.game.showFeedbackMessage(`Pasted ${pastedLootables.length} lootable(s)`, worldCoords.x, worldCoords.y);
+            }
         }
     }
 
@@ -190,6 +238,18 @@ class InputKeyboard {
             this.game.propSystem.deleteSelectedProp();
             this.game.showFeedbackMessage('Deleted 1 prop');
         }
+
+        // Delete selected lootables
+        if (this.game.lootableSystem) {
+            if (this.game.lootableSystem.selectedLootables && this.game.lootableSystem.selectedLootables.length > 0) {
+                const count = this.game.lootableSystem.selectedLootables.length;
+                this.game.lootableSystem.deleteSelectedLootables();
+                this.game.showFeedbackMessage(`Deleted ${count} lootable(s)`);
+            } else if (this.game.lootableSystem.selectedLootable) {
+                this.game.lootableSystem.deleteSelectedLootable();
+                this.game.showFeedbackMessage('Deleted 1 lootable');
+            }
+        }
     }
 
     handleEscape() {
@@ -198,6 +258,11 @@ class InputKeyboard {
 
         // Clear prop selection
         this.game.propSystem.clearSelection();
+
+        // Clear lootable selection
+        if (this.game.lootableSystem) {
+            this.game.lootableSystem.clearSelection();
+        }
 
         // Cancel any ongoing operations
         if (this.game.isAddingTransition) {

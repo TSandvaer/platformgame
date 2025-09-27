@@ -159,6 +159,11 @@ class SceneManager {
                 window.uiEventHandler.updateEnemyList();
             }
         }
+        if (this.game.lootableSystem) {
+            this.game.lootableSystem.clearSelection();
+            this.game.lootableSystem.updateLootableList();
+            this.game.lootableSystem.updateLootableProperties();
+        }
 
         // Clean up any invalid transition zones in this scene
         this.cleanupInvalidTransitions(scene);
@@ -190,6 +195,24 @@ class SceneManager {
         // Load props
         this.game.propSystem.props = [...(scene.props || [])];
         this.game.propSystem.data.initializeGroupsFromProps();
+
+        // Load lootables
+        if (this.game.lootableSystem) {
+            console.log('🔄 Loading lootables from scene:', scene.lootables ? scene.lootables.length : 0);
+            console.log('🔄 Scene lootables data:', scene.lootables);
+            this.game.lootableSystem.lootables = [...(scene.lootables || [])];
+
+            // Update next lootable ID to avoid conflicts
+            if (scene.lootables && scene.lootables.length > 0) {
+                const maxId = Math.max(...scene.lootables.map(l => l.id || 0));
+                this.game.lootableSystem.data.nextLootableId = maxId + 1;
+            }
+
+            console.log('🔄 Lootables loaded:', this.game.lootableSystem.lootables.length);
+            console.log('🔄 LootableSystem.lootables after loading:', this.game.lootableSystem.lootables);
+        } else {
+            console.log('🔄 LootableSystem not available during scene loading');
+        }
 
         // Load enemies
         if (this.game.enemySystem && this.game.enemySystem.data) {
@@ -387,11 +410,33 @@ class SceneManager {
 
             console.log('💾 Final enemy data to save:', enemyDataToSave ? enemyDataToSave.length : 'null', 'enemies');
 
+            // Check if we're about to wipe out existing lootables
+            if (currentScene.lootables && currentScene.lootables.length > 0 &&
+                (!this.game.lootableSystem?.lootables || this.game.lootableSystem.lootables.length === 0)) {
+                console.warn('⚠️ WARNING: Attempting to save empty lootables over existing lootables!');
+                console.warn('⚠️ Scene had', currentScene.lootables.length, 'lootables but lootableSystem has 0');
+                console.warn('⚠️ This likely means the lootables weren\'t loaded properly into memory');
+
+                // Try to reload the lootables into memory from the scene
+                const lootablesCopy = JSON.parse(JSON.stringify(currentScene.lootables));
+                if (this.game.lootableSystem) {
+                    this.game.lootableSystem.lootables = lootablesCopy;
+                }
+            }
+
+            // Handle lootable data
+            let lootableDataToSave = [];
+            if (this.game.lootableSystem && this.game.lootableSystem.lootables) {
+                lootableDataToSave = this.game.lootableSystem.lootables;
+                console.log('💾 Lootables being saved:', lootableDataToSave.length, 'lootables');
+            }
+
             this.sceneData.updateSceneData(
                 currentScene.id,
                 this.game.platformSystem.platforms,
                 this.game.propSystem.props,
-                enemyDataToSave
+                enemyDataToSave,
+                lootableDataToSave
             );
         }
     }

@@ -122,7 +122,22 @@ class InputMouse {
         console.log('🎯 Platform result:', platformResult);
 
         if (!platformResult.handled) {
-            // Handle enemy interaction first (highest priority for selection)
+            // Check if lootable system is in placement mode first (highest priority)
+            let lootableResult = null;
+            if (this.game.lootableSystem && this.game.lootableSystem.lootablePlacementMode) {
+                lootableResult = this.game.lootableSystem.handleMouseDown(
+                    mouseX, mouseY,
+                    e.ctrlKey || e.metaKey,
+                    e.shiftKey
+                );
+
+                // If lootable handled it (placement), skip other systems
+                if (lootableResult && lootableResult.handled) {
+                    return;
+                }
+            }
+
+            // Handle enemy interaction first
             console.log('🎯 Handling enemy mouse down at', mouseX, mouseY, 'placement mode:', this.game.enemySystem.enemyPlacementMode);
             const enemyResult = this.game.enemySystem.handleMouseDown(
                 mouseX, mouseY,
@@ -131,10 +146,18 @@ class InputMouse {
             );
             const enemyHandled = enemyResult && enemyResult.handled;
 
-            // Handle prop interaction only if no enemy was clicked
+            // Handle lootable interaction if no enemy was clicked and not in placement mode
+            if (!enemyHandled && this.game.lootableSystem && !this.game.lootableSystem.lootablePlacementMode) {
+                lootableResult = this.game.lootableSystem.handleMouseDown(
+                    mouseX, mouseY,
+                    e.ctrlKey || e.metaKey,
+                    e.shiftKey
+                );
+            }
+
+            // Handle prop interaction only if no enemy or lootable was clicked
             let propResult = null;
-            if (!enemyHandled) {
-                console.log('🎯 About to handle prop interaction');
+            if (!enemyHandled && (!lootableResult || !lootableResult.handled)) {
                 propResult = this.game.propSystem.handleMouseDown(
                     mouseX, mouseY,
                     this.game.platformSystem,
@@ -143,7 +166,6 @@ class InputMouse {
                     this.game.viewport,
                     this.game.cameraSystem.camera
                 );
-                console.log('🎯 Prop result:', propResult);
             }
 
             // Clear enemy selection if not clicking on an enemy and not in placement/drawing/dragging modes
@@ -160,14 +182,27 @@ class InputMouse {
                 }
             }
 
+            // Start lootable drag selection if no specific object was clicked and lootables were cleared
+            // Allow it even if prop system "handled" the click, but not if props are being dragged or multi-dragged
+            if (!platformResult.handled &&
+                !enemyHandled &&
+                lootableResult && lootableResult.type === 'clear' &&
+                this.game.lootableSystem &&
+                !this.game.lootableSystem.lootablePlacementMode &&
+                (!propResult || (propResult.type !== 'drag' && propResult.type !== 'multi-drag'))) { // Block if prop system is dragging
+                this.game.lootableSystem.data.startDragSelection(mouseX, mouseY);
+            }
+
             // Handle player attack in development mode - only if nothing else was handled and not in editor modes
             if (e.button === 0 && this.game.player &&
                 !platformResult.handled &&
                 (!propResult || !propResult.handled) &&
+                (!lootableResult || !lootableResult.handled) &&
                 !enemyHandled &&
                 !this.game.enemySystem.mouseHandler.enemyPlacementMode &&
                 !this.game.enemySystem.mouseHandler.isDrawingAttractionZone &&
                 !this.game.enemySystem.mouseHandler.isDrawingMovementZone &&
+                !(this.game.lootableSystem && this.game.lootableSystem.lootablePlacementMode) &&
                 !this.game.isAddingPlatform &&
                 !this.game.sceneSystem.isAddingTransition) {
 
@@ -191,6 +226,11 @@ class InputMouse {
 
         // Handle prop operations
         this.game.propSystem.handleMouseUp(e.ctrlKey || e.metaKey, this.game.viewport);
+
+        // Handle lootable operations
+        if (this.game.lootableSystem) {
+            this.game.lootableSystem.handleMouseUp(e.ctrlKey || e.metaKey);
+        }
 
         // Handle enemy operations
         this.game.enemySystem.handleMouseUp(e.ctrlKey || e.metaKey);
@@ -244,6 +284,15 @@ class InputMouse {
 
         // Handle prop dragging
         this.game.propSystem.handleMouseMove(mouseX, mouseY, this.game.viewport, this.game.cameraSystem.camera);
+
+        // Handle lootable dragging - only if no other system is actively dragging
+        if (this.game.lootableSystem &&
+            !this.game.propSystem.isDraggingProp &&
+            !this.game.platformSystem.isDragging &&
+            !this.game.platformSystem.isResizing &&
+            !this.game.enemySystem.isDraggingEnemy) {
+            this.game.lootableSystem.handleMouseMove(mouseX, mouseY);
+        }
 
         // Handle enemy dragging
         this.game.enemySystem.handleMouseMove(mouseX, mouseY);
@@ -433,7 +482,9 @@ class InputMouse {
                    return this.game.platformSystem.isPointInPlatform(mouseX, mouseY, renderPlatform);
                }) ||
                    this.game.propSystem.props.some(prop =>
-                   this.game.propSystem.data.isPointInProp(mouseX, mouseY, prop))) {
+                   this.game.propSystem.data.isPointInProp(mouseX, mouseY, prop)) ||
+                   (this.game.lootableSystem && this.game.lootableSystem.lootables.some(lootable =>
+                   this.game.lootableSystem.isPointInLootable(mouseX, mouseY, lootable)))) {
             this.game.canvas.className = 'blue-select-cursor';
             this.game.canvas.style.cursor = '';
         } else {

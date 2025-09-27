@@ -25,6 +25,7 @@ class SceneData {
             // Initialize empty arrays for other scene elements
             defaultScene.props = defaultScene.props || [];
             defaultScene.enemies = defaultScene.enemies || [];
+            defaultScene.lootables = defaultScene.lootables || [];
 
             this.currentSceneId = defaultScene.id;
             this.startSceneId = defaultScene.id;
@@ -39,6 +40,7 @@ class SceneData {
             platforms: [],
             props: [],
             enemies: [],
+            lootables: [],
             background: {
                 name: 'none',
                 layers: []
@@ -200,14 +202,16 @@ class SceneData {
         return scene ? scene.transitions.zones : [];
     }
 
-    updateSceneData(sceneId, platforms, props, enemies = []) {
+    updateSceneData(sceneId, platforms, props, enemies = [], lootables = []) {
         const scene = this.getSceneById(sceneId);
         if (scene) {
             console.log(`📝 updateSceneData called for scene ${sceneId}:`, {
                 platforms: platforms.length,
                 props: props.length,
                 enemies: enemies.length,
-                existingEnemies: scene.enemies?.length || 0
+                lootables: lootables.length,
+                existingEnemies: scene.enemies?.length || 0,
+                existingLootables: scene.lootables?.length || 0
             });
 
             // CRITICAL: Log if we're about to clear enemies
@@ -220,11 +224,14 @@ class SceneData {
                 console.error('🚨 Call stack:', new Error().stack);
             }
 
-            // Update platforms, props, and enemies, but preserve all other scene data
+            // Update platforms, props, enemies, and lootables, but preserve all other scene data
             scene.platforms = JSON.parse(JSON.stringify(platforms));
             scene.props = JSON.parse(JSON.stringify(props));
             scene.enemies = JSON.parse(JSON.stringify(enemies));
-            console.log(`📝 Scene data updated successfully: enemies = ${enemies.length}, IDs:`, enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible ? 'visible' : 'hidden'})`));
+            scene.lootables = JSON.parse(JSON.stringify(lootables));
+            console.log(`📝 Scene data updated successfully: enemies = ${enemies.length}, lootables = ${lootables.length}`);
+            console.log(`📝 Enemy IDs:`, enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible ? 'visible' : 'hidden'})`));
+            console.log(`📝 Lootable IDs:`, lootables.map(l => `${l.id}(${l.type})`));
 
             scene.metadata.modified = new Date().toISOString();
 
@@ -281,6 +288,7 @@ class SceneData {
             platforms: [],
             props: [],
             enemies: [],
+            lootables: [],
             background: {
                 name: 'none',
                 layers: []
@@ -314,6 +322,7 @@ class SceneData {
             platforms: scene.platforms || defaults.platforms,
             props: scene.props || defaults.props,
             enemies: scene.enemies || defaults.enemies,
+            lootables: scene.lootables || defaults.lootables,
             background: { ...defaults.background, ...(scene.background || {}) },
             transitions: { ...defaults.transitions, ...(scene.transitions || {}) },
             boundaries: { ...defaults.boundaries, ...(scene.boundaries || {}) },

@@ -181,6 +181,41 @@
             font-weight: bold;
         }
 
+        .lootable-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .lootable-item {
+            background-color: #444;
+            padding: 5px 8px;
+            margin: 2px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .lootable-item:hover {
+            background-color: #555;
+        }
+
+        .lootable-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .lootable-item.multi-selected {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .lootable-item.selected.multi-selected {
+            background-color: #1976D2;
+            color: white;
+            font-weight: bold;
+        }
+
         .property-row {
             display: flex;
             align-items: center;
@@ -196,6 +231,36 @@
         .btn.small {
             padding: 4px 8px;
             font-size: 12px;
+        }
+
+        /* Editor Tabs Styles */
+        .editor-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .editor-tab {
+            background-color: #555;
+            border: none;
+            color: #ccc;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            border-bottom: 2px solid transparent;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .editor-tab:hover {
+            background-color: #666;
+            color: white;
+        }
+
+        .editor-tab.active {
+            background-color: #4CAF50;
+            color: white;
+            border-bottom-color: #4CAF50;
         }
 
         .file-info {
@@ -541,7 +606,17 @@
                 </div>
                 <div id="scenesList"></div>
 
-                <div class="platform-editor" id="sceneProperties" style="display: none;">
+                <!-- Editor Navigation Tabs -->
+                <div class="editor-tabs" id="editorTabs" style="margin: 10px 0; border-bottom: 1px solid #555;">
+                    <button class="editor-tab active" data-editor="sceneProperties">Scenes</button>
+                    <button class="editor-tab" data-editor="viewportEditor">Viewport</button>
+                    <button class="editor-tab" data-editor="propsEditor">Props</button>
+                    <button class="editor-tab" data-editor="lootablesEditor">Lootables</button>
+                    <button class="editor-tab" data-editor="platformEditor">Platforms</button>
+                    <button class="editor-tab" data-editor="enemyEditor">Enemies</button>
+                </div>
+
+                <div class="platform-editor" id="sceneProperties" style="display: block;">
                     <h4>Scene Properties</h4>
                     <div class="property-row">
                         <span class="property-label">Name:</span>
@@ -848,6 +923,43 @@
                     </div>
                 </div>
 
+                <div class="platform-editor" id="lootablesEditor" style="display: none;">
+                    <h4>Lootables Editor</h4>
+                    <div class="property-row">
+                        <span class="property-label">Lootable Type:</span>
+                        <select id="lootableTypeSelect" style="width: 120px;">
+                            <option value="coin">Gold Coin</option>
+                            <option value="heart">Heart</option>
+                        </select>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small" id="toggleLootablePlacement">Place Lootable</button>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small danger" id="clearLootablesBtn">Clear All Lootables</button>
+                    </div>
+
+                    <div class="lootable-list" id="lootableList"></div>
+
+                    <div id="lootableProperties">
+                        <p>No lootable selected</p>
+                    </div>
+
+                    <div id="lootableSelectionActions" style="display: none;">
+                        <h4>Selection Actions</h4>
+                        <div class="property-row">
+                            <button class="btn small" id="copyLootables">Copy</button>
+                            <button class="btn small" id="pasteLootables">Paste</button>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small danger" id="deleteSelectedLootables">Delete Selected</button>
+                        </div>
+                        <div style="font-size: 11px; color: #888; margin-top: 5px;">
+                            Hold Ctrl+Click to multi-select lootables
+                        </div>
+                    </div>
+                </div>
+
                 <div class="platform-editor" id="platformEditor" style="display: none;">
                     <h4>Platform Editor <span id="platformSceneName"></span></h4>
                     <div class="property-row">
@@ -1080,6 +1192,12 @@
     <script src="js/props/propManager.js"></script>
     <script src="js/props/propsMouseHandler.js"></script>
     <script src="js/props/propSystem.js"></script>
+
+    <!-- Lootable System Scripts -->
+    <script src="js/lootables/lootableData.js"></script>
+    <script src="js/lootables/lootableRenderer.js"></script>
+    <script src="js/lootables/lootableManager.js"></script>
+    <script src="js/lootables/lootableSystem.js"></script>
 
     <!-- Scene System Scripts -->
     <script src="js/scenes/sceneData.js"></script>
