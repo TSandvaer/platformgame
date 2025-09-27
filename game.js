@@ -546,11 +546,11 @@ class PlatformRPG {
         // They need special handling for proper coordinate transformation
         this.propSystem.renderObstacleProps(this.isDevelopmentMode, this.viewport, this.cameraSystem.camera);
 
-        // Render enemies AFTER obstacle props so they appear on top
-        this.enemySystem.render(this.viewport, this.cameraSystem.camera, this.isDevelopmentMode);
-
         // Render torch particles after obstacle props (they need the same transformation)
         this.propSystem.renderParticles(this.viewport, this.cameraSystem.camera, this.platformSystem.platforms);
+
+        // Render enemies AFTER obstacle props so they appear on top and can be selected
+        this.enemySystem.render(this.viewport, this.cameraSystem.camera, this.isDevelopmentMode);
 
         if (this.isDevelopmentMode) {
             // Apply viewport scaling for dev rendering

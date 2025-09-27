@@ -122,29 +122,28 @@ class InputMouse {
         console.log('🎯 Platform result:', platformResult);
 
         if (!platformResult.handled) {
-            // Handle prop interaction
-            console.log('🎯 About to handle prop interaction');
-            const propResult = this.game.propSystem.handleMouseDown(
+            // Handle enemy interaction first (highest priority for selection)
+            console.log('🎯 Handling enemy mouse down at', mouseX, mouseY, 'placement mode:', this.game.enemySystem.enemyPlacementMode);
+            const enemyResult = this.game.enemySystem.handleMouseDown(
                 mouseX, mouseY,
-                this.game.platformSystem,
                 e.ctrlKey || e.metaKey,
-                e.shiftKey,
-                this.game.viewport,
-                this.game.cameraSystem.camera
+                e.shiftKey
             );
-            console.log('🎯 Prop result:', propResult);
+            const enemyHandled = enemyResult && enemyResult.handled;
 
-            // Handle enemy interaction if no prop interaction occurred
-            // Allow enemy placement even during drag-select operations
-            let enemyHandled = false;
-            if (!propResult || !propResult.handled || propResult.type === 'drag-select') {
-                console.log('🎯 Handling enemy mouse down at', mouseX, mouseY, 'placement mode:', this.game.enemySystem.enemyPlacementMode);
-                const enemyResult = this.game.enemySystem.handleMouseDown(
+            // Handle prop interaction only if no enemy was clicked
+            let propResult = null;
+            if (!enemyHandled) {
+                console.log('🎯 About to handle prop interaction');
+                propResult = this.game.propSystem.handleMouseDown(
                     mouseX, mouseY,
+                    this.game.platformSystem,
                     e.ctrlKey || e.metaKey,
-                    e.shiftKey
+                    e.shiftKey,
+                    this.game.viewport,
+                    this.game.cameraSystem.camera
                 );
-                enemyHandled = enemyResult && enemyResult.handled;
+                console.log('🎯 Prop result:', propResult);
             }
 
             // Clear enemy selection if not clicking on an enemy and not in placement/drawing/dragging modes

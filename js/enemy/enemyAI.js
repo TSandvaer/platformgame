@@ -41,6 +41,14 @@ class EnemyAI {
 
         const shouldFlee = healthPercentage <= (enemy.fleeHealthThreshold || 0.4) && !enemy.isDead;
 
+        // Clear recovery time if health has recovered above flee threshold
+        if (!shouldFlee && enemy.fleeRecoveryTime) {
+            enemy.fleeRecoveryTime = null;
+            if (enemy.id === 5) {
+                console.log(`Enemy 5 health recovered, clearing recovery period`);
+            }
+        }
+
         // Store original position when first entering flee state
         if (shouldFlee && enemy.aiState !== 'fleeing' && !enemy.originalPosition) {
             enemy.originalPosition = { x: enemy.x, y: enemy.y };
@@ -59,14 +67,19 @@ class EnemyAI {
                 // This prevents infinite flee/return loop when player is far away
                 const closeEnoughToFleeFromIdle = distanceToPlayer < 250; // Only flee if player is within 250 pixels
 
+                // Check if enemy is in recovery period after fleeing
+                const currentTimeIdle = Date.now();
+                const inRecoveryPeriodIdle = enemy.fleeRecoveryTime && currentTimeIdle < enemy.fleeRecoveryTime;
+
                 if (enemy.id === 5 && shouldFlee) {
-                    console.log(`DEBUG: Enemy 5 in IDLE state, should flee: ${shouldFlee}, close enough: ${closeEnoughToFleeFromIdle}, distance: ${Math.round(distanceToPlayer)}`);
+                    console.log(`DEBUG: Enemy 5 in IDLE state, should flee: ${shouldFlee}, close enough: ${closeEnoughToFleeFromIdle}, distance: ${Math.round(distanceToPlayer)}, in recovery: ${inRecoveryPeriodIdle}`);
                 }
                 if (shouldFlee && closeEnoughToFleeFromIdle) {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from idle (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if (playerInAttractionZone) {
+                } else if (playerInAttractionZone && !inRecoveryPeriodIdle) {
+                    // Only chase if not in recovery period
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
                 } else if (enemy.isMoving && enemy.movementZone.enabled) {
@@ -79,11 +92,20 @@ class EnemyAI {
                 // This prevents infinite flee/return loop when player is far away
                 const closeEnoughToFlee = distanceToPlayer < 250; // Only flee if player is within 250 pixels
 
+                // Check if enemy is in recovery period after fleeing
+                const currentTime = Date.now();
+                const inRecoveryPeriod = enemy.fleeRecoveryTime && currentTime < enemy.fleeRecoveryTime;
+
+                if (enemy.id === 5 && inRecoveryPeriod) {
+                    console.log(`Enemy 5 in recovery period, ignoring player for ${Math.round((enemy.fleeRecoveryTime - currentTime) / 1000)} more seconds`);
+                }
+
                 if (shouldFlee && closeEnoughToFlee) {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from patrolling (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if (playerInAttractionZone) {
+                } else if (playerInAttractionZone && !inRecoveryPeriod) {
+                    // Only chase if not in recovery period
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
                 } else if (!enemy.isMoving || !enemy.movementZone.enabled) {
@@ -186,6 +208,12 @@ class EnemyAI {
                     enemy.aiState = 'patrolling';
                     enemy.target = null;
                     enemy.originalPosition = null;
+
+                    // Set recovery period to prevent immediate re-engagement with player if health is still low
+                    if (shouldFlee) {
+                        enemy.fleeRecoveryTime = Date.now() + 3000; // 3 second recovery period
+                        console.log(`Enemy ${enemy.id} entering recovery period (3s) due to low health`);
+                    }
 
                     // Reset patrol direction based on current position in zone
                     const enemyCenter = enemy.x + enemy.width / 2;

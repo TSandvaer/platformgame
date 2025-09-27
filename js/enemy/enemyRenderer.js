@@ -29,7 +29,7 @@ class EnemyRenderer {
 
         // Render debug info in development mode
         if (isDevelopmentMode) {
-            this.renderDebugInfo(enemy, viewport, camera);
+            this.renderDebugInfo(enemy, viewport, camera, selectedEnemy);
         }
     }
 
@@ -127,7 +127,7 @@ class EnemyRenderer {
         this.ctx.restore();
     }
 
-    renderDebugInfo(enemy, viewport, camera) {
+    renderDebugInfo(enemy, viewport, camera, selectedEnemy = null) {
         this.ctx.save();
 
         // Apply camera and viewport transformation
@@ -154,8 +154,8 @@ class EnemyRenderer {
         this.ctx.arc(renderX + renderWidth / 2, renderY + renderHeight / 2, 3, 0, Math.PI * 2);
         this.ctx.fill();
 
-        // Draw movement zone if enabled
-        if (enemy.movementZone.enabled) {
+        // Draw movement zone if enabled and enemy is selected
+        if (enemy.movementZone.enabled && selectedEnemy && selectedEnemy.id === enemy.id) {
             const zoneStartX = viewport && camera ?
                 (enemy.movementZone.startX - camera.x) * viewport.scaleX + viewport.offsetX :
                 enemy.movementZone.startX;
@@ -181,10 +181,21 @@ class EnemyRenderer {
             this.ctx.beginPath();
             this.ctx.arc(zoneEndX, zoneY, 5, 0, Math.PI * 2);
             this.ctx.fill();
+
+            // Draw zone label
+            this.ctx.fillStyle = 'cyan';
+            this.ctx.strokeStyle = 'black';
+            this.ctx.lineWidth = 1;
+            this.ctx.font = `${10 * (viewport ? viewport.scaleX : 1)}px Arial`;
+            this.ctx.textAlign = 'center';
+            const labelX = (zoneStartX + zoneEndX) / 2;
+            const labelY = zoneY - 8;
+            this.ctx.strokeText('movement zone', labelX, labelY);
+            this.ctx.fillText('movement zone', labelX, labelY);
         }
 
-        // Draw attraction zone if enabled
-        if (enemy.attractionZone.enabled) {
+        // Draw attraction zone if enabled and enemy is selected
+        if (enemy.attractionZone.enabled && selectedEnemy && selectedEnemy.id === enemy.id) {
             const zoneX = viewport && camera ?
                 (enemy.attractionZone.x - camera.x) * viewport.scaleX + viewport.offsetX :
                 enemy.attractionZone.x;
@@ -199,6 +210,17 @@ class EnemyRenderer {
             this.ctx.setLineDash([5, 5]);
             this.ctx.strokeRect(zoneX, zoneY, zoneWidth, zoneHeight);
             this.ctx.setLineDash([]);
+
+            // Draw zone label
+            this.ctx.fillStyle = 'yellow';
+            this.ctx.strokeStyle = 'black';
+            this.ctx.lineWidth = 1;
+            this.ctx.font = `${10 * (viewport ? viewport.scaleX : 1)}px Arial`;
+            this.ctx.textAlign = 'center';
+            const labelX = zoneX + zoneWidth / 2;
+            const labelY = zoneY - 8;
+            this.ctx.strokeText('attraction zone', labelX, labelY);
+            this.ctx.fillText('attraction zone', labelX, labelY);
         }
 
         // Draw state info
