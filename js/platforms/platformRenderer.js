@@ -14,6 +14,7 @@ class PlatformRenderer {
         // Platform sprite type mappings - based on actual tileset layout
         this.platformSpriteTypes = {
             color: { tileset: 'none', tileX: -1, tileY: -1 }, // Use solid color instead
+            transparent: { tileset: 'none', tileX: -2, tileY: -2 }, // Special transparent type
 
             // Stone/Rock textures (examining first few rows for stone-like textures)
             cobblestone: { tileset: 'tileset', tileX: 6, tileY: 1 }, // Actually cobblestone texture
@@ -112,7 +113,13 @@ class PlatformRenderer {
     }
 
     renderPlatform(platform, isDevelopmentMode, isSelected) {
-        if (platform.spriteType !== 'color' && this.platformSprites.tileset.image) {
+        if (platform.spriteType === 'transparent') {
+            // Handle transparent platforms
+            if (isDevelopmentMode) {
+                this.drawTransparentPlatform(platform);
+            }
+            // In production mode, transparent platforms are invisible (no rendering)
+        } else if (platform.spriteType !== 'color' && this.platformSprites.tileset.image) {
             this.drawPlatformSprite(platform);
         } else {
             // Fallback to solid color
@@ -121,6 +128,15 @@ class PlatformRenderer {
         }
 
         if (isDevelopmentMode) {
+            // For transparent platforms, always show a subtle border so they're visible in dev mode
+            if (platform.spriteType === 'transparent') {
+                this.ctx.strokeStyle = 'rgba(128, 128, 128, 0.5)';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([3, 3]);
+                this.ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+                this.ctx.setLineDash([]);
+            }
+
             // Draw damage indicator for platforms with damage > 0
             if (platform.damagePerSecond > 0) {
                 this.ctx.strokeStyle = '#FF4444';
@@ -223,6 +239,43 @@ class PlatformRenderer {
 
         // Keep image smoothing disabled for crisp pixel art
         // Note: Re-enabling is handled by other renderers if needed
+    }
+
+    drawTransparentPlatform(platform) {
+        // Save the current context state
+        this.ctx.save();
+
+        // Set global alpha for semi-transparency
+        this.ctx.globalAlpha = 0.3;
+
+        // Draw checkered pattern
+        const checkerSize = 8; // Size of each checker square
+
+        // Calculate how many checkers fit in the platform
+        const checkersX = Math.ceil(platform.width / checkerSize);
+        const checkersY = Math.ceil(platform.height / checkerSize);
+
+        for (let i = 0; i < checkersX; i++) {
+            for (let j = 0; j < checkersY; j++) {
+                // Alternate colors in a checkerboard pattern
+                const isLight = (i + j) % 2 === 0;
+                this.ctx.fillStyle = isLight ? '#CCCCCC' : '#888888';
+
+                // Calculate actual checker position and size (clipped to platform bounds)
+                const checkerX = platform.x + (i * checkerSize);
+                const checkerY = platform.y + (j * checkerSize);
+                const checkerW = Math.min(checkerSize, platform.x + platform.width - checkerX);
+                const checkerH = Math.min(checkerSize, platform.y + platform.height - checkerY);
+
+                // Only draw if the checker is within platform bounds
+                if (checkerW > 0 && checkerH > 0) {
+                    this.ctx.fillRect(checkerX, checkerY, checkerW, checkerH);
+                }
+            }
+        }
+
+        // Restore the context state
+        this.ctx.restore();
     }
 
     drawResizeHandles(platform) {
