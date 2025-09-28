@@ -4,6 +4,7 @@ class PropSystem {
         this.renderer = new PropRenderer(ctx, platformSprites, torchParticles, onSpritesLoadedCallback);
         this.collisions = new PropCollisions();
         this.manager = new PropManager(this.data);
+        this.game = null; // Will be set after construction
 
         // Initialize prop z-orders
         this.data.initializePropZOrders();
@@ -15,14 +16,6 @@ class PropSystem {
     }
 
     set props(value) {
-        if (value && value.length > 0) {
-            console.log('🎭 Props being set:', value.map(p => ({
-                id: p.id,
-                type: p.type,
-                x: p.x,
-                y: p.y
-            })));
-        }
         this.data.props = value;
     }
 
@@ -151,6 +144,11 @@ class PropSystem {
         this.data.deleteSelectedProp();
         this.manager.updatePropProperties();
         this.manager.updatePropList();
+
+        // Save the scene to persist the deletion
+        if (this.game && this.game.sceneSystem) {
+            this.game.sceneSystem.saveScenes();
+        }
     }
 
     togglePropPlacement() {
@@ -346,6 +344,11 @@ class PropSystem {
         this.data.deleteSelectedProps();
         this.manager.updatePropProperties();
         this.manager.updatePropList();
+
+        // Save the scene to persist the deletion
+        if (this.game && this.game.sceneSystem) {
+            this.game.sceneSystem.saveScenes();
+        }
     }
 
     clearSelection() {

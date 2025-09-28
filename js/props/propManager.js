@@ -31,6 +31,7 @@ class PropManager {
             // All props use world coordinates for hit testing
             // The rendering transformation is handled separately
 
+
             if (this.propData.isPointInProp(testX, testY, renderProp)) {
                 propsUnderMouse.push(prop);
             }
@@ -38,7 +39,6 @@ class PropManager {
 
         // If we found props under mouse, select the one with highest z-order (topmost)
         if (propsUnderMouse.length > 0) {
-            console.log('Props under mouse:', propsUnderMouse.map(p => `ID:${p.id} Z:${p.zOrder} Group:${p.groupId}`));
             const topProp = propsUnderMouse.reduce((highest, current) =>
                 (current.zOrder || 0) > (highest.zOrder || 0) ? current : highest
             );
@@ -110,6 +110,7 @@ class PropManager {
                         const groupMembers = this.propData.getPropsInSameGroup(topProp);
                         this.propData.selectedProps = groupMembers;
                         this.propData.selectedProp = topProp; // Set clicked prop as primary
+                        console.log('✅ Selected grouped prop:', topProp.id, 'with group:', topProp.groupId);
                         this.updatePropProperties();
                         this.updatePropList();
                     } else {
@@ -287,13 +288,9 @@ class PropManager {
         const listElement = document.getElementById('propList');
         if (!listElement) return;
 
-        // Debug logging
-        if (this.propData.selectedProps.length > 1) {
-            console.log('Multiple props selected:', this.propData.selectedProps.map(p => `ID:${p.id} Group:${p.groupId}`));
-        }
-
         listElement.innerHTML = this.propData.props.map(prop => {
             const propType = this.propData.getPropType(prop.type);
+            const propName = propType ? propType.name : prop.type; // Fallback to type string if propType not found
             const isSelected = this.propData.selectedProps.includes(prop);
             const isPrimary = this.propData.selectedProp && this.propData.selectedProp.id === prop.id;
             const groupInfo = prop.groupId ? ` [Group ${prop.groupId}]` : '';
@@ -305,7 +302,7 @@ class PropManager {
 
             return `<div class="prop-item ${isPrimary ? 'selected' : ''} ${isSelected ? 'multi-selected' : ''}"
                       data-prop-id="${prop.id}">
-                    ${propType.name} (${Math.round(prop.x)}, ${Math.round(prop.y)})
+                    ${propName} (${Math.round(prop.x)}, ${Math.round(prop.y)})
                     ${prop.isObstacle ? ' [Obstacle]' : ''}${prop.damagePerSecond > 0 ? ` [🔥 ${prop.damagePerSecond} DPS]` : ''}${durabilityInfo}${isDestroyingInfo}${isDestroyedInfo}${groupInfo}
                     Z: ${prop.zOrder || 0}
                 </div>`;
@@ -315,7 +312,8 @@ class PropManager {
         listElement.querySelectorAll('.prop-item').forEach(item => {
             item.addEventListener('click', () => {
                 const propId = parseInt(item.dataset.propId);
-                this.propData.selectedProp = this.propData.getPropById(propId);
+                const prop = this.propData.getPropById(propId);
+                this.propData.selectedProp = prop;
                 this.updatePropProperties();
                 this.updatePropList();
             });

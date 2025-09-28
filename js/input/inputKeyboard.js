@@ -237,11 +237,19 @@ class InputKeyboard {
         // Delete selected props
         if (this.game.propSystem.selectedProps && this.game.propSystem.selectedProps.length > 0) {
             const count = this.game.propSystem.selectedProps.length;
+            // Get position of first selected prop for feedback message
+            const firstProp = this.game.propSystem.selectedProps[0];
+            const msgX = firstProp ? firstProp.x : null;
+            const msgY = firstProp ? firstProp.y : null;
             this.game.propSystem.deleteSelectedProps();
-            this.game.showFeedbackMessage(`Deleted ${count} prop(s)`);
+            this.game.showFeedbackMessage(`Deleted ${count} prop(s)`, msgX, msgY);
         } else if (this.game.propSystem.selectedProp) {
+            // Get position of selected prop for feedback message
+            const prop = this.game.propSystem.selectedProp;
+            const msgX = prop ? prop.x : null;
+            const msgY = prop ? prop.y : null;
             this.game.propSystem.deleteSelectedProp();
-            this.game.showFeedbackMessage('Deleted 1 prop');
+            this.game.showFeedbackMessage('Deleted 1 prop', msgX, msgY);
         }
 
         // Delete selected lootables

@@ -194,8 +194,22 @@ class SceneManager {
         this.game.platformSystem.nextPlatformId = scene.platforms.length > 0 ?
             Math.max(...scene.platforms.map(p => p.id !== undefined ? p.id : 0)) + 1 : 0;
 
-        // Load props
-        this.game.propSystem.props = [...(scene.props || [])];
+        // Load props and ensure they have valid IDs
+        const propsToLoad = [...(scene.props || [])];
+
+        // Ensure all props have valid IDs
+        let nextPropId = 1;
+        propsToLoad.forEach(prop => {
+            if (prop.id === undefined || prop.id === null || isNaN(prop.id)) {
+                console.warn(`⚠️ Prop missing or has invalid ID, assigning new ID ${nextPropId}:`, prop);
+                prop.id = nextPropId++;
+            } else {
+                nextPropId = Math.max(nextPropId, prop.id + 1);
+            }
+        });
+
+        this.game.propSystem.props = propsToLoad;
+        this.game.propSystem.data.nextPropId = nextPropId;
         this.game.propSystem.data.initializeGroupsFromProps();
 
         // Load lootables
@@ -363,17 +377,19 @@ class SceneManager {
             }
 
             // Check if we're about to wipe out existing props
+            // Only restore props if we're in the initial loading phase
+            // During normal operation, allow props to be deleted
             if (currentScene.props.length > 0 && this.game.propSystem.props.length === 0) {
-                if (!isInitialLoading) {
-                    console.warn('⚠️ WARNING: Attempting to save empty props over existing props!');
-                    console.warn('⚠️ Scene had', currentScene.props.length, 'props but propSystem has 0');
-                    console.warn('⚠️ This likely means the props weren\'t loaded properly into memory');
+                if (isInitialLoading) {
+                    // During initial loading, this might indicate props weren't loaded properly
+                    console.warn('⚠️ Initial loading: Scene had props but propSystem is empty - restoring');
+                    const propsCopy = JSON.parse(JSON.stringify(currentScene.props));
+                    this.game.propSystem.props = propsCopy;
+                    this.game.propSystem.data.initializeGroupsFromProps();
+                } else {
+                    // During normal operation, this is likely intentional (user deleted all props)
+                    console.log('💾 All props have been deleted - saving empty props array');
                 }
-
-                // Try to reload the props into memory from the scene
-                const propsCopy = JSON.parse(JSON.stringify(currentScene.props));
-                this.game.propSystem.props = propsCopy;
-                this.game.propSystem.data.initializeGroupsFromProps();
             }
 
             // Check if enemy system is initialized

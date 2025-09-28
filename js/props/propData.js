@@ -253,15 +253,27 @@ class PropData {
     }
 
     deleteProp(propId) {
-        this.props = this.props.filter(prop => prop.id !== propId);
+        // Convert propId to number to ensure proper comparison
+        const idToDelete = typeof propId === 'string' ? parseInt(propId) : propId;
+
+        this.props = this.props.filter(prop => {
+            // Also convert prop.id to ensure consistent comparison
+            const propIdNum = typeof prop.id === 'string' ? parseInt(prop.id) : prop.id;
+            const keep = propIdNum !== idToDelete;
+            return keep;
+        });
+
         if (this.selectedProp && this.selectedProp.id === propId) {
             this.selectedProp = null;
         }
     }
 
     deleteSelectedProp() {
-        if (!this.selectedProp) return;
+        if (!this.selectedProp) {
+            return;
+        }
         this.deleteProp(this.selectedProp.id);
+        this.selectedProp = null; // Clear selection after deletion
     }
 
     updateProp(prop, updates) {

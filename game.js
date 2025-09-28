@@ -60,6 +60,7 @@ class PlatformRPG {
             this.spritesLoaded.props = true;
             this.checkAllSpritesLoaded();
         });
+        this.propSystem.game = this; // Set the game reference
 
         // Initialize inventory items data
         this.inventoryItemsData = new InventoryItemsData();
