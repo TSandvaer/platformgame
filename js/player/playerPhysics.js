@@ -116,8 +116,23 @@ class PlayerPhysics {
         }
 
         if (this.data.isRunning || isJumping) {
-            // Drain stamina when running or jumping
-            const drainRate = isJumping ? 1.5 : 0.5; // Jumping drains faster, running drains moderately
+            // Drain stamina when running or jumping using configurable costs
+            const runningCostPerFrame = (this.data.runningCost || 1.5) / 60; // Convert SP/sec to SP/frame (60fps)
+            const jumpCostTotal = this.data.jumpCost || 10; // SP per jump
+
+            let drainRate = 0;
+            if (isJumping) {
+                // For jumping: use the total jump cost, but only drain once per jump
+                if (!this.data.hasJumpedThisFrame) {
+                    drainRate = jumpCostTotal;
+                    this.data.hasJumpedThisFrame = true;
+                }
+            }
+            if (this.data.isRunning) {
+                // For running: continuous drain per frame
+                drainRate += runningCostPerFrame;
+            }
+
             this.data.stamina = Math.max(0, this.data.stamina - drainRate * physicsMultiplier);
 
             // If stamina hits 0, immediately stop running and start cooldown
@@ -127,8 +142,8 @@ class PlayerPhysics {
             }
         } else if (!this.data.isTryingToRun) {
             // Only regenerate stamina when NOT trying to run (walking or idle)
-            const regenRate = 0.3;
-            this.data.stamina = Math.min(this.data.maxStamina, this.data.stamina + regenRate * physicsMultiplier);
+            const regenRatePerFrame = (this.data.staminaRegenRate || 5) / 60; // Convert SP/sec to SP/frame (60fps)
+            this.data.stamina = Math.min(this.data.maxStamina, this.data.stamina + regenRatePerFrame * physicsMultiplier);
         }
     }
 

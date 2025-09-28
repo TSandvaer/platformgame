@@ -12,10 +12,18 @@ class PlayerController {
 
         // Handle space key for jump (one-time trigger)
         if (key === ' ' && this.data.onGround && !this.data.spaceKeyPressed) {
-            const jumpPower = this.keys['shift'] ? 1.2 : 1.0;
-            this.physics.jump(jumpPower);
-            this.data.spaceKeyPressed = true;
-            return true; // Handled
+            // Check if player has enough stamina to jump
+            const jumpCost = this.data.jumpCost || 10;
+            if (this.data.stamina >= jumpCost) {
+                const jumpPower = this.keys['shift'] ? 1.2 : 1.0;
+                this.physics.jump(jumpPower);
+                this.data.spaceKeyPressed = true;
+                return true; // Handled
+            } else {
+                // Not enough stamina, but still consume the key press
+                this.data.spaceKeyPressed = true;
+                return false; // Not handled (no jump occurred)
+            }
         }
 
         // Ctrl key attack disabled - now using mouse click for attacks
@@ -56,8 +64,10 @@ class PlayerController {
         // Use delta time for framerate-independent movement
         const moveMultiplier = deltaTime / 16.67;
 
-        // Check if player can run (has stamina and not in cooldown)
-        const canRun = this.data.stamina > 0 && this.data.staminaExhaustedTimer <= 0;
+        // Check if player can run (has enough stamina to start running and not in cooldown)
+        const runningCost = this.data.runningCost || 1.5;
+        const minStaminaToRun = runningCost / 60; // Minimum stamina for one frame of running
+        const canRun = this.data.stamina >= minStaminaToRun && this.data.staminaExhaustedTimer <= 0;
         const wantsToRun = this.keys['shift'];
         const isRunning = wantsToRun && canRun;
         const speedMultiplier = isRunning ? 1.62 : 1.0; // 1.5 * 1.08 = 8% faster running
@@ -124,8 +134,10 @@ class PlayerController {
             return;
         }
 
-        // Check if player can run (has stamina and not in cooldown)
-        const canRun = this.data.stamina > 0 && this.data.staminaExhaustedTimer <= 0;
+        // Check if player can run (has enough stamina to start running and not in cooldown)
+        const runningCost = this.data.runningCost || 1.5;
+        const minStaminaToRun = runningCost / 60; // Minimum stamina for one frame of running
+        const canRun = this.data.stamina >= minStaminaToRun && this.data.staminaExhaustedTimer <= 0;
         const wantsToRun = this.keys['shift'];
         const isRunning = wantsToRun && canRun;
         const speedMultiplier = isRunning ? 1.62 : 1.0; // 1.5 * 1.08 = 8% faster running

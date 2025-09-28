@@ -44,6 +44,8 @@ class PlayerData {
         // Movement stats
         this.runSpeed = 8; // Running speed (different from walk speed)
         this.staminaRegenRate = 5; // Stamina per second regeneration rate
+        this.runningCost = 1.5; // Stamina cost per second while running
+        this.jumpCost = 10; // Stamina cost per jump
 
         // Damage system
         this.isDamaged = false;
@@ -66,6 +68,7 @@ class PlayerData {
         this.isRunning = false;
         this.isTryingToRun = false; // Whether player is holding shift while moving
         this.staminaExhaustedTimer = 0; // Cooldown timer after stamina depletion
+        this.hasJumpedThisFrame = false; // Track if player has jumped this frame for stamina cost
 
         // Death state
         this.isDead = false;

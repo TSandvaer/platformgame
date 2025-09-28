@@ -24,6 +24,9 @@ class PlayerSystem {
 
     // Main update loop
     update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport) {
+        // Reset per-frame flags
+        this.data.hasJumpedThisFrame = false;
+
         // Update controls
         this.controller.update(deltaTime, isDevelopmentMode, propSystem);
 

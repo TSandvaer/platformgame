@@ -526,7 +526,8 @@ class UIEventHandler {
         // Real-time updates on input changes
         const inputs = [
             'playerMaxHealth', 'playerHealthRegen', 'playerMaxStamina', 'playerStaminaRegen',
-            'playerAttackDamage', 'playerWalkSpeed', 'playerRunSpeed', 'playerJumpForce'
+            'playerRunningCost', 'playerJumpCost', 'playerAttackDamage', 'playerWalkSpeed',
+            'playerRunSpeed', 'playerJumpForce'
         ];
 
         inputs.forEach(inputId => {
@@ -556,6 +557,8 @@ class UIEventHandler {
         const healthRegenInput = document.getElementById('playerHealthRegen');
         const maxStaminaInput = document.getElementById('playerMaxStamina');
         const staminaRegenInput = document.getElementById('playerStaminaRegen');
+        const runningCostInput = document.getElementById('playerRunningCost');
+        const jumpCostInput = document.getElementById('playerJumpCost');
         const attackDamageInput = document.getElementById('playerAttackDamage');
         const walkSpeedInput = document.getElementById('playerWalkSpeed');
         const runSpeedInput = document.getElementById('playerRunSpeed');
@@ -565,6 +568,8 @@ class UIEventHandler {
         if (healthRegenInput) healthRegenInput.value = settings?.healthRegen || player.healthRegenRate || 0;
         if (maxStaminaInput) maxStaminaInput.value = settings?.maxStamina || player.maxStamina || 100;
         if (staminaRegenInput) staminaRegenInput.value = settings?.staminaRegen || player.staminaRegenRate || 5;
+        if (runningCostInput) runningCostInput.value = settings?.runningCost || player.runningCost || 1.5;
+        if (jumpCostInput) jumpCostInput.value = settings?.jumpCost || player.jumpCost || 10;
         if (attackDamageInput) attackDamageInput.value = settings?.attackDamage || player.attackDamage || 25;
         if (walkSpeedInput) walkSpeedInput.value = settings?.walkSpeed || player.speed || 5;
         if (runSpeedInput) runSpeedInput.value = settings?.runSpeed || player.runSpeed || 10;
@@ -581,6 +586,8 @@ class UIEventHandler {
         const healthRegen = parseFloat(document.getElementById('playerHealthRegen')?.value) || 0;
         const maxStamina = parseFloat(document.getElementById('playerMaxStamina')?.value) || 100;
         const staminaRegen = parseFloat(document.getElementById('playerStaminaRegen')?.value) || 5;
+        const runningCost = parseFloat(document.getElementById('playerRunningCost')?.value) || 1.5;
+        const jumpCost = parseFloat(document.getElementById('playerJumpCost')?.value) || 10;
         const attackDamage = parseFloat(document.getElementById('playerAttackDamage')?.value) || 25;
         const walkSpeed = parseFloat(document.getElementById('playerWalkSpeed')?.value) || 5;
         const runSpeed = parseFloat(document.getElementById('playerRunSpeed')?.value) || 10;
@@ -591,6 +598,8 @@ class UIEventHandler {
         player.healthRegenRate = healthRegen;
         player.maxStamina = maxStamina;
         player.staminaRegenRate = staminaRegen;
+        player.runningCost = runningCost;
+        player.jumpCost = jumpCost;
         player.speed = walkSpeed;
         player.jumpPower = -Math.abs(jumpForce); // Jump power is negative
         player.runSpeed = runSpeed;
@@ -606,6 +615,8 @@ class UIEventHandler {
             healthRegen,
             maxStamina,
             staminaRegen,
+            runningCost,
+            jumpCost,
             attackDamage,
             walkSpeed,
             runSpeed,
@@ -625,6 +636,8 @@ class UIEventHandler {
         document.getElementById('playerHealthRegen').value = 0;
         document.getElementById('playerMaxStamina').value = 100;
         document.getElementById('playerStaminaRegen').value = 5;
+        document.getElementById('playerRunningCost').value = 1.5;
+        document.getElementById('playerJumpCost').value = 10;
         document.getElementById('playerAttackDamage').value = 25;
         document.getElementById('playerWalkSpeed').value = 5;
         document.getElementById('playerRunSpeed').value = 10;
