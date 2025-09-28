@@ -64,6 +64,9 @@ class PlatformRPG {
         // Initialize inventory items data
         this.inventoryItemsData = new InventoryItemsData();
 
+        // Initialize player inventory system
+        this.playerInventorySystem = new PlayerInventorySystem(this);
+
         // Initialize lootable system
         console.log('🍯 Initializing lootable system...');
         this.lootableSystem = new LootableSystem(this.ctx, () => {

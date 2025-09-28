@@ -380,8 +380,21 @@ class InputKeyboard {
         const nearbyChest = this.game.propSystem.checkChestInteraction(this.game.playerSystem.data);
 
         if (nearbyChest) {
+            // If chest is already open, show inventory modal
+            if (nearbyChest.chestState === 'open') {
+                if (this.game.playerInventorySystem) {
+                    this.game.playerInventorySystem.openChestModal(nearbyChest);
+                }
+                return;
+            }
+
             // Toggle the chest state
-            this.game.propSystem.toggleChest(nearbyChest);
+            this.game.propSystem.toggleChest(nearbyChest, () => {
+                // Callback when chest finishes opening
+                if (nearbyChest.chestState === 'open' && this.game.playerInventorySystem) {
+                    this.game.playerInventorySystem.openChestModal(nearbyChest);
+                }
+            });
 
             // Show feedback message
             const action = nearbyChest.chestState === 'opening' ? 'Opening' : 'Closing';

@@ -79,6 +79,9 @@ class PlayerData {
 
         // Tracking
         this.lastValidPosition = { x: 100, y: 400 };
+
+        // Player inventory system
+        this.playerInventory = []; // Array of items in player's inventory
     }
 
     reset() {
@@ -118,6 +121,75 @@ class PlayerData {
 
         // Reset stamina regeneration
         this.lastStaminaRegenTime = 0;
+
+        // Clear player inventory (as requested - no save feature yet)
+        this.playerInventory = [];
+    }
+
+    // Player inventory management methods
+    addItemToInventory(item, quantity = 1) {
+        if (!item || !item.id) {
+            console.error('❌ Invalid item provided to addItemToInventory');
+            return false;
+        }
+
+        // Check if item is stackable and already exists
+        if (item.stackable) {
+            const existingItem = this.playerInventory.find(invItem => invItem.id === item.id);
+            if (existingItem) {
+                existingItem.quantity = (existingItem.quantity || 1) + quantity;
+                console.log(`📦 Added ${quantity}x ${item.name} to player inventory (now ${existingItem.quantity})`);
+                return true;
+            }
+        }
+
+        // Add new item (or non-stackable item)
+        const inventoryItem = {
+            ...item,
+            quantity: quantity
+        };
+
+        this.playerInventory.push(inventoryItem);
+        console.log(`📦 Added ${quantity}x ${item.name} to player inventory`);
+        return true;
+    }
+
+    removeItemFromInventory(itemId, quantity = 1) {
+        const itemIndex = this.playerInventory.findIndex(item => item.id === itemId);
+        if (itemIndex === -1) {
+            return false;
+        }
+
+        const item = this.playerInventory[itemIndex];
+        if (item.stackable && item.quantity > quantity) {
+            // Reduce quantity
+            item.quantity -= quantity;
+            console.log(`📦 Removed ${quantity}x ${item.name} from player inventory (${item.quantity} remaining)`);
+        } else {
+            // Remove entire item
+            this.playerInventory.splice(itemIndex, 1);
+            console.log(`📦 Removed ${item.name} from player inventory`);
+        }
+
+        return true;
+    }
+
+    hasItem(itemId) {
+        return this.playerInventory.some(item => item.id === itemId);
+    }
+
+    getItemQuantity(itemId) {
+        const item = this.playerInventory.find(item => item.id === itemId);
+        return item ? (item.quantity || 1) : 0;
+    }
+
+    getInventory() {
+        return [...this.playerInventory]; // Return copy to prevent external modification
+    }
+
+    clearInventory() {
+        this.playerInventory = [];
+        console.log('🗑️ Player inventory cleared');
     }
 
     setPosition(x, y) {

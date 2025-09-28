@@ -399,6 +399,11 @@ class PropSystem {
                         if (prop.chestAnimFrame >= 6) {
                             prop.chestAnimFrame = 6;
                             prop.chestState = 'open';
+                            // Execute callback when chest finishes opening
+                            if (prop.onOpenCallback && typeof prop.onOpenCallback === 'function') {
+                                prop.onOpenCallback();
+                                prop.onOpenCallback = null; // Clear callback after execution
+                            }
                         }
                     } else if (prop.chestState === 'closing') {
                         prop.chestAnimFrame--;
@@ -439,13 +444,17 @@ class PropSystem {
     }
 
     // Toggle chest open/close state
-    toggleChest(chest) {
+    toggleChest(chest, onOpenCallback = null) {
         if (!chest || !chest.isChest) return;
 
         if (chest.chestState === 'closed') {
             chest.chestState = 'opening';
+            // Store callback for when chest finishes opening
+            chest.onOpenCallback = onOpenCallback;
         } else if (chest.chestState === 'open') {
             chest.chestState = 'closing';
+            // Clear any pending callback
+            chest.onOpenCallback = null;
         }
         // Don't toggle if already animating
     }
