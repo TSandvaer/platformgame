@@ -531,6 +531,83 @@
         .blue-ns-resize-cursor {
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10 3 L12 7 L14 3 Z M10 21 L12 17 L14 21 Z M11 7 L13 7 L13 17 L11 17 Z" fill="%230099ff" stroke="%23ffffff" stroke-width="0.6"/></svg>'), ns-resize !important;
         }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background-color: #2a2a2a;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a1a;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #4CAF50;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-close:hover {
+            color: #4CAF50;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #444;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: #1a1a1a;
+        }
+
+        .inventory-item-option:hover {
+            background-color: #404040 !important;
+        }
+
+        .inventory-item-option.selected {
+            border: 2px solid #4CAF50 !important;
+            background-color: #2a4a2a !important;
+        }
     </style>
 </head>
 <body>
@@ -902,6 +979,9 @@
                         </div>
                         <div class="property-row">
                             <button class="btn small" id="testDamageProp">🔨 Test Damage (25)</button>
+                        </div>
+                        <div class="property-row" id="chestInventoryButtonRow" style="display: none;">
+                            <button class="btn small" id="chestInventoryBtn">📦 Chest Inventory</button>
                         </div>
                         <div class="property-row">
                             <button class="btn small" id="sendToBackground">Send to Background</button>
@@ -1373,6 +1453,57 @@
 
     <!-- HUD System Scripts -->
     <script src="js/hud/hudSystem.js"></script>
+
+    <!-- Chest Inventory Editor Modal -->
+    <div id="chestInventoryModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 500px; max-height: 600px;">
+            <div class="modal-header">
+                <h3>Chest Inventory Editor</h3>
+                <button class="modal-close" id="closeChestInventoryModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-row">
+                    <span class="property-label">Chest ID:</span>
+                    <span id="chestInventoryModalId" style="color: #4CAF50; font-weight: bold;">-</span>
+                </div>
+                <div class="property-row">
+                    <button class="btn small" id="addItemToChestBtn">+ Add Item</button>
+                    <button class="btn small danger" id="clearChestInventoryBtn">Clear All Items</button>
+                </div>
+                <div class="property-row">
+                    <span class="property-label">Items in Chest:</span>
+                    <div id="chestItemsList" style="background-color: #444; padding: 10px; border-radius: 4px; min-height: 100px; max-height: 300px; overflow-y: auto;">
+                        No items in chest
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Selection Modal -->
+    <div id="inventorySelectionModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 600px; max-height: 700px;">
+            <div class="modal-header">
+                <h3>Select Inventory Item</h3>
+                <button class="modal-close" id="closeInventorySelectionModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-row">
+                    <input type="text" id="inventorySearchInput" placeholder="Search items..." style="width: 100%; padding: 5px; margin-bottom: 10px;">
+                </div>
+                <div class="property-row">
+                    <span class="property-label">Available Items:</span>
+                    <div id="availableInventoryItemsList" style="background-color: #444; padding: 10px; border-radius: 4px; min-height: 200px; max-height: 400px; overflow-y: auto;">
+                        Loading items...
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn small" id="addSelectedItemBtn" disabled>Add Selected</button>
+                    <button class="btn small" id="cancelItemSelectionBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Game Script -->
     <script src="game.js"></script>

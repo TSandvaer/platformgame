@@ -347,6 +347,9 @@ class UIEventHandler {
             }
         });
 
+        // Chest Inventory event listeners
+        this.setupChestInventoryListeners();
+
         // Context menu event listeners
     }
 
@@ -716,6 +719,325 @@ class UIEventHandler {
 
         listElement.innerHTML = html;
         console.log(`📦 Inventory items list refreshed: ${inventoryItems.length} items`);
+    }
+
+    // Setup chest inventory modal and selection event listeners
+    setupChestInventoryListeners() {
+        // Current chest being edited
+        this.currentChestBeingEdited = null;
+        this.selectedInventoryItemForChest = null;
+
+        // Chest inventory button
+        const chestInventoryBtn = document.getElementById('chestInventoryBtn');
+        if (chestInventoryBtn) {
+            chestInventoryBtn.addEventListener('click', () => {
+                this.openChestInventoryModal();
+            });
+        }
+
+        // Close chest inventory modal
+        const closeChestInventoryModal = document.getElementById('closeChestInventoryModal');
+        if (closeChestInventoryModal) {
+            closeChestInventoryModal.addEventListener('click', () => {
+                this.closeChestInventoryModal();
+            });
+        }
+
+        // Add item to chest button
+        const addItemToChestBtn = document.getElementById('addItemToChestBtn');
+        if (addItemToChestBtn) {
+            addItemToChestBtn.addEventListener('click', () => {
+                this.openInventorySelectionModal();
+            });
+        }
+
+        // Clear chest inventory button
+        const clearChestInventoryBtn = document.getElementById('clearChestInventoryBtn');
+        if (clearChestInventoryBtn) {
+            clearChestInventoryBtn.addEventListener('click', () => {
+                this.clearChestInventory();
+            });
+        }
+
+        // Close inventory selection modal
+        const closeInventorySelectionModal = document.getElementById('closeInventorySelectionModal');
+        if (closeInventorySelectionModal) {
+            closeInventorySelectionModal.addEventListener('click', () => {
+                this.closeInventorySelectionModal();
+            });
+        }
+
+        // Cancel item selection button
+        const cancelItemSelectionBtn = document.getElementById('cancelItemSelectionBtn');
+        if (cancelItemSelectionBtn) {
+            cancelItemSelectionBtn.addEventListener('click', () => {
+                this.closeInventorySelectionModal();
+            });
+        }
+
+        // Add selected item button
+        const addSelectedItemBtn = document.getElementById('addSelectedItemBtn');
+        if (addSelectedItemBtn) {
+            addSelectedItemBtn.addEventListener('click', () => {
+                this.addSelectedItemToChest();
+            });
+        }
+
+        // Search functionality for inventory items
+        const inventorySearchInput = document.getElementById('inventorySearchInput');
+        if (inventorySearchInput) {
+            inventorySearchInput.addEventListener('input', (e) => {
+                this.filterInventoryItems(e.target.value);
+            });
+        }
+
+        // Modal click outside to close
+        const chestInventoryModal = document.getElementById('chestInventoryModal');
+        if (chestInventoryModal) {
+            chestInventoryModal.addEventListener('click', (e) => {
+                if (e.target === chestInventoryModal) {
+                    this.closeChestInventoryModal();
+                }
+            });
+        }
+
+        const inventorySelectionModal = document.getElementById('inventorySelectionModal');
+        if (inventorySelectionModal) {
+            inventorySelectionModal.addEventListener('click', (e) => {
+                if (e.target === inventorySelectionModal) {
+                    this.closeInventorySelectionModal();
+                }
+            });
+        }
+    }
+
+    // Open chest inventory editor modal
+    openChestInventoryModal() {
+        const selectedProp = this.game.propSystem.selectedProp;
+        if (!selectedProp || !selectedProp.isChest) {
+            alert('Please select a chest first');
+            return;
+        }
+
+        this.currentChestBeingEdited = selectedProp;
+
+        // Update modal content
+        const chestIdElement = document.getElementById('chestInventoryModalId');
+        if (chestIdElement) {
+            chestIdElement.textContent = `Chest #${selectedProp.id}`;
+        }
+
+        // Show the modal
+        const modal = document.getElementById('chestInventoryModal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+
+        // Refresh the chest items list
+        this.refreshChestItemsList();
+    }
+
+    // Close chest inventory modal
+    closeChestInventoryModal() {
+        const modal = document.getElementById('chestInventoryModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.currentChestBeingEdited = null;
+    }
+
+    // Refresh the items list in the chest
+    refreshChestItemsList() {
+        const listElement = document.getElementById('chestItemsList');
+        if (!listElement || !this.currentChestBeingEdited) return;
+
+        const chestInventory = this.currentChestBeingEdited.chestInventory || [];
+
+        if (chestInventory.length === 0) {
+            listElement.innerHTML = 'No items in chest';
+            return;
+        }
+
+        let html = '';
+        chestInventory.forEach((item, index) => {
+            html += `<div style="margin-bottom: 8px; padding: 6px; background-color: #333; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: bold; color: #4CAF50;">${item.name}</div>
+                    <div style="color: #aaa; font-size: 11px;">Type: ${item.type} | Quantity: ${item.quantity || 1}</div>
+                    <div style="color: #ccc; font-size: 11px; margin-top: 2px;">${item.description || 'No description'}</div>
+                </div>
+                <button class="btn small danger" onclick="uiEventHandler.removeItemFromChest(${index})" style="margin-left: 10px;">Remove</button>
+            </div>`;
+        });
+
+        listElement.innerHTML = html;
+    }
+
+    // Remove item from chest
+    removeItemFromChest(index) {
+        if (!this.currentChestBeingEdited || !this.currentChestBeingEdited.chestInventory) return;
+
+        this.currentChestBeingEdited.chestInventory.splice(index, 1);
+        this.refreshChestItemsList();
+        console.log(`📦 Removed item from chest #${this.currentChestBeingEdited.id}`);
+    }
+
+    // Clear all items from chest
+    clearChestInventory() {
+        if (!this.currentChestBeingEdited) return;
+
+        if (confirm('Clear all items from this chest? This cannot be undone.')) {
+            this.currentChestBeingEdited.chestInventory = [];
+            this.refreshChestItemsList();
+            console.log(`📦 Cleared all items from chest #${this.currentChestBeingEdited.id}`);
+        }
+    }
+
+    // Open inventory selection modal
+    openInventorySelectionModal() {
+        const modal = document.getElementById('inventorySelectionModal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+
+        // Clear search and refresh items list
+        const searchInput = document.getElementById('inventorySearchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        this.refreshAvailableInventoryItems();
+
+        // Disable add button initially
+        const addBtn = document.getElementById('addSelectedItemBtn');
+        if (addBtn) {
+            addBtn.disabled = true;
+        }
+
+        this.selectedInventoryItemForChest = null;
+    }
+
+    // Close inventory selection modal
+    closeInventorySelectionModal() {
+        const modal = document.getElementById('inventorySelectionModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        this.selectedInventoryItemForChest = null;
+    }
+
+    // Refresh available inventory items in selection modal
+    refreshAvailableInventoryItems(searchTerm = '') {
+        const listElement = document.getElementById('availableInventoryItemsList');
+        if (!listElement) return;
+
+        // Get all available inventory items
+        const inventoryItemsData = this.game.inventoryItemsData ? this.game.inventoryItemsData.getAllItems() : {};
+        const inventoryItems = Object.values(inventoryItemsData);
+
+        // Filter by search term if provided
+        const filteredItems = searchTerm ?
+            inventoryItems.filter(item =>
+                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+            ) : inventoryItems;
+
+        if (filteredItems.length === 0) {
+            listElement.innerHTML = searchTerm ? 'No items match your search' : 'No inventory items available';
+            return;
+        }
+
+        let html = '';
+        filteredItems.forEach((item) => {
+            html += `<div class="inventory-item-option" data-item-id="${item.id}" style="margin-bottom: 8px; padding: 8px; background-color: #333; border-radius: 3px; cursor: pointer; border: 2px solid transparent;">
+                <div style="font-weight: bold; color: #4CAF50;">${item.name}</div>
+                <div style="color: #aaa; font-size: 11px;">
+                    Type: ${item.type} | Rarity: ${item.rarity} | Value: ${item.value || 0}
+                </div>
+                <div style="color: #ccc; font-size: 11px; margin-top: 2px;">${item.description || 'No description'}</div>
+            </div>`;
+        });
+
+        listElement.innerHTML = html;
+
+        // Add click handlers to items
+        const itemOptions = listElement.querySelectorAll('.inventory-item-option');
+        itemOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                this.selectInventoryItemForChest(option.dataset.itemId);
+            });
+        });
+    }
+
+    // Filter inventory items by search term
+    filterInventoryItems(searchTerm) {
+        this.refreshAvailableInventoryItems(searchTerm);
+    }
+
+    // Select an inventory item for adding to chest
+    selectInventoryItemForChest(itemId) {
+        // Get the item data
+        const itemData = this.game.inventoryItemsData ? this.game.inventoryItemsData.getItem(itemId) : null;
+        if (!itemData) return;
+
+        this.selectedInventoryItemForChest = itemData;
+
+        // Update visual selection
+        const itemOptions = document.querySelectorAll('.inventory-item-option');
+        itemOptions.forEach(option => {
+            if (option.dataset.itemId === itemId) {
+                option.style.border = '2px solid #4CAF50';
+                option.style.backgroundColor = '#2a4a2a';
+            } else {
+                option.style.border = '2px solid transparent';
+                option.style.backgroundColor = '#333';
+            }
+        });
+
+        // Enable add button
+        const addBtn = document.getElementById('addSelectedItemBtn');
+        if (addBtn) {
+            addBtn.disabled = false;
+        }
+    }
+
+    // Add selected item to chest
+    addSelectedItemToChest() {
+        if (!this.selectedInventoryItemForChest || !this.currentChestBeingEdited) {
+            alert('Please select an item first');
+            return;
+        }
+
+        // Create a copy of the item for the chest
+        const chestItem = {
+            ...this.selectedInventoryItemForChest,
+            quantity: 1 // Default quantity
+        };
+
+        // Initialize chest inventory if needed
+        if (!this.currentChestBeingEdited.chestInventory) {
+            this.currentChestBeingEdited.chestInventory = [];
+        }
+
+        // Check if item is stackable and already exists
+        if (chestItem.stackable) {
+            const existingItem = this.currentChestBeingEdited.chestInventory.find(item => item.id === chestItem.id);
+            if (existingItem) {
+                existingItem.quantity = (existingItem.quantity || 1) + 1;
+            } else {
+                this.currentChestBeingEdited.chestInventory.push(chestItem);
+            }
+        } else {
+            // Non-stackable, always add as new item
+            this.currentChestBeingEdited.chestInventory.push(chestItem);
+        }
+
+        console.log(`📦 Added ${chestItem.name} to chest #${this.currentChestBeingEdited.id}`);
+
+        // Close selection modal and refresh chest list
+        this.closeInventorySelectionModal();
+        this.refreshChestItemsList();
     }
 
     // Initialize all event listeners

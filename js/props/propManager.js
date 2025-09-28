@@ -387,8 +387,21 @@ class PropManager {
             }
 
             if (zOrderDisplay) zOrderDisplay.textContent = this.propData.selectedProp.zOrder || 0;
+
+            // Show chest inventory button for chest types
+            const chestInventoryButtonRow = document.getElementById('chestInventoryButtonRow');
+            if (chestInventoryButtonRow) {
+                const isChest = this.propData.selectedProp.type && this.propData.selectedProp.type.toLowerCase().includes('chest');
+                chestInventoryButtonRow.style.display = isChest ? 'block' : 'none';
+            }
         } else {
             propertiesDiv.style.display = 'none';
+
+            // Hide chest inventory button when no prop is selected
+            const chestInventoryButtonRow = document.getElementById('chestInventoryButtonRow');
+            if (chestInventoryButtonRow) {
+                chestInventoryButtonRow.style.display = 'none';
+            }
         }
     }
 

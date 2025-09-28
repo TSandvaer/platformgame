@@ -181,6 +181,9 @@ class PropData {
                 if (prop.chestAnimSpeed === undefined) {
                     prop.chestAnimSpeed = 100;
                 }
+                if (prop.chestInventory === undefined || prop.chestInventory === null) {
+                    prop.chestInventory = [];
+                }
             }
         });
 
@@ -229,6 +232,7 @@ class PropData {
             chestAnimFrame: propType.isChest ? 0 : null, // Always start at frame 0 (closed)
             chestAnimTimer: 0,
             chestAnimSpeed: 100, // milliseconds per frame
+            chestInventory: propType.isChest ? [] : null, // Array of inventory items in this chest
             // Destruction system properties
             destroyable: destroyable,
             maxDurability: destroyable ? maxDurability : 0,
