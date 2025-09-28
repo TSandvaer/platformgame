@@ -166,6 +166,22 @@ class PropData {
             if (prop.zOrder === undefined || prop.zOrder === null) {
                 prop.zOrder = this.nextPropZOrder++;
             }
+
+            // Initialize chest properties for loaded chests
+            if (prop.isChest) {
+                if (prop.chestState === undefined || prop.chestState === null) {
+                    prop.chestState = 'closed';
+                }
+                if (prop.chestAnimFrame === undefined || prop.chestAnimFrame === null) {
+                    prop.chestAnimFrame = 0;
+                }
+                if (prop.chestAnimTimer === undefined) {
+                    prop.chestAnimTimer = 0;
+                }
+                if (prop.chestAnimSpeed === undefined) {
+                    prop.chestAnimSpeed = 100;
+                }
+            }
         });
 
         // Update nextPropId to be higher than any existing prop ID
@@ -210,7 +226,7 @@ class PropData {
             // Chest-specific properties
             isChest: propType.isChest || false,
             chestState: propType.isChest ? 'closed' : null, // 'closed', 'opening', 'open', 'closing'
-            chestAnimFrame: propType.isChest ? 0 : null,
+            chestAnimFrame: propType.isChest ? 0 : null, // Always start at frame 0 (closed)
             chestAnimTimer: 0,
             chestAnimSpeed: 100, // milliseconds per frame
             // Destruction system properties

@@ -380,6 +380,13 @@ class PropSystem {
         for (const prop of this.data.props) {
             if (!prop.isChest) continue;
 
+            // Ensure chest state is initialized properly
+            if (prop.chestState === undefined || prop.chestState === null) {
+                prop.chestState = 'closed';
+                prop.chestAnimFrame = 0;
+                prop.chestAnimTimer = 0;
+            }
+
             // Update animation timer if chest is animating
             if (prop.chestState === 'opening' || prop.chestState === 'closing') {
                 prop.chestAnimTimer += deltaTime;

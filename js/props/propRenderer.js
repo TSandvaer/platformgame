@@ -701,22 +701,26 @@ class PropRenderer {
         const row = propType.chestRow;
 
         // Get the correct column based on animation frame (0-6)
-        const col = Math.min(prop.chestAnimFrame, 6); // Clamp to max frame
+        // Ensure chestAnimFrame is initialized, default to 0 (closed)
+        const animFrame = (prop.chestAnimFrame !== undefined && prop.chestAnimFrame !== null) ? prop.chestAnimFrame : 0;
+        const col = Math.min(Math.max(0, animFrame), 6); // Clamp between 0 and 6
 
-        // The sprite sheet has 64x64 cells with double row spacing
+        // Back to what was working for chest 1 and 2
         const actualCellWidth = 64;
-        const actualCellHeight = 64;
 
         // The chest closed is about 32x32, but opening animation is taller
-        // We need to capture more height to accommodate the open lid
         const chestWidth = 32;
         const chestHeight = 40; // Extra height for open lid animation
-        const paddingOffsetX = 32; // Offset to skip horizontal padding
-        const paddingOffsetY = 24; // Less vertical offset to capture lid animation
+        const paddingOffsetX = 32; // This was working for horizontal
+        const paddingOffsetY = 24; // This was working for vertical
+
+        // For rows: chest 1 and 2 worked with row*128
+        // But let's try a smaller row spacing for types 3 and 4
+        const rowSpacing = 64; // Try 64px spacing between rows
 
         // Calculate position with proper spacing and offset
         const sourceX = col * actualCellWidth + paddingOffsetX;
-        const sourceY = row * actualCellHeight * 2 + paddingOffsetY; // Double spacing for rows + offset
+        const sourceY = row * rowSpacing + paddingOffsetY;
 
         // Extract chest with extra height for animation (32x40)
         const frameWidth = chestWidth;
@@ -810,22 +814,26 @@ class PropRenderer {
         const row = propType.chestRow;
 
         // Get the correct column based on animation frame (0-6)
-        const col = Math.min(prop.chestAnimFrame, 6); // Clamp to max frame
+        // Ensure chestAnimFrame is initialized, default to 0 (closed)
+        const animFrame = (prop.chestAnimFrame !== undefined && prop.chestAnimFrame !== null) ? prop.chestAnimFrame : 0;
+        const col = Math.min(Math.max(0, animFrame), 6); // Clamp between 0 and 6
 
-        // The sprite sheet has 64x64 cells with double row spacing
+        // Back to what was working for chest 1 and 2
         const actualCellWidth = 64;
-        const actualCellHeight = 64;
 
         // The chest closed is about 32x32, but opening animation is taller
-        // We need to capture more height to accommodate the open lid
         const chestWidth = 32;
         const chestHeight = 40; // Extra height for open lid animation
-        const paddingOffsetX = 32; // Offset to skip horizontal padding
-        const paddingOffsetY = 24; // Less vertical offset to capture lid animation
+        const paddingOffsetX = 32; // This was working for horizontal
+        const paddingOffsetY = 24; // This was working for vertical
+
+        // For rows: chest 1 and 2 worked with row*128
+        // But let's try a smaller row spacing for types 3 and 4
+        const rowSpacing = 64; // Try 64px spacing between rows
 
         // Calculate position with proper spacing and offset
         const sourceX = col * actualCellWidth + paddingOffsetX;
-        const sourceY = row * actualCellHeight * 2 + paddingOffsetY; // Double spacing for rows + offset
+        const sourceY = row * rowSpacing + paddingOffsetY;
 
         // Extract chest with extra height for animation (32x40)
         const frameWidth = chestWidth;
