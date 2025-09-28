@@ -260,6 +260,9 @@ class PlayerInventorySystem {
         // Save player data
         this.savePlayerData();
 
+        // NOTE: NOT saving scene data here because chest changes should be temporary
+        // Chests should reset to their original state on reload (no save game system yet)
+
         // Re-render chest items
         this.renderChestItems();
 
