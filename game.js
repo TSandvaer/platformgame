@@ -61,6 +61,9 @@ class PlatformRPG {
             this.checkAllSpritesLoaded();
         });
 
+        // Initialize inventory items data
+        this.inventoryItemsData = new InventoryItemsData();
+
         // Initialize lootable system
         console.log('🍯 Initializing lootable system...');
         this.lootableSystem = new LootableSystem(this.ctx, () => {

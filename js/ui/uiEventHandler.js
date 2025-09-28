@@ -139,6 +139,24 @@ class UIEventHandler {
             }
         });
 
+        // Inventory Items controls
+        const refreshInventoryItemsBtn = document.getElementById('refreshInventoryItems');
+        if (refreshInventoryItemsBtn) {
+            refreshInventoryItemsBtn.addEventListener('click', () => {
+                this.refreshInventoryItemsList();
+            });
+        }
+
+        const clearInventoryItemsBtn = document.getElementById('clearInventoryItems');
+        if (clearInventoryItemsBtn) {
+            clearInventoryItemsBtn.addEventListener('click', () => {
+                if (confirm('Clear all inventory items? This cannot be undone.')) {
+                    this.game.gameDataSystem.clearInventoryItems();
+                    this.refreshInventoryItemsList();
+                }
+            });
+        }
+
         // Lootable controls
         const toggleLootablePlacementBtn = document.getElementById('toggleLootablePlacement');
         if (toggleLootablePlacementBtn) {
@@ -668,6 +686,36 @@ class UIEventHandler {
         player.staminaExhaustedTimer = 0;
 
         console.log('⚡ Player stamina restored!');
+    }
+
+    // Refresh the inventory items list display
+    refreshInventoryItemsList() {
+        const listElement = document.getElementById('inventoryItemsList');
+        if (!listElement) return;
+
+        // Get hardcoded inventory items from the data class
+        const inventoryItemsData = this.game.inventoryItemsData ? this.game.inventoryItemsData.getAllItems() : {};
+        const inventoryItems = Object.values(inventoryItemsData);
+
+        if (inventoryItems.length === 0) {
+            listElement.innerHTML = 'No inventory items defined yet. Use the sprite editor to add items.';
+            return;
+        }
+
+        let html = '';
+        inventoryItems.forEach((item, index) => {
+            html += `<div style="margin-bottom: 8px; padding: 6px; background-color: #333; border-radius: 3px;">
+                <div style="font-weight: bold; color: #4CAF50;">${item.name}</div>
+                <div style="color: #aaa; font-size: 11px;">
+                    ID: ${item.id} | Type: ${item.type} |
+                    Sprite: ${item.sprite?.x || 0}, ${item.sprite?.y || 0}, ${item.sprite?.width || 0}x${item.sprite?.height || 0}
+                </div>
+                <div style="color: #ccc; font-size: 11px; margin-top: 2px;">${item.description || 'No description'}</div>
+            </div>`;
+        });
+
+        listElement.innerHTML = html;
+        console.log(`📦 Inventory items list refreshed: ${inventoryItems.length} items`);
     }
 
     // Initialize all event listeners

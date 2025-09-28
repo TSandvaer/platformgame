@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-27"
+    "lastModified": "2025-09-28"
   },
   "scenes": [
     {
@@ -75,6 +75,20 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5
+        },
+        {
+          "id": 10,
+          "x": 1301.8503100088572,
+          "y": 797.5925597874226,
+          "width": 384,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "darkStone",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal"
         }
       ],
       "props": [
@@ -994,24 +1008,10 @@
         {
           "id": 82,
           "type": "grass7",
-          "x": 218.71990604815028,
-          "y": 895.4122595097382,
+          "x": 221.2947831156514,
+          "y": 897.9871365772393,
           "isObstacle": false,
           "zOrder": 2,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0,
-          "debris": []
-        },
-        {
-          "id": 83,
-          "type": "grass8",
-          "x": 324.69759248385213,
-          "y": 902.4539048737522,
-          "isObstacle": false,
-          "zOrder": 3,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
@@ -1401,8 +1401,8 @@
         {
           "id": 112,
           "type": "grass9",
-          "x": 280,
-          "y": 901,
+          "x": 278.2834152883326,
+          "y": 907.0080464908359,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -1478,11 +1478,11 @@
           "debrisLandingTimer": 0
         },
         {
-          "id": 116,
-          "type": "barrel",
-          "x": 442.62798937112495,
-          "y": 871.5507528786538,
-          "isObstacle": true,
+          "id": 117,
+          "type": "chest1",
+          "x": 319.7165633303809,
+          "y": 861.4526129317982,
+          "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
           "relativeX": 0.5,
@@ -1490,9 +1490,14 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "damagePerSecond": 0,
-          "destroyable": true,
-          "maxDurability": 100,
-          "currentDurability": 100,
+          "isChest": true,
+          "chestState": "closed",
+          "chestAnimFrame": 0,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
           "isDestroying": false,
           "destructionFrameIndex": 0,
           "destructionTimer": 0,
@@ -1500,19 +1505,134 @@
           "isDestroyed": false,
           "isVisible": true,
           "isDamaged": false,
-          "damageTimer": 0,
-          "isFallingDebris": false,
-          "debrisVelocityY": 0,
-          "debrisGravity": 0,
-          "debrisHasLanded": false,
-          "debrisLandingTimer": 0
+          "damageTimer": 0
+        },
+        {
+          "id": 118,
+          "type": "chest2",
+          "x": 390.29229406554475,
+          "y": 861.4526129317982,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": true,
+          "chestState": "closed",
+          "chestAnimFrame": 0,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0
+        },
+        {
+          "id": 119,
+          "type": "chest3",
+          "x": 461.718334809566,
+          "y": 858.9016829052258,
+          "isObstacle": false,
+          "zOrder": 2,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": true,
+          "chestState": "closed",
+          "chestAnimFrame": 0,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0
+        },
+        {
+          "id": 120,
+          "type": "chest4",
+          "x": 525.4915854738707,
+          "y": 858.0513728963684,
+          "isObstacle": false,
+          "zOrder": 3,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": true,
+          "chestState": "closed",
+          "chestAnimFrame": 0,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0
+        },
+        {
+          "id": 121,
+          "type": "chest1",
+          "x": 1344.340124003543,
+          "y": 737.3073516386183,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": true,
+          "chestState": "closed",
+          "chestAnimFrame": 0,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0
         }
       ],
       "enemies": [
         {
           "id": 2,
           "type": "orc",
-          "x": 519.3642685569615,
+          "x": 731.6847122977715,
           "y": 570.482488190211,
           "width": 44,
           "height": 59,
@@ -1534,11 +1654,11 @@
             "height": 71.4260407440213
           },
           "currentAnimation": "walk",
-          "frameIndex": 1,
-          "frameTimer": 29.200000000000728,
+          "frameIndex": 0,
+          "frameTimer": 41.5,
           "frameRate": 150,
-          "facing": "right",
-          "velocityX": 1.0351991648378773,
+          "facing": "left",
+          "velocityX": -1.0373433767344167,
           "velocityY": 0,
           "onGround": true,
           "speed": 3,
@@ -1549,11 +1669,11 @@
           "attackTimer": 0,
           "attackDuration": 600,
           "attackCooldown": 1000,
-          "lastAttackTime": 1758997636777,
+          "lastAttackTime": 1759038994817,
           "isDead": false,
           "isDamaged": false,
           "damageTimer": 0,
-          "patrolDirection": 1,
+          "patrolDirection": -1,
           "patrolSpeed": 1,
           "deathTimer": 0,
           "flashTimer": 0,
@@ -1567,11 +1687,11 @@
         {
           "id": 5,
           "type": "orc",
-          "x": 1545.4719297744161,
+          "x": 1029.2821970345644,
           "y": 861,
           "width": 44,
           "height": 59,
-          "health": 100,
+          "health": 0,
           "maxHealth": 100,
           "damage": 20,
           "isMoving": true,
@@ -1588,34 +1708,37 @@
             "width": 1366.4481842338355,
             "height": 235.53587245349877
           },
-          "currentAnimation": "walk",
+          "currentAnimation": "death",
           "frameIndex": 3,
-          "frameTimer": 137.8000000000011,
+          "frameTimer": 41.69999999999891,
           "frameRate": 150,
-          "facing": "left",
-          "velocityX": -0.690807261331804,
+          "facing": "right",
+          "velocityX": 1.5473066255544765,
           "velocityY": 0,
           "onGround": true,
           "speed": 2,
-          "aiState": "patrolling",
-          "target": null,
+          "aiState": "fleeing",
+          "target": {
+            "x": 958.0321189962956,
+            "y": 890.5
+          },
           "lastPlayerPosition": null,
           "isAttacking": false,
           "attackTimer": 0,
           "attackDuration": 600,
           "attackCooldown": 1000,
-          "lastAttackTime": 1758997602012,
-          "isDead": false,
+          "lastAttackTime": 1759039094307,
+          "isDead": true,
           "isDamaged": false,
-          "damageTimer": 0,
-          "deathTimer": 0,
-          "flashTimer": 0,
-          "patrolDirection": -1,
+          "damageTimer": -0.6999999999998181,
+          "deathTimer": -2.2000000000007276,
+          "flashTimer": 2002.2000000000007,
+          "patrolDirection": 1,
           "patrolSpeed": 1,
-          "isVisible": true,
+          "isVisible": false,
           "fleeHealthThreshold": 0.4,
           "originalPosition": {
-            "x": 1597.5957569218717,
+            "x": 1636.2990648686944,
             "y": 861
           },
           "fleeRecoveryTime": null
@@ -1625,8 +1748,8 @@
         {
           "id": 6,
           "type": "heart",
-          "x": 545.0487156775908,
-          "y": 818.9371124889282,
+          "x": 1564.5704162976092,
+          "y": 698.1930912311778,
           "isVisible": true
         },
         {
@@ -1639,63 +1762,53 @@
         {
           "id": 8,
           "type": "coin",
-          "x": 394.5438441098317,
-          "y": 818.9371124889283,
+          "x": 1414.0655447298495,
+          "y": 698.193091231178,
           "isVisible": true
         },
         {
           "id": 9,
           "type": "coin",
-          "x": 421.7537643932684,
-          "y": 807.8830823737821,
+          "x": 1441.2754650132863,
+          "y": 687.1390611160318,
           "isVisible": true
         },
         {
           "id": 10,
           "type": "coin",
-          "x": 445.5624446412755,
-          "y": 818.0868024800709,
+          "x": 1465.0841452612933,
+          "y": 697.3427812223206,
           "isVisible": true
         },
         {
           "id": 11,
           "type": "coin",
-          "x": 466.82019486271037,
-          "y": 840.1948627103632,
+          "x": 1486.3418954827282,
+          "y": 719.4508414526128,
           "isVisible": true
         }
       ],
       "background": {
-        "name": "Mountains1",
+        "name": "Dynamic_Space_Nebula_Aqua_Pink",
         "layers": []
       },
       "transitions": {
         "zones": [
           {
-            "id": 1,
-            "x": 4277.236492471214,
-            "y": 541.7360496014172,
-            "width": 20.407440212577058,
-            "height": 375.837023914969,
+            "id": 3,
+            "x": 3834.7188198480108,
+            "y": 438.8109074653554,
+            "width": 24.03218596334409,
+            "height": 479.78542691104155,
             "targetSceneId": 2,
-            "playerStartX": 199,
-            "playerStartY": 861
-          },
-          {
-            "id": 2,
-            "x": 1168.325952170062,
-            "y": 676.0850310008857,
-            "width": 111.39061116031894,
-            "height": 15.305580159433134,
-            "targetSceneId": 2,
-            "playerStartX": 96,
-            "playerStartY": 851
+            "playerStartX": 101,
+            "playerStartY": 363
           }
         ]
       },
       "boundaries": {
         "left": 0,
-        "right": 4305,
+        "right": 3858,
         "top": 0,
         "bottom": 1000
       },
@@ -1703,11 +1816,12 @@
         "playerStartX": 187,
         "playerStartY": 801,
         "gravity": 0.8,
-        "playerSpeed": 5
+        "playerSpeed": 5,
+        "defaultBackgroundColor": "#000000"
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-27T18:31:34.743Z"
+        "modified": "2025-09-28T05:59:03.670Z"
       }
     },
     {
@@ -1719,7 +1833,7 @@
           "id": 9,
           "x": 3,
           "y": 669.607617360496,
-          "width": 416,
+          "width": 3136,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "cobblestone",
@@ -1797,7 +1911,7 @@
       "enemies": [],
       "lootables": [],
       "background": {
-        "name": "Stone cave 1",
+        "name": "Flay_Night_4_BG",
         "layers": []
       },
       "transitions": {
@@ -1821,14 +1935,14 @@
         "bottom": 1000
       },
       "settings": {
-        "playerStartX": 103,
-        "playerStartY": 571,
+        "playerStartX": 101,
+        "playerStartY": 363,
         "gravity": 0.8,
         "playerSpeed": 5
       },
       "metadata": {
         "created": "2025-09-21T13:12:09.327Z",
-        "modified": "2025-09-27T09:44:47.116Z"
+        "modified": "2025-09-28T05:56:50.421Z"
       }
     }
   ],
@@ -1847,5 +1961,17 @@
       "width": 231,
       "height": 122
     }
+  },
+  "playerSettings": {
+    "maxHealth": 100,
+    "healthRegen": 3,
+    "maxStamina": 100,
+    "staminaRegen": 5,
+    "attackDamage": 25,
+    "walkSpeed": 5,
+    "runSpeed": 10,
+    "jumpForce": 17,
+    "runningCost": 15,
+    "jumpCost": 0.8
   }
 }

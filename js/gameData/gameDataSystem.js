@@ -22,6 +22,7 @@ class GameDataSystem {
             classes: [],
             weapons: [],
             items: [],
+            inventoryItems: [],
             gameSettings: {
                 hud: {
                     position: { x: 20, y: 20 },
@@ -265,6 +266,55 @@ class GameDataSystem {
 
         // Update only playerSettings in localStorage
         this.storage.updatePlayerSettings(this.gameData.playerSettings);
+    }
+
+    // Inventory Items Management
+    addInventoryItem(item) {
+        // Ensure the item has required properties
+        if (!item.id || !item.name) {
+            console.error('Inventory item must have id and name properties');
+            return false;
+        }
+
+        // Check if item with this ID already exists
+        const existingIndex = this.gameData.inventoryItems.findIndex(i => i.id === item.id);
+        if (existingIndex !== -1) {
+            console.warn(`Inventory item with ID '${item.id}' already exists. Updating existing item.`);
+            this.gameData.inventoryItems[existingIndex] = { ...item };
+        } else {
+            this.gameData.inventoryItems.push({ ...item });
+        }
+
+        // Save to localStorage
+        this.storage.updateInventoryItems(this.gameData.inventoryItems);
+        return true;
+    }
+
+    updateInventoryItems(inventoryItems) {
+        // Update inventory items in memory
+        this.gameData.inventoryItems = [...inventoryItems];
+
+        // Save to localStorage via storage system
+        this.storage.updateInventoryItems(this.gameData.inventoryItems);
+    }
+
+    removeInventoryItem(itemId) {
+        const index = this.gameData.inventoryItems.findIndex(item => item.id === itemId);
+        if (index !== -1) {
+            this.gameData.inventoryItems.splice(index, 1);
+            this.storage.updateInventoryItems(this.gameData.inventoryItems);
+            return true;
+        }
+        return false;
+    }
+
+    getInventoryItems() {
+        return [...this.gameData.inventoryItems];
+    }
+
+    clearInventoryItems() {
+        this.gameData.inventoryItems = [];
+        this.storage.updateInventoryItems(this.gameData.inventoryItems);
     }
 
     // Collect current game state

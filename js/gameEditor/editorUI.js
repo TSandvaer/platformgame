@@ -96,6 +96,7 @@ class EditorUI {
             'sceneProperties',
             'viewportEditor',
             'propsEditor',
+            'inventoryItemsEditor',
             'lootablesEditor',
             'platformEditor',
             'enemyEditor'
@@ -112,6 +113,11 @@ class EditorUI {
         const targetEditor = document.getElementById(editorId);
         if (targetEditor) {
             targetEditor.style.display = 'block';
+        }
+
+        // Refresh inventory items list when switching to inventory items editor
+        if (editorId === 'inventoryItemsEditor' && this.game?.uiEventHandler) {
+            this.game.uiEventHandler.refreshInventoryItemsList();
         }
     }
 

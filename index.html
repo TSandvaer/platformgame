@@ -611,6 +611,7 @@
                     <button class="editor-tab active" data-editor="sceneProperties">Scenes</button>
                     <button class="editor-tab" data-editor="viewportEditor">Viewport</button>
                     <button class="editor-tab" data-editor="propsEditor">Props</button>
+                    <button class="editor-tab" data-editor="inventoryItemsEditor">Inventory Items</button>
                     <button class="editor-tab" data-editor="lootablesEditor">Lootables</button>
                     <button class="editor-tab" data-editor="platformEditor">Platforms</button>
                     <button class="editor-tab" data-editor="enemyEditor">Enemies</button>
@@ -924,6 +925,31 @@
                         <div style="font-size: 11px; color: #888; margin-top: 5px;">
                             Hold Ctrl+Click to multi-select props
                         </div>
+                    </div>
+                </div>
+
+                <div class="platform-editor" id="inventoryItemsEditor" style="display: none;">
+                    <h4>Inventory Items Editor</h4>
+                    <div class="property-row">
+                        <a href="inventory-sprite-editor.html" class="btn small" target="_blank" style="text-decoration: none;">🎒 Open Inventory Sprite Editor</a>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Description:</span>
+                        <div style="background-color: #444; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.4;">
+                            Inventory items belong to the entire game and are not placed on maps.
+                            Use the sprite editor to locate items in the sprite sheet and generate
+                            the proper data structure for gamedata.js.
+                        </div>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Current Items:</span>
+                        <div id="inventoryItemsList" style="background-color: #444; padding: 10px; border-radius: 4px; font-size: 12px; max-height: 150px; overflow-y: auto;">
+                            No inventory items defined yet. Use the sprite editor to add items.
+                        </div>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small" id="refreshInventoryItems">Refresh Item List</button>
+                        <button class="btn small secondary" id="clearInventoryItems">Clear All Items</button>
                     </div>
                 </div>
 
@@ -1268,6 +1294,9 @@
 
     <!-- Prop System Scripts -->
     <script src="js/props/propData.js"></script>
+
+    <!-- Inventory System Scripts -->
+    <script src="js/inventory/inventoryItemsData.js"></script>
     <script src="js/props/propRenderer.js"></script>
     <script src="js/props/propCollisions.js"></script>
     <script src="js/props/propManager.js"></script>

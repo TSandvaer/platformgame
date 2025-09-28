@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Items Sprite Editor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #555;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        .btn.secondary {
+            background-color: #666;
+        }
+
+        .btn.secondary:hover {
+            background-color: #555;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .sprite-area {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sprite-container {
+            position: relative;
+            display: inline-block;
+            border: 2px solid #444;
+            background-color: #2a2a2a;
+            background-image:
+                linear-gradient(45deg, #333 25%, transparent 25%),
+                linear-gradient(-45deg, #333 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #333 75%),
+                linear-gradient(-45deg, transparent 75%, #333 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .sprite-image {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            cursor: crosshair;
+        }
+
+        .selection-overlay {
+            position: absolute;
+            border: 2px solid #00ff00;
+            background-color: rgba(0, 255, 0, 0.2);
+            pointer-events: none;
+            display: none;
+        }
+
+        .info-panel {
+            width: 350px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .info-section:last-child {
+            border-bottom: none;
+        }
+
+        .info-section h3 {
+            margin: 0 0 10px 0;
+            color: #4CAF50;
+            font-size: 16px;
+        }
+
+        .coord-display {
+            background-color: #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .coord-label {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .coord-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background-color: #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .copy-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .zoom-controls {
+            margin-bottom: 15px;
+        }
+
+        .zoom-btn {
+            background-color: #666;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin: 0 2px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .zoom-btn:hover {
+            background-color: #555;
+        }
+
+        .zoom-btn.active {
+            background-color: #4CAF50;
+        }
+
+        .current-selection {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #666;
+        }
+
+        .code-output {
+            background-color: #1e1e1e;
+            border: 1px solid #666;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎒 Inventory Items Sprite Editor</h1>
+        <div>
+            <a href="index.html" class="btn secondary">← Back to Game</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sprite-area">
+            <div class="zoom-controls">
+                <span style="color: #aaa; margin-right: 10px;">Zoom:</span>
+                <button class="zoom-btn" data-zoom="1">1x</button>
+                <button class="zoom-btn active" data-zoom="2">2x</button>
+                <button class="zoom-btn" data-zoom="3">3x</button>
+                <button class="zoom-btn" data-zoom="4">4x</button>
+                <button class="zoom-btn" data-zoom="6">6x</button>
+            </div>
+
+            <div class="sprite-container">
+                <img id="spriteImage" class="sprite-image" src="sprites/Inventory item sprite sets/inventory_items_pack1.png" alt="Inventory Items Pack 1">
+                <div id="selectionOverlay" class="selection-overlay"></div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-section">
+                <h3>Instructions</h3>
+                <div class="instructions">
+                    1. Click and drag on the sprite to select an item<br>
+                    2. Enter a name for the inventory item<br>
+                    3. The coordinates and gamedata.js code will be generated<br>
+                    4. Copy the code to add to your game data<br>
+                    5. Use different zoom levels for precision
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Mouse Position</h3>
+                <div class="coord-display">
+                    <div class="coord-label">X: <span id="mouseX" class="coord-value">0</span></div>
+                    <div class="coord-label">Y: <span id="mouseY" class="coord-value">0</span></div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Current Selection</h3>
+                <div class="current-selection">
+                    <div class="coord-display">
+                        <div class="coord-label">Top-Left X: <span id="selectionX" class="coord-value">-</span></div>
+                        <div class="coord-label">Top-Left Y: <span id="selectionY" class="coord-value">-</span></div>
+                        <div class="coord-label">Width: <span id="selectionWidth" class="coord-value">-</span></div>
+                        <div class="coord-label">Height: <span id="selectionHeight" class="coord-value">-</span></div>
+                    </div>
+                    <button class="copy-btn" id="copyCoords">Copy Coordinates</button>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Item Details</h3>
+                <div style="margin-bottom: 10px;">
+                    <label for="itemNameInput" style="display: block; margin-bottom: 5px; color: #aaa;">Item Name:</label>
+                    <input type="text" id="itemNameInput" placeholder="e.g., Health Potion" style="width: 100%; padding: 8px; border: 1px solid #444; background: #1a1a1a; color: #fff; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="itemTypeInput" style="display: block; margin-bottom: 5px; color: #aaa;">Item Type:</label>
+                    <select id="itemTypeInput" style="width: 100%; padding: 8px; border: 1px solid #444; background: #1a1a1a; color: #fff; border-radius: 4px;">
+                        <option value="consumable">Consumable</option>
+                        <option value="weapon">Weapon</option>
+                        <option value="armor">Armor</option>
+                        <option value="accessory">Accessory</option>
+                        <option value="tool">Tool</option>
+                        <option value="material">Material</option>
+                        <option value="quest">Quest Item</option>
+                        <option value="misc">Miscellaneous</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="itemDescInput" style="display: block; margin-bottom: 5px; color: #aaa;">Description:</label>
+                    <textarea id="itemDescInput" placeholder="Item description..." style="width: 100%; height: 60px; padding: 8px; border: 1px solid #444; background: #1a1a1a; color: #fff; border-radius: 4px; resize: vertical;"></textarea>
+                </div>
+                <button class="copy-btn" id="applyDetails" style="margin-top: 10px; padding: 8px 15px;">Update Code</button>
+            </div>
+
+            <div class="info-section">
+                <h3>GameData.js Code</h3>
+                <div class="code-output" id="codeOutput">
+                    Select an area and enter item details to generate code...
+                </div>
+                <button class="copy-btn" id="copyCode">Copy GameData.js Code</button>
+            </div>
+
+            <div class="info-section">
+                <h3>Item Object (Single)</h3>
+                <div class="code-output" id="itemObjectOutput" style="background: #0a0a0a; border: 1px solid #333;">
+                    Select an area to generate item object...
+                </div>
+                <button class="copy-btn" id="copyItemObject">Copy Item Object</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class InventorySpriteEditor {
+            constructor() {
+                this.spriteImage = document.getElementById('spriteImage');
+                this.selectionOverlay = document.getElementById('selectionOverlay');
+                this.isSelecting = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.currentZoom = 2;
+                this.originalImageWidth = 0;
+                this.originalImageHeight = 0;
+
+                this.init();
+            }
+
+            init() {
+                this.spriteImage.addEventListener('load', () => {
+                    this.originalImageWidth = this.spriteImage.naturalWidth;
+                    this.originalImageHeight = this.spriteImage.naturalHeight;
+                    this.updateImageSize();
+                });
+
+                this.spriteImage.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                this.spriteImage.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.spriteImage.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                this.spriteImage.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+
+                // Zoom controls
+                document.querySelectorAll('.zoom-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const zoom = parseInt(btn.dataset.zoom);
+                        this.setZoom(zoom);
+
+                        // Update active button
+                        document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                    });
+                });
+
+                // Copy buttons
+                document.getElementById('copyCoords').addEventListener('click', this.copyCoordinates.bind(this));
+                document.getElementById('copyCode').addEventListener('click', this.copyCode.bind(this));
+                document.getElementById('copyItemObject').addEventListener('click', this.copyItemObject.bind(this));
+
+                // Apply details button
+                document.getElementById('applyDetails').addEventListener('click', () => {
+                    this.updateCodeOutputs();
+                });
+
+                // Update code when inputs change
+                ['itemNameInput', 'itemTypeInput', 'itemDescInput'].forEach(id => {
+                    document.getElementById(id).addEventListener('input', () => {
+                        this.updateCodeOutputs();
+                    });
+                });
+
+                // If image is already loaded (cached)
+                if (this.spriteImage.complete) {
+                    this.originalImageWidth = this.spriteImage.naturalWidth;
+                    this.originalImageHeight = this.spriteImage.naturalHeight;
+                    this.updateImageSize();
+                }
+            }
+
+            setZoom(zoom) {
+                this.currentZoom = zoom;
+                this.updateImageSize();
+            }
+
+            updateImageSize() {
+                if (this.originalImageWidth && this.originalImageHeight) {
+                    this.spriteImage.style.width = (this.originalImageWidth * this.currentZoom) + 'px';
+                    this.spriteImage.style.height = (this.originalImageHeight * this.currentZoom) + 'px';
+                }
+            }
+
+            getImageCoordinates(clientX, clientY) {
+                const rect = this.spriteImage.getBoundingClientRect();
+                const x = Math.floor((clientX - rect.left) / this.currentZoom);
+                const y = Math.floor((clientY - rect.top) / this.currentZoom);
+                return { x, y };
+            }
+
+            handleMouseDown(e) {
+                e.preventDefault();
+                const coords = this.getImageCoordinates(e.clientX, e.clientY);
+                this.startX = coords.x;
+                this.startY = coords.y;
+                this.isSelecting = true;
+
+                // Show overlay at start position
+                this.selectionOverlay.style.display = 'block';
+                this.updateOverlay(this.startX, this.startY, 0, 0);
+            }
+
+            handleMouseMove(e) {
+                const coords = this.getImageCoordinates(e.clientX, e.clientY);
+
+                // Update mouse position display
+                document.getElementById('mouseX').textContent = coords.x;
+                document.getElementById('mouseY').textContent = coords.y;
+
+                if (this.isSelecting) {
+                    const width = coords.x - this.startX;
+                    const height = coords.y - this.startY;
+                    this.updateOverlay(this.startX, this.startY, width, height);
+                }
+            }
+
+            handleMouseUp(e) {
+                if (this.isSelecting) {
+                    const coords = this.getImageCoordinates(e.clientX, e.clientY);
+                    const endX = coords.x;
+                    const endY = coords.y;
+
+                    // Calculate final selection bounds
+                    const x = Math.min(this.startX, endX);
+                    const y = Math.min(this.startY, endY);
+                    const width = Math.abs(endX - this.startX);
+                    const height = Math.abs(endY - this.startY);
+
+                    if (width > 0 && height > 0) {
+                        this.updateSelection(x, y, width, height);
+                        this.updateOverlay(x, y, width, height);
+                    } else {
+                        this.selectionOverlay.style.display = 'none';
+                    }
+                }
+                this.isSelecting = false;
+            }
+
+            handleMouseLeave(e) {
+                this.isSelecting = false;
+            }
+
+            updateOverlay(x, y, width, height) {
+                // Convert back to display coordinates
+                const displayX = x * this.currentZoom;
+                const displayY = y * this.currentZoom;
+                const displayWidth = width * this.currentZoom;
+                const displayHeight = height * this.currentZoom;
+
+                this.selectionOverlay.style.left = displayX + 'px';
+                this.selectionOverlay.style.top = displayY + 'px';
+                this.selectionOverlay.style.width = Math.abs(displayWidth) + 'px';
+                this.selectionOverlay.style.height = Math.abs(displayHeight) + 'px';
+            }
+
+            updateSelection(x, y, width, height) {
+                // Update coordinate display
+                document.getElementById('selectionX').textContent = x;
+                document.getElementById('selectionY').textContent = y;
+                document.getElementById('selectionWidth').textContent = width;
+                document.getElementById('selectionHeight').textContent = height;
+
+                this.updateCodeOutputs();
+            }
+
+            updateCodeOutputs() {
+                const x = document.getElementById('selectionX').textContent;
+                const y = document.getElementById('selectionY').textContent;
+                const width = document.getElementById('selectionWidth').textContent;
+                const height = document.getElementById('selectionHeight').textContent;
+
+                if (x !== '-') {
+                    // Generate gamedata.js code
+                    const gameDataCode = this.generateGameDataCode(parseInt(x), parseInt(y), parseInt(width), parseInt(height));
+                    document.getElementById('codeOutput').textContent = gameDataCode;
+
+                    // Generate item object code
+                    const itemObjectCode = this.generateItemObjectCode(parseInt(x), parseInt(y), parseInt(width), parseInt(height));
+                    document.getElementById('itemObjectOutput').textContent = itemObjectCode;
+                }
+            }
+
+            generateGameDataCode(x, y, width, height) {
+                const itemName = document.getElementById('itemNameInput').value.trim() || 'New Item';
+                const itemType = document.getElementById('itemTypeInput').value;
+                const itemDesc = document.getElementById('itemDescInput').value.trim() || 'Item description';
+
+                const itemId = this.sanitizeItemId(itemName);
+
+                return `// Add to gamedata.js in the inventoryItems array:
+{
+    id: '${itemId}',
+    name: '${itemName}',
+    type: '${itemType}',
+    description: '${itemDesc}',
+    sprite: {
+        src: 'sprites/Inventory item sprite sets/inventory_items_pack1.png',
+        x: ${x},
+        y: ${y},
+        width: ${width},
+        height: ${height}
+    },
+    stackable: ${itemType === 'consumable' || itemType === 'material' ? 'true' : 'false'},
+    maxStack: ${itemType === 'consumable' || itemType === 'material' ? '99' : '1'},
+    rarity: 'common', // common, uncommon, rare, epic, legendary
+    value: 10 // Base value for selling/buying
+},
+
+// Original coordinates: X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}`;
+            }
+
+            generateItemObjectCode(x, y, width, height) {
+                const itemName = document.getElementById('itemNameInput').value.trim() || 'New Item';
+                const itemType = document.getElementById('itemTypeInput').value;
+                const itemDesc = document.getElementById('itemDescInput').value.trim() || 'Item description';
+
+                const itemId = this.sanitizeItemId(itemName);
+
+                return `{
+    id: '${itemId}',
+    name: '${itemName}',
+    type: '${itemType}',
+    description: '${itemDesc}',
+    sprite: {
+        src: 'sprites/Inventory item sprite sets/inventory_items_pack1.png',
+        x: ${x},
+        y: ${y},
+        width: ${width},
+        height: ${height}
+    },
+    stackable: ${itemType === 'consumable' || itemType === 'material' ? 'true' : 'false'},
+    maxStack: ${itemType === 'consumable' || itemType === 'material' ? '99' : '1'},
+    rarity: 'common',
+    value: 10
+}`;
+            }
+
+            sanitizeItemId(name) {
+                if (!name) return 'newItem';
+
+                // Convert to camelCase and remove invalid characters
+                return name
+                    .toLowerCase()
+                    .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
+                    .split(/\s+/) // Split by whitespace
+                    .map((word, index) => {
+                        if (index === 0) return word;
+                        return word.charAt(0).toUpperCase() + word.slice(1);
+                    })
+                    .join('')
+                    .replace(/^[0-9]/, 'item$&'); // Ensure doesn't start with number
+            }
+
+            copyCoordinates() {
+                const x = document.getElementById('selectionX').textContent;
+                const y = document.getElementById('selectionY').textContent;
+                const width = document.getElementById('selectionWidth').textContent;
+                const height = document.getElementById('selectionHeight').textContent;
+
+                if (x !== '-') {
+                    const text = `X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.showCopyFeedback('copyCoords');
+                    });
+                }
+            }
+
+            copyCode() {
+                const code = document.getElementById('codeOutput').textContent;
+                if (code && !code.includes('Select an area')) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        this.showCopyFeedback('copyCode');
+                    });
+                }
+            }
+
+            copyItemObject() {
+                const code = document.getElementById('itemObjectOutput').textContent;
+                if (code && !code.includes('Select an area')) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        this.showCopyFeedback('copyItemObject');
+                    });
+                }
+            }
+
+            showCopyFeedback(buttonId) {
+                const btn = document.getElementById(buttonId);
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#4CAF50';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.backgroundColor = '#2196F3';
+                }, 1000);
+            }
+        }
+
+        // Initialize the sprite editor when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new InventorySpriteEditor();
+        });
+    </script>
+</body>
+</html>
