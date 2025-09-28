@@ -375,6 +375,74 @@ class PropSystem {
         this.data.updateAllDestruction(deltaTime, platformSystem);
     }
 
+    // Update chest animations
+    updateChestAnimations(deltaTime) {
+        for (const prop of this.data.props) {
+            if (!prop.isChest) continue;
+
+            // Update animation timer if chest is animating
+            if (prop.chestState === 'opening' || prop.chestState === 'closing') {
+                prop.chestAnimTimer += deltaTime;
+
+                if (prop.chestAnimTimer >= prop.chestAnimSpeed) {
+                    prop.chestAnimTimer = 0;
+
+                    if (prop.chestState === 'opening') {
+                        prop.chestAnimFrame++;
+                        if (prop.chestAnimFrame >= 6) {
+                            prop.chestAnimFrame = 6;
+                            prop.chestState = 'open';
+                        }
+                    } else if (prop.chestState === 'closing') {
+                        prop.chestAnimFrame--;
+                        if (prop.chestAnimFrame <= 0) {
+                            prop.chestAnimFrame = 0;
+                            prop.chestState = 'closed';
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Check if player is near any chest and handle interaction
+    checkChestInteraction(player) {
+        const interactionDistance = 60; // Distance at which player can interact
+
+        for (const prop of this.data.props) {
+            if (!prop.isChest) continue;
+
+            const propBounds = this.getPropBounds(prop);
+            const playerCenterX = player.x + player.width / 2;
+            const playerCenterY = player.y + player.height / 2;
+            const propCenterX = (propBounds.left + propBounds.right) / 2;
+            const propCenterY = (propBounds.top + propBounds.bottom) / 2;
+
+            const distance = Math.sqrt(
+                Math.pow(playerCenterX - propCenterX, 2) +
+                Math.pow(playerCenterY - propCenterY, 2)
+            );
+
+            if (distance <= interactionDistance) {
+                return prop; // Return the chest that's close enough to interact with
+            }
+        }
+
+        return null;
+    }
+
+    // Toggle chest open/close state
+    toggleChest(chest) {
+        if (!chest || !chest.isChest) return;
+
+        if (chest.chestState === 'closed') {
+            chest.chestState = 'opening';
+        } else if (chest.chestState === 'open') {
+            chest.chestState = 'closing';
+        }
+        // Don't toggle if already animating
+    }
+
     // Check if player attack hits any destroyable props
     checkPlayerAttackCollisions(player) {
         if (!player.isAttacking || player.isDead) return [];

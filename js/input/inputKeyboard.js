@@ -19,6 +19,11 @@ class InputKeyboard {
         // Store key state for regular game input
         const key = e.key.toLowerCase();
 
+        // Handle 'E' key for chest interaction (not in development mode)
+        if (key === 'e' && !this.game.isDevelopmentMode) {
+            this.handleChestInteraction();
+        }
+
         // Don't register arrow keys for player movement if we're nudging props
         const isArrowKey = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key);
         const isNudgingProp = this.game.isDevelopmentMode &&
@@ -368,5 +373,19 @@ class InputKeyboard {
 
     clearKeys() {
         this.keys = {};
+    }
+
+    handleChestInteraction() {
+        // Check if player is near a chest
+        const nearbyChest = this.game.propSystem.checkChestInteraction(this.game.playerSystem.data);
+
+        if (nearbyChest) {
+            // Toggle the chest state
+            this.game.propSystem.toggleChest(nearbyChest);
+
+            // Show feedback message
+            const action = nearbyChest.chestState === 'opening' ? 'Opening' : 'Closing';
+            this.game.showFeedbackMessage(`${action} chest...`, nearbyChest.x, nearbyChest.y - 20);
+        }
     }
 }

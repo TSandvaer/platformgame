@@ -109,6 +109,15 @@ class PropData {
             lampLighted: { tileX: 30.28, tileY: 0.16, width: 13, height: 19, name: 'lampLighted', hasGlow: true },
             torch: { tileX: 20.38, tileY: 1.16, width: 8, height: 24, name: 'Torch', hasFlame: true },
 
+            // Chests (4 different styles, 7 frames each)
+            // These don't use the village props tileset, they use their own sprite sheet
+            // Setting tileX and tileY to -1 to indicate they don't use the tileset
+            // Chest graphic is 32x40 pixels (extra height for lid animation)
+            chest1: { tileX: -1, tileY: -1, width: 32, height: 40, name: 'Chest Style 1', isChest: true, chestRow: 0 },
+            chest2: { tileX: -1, tileY: -1, width: 32, height: 40, name: 'Chest Style 2', isChest: true, chestRow: 1 },
+            chest3: { tileX: -1, tileY: -1, width: 32, height: 40, name: 'Chest Style 3', isChest: true, chestRow: 2 },
+            chest4: { tileX: -1, tileY: -1, width: 32, height: 40, name: 'Chest Style 4', isChest: true, chestRow: 3 },
+
             // Vegetation
             bush1: { tileX: 14.03, tileY: 17.84, width: 93, height: 40, name: 'bush1' },
             bush2: { tileX: 11.13, tileY: 18.06, width: 57, height: 32, name: 'Bush2' },
@@ -198,6 +207,12 @@ class PropData {
             sizeMultiplier: sizeMultiplier,  // Resolution-independent size multiplier
             rotation: 0,            // Rotation angle in radians
             damagePerSecond: damagePerSecond, // Damage dealt to player per second
+            // Chest-specific properties
+            isChest: propType.isChest || false,
+            chestState: propType.isChest ? 'closed' : null, // 'closed', 'opening', 'open', 'closing'
+            chestAnimFrame: propType.isChest ? 0 : null,
+            chestAnimTimer: 0,
+            chestAnimSpeed: 100, // milliseconds per frame
             // Destruction system properties
             destroyable: destroyable,
             maxDurability: destroyable ? maxDurability : 0,

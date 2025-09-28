@@ -450,6 +450,7 @@ class PlatformRPG {
 
         // Update prop destruction animations
         this.propSystem.updateDestruction(this.deltaTime, this.platformSystem);
+        this.propSystem.updateChestAnimations(this.deltaTime);
 
         // Update lootable animations
         if (this.lootableSystem) {
@@ -643,6 +644,14 @@ class PlatformRPG {
 
         // Render torch particles after obstacle props (they need the same transformation)
         this.propSystem.renderParticles(this.viewport, this.cameraSystem.camera, this.platformSystem.platforms);
+
+        // Render interaction prompt if player is near a chest (only in production mode)
+        if (!this.isDevelopmentMode) {
+            const nearbyChest = this.propSystem.checkChestInteraction(this.playerSystem.data);
+            if (nearbyChest) {
+                this.propSystem.renderer.renderInteractionPrompt(nearbyChest, this.viewport, this.cameraSystem.camera, this.propSystem.propTypes);
+            }
+        }
 
         // Render lootables after obstacle props (they need the same transformation)
         if (this.lootableSystem) {

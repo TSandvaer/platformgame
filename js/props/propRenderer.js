@@ -8,7 +8,8 @@ class PropRenderer {
         // Initialize prop-specific sprites
         this.propSprites = {
             torchFlame: { image: null, frameWidth: 21, frameHeight: 21, totalFrames: 6 },
-            barrelDestruction: { image: null, frameWidth: 0, frameHeight: 0, totalFrames: 5 }
+            barrelDestruction: { image: null, frameWidth: 0, frameHeight: 0, totalFrames: 5 },
+            chestAnimation: { image: null, frameWidth: 73, frameHeight: 73, totalFrames: 7, rows: 4 }
         };
         this.spritesLoaded = false;
         this.loadSprites();
@@ -16,7 +17,7 @@ class PropRenderer {
 
     loadSprites() {
         let loadedCount = 0;
-        const totalImages = 2; // Torch flame and barrel destruction
+        const totalImages = 3; // Torch flame, barrel destruction, and chest animation
 
         const checkAllLoaded = () => {
             if (loadedCount === totalImages) {
@@ -58,6 +59,20 @@ class PropRenderer {
         };
         barrelDestructionImg.src = 'sprites/prop destruction animations/barrel_destruction.png';
         this.propSprites.barrelDestruction.image = barrelDestructionImg;
+
+        // Load chest animation sprite sheet
+        const chestImg = new Image();
+        chestImg.onload = () => {
+            loadedCount++;
+            checkAllLoaded();
+        };
+        chestImg.onerror = () => {
+            console.error('Failed to load chest animation sprite');
+            loadedCount++;
+            checkAllLoaded();
+        };
+        chestImg.src = 'sprites/Pixel Art Platformer/Texture/TX Chest Animation.png';
+        this.propSprites.chestAnimation.image = chestImg;
     }
 
     renderProps(props, propTypes, isDevelopmentMode, selectedProp, renderObstacles = false, selectedProps = [], viewport, camera) {
@@ -132,6 +147,12 @@ class PropRenderer {
     drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps = [], viewport = null) {
         const propType = propTypes[prop.type];
         if (!propType) return;
+
+        // For chests, we'll handle rendering differently since they use their own sprite sheet
+        if (prop.isChest && this.propSprites.chestAnimation.image) {
+            this.drawChestProp(prop, propType, isDevelopmentMode, selectedProp, selectedProps, viewport);
+            return;
+        }
 
         const tileset = this.platformSprites.villageProps;
         if (!tileset.image) return;
@@ -229,6 +250,9 @@ class PropRenderer {
                 );
                 this.ctx.globalAlpha = 1.0;
             }
+        } else if (prop.isChest && this.propSprites.chestAnimation.image) {
+            // Render chest with current animation frame
+            this.renderChest(prop, propType, renderWidth, renderHeight, viewportScale);
         } else {
             // Draw the normal prop sprite
             this.ctx.drawImage(
@@ -659,5 +683,204 @@ class PropRenderer {
     // Call this once per frame after all props have been rendered
     renderAllParticles(viewport, camera, platforms) {
         this.updateAndRenderParticles(viewport, camera, platforms);
+    }
+
+    drawChestProp(prop, propType, isDevelopmentMode, selectedProp, selectedProps = [], viewport = null) {
+        const chestSprite = this.propSprites.chestAnimation;
+        if (!chestSprite.image) return;
+
+        // Use sizeMultiplier for resolution-independent sizing
+        const sizeMultiplier = prop.sizeMultiplier !== undefined ? prop.sizeMultiplier : 1.0;
+
+        // Apply viewport scaling if this is an obstacle prop (rendered outside transforms)
+        const viewportScale = viewport ? viewport.scaleX : 1;
+        const renderWidth = propType.width * sizeMultiplier * viewportScale;
+        const renderHeight = propType.height * sizeMultiplier * viewportScale;
+
+        // Get the correct row based on chest style (0-3)
+        const row = propType.chestRow;
+
+        // Get the correct column based on animation frame (0-6)
+        const col = Math.min(prop.chestAnimFrame, 6); // Clamp to max frame
+
+        // The sprite sheet has 64x64 cells with double row spacing
+        const actualCellWidth = 64;
+        const actualCellHeight = 64;
+
+        // The chest closed is about 32x32, but opening animation is taller
+        // We need to capture more height to accommodate the open lid
+        const chestWidth = 32;
+        const chestHeight = 40; // Extra height for open lid animation
+        const paddingOffsetX = 32; // Offset to skip horizontal padding
+        const paddingOffsetY = 24; // Less vertical offset to capture lid animation
+
+        // Calculate position with proper spacing and offset
+        const sourceX = col * actualCellWidth + paddingOffsetX;
+        const sourceY = row * actualCellHeight * 2 + paddingOffsetY; // Double spacing for rows + offset
+
+        // Extract chest with extra height for animation (32x40)
+        const frameWidth = chestWidth;
+        const frameHeight = chestHeight;
+
+        // Disable image smoothing for pixel-perfect rendering
+        this.ctx.imageSmoothingEnabled = false;
+
+        // Save context state for rotation
+        this.ctx.save();
+
+        // Apply rotation if prop has rotation value
+        if (prop.rotation && prop.rotation !== 0) {
+            // Translate to prop center, rotate, then translate back
+            const centerX = prop.x + renderWidth / 2;
+            const centerY = prop.y + renderHeight / 2;
+            this.ctx.translate(centerX, centerY);
+            this.ctx.rotate(prop.rotation);
+            this.ctx.translate(-centerX, -centerY);
+        }
+
+        // Show backgrounds for selected props in development mode
+        if (isDevelopmentMode) {
+            const isMultiSelected = selectedProps.some(p => p.id === prop.id);
+            const isPrimarySelected = selectedProp && selectedProp.id === prop.id;
+
+            if (isMultiSelected) {
+                // Multi-selected props get blue background
+                this.ctx.fillStyle = isPrimarySelected ? '#4444FF' : '#6666DD';
+                this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
+            } else if (isPrimarySelected) {
+                // Single selected prop gets green background
+                this.ctx.fillStyle = '#44FF44';
+                this.ctx.fillRect(prop.x, prop.y, renderWidth, renderHeight);
+            }
+        }
+
+        // Draw the chest sprite
+        this.ctx.drawImage(
+            chestSprite.image,
+            sourceX, sourceY,
+            frameWidth, frameHeight,
+            Math.floor(prop.x), Math.floor(prop.y),
+            Math.floor(renderWidth), Math.floor(renderHeight)
+        );
+
+        // Development mode: show prop boundaries (while still in rotation context)
+        if (isDevelopmentMode) {
+            const isMultiSelected = selectedProps.some(p => p.id === prop.id);
+            const isPrimarySelected = selectedProp && selectedProp.id === prop.id;
+
+            if (isMultiSelected) {
+                // Multi-selected props get thicker blue borders
+                this.ctx.strokeStyle = isPrimarySelected ? '#0066FF' : '#3399FF';
+                this.ctx.lineWidth = isPrimarySelected ? 3 : 2;
+                this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
+
+                // Add group indicator if prop is grouped
+                if (prop.groupId) {
+                    this.ctx.strokeStyle = '#FF9900';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.setLineDash([5, 5]);
+                    this.ctx.strokeRect(prop.x - 2, prop.y - 2, renderWidth + 4, renderHeight + 4);
+                    this.ctx.setLineDash([]);
+                }
+            } else if (isPrimarySelected) {
+                // Single selected prop gets thick green border
+                this.ctx.strokeStyle = prop.isObstacle ? '#FF6B6B' : '#4ECDC4';
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
+            } else {
+                // Unselected props get thin borders
+                this.ctx.strokeStyle = prop.isObstacle ? '#FF9999' : '#99D6CE';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(prop.x, prop.y, renderWidth, renderHeight);
+            }
+        }
+
+        // Restore context state (removes rotation)
+        this.ctx.restore();
+
+        // Re-enable image smoothing
+        this.ctx.imageSmoothingEnabled = true;
+    }
+
+    renderChest(prop, propType, renderWidth, renderHeight, viewportScale) {
+        const chestSprite = this.propSprites.chestAnimation;
+        if (!chestSprite.image) return;
+
+        // Get the correct row based on chest style (0-3)
+        const row = propType.chestRow;
+
+        // Get the correct column based on animation frame (0-6)
+        const col = Math.min(prop.chestAnimFrame, 6); // Clamp to max frame
+
+        // The sprite sheet has 64x64 cells with double row spacing
+        const actualCellWidth = 64;
+        const actualCellHeight = 64;
+
+        // The chest closed is about 32x32, but opening animation is taller
+        // We need to capture more height to accommodate the open lid
+        const chestWidth = 32;
+        const chestHeight = 40; // Extra height for open lid animation
+        const paddingOffsetX = 32; // Offset to skip horizontal padding
+        const paddingOffsetY = 24; // Less vertical offset to capture lid animation
+
+        // Calculate position with proper spacing and offset
+        const sourceX = col * actualCellWidth + paddingOffsetX;
+        const sourceY = row * actualCellHeight * 2 + paddingOffsetY; // Double spacing for rows + offset
+
+        // Extract chest with extra height for animation (32x40)
+        const frameWidth = chestWidth;
+        const frameHeight = chestHeight;
+
+        // Draw the chest sprite
+        this.ctx.drawImage(
+            chestSprite.image,
+            sourceX, sourceY,
+            frameWidth, frameHeight,
+            Math.floor(prop.x), Math.floor(prop.y),
+            Math.floor(renderWidth), Math.floor(renderHeight)
+        );
+    }
+
+    // Render interaction prompt for chests
+    renderInteractionPrompt(nearbyChest, viewport, camera, propTypes) {
+        if (!nearbyChest || !nearbyChest.isChest) return;
+
+        const propType = propTypes[nearbyChest.type];
+        if (!propType) return;
+
+        // Calculate chest position with camera transform
+        let renderX = nearbyChest.x;
+        let renderY = nearbyChest.y;
+        const sizeMultiplier = nearbyChest.sizeMultiplier || 1.0;
+        const renderWidth = propType.width * sizeMultiplier;
+
+        if (viewport && camera) {
+            renderX = (nearbyChest.x - camera.x) * viewport.scaleX + viewport.offsetX;
+            renderY = (nearbyChest.y - camera.y) * viewport.scaleY + viewport.offsetY;
+        }
+
+        // Draw "Press E" prompt above the chest
+        this.ctx.save();
+
+        const promptX = renderX + renderWidth / 2;
+        const promptY = renderY - 30;
+
+        // Draw background for prompt
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.fillRect(promptX - 35, promptY - 15, 70, 25);
+
+        // Draw border
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(promptX - 35, promptY - 15, 70, 25);
+
+        // Draw text
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('Press E', promptX, promptY);
+
+        this.ctx.restore();
     }
 }
