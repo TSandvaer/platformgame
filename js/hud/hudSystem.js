@@ -6,7 +6,7 @@ class HUDSystem {
 
         // HUD positioning and sizing
         this.position = { x: 20, y: 20 };
-        this.width = 220;
+        this.width = 240;  // Increased from 220 to 240 to accommodate extra padding
         this.height = 80;
         this.cornerRadius = 8;
 
@@ -14,12 +14,12 @@ class HUDSystem {
         this.barWidth = 140;
         this.barHeight = 16;
         this.barSpacing = 25;
-        this.barOffsetX = 65;
+        this.barOffsetX = 85;  // Increased from 65 to 85 for more left padding
         this.barOffsetY = 35;
 
         // Gear icon settings
         this.gearSize = 16;
-        this.gearPosition = { x: 8, y: 8 };
+        this.gearPosition = { x: 15, y: 8 };  // Increased from x: 8 to x: 15
 
         // Player stats (will be connected to player system later)
         this.playerStats = {
@@ -32,6 +32,11 @@ class HUDSystem {
         this.coinIconSize = 16;
         this.coinIcon = null;
         this.loadCoinIcon();
+
+        // Fantasy Wooden GUI theme assets
+        this.stoneBackground = null;
+        this.parchmentBackground = null;
+        this.loadWoodenGUIAssets();
 
         // Colors
         this.colors = {
@@ -71,6 +76,30 @@ class HUDSystem {
             console.error('💰 Failed to load coin icon for HUD');
         };
         coinImg.src = 'sprites/Coins/gold/gold.png';
+    }
+
+    loadWoodenGUIAssets() {
+        // Load stone background
+        const stoneImg = new Image();
+        stoneImg.onload = () => {
+            this.stoneBackground = stoneImg;
+            console.log('🏰 Stone background loaded for HUD');
+        };
+        stoneImg.onerror = () => {
+            console.error('🏰 Failed to load stone background for HUD');
+        };
+        stoneImg.src = 'GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  stone.png';
+
+        // Load parchment background
+        const parchmentImg = new Image();
+        parchmentImg.onload = () => {
+            this.parchmentBackground = parchmentImg;
+            console.log('📜 Parchment background loaded for HUD');
+        };
+        parchmentImg.onerror = () => {
+            console.error('📜 Failed to load parchment background for HUD');
+        };
+        parchmentImg.src = 'GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png';
     }
 
     setupGearClickHandler() {
@@ -228,16 +257,8 @@ class HUDSystem {
     render() {
         this.ctx.save();
 
-        // Draw HUD background with rounded corners
-        this.drawRoundedRect(
-            this.position.x,
-            this.position.y,
-            this.width,
-            this.height,
-            this.cornerRadius,
-            this.colors.background,
-            this.colors.border
-        );
+        // Draw HUD background based on current theme
+        this.drawHUDBackground();
 
         // Draw gear icon
         this.drawGearIcon();
@@ -299,8 +320,10 @@ class HUDSystem {
     }
 
     drawStatusBar(label, x, y, current, max, fillColor, bgColor) {
-        // Draw label
-        this.ctx.fillStyle = this.colors.text;
+        // Draw label with theme-appropriate color
+        const currentTheme = this.getCurrentTheme();
+        const textColor = currentTheme === 'fantasy-wooden' ? '#4A2C17' : this.colors.text;
+        this.ctx.fillStyle = textColor;
         this.ctx.font = 'bold 12px Arial';
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'middle';
@@ -345,8 +368,10 @@ class HUDSystem {
             );
         }
 
-        // Draw coin count text
-        this.ctx.fillStyle = this.colors.text;
+        // Draw coin count text with theme-appropriate color
+        const currentTheme = this.getCurrentTheme();
+        const textColor = currentTheme === 'fantasy-wooden' ? '#4A2C17' : this.colors.text;
+        this.ctx.fillStyle = textColor;
         this.ctx.font = 'bold 12px Arial';
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'middle';
@@ -403,6 +428,55 @@ class HUDSystem {
         this.ctx.fillStyle = this.colors.background;
         this.ctx.fill();
         this.ctx.stroke();
+    }
+
+    getCurrentTheme() {
+        // Check if game data system exists and has GUI settings
+        if (this.game.gameDataSystem && this.game.gameDataSystem.gameData && this.game.gameDataSystem.gameData.GUISettings) {
+            return this.game.gameDataSystem.gameData.GUISettings.theme || 'none';
+        }
+        return 'none';
+    }
+
+    drawHUDBackground() {
+        const currentTheme = this.getCurrentTheme();
+
+        if (currentTheme === 'fantasy-wooden' && this.stoneBackground && this.parchmentBackground) {
+            this.drawWoodenHUDBackground();
+        } else {
+            // Draw default HUD background with rounded corners
+            this.drawRoundedRect(
+                this.position.x,
+                this.position.y,
+                this.width,
+                this.height,
+                this.cornerRadius,
+                this.colors.background,
+                this.colors.border
+            );
+        }
+    }
+
+    drawWoodenHUDBackground() {
+        const stoneMargin = 8;
+
+        // Draw stone background
+        this.ctx.drawImage(
+            this.stoneBackground,
+            this.position.x,
+            this.position.y,
+            this.width,
+            this.height
+        );
+
+        // Draw parchment overlay with margin for stone to show
+        this.ctx.drawImage(
+            this.parchmentBackground,
+            this.position.x + stoneMargin,
+            this.position.y + stoneMargin,
+            this.width - (stoneMargin * 2),
+            this.height - (stoneMargin * 2)
+        );
     }
 
     renderDevelopmentOverlay() {

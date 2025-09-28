@@ -41,6 +41,9 @@ class UIEventHandler {
         // Player controls event listeners
         this.setupPlayerControlListeners();
 
+        // GUI settings event listeners
+        this.setupGUISettingsListeners();
+
         // Multi-selection and grouping event listeners
         const groupButton = document.getElementById('groupProps');
         if (groupButton) {
@@ -668,6 +671,70 @@ class UIEventHandler {
         this.applyPlayerSettings();
 
         console.log('🔄 Player settings reset to defaults');
+    }
+
+    setupGUISettingsListeners() {
+        // Load current GUI values into the controls
+        this.loadGUIValues();
+
+        // Apply Settings button
+        const applyBtn = document.getElementById('applyGUISettings');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.applyGUISettings();
+            });
+        }
+
+        // Reset Settings button
+        const resetBtn = document.getElementById('resetGUISettings');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetGUISettings();
+            });
+        }
+
+        // Real-time updates on theme selection changes
+        const themeSelect = document.getElementById('guiThemeSelect');
+        if (themeSelect) {
+            themeSelect.addEventListener('change', () => {
+                // Apply immediately for responsive feedback
+                this.applyGUISettings();
+            });
+        }
+    }
+
+    loadGUIValues() {
+        const gameData = this.game.gameDataSystem ? this.game.gameDataSystem.gameData : null;
+        const guiSettings = gameData?.GUISettings;
+
+        // Load theme selection
+        const themeSelect = document.getElementById('guiThemeSelect');
+        if (themeSelect) {
+            themeSelect.value = guiSettings?.theme || 'none';
+        }
+    }
+
+    applyGUISettings() {
+        // Get values from inputs
+        const theme = document.getElementById('guiThemeSelect')?.value || 'none';
+
+        // Save to localStorage via gameDataSystem
+        const guiSettings = { theme };
+
+        if (this.game.gameDataSystem) {
+            this.game.gameDataSystem.updateGUISettings(guiSettings);
+            console.log('🎨 GUI settings applied:', guiSettings);
+        }
+    }
+
+    resetGUISettings() {
+        // Reset to default values
+        document.getElementById('guiThemeSelect').value = 'none';
+
+        // Apply the reset values
+        this.applyGUISettings();
+
+        console.log('🔄 GUI settings reset to defaults');
     }
 
     healPlayer() {

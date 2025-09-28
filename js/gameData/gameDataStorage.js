@@ -119,6 +119,22 @@ class GameDataStorage {
         return false;
     }
 
+    // Update only the GUISettings in localStorage
+    updateGUISettings(guiSettings) {
+        try {
+            const dataStr = localStorage.getItem(this.storageKey);
+            if (dataStr) {
+                const gameData = JSON.parse(dataStr);
+                gameData.GUISettings = guiSettings;
+                localStorage.setItem(this.storageKey, JSON.stringify(gameData));
+                return true;
+            }
+        } catch (error) {
+            console.error('Error updating GUI settings in localStorage:', error);
+        }
+        return false;
+    }
+
     // Load from localStorage
     loadFromLocalStorage() {
         try {

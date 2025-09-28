@@ -30,6 +30,9 @@ class GameDataSystem {
                     height: 80
                 }
             },
+            GUISettings: {
+                theme: 'none' // Default theme is none (current styling)
+            },
             playerSettings: {
                 maxHealth: 100,
                 healthRegen: 0,
@@ -53,9 +56,10 @@ class GameDataSystem {
         this.importer.initialize();
         this.validator.initialize();
 
-        // Load saved data from localStorage (especially gameSettings and playerSettings)
+        // Load saved data from localStorage (especially gameSettings, playerSettings, and GUISettings)
         this.loadSavedGameSettings();
         this.loadSavedPlayerSettings();
+        this.loadSavedGUISettings();
 
         // Set up event listeners
         this.setupEventListeners();
@@ -268,6 +272,53 @@ class GameDataSystem {
         this.storage.updatePlayerSettings(this.gameData.playerSettings);
     }
 
+    // Load just the GUISettings from localStorage
+    loadSavedGUISettings() {
+        try {
+            const savedData = this.storage.loadFromLocalStorage();
+            if (savedData && savedData.GUISettings) {
+                // Apply only the GUISettings
+                this.gameData.GUISettings = savedData.GUISettings;
+
+                // Apply GUI theme immediately
+                this.applyGUITheme(savedData.GUISettings.theme);
+                console.log('🎨 Loaded saved GUI settings:', savedData.GUISettings);
+            }
+        } catch (error) {
+            console.error('Error loading GUI settings:', error);
+        }
+    }
+
+    updateGUISettings(guiSettings) {
+        if (!guiSettings) return;
+
+        // Update the in-memory gameData
+        this.gameData.GUISettings = { ...this.gameData.GUISettings, ...guiSettings };
+
+        // Update only GUISettings in localStorage
+        this.storage.updateGUISettings(this.gameData.GUISettings);
+
+        // Apply the theme change immediately
+        this.applyGUITheme(guiSettings.theme);
+    }
+
+    // Apply GUI theme to the interface
+    applyGUITheme(theme) {
+        const body = document.body;
+
+        // Remove any existing theme classes
+        body.classList.remove('gui-theme-none', 'gui-theme-fantasy-wooden');
+
+        // Apply new theme class
+        if (theme === 'fantasy-wooden') {
+            body.classList.add('gui-theme-fantasy-wooden');
+            console.log('🎨 Applied Fantasy Wooden GUI theme');
+        } else {
+            body.classList.add('gui-theme-none');
+            console.log('🎨 Applied default (none) GUI theme');
+        }
+    }
+
     // Inventory Items Management
     addInventoryItem(item) {
         // Ensure the item has required properties
@@ -350,7 +401,9 @@ class GameDataSystem {
             gameSettings: {
                 hud: hudSettings
             },
-            playerSettings: this.gameData.playerSettings || this.defaultGameData.playerSettings
+            playerSettings: this.gameData.playerSettings || this.defaultGameData.playerSettings,
+            inventoryItems: this.gameData.inventoryItems || [],
+            GUISettings: this.gameData.GUISettings || this.defaultGameData.GUISettings
         };
     }
 
