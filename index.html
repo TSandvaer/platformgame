@@ -615,19 +615,22 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #333;
-            border: 2px solid #555;
-            border-radius: 6px;
-            padding: 8px;
+            background-color: transparent;
+            border: 1px solid rgba(85, 85, 85, 0.4);
+            border-radius: 3px;
+            padding: 2px;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 80px;
             position: relative;
+            width: fit-content;
+            height: fit-content;
+            min-width: auto;
+            min-height: auto;
         }
 
         .chest-item:hover {
             border-color: #4CAF50;
-            background-color: #404040;
+            background-color: rgba(64, 64, 64, 0.3);
             transform: scale(1.05);
         }
 
@@ -642,19 +645,67 @@
 
         .chest-item-quantity {
             position: absolute;
-            bottom: 2px;
-            right: 4px;
-            background-color: rgba(76, 175, 80, 0.8);
+            bottom: 0px;
+            right: 0px;
+            background-color: rgba(76, 175, 80, 0.9);
             color: white;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
-            padding: 1px 4px;
+            padding: 1px 3px;
             border-radius: 2px;
-            min-width: 12px;
+            min-width: 10px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .chest-empty {
+            width: 100%;
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 40px 20px;
+        }
+
+        /* Context Menu Styles */
+        .context-menu-option:hover {
+            background-color: #404040;
+        }
+
+        .context-menu-option:active {
+            background-color: #4CAF50;
+        }
+
+        /* Player inventory specific styles */
+        .player-inventory-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            border: 1px solid rgba(85, 85, 85, 0.4);
+            border-radius: 3px;
+            padding: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            width: fit-content;
+            height: fit-content;
+            min-width: auto;
+            min-height: auto;
+        }
+
+        .player-inventory-item:hover {
+            border-color: #4CAF50;
+            background-color: rgba(64, 64, 64, 0.3);
+            transform: scale(1.05);
+        }
+
+        .player-inventory-item.consumable:hover {
+            border-color: #8BC34A;
+            background-color: rgba(64, 64, 64, 0.3);
+        }
+
+        .inventory-empty {
             grid-column: 1 / -1;
             text-align: center;
             color: #888;
@@ -1572,7 +1623,7 @@
                     <span class="property-label" id="playerChestDescription">Click on items to collect them</span>
                 </div>
                 <div class="property-row">
-                    <div id="playerChestItemsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; background-color: #444; padding: 15px; border-radius: 4px; min-height: 200px; max-height: 400px; overflow-y: auto;">
+                    <div id="playerChestItemsGrid" style="display: flex; flex-wrap: wrap; gap: 8px; background-color: #444; padding: 15px; border-radius: 4px; min-height: 200px; max-height: 400px; overflow-y: auto; justify-content: flex-start; align-items: flex-start; width: 100%; box-sizing: border-box;">
                         <!-- Items will be dynamically populated here -->
                     </div>
                 </div>
@@ -1580,6 +1631,39 @@
                     <span style="color: #888; font-size: 12px;">Press E or click X to close</span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Player Inventory Modal -->
+    <div id="playerInventoryModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 700px; max-height: 800px;">
+            <div class="modal-header">
+                <h3>Player Inventory</h3>
+                <button class="modal-close" id="closePlayerInventoryModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-row">
+                    <span class="property-label" id="playerInventoryDescription">Right-click consumable items to use them</span>
+                </div>
+                <div class="property-row">
+                    <div id="playerInventoryGrid" style="display: flex; flex-wrap: wrap; gap: 8px; background-color: #444; padding: 15px; border-radius: 4px; min-height: 200px; max-height: 500px; overflow-y: auto; justify-content: flex-start; align-items: flex-start; width: 100%; box-sizing: border-box;">
+                        <!-- Player inventory items will be dynamically populated here -->
+                    </div>
+                </div>
+                <div class="property-row" style="margin-top: 10px; text-align: center;">
+                    <span style="color: #888; font-size: 12px;">Press I to close | Right-click consumables to use</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="itemContextMenu" style="position: absolute; display: none; background-color: #2a2a2a; border: 1px solid #4CAF50; border-radius: 4px; z-index: 10002; min-width: 100px; box-shadow: 0 2px 10px rgba(0,0,0,0.5);">
+        <div id="consumeItemOption" class="context-menu-option" style="padding: 8px 12px; cursor: pointer; color: white; border-bottom: 1px solid #444;">
+            🍀 Consume
+        </div>
+        <div id="discardItemOption" class="context-menu-option" style="padding: 8px 12px; cursor: pointer; color: #ff6b6b;">
+            🗑️ Discard
         </div>
     </div>
 
