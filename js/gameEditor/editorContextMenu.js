@@ -7,9 +7,11 @@ class EditorContextMenu {
     }
 
     initialize() {
-        // Get or create context menu element
+        // Get existing context menu element
         this.contextMenuElement = document.getElementById('contextMenu');
         if (!this.contextMenuElement) {
+            console.error('Context menu element not found in HTML!');
+            // Create it dynamically as fallback
             this.createContextMenuElement();
         }
 
@@ -18,7 +20,7 @@ class EditorContextMenu {
 
         // Set up document click to hide menu
         document.addEventListener('click', (e) => {
-            if (!this.contextMenuElement.contains(e.target)) {
+            if (this.contextMenuElement && !this.contextMenuElement.contains(e.target)) {
                 this.hide();
             }
         });
@@ -82,8 +84,8 @@ class EditorContextMenu {
     }
 
     setupMenuItemListeners() {
-        // Copy coordinates
-        const copyCoords = document.getElementById('copyCoords');
+        // Copy coordinates - Note: HTML element has ID "copyCoordinates" not "copyCoords"
+        const copyCoords = document.getElementById('copyCoordinates');
         if (copyCoords) {
             copyCoords.addEventListener('click', () => {
                 if (this.contextCoords) {
@@ -91,6 +93,8 @@ class EditorContextMenu {
                 }
                 this.hide();
             });
+        } else {
+            console.warn('Copy coordinates button not found in HTML');
         }
 
         // Add platform here
@@ -151,8 +155,16 @@ class EditorContextMenu {
             screenY: e.clientY
         };
 
+        console.log('📋 Context menu showing at world coords:', this.contextCoords.x, this.contextCoords.y);
+
         // Store in editor system for backward compatibility
         this.editor.contextMenuCoords = this.contextCoords;
+
+        // Ensure the menu element exists
+        if (!this.contextMenuElement) {
+            console.error('Context menu element is null!');
+            return;
+        }
 
         // Position the menu at mouse location
         this.contextMenuElement.style.left = `${e.clientX}px`;

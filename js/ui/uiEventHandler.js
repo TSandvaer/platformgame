@@ -621,56 +621,16 @@ class UIEventHandler {
         console.log('🔄 Values being loaded into UI inputs:', valuesToLoad);
 
         // Ensure all values use period as decimal separator for consistent parsing
-        if (maxHealthInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.maxHealth);
-            console.log(`🔄 Setting maxHealth: ${valuesToLoad.maxHealth} -> ${formattedValue}`);
-            maxHealthInput.value = formattedValue;
-        }
-        if (healthRegenInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.healthRegen);
-            console.log(`🔄 Setting healthRegen: ${valuesToLoad.healthRegen} -> ${formattedValue}`);
-            healthRegenInput.value = formattedValue;
-        }
-        if (maxStaminaInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.maxStamina);
-            console.log(`🔄 Setting maxStamina: ${valuesToLoad.maxStamina} -> ${formattedValue}`);
-            maxStaminaInput.value = formattedValue;
-        }
-        if (staminaRegenInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.staminaRegen);
-            console.log(`🔄 Setting staminaRegen: ${valuesToLoad.staminaRegen} -> ${formattedValue}`);
-            staminaRegenInput.value = formattedValue;
-        }
-        if (runningCostInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.runningCost);
-            console.log(`🔄 Setting runningCost: ${valuesToLoad.runningCost} -> ${formattedValue}`);
-            runningCostInput.value = formattedValue;
-        }
-        if (jumpCostInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.jumpCost);
-            console.log(`🔄 Setting jumpCost: ${valuesToLoad.jumpCost} -> ${formattedValue}`);
-            jumpCostInput.value = formattedValue;
-        }
-        if (attackDamageInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.attackDamage);
-            console.log(`🔄 Setting attackDamage: ${valuesToLoad.attackDamage} -> ${formattedValue}`);
-            attackDamageInput.value = formattedValue;
-        }
-        if (walkSpeedInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.walkSpeed);
-            console.log(`🔄 Setting walkSpeed: ${valuesToLoad.walkSpeed} -> ${formattedValue}`);
-            walkSpeedInput.value = formattedValue;
-        }
-        if (runSpeedInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.runSpeed);
-            console.log(`🔄 Setting runSpeed: ${valuesToLoad.runSpeed} -> ${formattedValue}`);
-            runSpeedInput.value = formattedValue;
-        }
-        if (jumpForceInput) {
-            const formattedValue = this.formatNumberForInput(valuesToLoad.jumpForce);
-            console.log(`🔄 Setting jumpForce: ${valuesToLoad.jumpForce} -> ${formattedValue}`);
-            jumpForceInput.value = formattedValue;
-        }
+        if (maxHealthInput) maxHealthInput.value = this.formatNumberForInput(valuesToLoad.maxHealth);
+        if (healthRegenInput) healthRegenInput.value = this.formatNumberForInput(valuesToLoad.healthRegen);
+        if (maxStaminaInput) maxStaminaInput.value = this.formatNumberForInput(valuesToLoad.maxStamina);
+        if (staminaRegenInput) staminaRegenInput.value = this.formatNumberForInput(valuesToLoad.staminaRegen);
+        if (runningCostInput) runningCostInput.value = this.formatNumberForInput(valuesToLoad.runningCost);
+        if (jumpCostInput) jumpCostInput.value = this.formatNumberForInput(valuesToLoad.jumpCost);
+        if (attackDamageInput) attackDamageInput.value = this.formatNumberForInput(valuesToLoad.attackDamage);
+        if (walkSpeedInput) walkSpeedInput.value = this.formatNumberForInput(valuesToLoad.walkSpeed);
+        if (runSpeedInput) runSpeedInput.value = this.formatNumberForInput(valuesToLoad.runSpeed);
+        if (jumpForceInput) jumpForceInput.value = this.formatNumberForInput(valuesToLoad.jumpForce);
 
         console.log('✅ Player values loaded into UI inputs');
     }
@@ -711,12 +671,6 @@ class UIEventHandler {
         const runSpeed = this.parseNumberFromInput(document.getElementById('playerRunSpeed')?.value) || 10;
         const jumpForce = this.parseNumberFromInput(document.getElementById('playerJumpForce')?.value) || 15;
 
-        console.log('🎮 Parsed input values for saving:', {
-            jumpCost: jumpCost,
-            jumpCostInput: document.getElementById('playerJumpCost')?.value,
-            runningCost: runningCost,
-            runningCostInput: document.getElementById('playerRunningCost')?.value
-        });
 
         // Apply the values to player
         player.maxHealth = maxHealth;

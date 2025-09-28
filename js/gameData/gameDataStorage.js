@@ -98,14 +98,7 @@ class GameDataStorage {
                 console.log('🗄️ Storage: Current playerSettings in localStorage:', gameData.playerSettings);
                 gameData.playerSettings = playerSettings;
                 console.log('🗄️ Storage: New playerSettings to save:', playerSettings);
-                console.log('🗄️ Storage: Jump cost details:', {
-                    jumpCost: playerSettings.jumpCost,
-                    jumpCostType: typeof playerSettings.jumpCost,
-                    jumpCostString: playerSettings.jumpCost.toString()
-                });
-                const jsonString = JSON.stringify(gameData);
-                console.log('🗄️ Storage: JSON string contains:', jsonString.substring(jsonString.indexOf('"jumpCost"'), jsonString.indexOf('"jumpCost"') + 30));
-                localStorage.setItem(this.storageKey, jsonString);
+                localStorage.setItem(this.storageKey, JSON.stringify(gameData));
                 console.log('✅ Storage: Player settings successfully written to localStorage');
                 return true;
             } else {
@@ -155,8 +148,6 @@ class GameDataStorage {
             // Load from the main storage key
             const dataStr = localStorage.getItem(this.storageKey);
             if (dataStr) {
-                console.log('🗄️ Raw JSON string from localStorage length:', dataStr.length);
-                console.log('🗄️ JSON jumpCost section:', dataStr.substring(dataStr.indexOf('"jumpCost"'), dataStr.indexOf('"jumpCost"') + 30));
                 const gameData = JSON.parse(dataStr);
                 console.log('📂 Data structure:', {
                     hasScenes: !!gameData.scenes,
@@ -164,13 +155,6 @@ class GameDataStorage {
                     currentSceneId: gameData.currentSceneId,
                     startSceneId: gameData.startSceneId
                 });
-                if (gameData.playerSettings) {
-                    console.log('🗄️ Loaded playerSettings jump cost details:', {
-                        jumpCost: gameData.playerSettings.jumpCost,
-                        jumpCostType: typeof gameData.playerSettings.jumpCost,
-                        jumpCostString: gameData.playerSettings.jumpCost?.toString()
-                    });
-                }
                 return gameData;
             }
             return null;

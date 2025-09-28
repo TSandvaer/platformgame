@@ -117,6 +117,8 @@ class GameDataSystem {
                     player.speed = settings.walkSpeed || 5;
                     player.runSpeed = settings.runSpeed || 10;
                     player.jumpPower = -Math.abs(settings.jumpForce || 15);
+                    player.jumpCost = settings.jumpCost || 10;
+                    player.runningCost = settings.runningCost || 1.5;
 
                     // Ensure current health/stamina don't exceed new maximums
                     if (player.health > player.maxHealth) player.health = player.maxHealth;
