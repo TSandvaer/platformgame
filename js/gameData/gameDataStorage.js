@@ -90,15 +90,29 @@ class GameDataStorage {
     // Update only the playerSettings in localStorage
     updatePlayerSettings(playerSettings) {
         try {
+            console.log('🗄️ Storage: Attempting to update player settings in localStorage');
             const dataStr = localStorage.getItem(this.storageKey);
             if (dataStr) {
+                console.log('🗄️ Storage: Found existing game data in localStorage');
                 const gameData = JSON.parse(dataStr);
+                console.log('🗄️ Storage: Current playerSettings in localStorage:', gameData.playerSettings);
                 gameData.playerSettings = playerSettings;
-                localStorage.setItem(this.storageKey, JSON.stringify(gameData));
+                console.log('🗄️ Storage: New playerSettings to save:', playerSettings);
+                console.log('🗄️ Storage: Jump cost details:', {
+                    jumpCost: playerSettings.jumpCost,
+                    jumpCostType: typeof playerSettings.jumpCost,
+                    jumpCostString: playerSettings.jumpCost.toString()
+                });
+                const jsonString = JSON.stringify(gameData);
+                console.log('🗄️ Storage: JSON string contains:', jsonString.substring(jsonString.indexOf('"jumpCost"'), jsonString.indexOf('"jumpCost"') + 30));
+                localStorage.setItem(this.storageKey, jsonString);
+                console.log('✅ Storage: Player settings successfully written to localStorage');
                 return true;
+            } else {
+                console.warn('⚠️ Storage: No existing game data found in localStorage');
             }
         } catch (error) {
-            console.error('Error updating player settings in localStorage:', error);
+            console.error('❌ Storage: Error updating player settings in localStorage:', error);
         }
         return false;
     }
@@ -141,6 +155,8 @@ class GameDataStorage {
             // Load from the main storage key
             const dataStr = localStorage.getItem(this.storageKey);
             if (dataStr) {
+                console.log('🗄️ Raw JSON string from localStorage length:', dataStr.length);
+                console.log('🗄️ JSON jumpCost section:', dataStr.substring(dataStr.indexOf('"jumpCost"'), dataStr.indexOf('"jumpCost"') + 30));
                 const gameData = JSON.parse(dataStr);
                 console.log('📂 Data structure:', {
                     hasScenes: !!gameData.scenes,
@@ -148,6 +164,13 @@ class GameDataStorage {
                     currentSceneId: gameData.currentSceneId,
                     startSceneId: gameData.startSceneId
                 });
+                if (gameData.playerSettings) {
+                    console.log('🗄️ Loaded playerSettings jump cost details:', {
+                        jumpCost: gameData.playerSettings.jumpCost,
+                        jumpCostType: typeof gameData.playerSettings.jumpCost,
+                        jumpCostString: gameData.playerSettings.jumpCost?.toString()
+                    });
+                }
                 return gameData;
             }
             return null;

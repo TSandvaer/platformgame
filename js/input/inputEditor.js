@@ -91,6 +91,14 @@ class InputEditor {
             }
         });
 
+        // Background selection
+        const backgroundSelect = document.getElementById('backgroundSelect');
+        if (backgroundSelect) {
+            backgroundSelect.addEventListener('change', () => {
+                this.updateSceneBackground(backgroundSelect.value);
+            });
+        }
+
         const updateBoundariesBtn = document.getElementById('updateBoundariesBtn');
         if (updateBoundariesBtn) {
             updateBoundariesBtn.addEventListener('click', () => {
@@ -255,15 +263,38 @@ class InputEditor {
         }
     }
 
+    updateSceneBackground(backgroundName) {
+        const currentScene = this.game.sceneSystem.currentScene;
+        if (currentScene) {
+            currentScene.settings.backgroundName = backgroundName;
+            currentScene.metadata.modified = new Date().toISOString();
+
+            // Load the background immediately
+            if (this.game.backgroundSystem) {
+                this.game.backgroundSystem.loadBackground(backgroundName);
+                console.log(`🖼️ Scene background changed to: ${backgroundName}`);
+            }
+        }
+    }
+
+    // Helper method to parse number from input, handling both comma and period separators
+    parseNumberFromInput(value) {
+        if (!value) return 0;
+        // Replace comma with period for consistent parsing
+        const normalizedValue = value.toString().replace(',', '.');
+        const parsed = parseFloat(normalizedValue);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
     updateSelectedProp() {
         if (!this.game.propSystem.selectedProp) return;
 
         const prop = this.game.propSystem.selectedProp;
-        prop.x = parseFloat(document.getElementById('propX')?.value) || prop.x;
-        prop.y = parseFloat(document.getElementById('propY')?.value) || prop.y;
-        prop.width = parseFloat(document.getElementById('propWidth')?.value) || prop.width;
-        prop.height = parseFloat(document.getElementById('propHeight')?.value) || prop.height;
-        prop.scale = parseFloat(document.getElementById('propScale')?.value) || prop.scale;
+        prop.x = this.parseNumberFromInput(document.getElementById('propX')?.value) || prop.x;
+        prop.y = this.parseNumberFromInput(document.getElementById('propY')?.value) || prop.y;
+        prop.width = this.parseNumberFromInput(document.getElementById('propWidth')?.value) || prop.width;
+        prop.height = this.parseNumberFromInput(document.getElementById('propHeight')?.value) || prop.height;
+        prop.scale = this.parseNumberFromInput(document.getElementById('propScale')?.value) || prop.scale;
         prop.isObstacle = document.getElementById('propIsObstacle')?.checked || false;
     }
 }

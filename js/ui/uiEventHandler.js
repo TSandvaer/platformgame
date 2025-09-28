@@ -216,7 +216,7 @@ class UIEventHandler {
                 this.game.propSystem.selectedProp.isObstacle = document.getElementById('selectedPropObstacle').checked;
 
                 // Update size multiplier
-                const newSize = parseFloat(document.getElementById('propSize').value) || 1.0;
+                const newSize = this.parseNumberFromInput(document.getElementById('propSize').value) || 1.0;
                 this.game.propSystem.selectedProp.sizeMultiplier = newSize;
 
                 // Remove old width/height properties as they're calculated from sizeMultiplier now
@@ -286,7 +286,7 @@ class UIEventHandler {
                 selectedEnemy.maxHealth = parseInt(document.getElementById('enemyHealth').value);
                 selectedEnemy.health = selectedEnemy.maxHealth; // Reset current health to max
                 selectedEnemy.damage = parseInt(document.getElementById('enemyDamage').value);
-                selectedEnemy.speed = parseFloat(document.getElementById('enemySpeed').value);
+                selectedEnemy.speed = this.parseNumberFromInput(document.getElementById('enemySpeed').value);
                 selectedEnemy.isMoving = document.getElementById('enemyIsMoving').checked;
                 selectedEnemy.attractionZone.enabled = document.getElementById('enemyAttractionEnabled').checked;
                 selectedEnemy.movementZone.enabled = document.getElementById('enemyMovementEnabled').checked;
@@ -566,14 +566,31 @@ class UIEventHandler {
     }
 
     loadPlayerValues() {
-        if (!this.game.playerSystem || !this.game.playerSystem.data) return;
+        console.log('🔄 loadPlayerValues() called');
+        if (!this.game.playerSystem || !this.game.playerSystem.data) {
+            console.warn('⚠️ Player system not available for loading values');
+            return;
+        }
 
         const player = this.game.playerSystem.data;
+        console.log('🔄 Current player data:', {
+            maxHealth: player.maxHealth,
+            healthRegenRate: player.healthRegenRate,
+            maxStamina: player.maxStamina,
+            staminaRegenRate: player.staminaRegenRate,
+            attackDamage: player.attackDamage,
+            speed: player.speed,
+            runSpeed: player.runSpeed,
+            jumpPower: player.jumpPower
+        });
 
         // Try to load saved settings first, then fall back to current player values
         let settings = null;
         if (this.game.gameDataSystem && this.game.gameDataSystem.gameData.playerSettings) {
             settings = this.game.gameDataSystem.gameData.playerSettings;
+            console.log('🔄 Found saved settings in gameData:', settings);
+        } else {
+            console.log('🔄 No saved settings found in gameData - using player values');
         }
 
         // Load values into inputs (use saved settings if available, otherwise current player values)
@@ -588,16 +605,93 @@ class UIEventHandler {
         const runSpeedInput = document.getElementById('playerRunSpeed');
         const jumpForceInput = document.getElementById('playerJumpForce');
 
-        if (maxHealthInput) maxHealthInput.value = settings?.maxHealth || player.maxHealth || 100;
-        if (healthRegenInput) healthRegenInput.value = settings?.healthRegen || player.healthRegenRate || 0;
-        if (maxStaminaInput) maxStaminaInput.value = settings?.maxStamina || player.maxStamina || 100;
-        if (staminaRegenInput) staminaRegenInput.value = settings?.staminaRegen || player.staminaRegenRate || 5;
-        if (runningCostInput) runningCostInput.value = settings?.runningCost || player.runningCost || 1.5;
-        if (jumpCostInput) jumpCostInput.value = settings?.jumpCost || player.jumpCost || 10;
-        if (attackDamageInput) attackDamageInput.value = settings?.attackDamage || player.attackDamage || 25;
-        if (walkSpeedInput) walkSpeedInput.value = settings?.walkSpeed || player.speed || 5;
-        if (runSpeedInput) runSpeedInput.value = settings?.runSpeed || player.runSpeed || 10;
-        if (jumpForceInput) jumpForceInput.value = settings?.jumpForce || Math.abs(player.jumpPower) || 15;
+        const valuesToLoad = {
+            maxHealth: settings?.maxHealth || player.maxHealth || 100,
+            healthRegen: settings?.healthRegen || player.healthRegenRate || 0,
+            maxStamina: settings?.maxStamina || player.maxStamina || 100,
+            staminaRegen: settings?.staminaRegen || player.staminaRegenRate || 5,
+            runningCost: settings?.runningCost || player.runningCost || 1.5,
+            jumpCost: settings?.jumpCost || player.jumpCost || 10,
+            attackDamage: settings?.attackDamage || player.attackDamage || 25,
+            walkSpeed: settings?.walkSpeed || player.speed || 5,
+            runSpeed: settings?.runSpeed || player.runSpeed || 10,
+            jumpForce: settings?.jumpForce || Math.abs(player.jumpPower) || 15
+        };
+
+        console.log('🔄 Values being loaded into UI inputs:', valuesToLoad);
+
+        // Ensure all values use period as decimal separator for consistent parsing
+        if (maxHealthInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.maxHealth);
+            console.log(`🔄 Setting maxHealth: ${valuesToLoad.maxHealth} -> ${formattedValue}`);
+            maxHealthInput.value = formattedValue;
+        }
+        if (healthRegenInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.healthRegen);
+            console.log(`🔄 Setting healthRegen: ${valuesToLoad.healthRegen} -> ${formattedValue}`);
+            healthRegenInput.value = formattedValue;
+        }
+        if (maxStaminaInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.maxStamina);
+            console.log(`🔄 Setting maxStamina: ${valuesToLoad.maxStamina} -> ${formattedValue}`);
+            maxStaminaInput.value = formattedValue;
+        }
+        if (staminaRegenInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.staminaRegen);
+            console.log(`🔄 Setting staminaRegen: ${valuesToLoad.staminaRegen} -> ${formattedValue}`);
+            staminaRegenInput.value = formattedValue;
+        }
+        if (runningCostInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.runningCost);
+            console.log(`🔄 Setting runningCost: ${valuesToLoad.runningCost} -> ${formattedValue}`);
+            runningCostInput.value = formattedValue;
+        }
+        if (jumpCostInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.jumpCost);
+            console.log(`🔄 Setting jumpCost: ${valuesToLoad.jumpCost} -> ${formattedValue}`);
+            jumpCostInput.value = formattedValue;
+        }
+        if (attackDamageInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.attackDamage);
+            console.log(`🔄 Setting attackDamage: ${valuesToLoad.attackDamage} -> ${formattedValue}`);
+            attackDamageInput.value = formattedValue;
+        }
+        if (walkSpeedInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.walkSpeed);
+            console.log(`🔄 Setting walkSpeed: ${valuesToLoad.walkSpeed} -> ${formattedValue}`);
+            walkSpeedInput.value = formattedValue;
+        }
+        if (runSpeedInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.runSpeed);
+            console.log(`🔄 Setting runSpeed: ${valuesToLoad.runSpeed} -> ${formattedValue}`);
+            runSpeedInput.value = formattedValue;
+        }
+        if (jumpForceInput) {
+            const formattedValue = this.formatNumberForInput(valuesToLoad.jumpForce);
+            console.log(`🔄 Setting jumpForce: ${valuesToLoad.jumpForce} -> ${formattedValue}`);
+            jumpForceInput.value = formattedValue;
+        }
+
+        console.log('✅ Player values loaded into UI inputs');
+    }
+
+    // Helper method to ensure consistent decimal format (period) for input fields
+    formatNumberForInput(value) {
+        if (value === null || value === undefined) return '';
+        // Convert to number first, then to string to ensure consistent format
+        const num = parseFloat(value.toString().replace(',', '.'));
+        if (isNaN(num)) return '';
+        // Force English locale formatting to ensure period decimal separator
+        return num.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 10 });
+    }
+
+    // Helper method to parse number from input, handling both comma and period separators
+    parseNumberFromInput(value) {
+        if (!value) return 0;
+        // Replace comma with period for consistent parsing
+        const normalizedValue = value.toString().replace(',', '.');
+        const parsed = parseFloat(normalizedValue);
+        return isNaN(parsed) ? 0 : parsed;
     }
 
     applyPlayerSettings() {
@@ -605,17 +699,24 @@ class UIEventHandler {
 
         const player = this.game.playerSystem.data;
 
-        // Get values from inputs
-        const maxHealth = parseFloat(document.getElementById('playerMaxHealth')?.value) || 100;
-        const healthRegen = parseFloat(document.getElementById('playerHealthRegen')?.value) || 0;
-        const maxStamina = parseFloat(document.getElementById('playerMaxStamina')?.value) || 100;
-        const staminaRegen = parseFloat(document.getElementById('playerStaminaRegen')?.value) || 5;
-        const runningCost = parseFloat(document.getElementById('playerRunningCost')?.value) || 1.5;
-        const jumpCost = parseFloat(document.getElementById('playerJumpCost')?.value) || 10;
-        const attackDamage = parseFloat(document.getElementById('playerAttackDamage')?.value) || 25;
-        const walkSpeed = parseFloat(document.getElementById('playerWalkSpeed')?.value) || 5;
-        const runSpeed = parseFloat(document.getElementById('playerRunSpeed')?.value) || 10;
-        const jumpForce = parseFloat(document.getElementById('playerJumpForce')?.value) || 15;
+        // Get values from inputs using locale-safe parsing
+        const maxHealth = this.parseNumberFromInput(document.getElementById('playerMaxHealth')?.value) || 100;
+        const healthRegen = this.parseNumberFromInput(document.getElementById('playerHealthRegen')?.value) || 0;
+        const maxStamina = this.parseNumberFromInput(document.getElementById('playerMaxStamina')?.value) || 100;
+        const staminaRegen = this.parseNumberFromInput(document.getElementById('playerStaminaRegen')?.value) || 5;
+        const runningCost = this.parseNumberFromInput(document.getElementById('playerRunningCost')?.value) || 1.5;
+        const jumpCost = this.parseNumberFromInput(document.getElementById('playerJumpCost')?.value) || 10;
+        const attackDamage = this.parseNumberFromInput(document.getElementById('playerAttackDamage')?.value) || 25;
+        const walkSpeed = this.parseNumberFromInput(document.getElementById('playerWalkSpeed')?.value) || 5;
+        const runSpeed = this.parseNumberFromInput(document.getElementById('playerRunSpeed')?.value) || 10;
+        const jumpForce = this.parseNumberFromInput(document.getElementById('playerJumpForce')?.value) || 15;
+
+        console.log('🎮 Parsed input values for saving:', {
+            jumpCost: jumpCost,
+            jumpCostInput: document.getElementById('playerJumpCost')?.value,
+            runningCost: runningCost,
+            runningCostInput: document.getElementById('playerRunningCost')?.value
+        });
 
         // Apply the values to player
         player.maxHealth = maxHealth;
@@ -648,7 +749,11 @@ class UIEventHandler {
         };
 
         if (this.game.gameDataSystem) {
+            console.log('🎮 About to save player settings:', playerSettings);
             this.game.gameDataSystem.updatePlayerSettings(playerSettings);
+            console.log('🎮 Player settings save completed');
+        } else {
+            console.error('❌ gameDataSystem not available for saving player settings');
         }
 
         console.log('🎮 Player settings applied and saved:', playerSettings);

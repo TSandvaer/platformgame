@@ -296,6 +296,15 @@ class SceneManager {
             this.game.player.velocityY = 0;
         }
 
+        // Load scene background if specified
+        if (this.game.backgroundSystem && scene.settings.backgroundName) {
+            this.game.backgroundSystem.loadBackground(scene.settings.backgroundName);
+            console.log(`🖼️ Loading scene background: ${scene.settings.backgroundName}`);
+        }
+
+        // Update main dashboard background dropdown
+        this.updateMainDashboardBackground(scene);
+
         // Update camera to follow player - set position directly for immediate transition
         if (this.game.camera && this.game.player) {
             // Force viewport update to ensure correct dimensions after scene change
@@ -468,10 +477,43 @@ class SceneManager {
                 console.log('💾 Final lootable data to save:', lootableDataToSave.length, 'lootables');
             }
 
+            // Handle chest inventory protection (similar to lootable protection)
+            let propsDataToSave = [...this.game.propSystem.props];
+
+            // Check each chest to see if items were removed during gameplay
+            propsDataToSave = propsDataToSave.map(prop => {
+                if (prop.isChest && prop.chestInventory) {
+                    // Find original chest data in scene
+                    const originalProp = currentScene.props.find(originalProp =>
+                        originalProp.id === prop.id && originalProp.isChest
+                    );
+
+                    if (originalProp && originalProp.chestInventory) {
+                        const originalItemCount = originalProp.chestInventory.length;
+                        const currentItemCount = prop.chestInventory.length;
+
+                        // If items were removed, restore original inventory
+                        if (originalItemCount > currentItemCount) {
+                            console.warn('🚨 CHEST PROTECTION: Detected looted items from chest');
+                            console.warn(`🚨 Chest ${prop.id} originally had: ${originalItemCount} items`);
+                            console.warn(`🚨 Current memory has: ${currentItemCount} items`);
+                            console.warn('🚨 Preserving original chest inventory to prevent permanent loss');
+
+                            // Return chest with original inventory
+                            return {
+                                ...prop,
+                                chestInventory: [...originalProp.chestInventory]
+                            };
+                        }
+                    }
+                }
+                return prop;
+            });
+
             this.sceneData.updateSceneData(
                 currentScene.id,
                 this.game.platformSystem.platforms,
-                this.game.propSystem.props,
+                propsDataToSave,
                 enemyDataToSave,
                 lootableDataToSave
             );
@@ -843,16 +885,14 @@ class SceneManager {
                 </div>
             `;
 
-            // Populate the background dropdown with available backgrounds
+            // Populate background dropdown and set current value
             if (this.game.backgroundSystem) {
                 this.game.backgroundSystem.populateDropdown();
-            }
-
-            // Set the background dropdown to the current scene's background
-            const backgroundSelect = document.getElementById('backgroundSelect');
-            if (backgroundSelect && currentScene.background) {
-                const backgroundName = currentScene.background.name || 'none';
-                backgroundSelect.value = backgroundName;
+                const backgroundSelect = document.getElementById('backgroundSelect');
+                if (backgroundSelect) {
+                    const backgroundName = currentScene.settings.backgroundName || 'none';
+                    backgroundSelect.value = backgroundName;
+                }
             }
 
             // Set up background apply button event listener (since controls are dynamically created)
@@ -863,9 +903,11 @@ class SceneManager {
                 const newApplyBtn = document.getElementById('applyBackground');
                 newApplyBtn.addEventListener('click', () => {
                     const selectedBackground = document.getElementById('backgroundSelect').value;
-                    if (this.game.sceneSystem && this.game.sceneSystem.setSceneBackground) {
-                        this.game.sceneSystem.setSceneBackground(selectedBackground);
-                    }
+                    // Update scene settings and load background
+                    currentScene.settings.backgroundName = selectedBackground;
+                    currentScene.metadata.modified = new Date().toISOString();
+                    this.game.backgroundSystem.loadBackground(selectedBackground);
+                    console.log(`🖼️ Scene background applied: ${selectedBackground}`);
                 });
             }
 
@@ -936,6 +978,22 @@ class SceneManager {
             if (this.game && this.game.sceneSystem) {
                 this.game.sceneSystem.saveScenes();
             }
+        }
+    }
+
+    updateMainDashboardBackground(scene) {
+        // Update the main dashboard background dropdown to reflect current scene's background
+        const mainBackgroundSelect = document.getElementById('backgroundSelect');
+        if (mainBackgroundSelect && scene && scene.settings) {
+            // Ensure dropdown has all available backgrounds first
+            if (this.game.backgroundSystem) {
+                this.game.backgroundSystem.populateDropdown();
+            }
+
+            // Set the dropdown value to match the scene's background
+            const backgroundName = scene.settings.backgroundName || 'none';
+            mainBackgroundSelect.value = backgroundName;
+            console.log(`🔄 Updated main dashboard background dropdown to: ${backgroundName}`);
         }
     }
 

@@ -30,6 +30,7 @@ class BackgroundSystem {
             'Mountains2',
             'MountainWaterfall',
             'Parallax_Forest_Background_Blue',
+            'PixelFantasy_Caves',
             'The Dawn'
         ];
     }
@@ -160,6 +161,15 @@ class BackgroundSystem {
                     'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/08_Forest.png',
                     'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/09_Forest.png',
                     'backgrounds/Parallax Forest Background/Parallax Forest Background - Blue/10_Sky.png'
+                ];
+                break;
+            case 'PixelFantasy_Caves':
+                layerPaths = [
+                    'backgrounds/PixelFantasy_Caves_1.0/background1.png',
+                    'backgrounds/PixelFantasy_Caves_1.0/background2.png',
+                    'backgrounds/PixelFantasy_Caves_1.0/background3.png',
+                    'backgrounds/PixelFantasy_Caves_1.0/background4a.png',
+                    'backgrounds/PixelFantasy_Caves_1.0/background4b.png'
                 ];
                 break;
             case 'The Dawn':

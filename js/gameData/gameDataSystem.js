@@ -91,14 +91,20 @@ class GameDataSystem {
 
     // Load just the playerSettings from localStorage (not full game data)
     loadSavedPlayerSettings() {
+        console.log('🔄 loadSavedPlayerSettings() called');
         try {
             const savedData = this.storage.loadFromLocalStorage();
+            console.log('🔄 Retrieved saved data from localStorage:', savedData ? 'Found' : 'Not found');
+
             if (savedData && savedData.playerSettings) {
+                console.log('🔄 Found saved player settings:', savedData.playerSettings);
+
                 // Apply only the playerSettings
                 this.gameData.playerSettings = savedData.playerSettings;
 
                 // Apply player settings immediately if player system exists
                 if (this.game.playerSystem && this.game.playerSystem.data) {
+                    console.log('🔄 Player system available - applying settings to player');
                     const player = this.game.playerSystem.data;
                     const settings = savedData.playerSettings;
 
@@ -116,8 +122,12 @@ class GameDataSystem {
                     if (player.health > player.maxHealth) player.health = player.maxHealth;
                     if (player.stamina > player.maxStamina) player.stamina = player.maxStamina;
 
-                    console.log('🎮 Loaded saved player settings:', settings);
+                    console.log('✅ Loaded and applied saved player settings:', settings);
+                } else {
+                    console.warn('⚠️ Player system not available yet - settings loaded but not applied');
                 }
+            } else {
+                console.log('ℹ️ No saved player settings found - using defaults');
             }
         } catch (error) {
             console.error('Error loading player settings:', error);
@@ -263,13 +273,26 @@ class GameDataSystem {
     }
 
     updatePlayerSettings(playerSettings) {
-        if (!playerSettings) return;
+        if (!playerSettings) {
+            console.warn('⚠️ updatePlayerSettings called with no settings');
+            return;
+        }
+
+        console.log('💾 Updating player settings in gameDataSystem:', playerSettings);
 
         // Update the in-memory gameData
         this.gameData.playerSettings = { ...this.gameData.playerSettings, ...playerSettings };
 
+        console.log('💾 Updated in-memory playerSettings:', this.gameData.playerSettings);
+
         // Update only playerSettings in localStorage
-        this.storage.updatePlayerSettings(this.gameData.playerSettings);
+        const success = this.storage.updatePlayerSettings(this.gameData.playerSettings);
+
+        if (success) {
+            console.log('✅ Player settings successfully saved to localStorage');
+        } else {
+            console.error('❌ Failed to save player settings to localStorage');
+        }
     }
 
     // Load just the GUISettings from localStorage
