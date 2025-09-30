@@ -1055,6 +1055,35 @@ class UIEventHandler {
                 }
             });
         }
+
+        // Game Settings Modal handlers
+        const gameSettingsBtn = document.getElementById('gameSettingsBtn');
+        if (gameSettingsBtn) {
+            gameSettingsBtn.addEventListener('click', () => {
+                const modal = document.getElementById('gameSettingsModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    // Refresh inventory items list when modal opens
+                    this.refreshInventoryItemsList();
+                }
+            });
+        }
+
+        const closeGameSettingsModal = document.getElementById('closeGameSettingsModal');
+        if (closeGameSettingsModal) {
+            closeGameSettingsModal.addEventListener('click', () => {
+                this.closeGameSettingsModal();
+            });
+        }
+
+        const gameSettingsModal = document.getElementById('gameSettingsModal');
+        if (gameSettingsModal) {
+            gameSettingsModal.addEventListener('click', (e) => {
+                if (e.target === gameSettingsModal) {
+                    this.closeGameSettingsModal();
+                }
+            });
+        }
     }
 
     // Open chest inventory editor modal
@@ -1090,6 +1119,14 @@ class UIEventHandler {
             modal.style.display = 'none';
         }
         this.currentChestBeingEdited = null;
+    }
+
+    // Close game settings modal
+    closeGameSettingsModal() {
+        const modal = document.getElementById('gameSettingsModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
     }
 
     // Refresh the items list in the chest

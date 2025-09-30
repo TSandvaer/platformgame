@@ -714,7 +714,7 @@
         }
 
         /* Fantasy Wooden GUI Theme Styles */
-        .gui-theme-fantasy-wooden .modal-content {
+        .gui-theme-fantasy-wooden .modal-content:not(.no-theme) {
             background: url('GUI/graphics/Fantasy Wooden GUI/PNG/UI board Medium  stone.png') center/cover no-repeat;            
             border: none;
             border-radius: 0;
@@ -728,18 +728,19 @@
             position: relative;
         }
 
-        .gui-theme-fantasy-wooden .modal-content::before {
+        .gui-theme-fantasy-wooden .modal-content:not(.no-theme)::before {
             content: '';
             position: absolute;
             top: 20px;
             left: 20px;
             right: 20px;
             bottom: 20px;
-            background: url('GUI/graphics/Fantasy Wooden GUI/PNG/UI board Medium  parchment.png') center/cover no-repeat;            
+            background: url('GUI/graphics/Fantasy Wooden GUI/PNG/UI board Medium  parchment.png') center/cover no-repeat;
             z-index: 1;
+            pointer-events: none;
         }
 
-        .gui-theme-fantasy-wooden .modal-header {
+        .gui-theme-fantasy-wooden .modal-content:not(.no-theme) .modal-header {
             background: transparent;
             border-bottom: none;
             color: #4A2C17;
@@ -748,7 +749,7 @@
             z-index: 2;
         }
 
-        .gui-theme-fantasy-wooden .modal-header h3 {
+        .gui-theme-fantasy-wooden .modal-content:not(.no-theme) .modal-header h3 {
             color: #4A2C17;
             text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
             font-family: serif;
@@ -756,7 +757,7 @@
             font-size: 18px;
         }
 
-        .gui-theme-fantasy-wooden .modal-close {
+        .gui-theme-fantasy-wooden .modal-content:not(.no-theme) .modal-close {
             background: url('GUI/graphics/Fantasy Wooden GUI/PNG/Close Button.png') center/contain no-repeat;
             color: transparent;
             width: 35px;
@@ -767,13 +768,13 @@
             z-index: 3;
         }
 
-        .gui-theme-fantasy-wooden .modal-close:hover {
+        .gui-theme-fantasy-wooden .modal-content:not(.no-theme) .modal-close:hover {
             background: url('GUI/graphics/Fantasy Wooden GUI/PNG/Close Button.png') center/contain no-repeat;
             transform: scale(1.05);
             color: transparent;
         }
 
-        .gui-theme-fantasy-wooden .modal-body {
+        .gui-theme-fantasy-wooden .modal-content:not(.no-theme) .modal-body {
             background: transparent;
             color: #4A2C17;
             padding: 5px 20px 20px 20px;
@@ -872,6 +873,7 @@
                 <button class="btn" id="toggleDashboardBtn">Toggle Dashboard</button>
                 <button class="btn" id="cameraModeBtn">Camera: Character Mode</button>
                 <button class="btn" id="focusPlayerBtn">Focus Player</button>
+                <button class="btn" id="gameSettingsBtn">⚙️ Game Settings</button>
                 <button class="btn" id="backToDevBtn" style="display: none;">Back to Dev</button>
                 <select id="productionSceneSelect" style="display: none; margin-left: 10px; padding: 5px; width: auto;">
                     <option value="">Select Scene...</option>
@@ -892,15 +894,6 @@
             </div>
 
             <div class="section">
-                <h3>Game Management</h3>
-                <div class="property-row">
-                    <button class="btn small" id="exportGameData">Export Game Data</button>
-                    <input type="file" id="importGameData" accept=".json" style="display: none;">
-                    <button class="btn small" id="importGameDataBtn">Import Game Data</button>
-                </div>
-            </div>
-
-            <div class="section">
                 <h3>Scene Management</h3>
                 <div class="property-row">
                     <button class="btn small" id="createSceneBtn">Create New Scene</button>
@@ -914,7 +907,6 @@
                 <!-- Editor Navigation Tabs -->
                 <div class="editor-tabs" id="editorTabs" style="margin: 10px 0; border-bottom: 1px solid #555;">
                     <button class="editor-tab active" data-editor="sceneProperties">Scenes</button>
-                    <button class="editor-tab" data-editor="viewportEditor">Viewport</button>
                     <button class="editor-tab" data-editor="propsEditor">Props</button>
                     <button class="editor-tab" data-editor="inventoryItemsEditor">Inventory Items</button>
                     <button class="editor-tab" data-editor="lootablesEditor">Lootables</button>
@@ -963,40 +955,6 @@
                         <h4>Transitions (<span id="transitionCount">0</span>)</h4>
                         <div id="transitionsList"></div>
                         <button class="btn small" id="addTransitionBtn" data-action="add-transition">Add Transition Zone</button>
-                    </div>
-                </div>
-
-
-                <div class="platform-editor" id="viewportEditor" style="display: none;">
-                    <h4>Resolution & Viewport Settings</h4>
-                    <div class="property-row">
-                        <span class="property-label">Scaling Mode:</span>
-                        <select id="viewportModeSelect" style="width: 120px;">
-                            <option value="fit">Fit (Letterbox)</option>
-                            <option value="stretch">Stretch</option>
-                            <option value="crop">Crop (Fill)</option>
-                            <option value="pixel-perfect">Pixel Perfect</option>
-                        </select>
-                    </div>
-                    <div class="property-row">
-                        <span class="property-label">Design Width:</span>
-                        <input type="number" id="designWidth" min="640" max="3840" step="1" value="1920" style="width: 80px;">
-                    </div>
-                    <div class="property-row">
-                        <span class="property-label">Design Height:</span>
-                        <input type="number" id="designHeight" min="480" max="2160" step="1" value="1080" style="width: 80px;">
-                    </div>
-                    <div class="property-row">
-                        <span class="property-label">Current Scale:</span>
-                        <span id="currentScale">1.0x</span>
-                    </div>
-                    <div class="property-row">
-                        <span class="property-label">Actual Size:</span>
-                        <span id="actualSize">1920x1080</span>
-                    </div>
-                    <div class="property-row">
-                        <button class="btn small" id="applyViewport">Apply Settings</button>
-                        <button class="btn small" id="resetViewport">Reset to Default</button>
                     </div>
                 </div>
 
@@ -1305,31 +1263,6 @@
                     </div>
                 </div>
 
-                <div class="platform-editor" id="inventoryItemsEditor" style="display: none;">
-                    <h4>Inventory Items Editor</h4>
-                    <div class="property-row">
-                        <a href="inventory-sprite-editor.html" class="btn small" target="_blank" style="text-decoration: none;">🎒 Open Inventory Sprite Editor</a>
-                    </div>
-                    <div class="property-row">
-                        <span class="property-label">Description:</span>
-                        <div style="background-color: #444; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.4;">
-                            Inventory items belong to the entire game and are not placed on maps.
-                            Use the sprite editor to locate items in the sprite sheet and generate
-                            the proper data structure for gamedata.js.
-                        </div>
-                    </div>
-                    <div class="property-row">
-                        <span class="property-label">Current Items:</span>
-                        <div id="inventoryItemsList" style="background-color: #444; padding: 10px; border-radius: 4px; font-size: 12px; max-height: 150px; overflow-y: auto;">
-                            No inventory items defined yet. Use the sprite editor to add items.
-                        </div>
-                    </div>
-                    <div class="property-row">
-                        <button class="btn small" id="refreshInventoryItems">Refresh Item List</button>
-                        <button class="btn small secondary" id="clearInventoryItems">Clear All Items</button>
-                    </div>
-                </div>
-
                 <div class="platform-editor" id="lootablesEditor" style="display: none;">
                     <h4>Lootables Editor</h4>
                     <div class="property-row">
@@ -1585,109 +1518,6 @@
                             <button class="btn small" id="updateEnemy">Update Enemy</button>
                             <button class="btn small danger" id="deleteEnemy">Delete Enemy</button>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3>Player Controls</h3>
-                <div class="platform-editor">
-                    <h4>Player Stats & Abilities</h4>
-
-                    <div class="property-group">
-                        <label>Health Settings</label>
-                        <div class="property-row">
-                            <span class="property-label">Max Health:</span>
-                            <input type="number" id="playerMaxHealth" min="50" max="1000" step="10" value="100" style="width: 80px;">
-                        </div>
-                        <div class="property-row">
-                            <span class="property-label">Health Regen:</span>
-                            <input type="number" id="playerHealthRegen" min="0" max="50" step="0.5" value="0" style="width: 80px;">
-                            <span style="font-size: 11px; color: #aaa;">HP/sec</span>
-                        </div>
-                    </div>
-
-                    <div class="property-group">
-                        <label>Stamina Settings</label>
-                        <div class="property-row">
-                            <span class="property-label">Max Stamina:</span>
-                            <input type="number" id="playerMaxStamina" min="50" max="1000" step="10" value="100" style="width: 80px;">
-                        </div>
-                        <div class="property-row">
-                            <span class="property-label">Stamina Regen:</span>
-                            <input type="number" id="playerStaminaRegen" min="0" max="50" step="0.5" value="5" style="width: 80px;">
-                            <span style="font-size: 11px; color: #aaa;">SP/sec</span>
-                        </div>
-                        <div class="property-row">
-                            <span class="property-label">Running Cost:</span>
-                            <input type="number" id="playerRunningCost" min="0" max="20" step="0.1" value="1.5" style="width: 80px;">
-                            <span style="font-size: 11px; color: #aaa;">SP/sec</span>
-                        </div>
-                        <div class="property-row">
-                            <span class="property-label">Jump Cost:</span>
-                            <input type="number" id="playerJumpCost" min="0" max="50" step="1" value="10" style="width: 80px;">
-                            <span style="font-size: 11px; color: #aaa;">SP/jump</span>
-                        </div>
-                    </div>
-
-                    <div class="property-group">
-                        <label>Combat Settings</label>
-                        <div class="property-row">
-                            <span class="property-label">Attack Damage:</span>
-                            <input type="number" id="playerAttackDamage" min="1" max="200" step="1" value="25" style="width: 80px;">
-                        </div>
-                    </div>
-
-                    <div class="property-group">
-                        <label>Movement Settings</label>
-                        <div class="property-row">
-                            <span class="property-label">Walk Speed:</span>
-                            <input type="number" id="playerWalkSpeed" min="1" max="20" step="0.5" value="5" style="width: 80px;">
-                        </div>
-                        <div class="property-row">
-                            <span class="property-label">Run Speed:</span>
-                            <input type="number" id="playerRunSpeed" min="1" max="30" step="0.5" value="10" style="width: 80px;">
-                        </div>
-                        <div class="property-row">
-                            <span class="property-label">Jump Force:</span>
-                            <input type="number" id="playerJumpForce" min="5" max="30" step="0.5" value="15" style="width: 80px;">
-                        </div>
-                    </div>
-
-                    <div class="property-row">
-                        <button class="btn small" id="applyPlayerSettings">Apply Settings</button>
-                        <button class="btn small" id="resetPlayerSettings">Reset to Default</button>
-                    </div>
-
-                    <div class="property-row">
-                        <button class="btn small" id="healPlayer">🩹 Full Heal</button>
-                        <button class="btn small" id="restoreStamina">⚡ Restore Stamina</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3>GUI Settings</h3>
-                <div class="platform-editor">
-                    <h4>Interface Theme</h4>
-
-                    <div class="property-group">
-                        <label>GUI Theme</label>
-                        <div class="property-row">
-                            <span class="property-label">Theme:</span>
-                            <select id="guiThemeSelect" style="width: 200px;">
-                                <option value="none">None (Default)</option>
-                                <option value="fantasy-wooden">Fantasy Wooden GUI</option>
-                            </select>
-                        </div>
-                        <div class="property-row">
-                            <span style="color: #888; font-size: 12px;">Select a visual theme for inventory modals and UI elements</span>
-                        </div>
-                    </div>
-
-                    <div class="property-row">
-                        <button class="btn small" id="applyGUISettings">Apply Theme</button>
-                        <button class="btn small" id="resetGUISettings">Reset to Default</button>
                     </div>
                 </div>
             </div>
@@ -1993,6 +1823,194 @@
                 <div class="modal-footer">
                     <button class="btn small" id="addDropConfirm">Add Drop</button>
                     <button class="btn small" id="cancelDropConfig">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Settings Modal -->
+    <div id="gameSettingsModal" class="modal no-theme" style="display: none;">
+        <div class="modal-content no-theme" style="width: 800px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>⚙️ Game Settings</h3>
+                <button class="modal-close" id="closeGameSettingsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Game Management Section -->
+                <div class="section">
+                    <h3>Game Management</h3>
+                    <div class="property-row">
+                        <button class="btn small" id="exportGameData">Export Game Data</button>
+                        <input type="file" id="importGameData" accept=".json" style="display: none;">
+                        <button class="btn small" id="importGameDataBtn">Import Game Data</button>
+                    </div>
+                </div>
+
+                <!-- Resolution & Viewport Settings Section -->
+                <div class="section">
+                    <h3>Resolution & Viewport Settings</h3>
+                    <div class="property-row">
+                        <span class="property-label">Scaling Mode:</span>
+                        <select id="viewportModeSelect" style="width: 120px;">
+                            <option value="fit">Fit (Letterbox)</option>
+                            <option value="stretch">Stretch</option>
+                            <option value="crop">Crop (Fill)</option>
+                            <option value="pixel-perfect">Pixel Perfect</option>
+                        </select>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Design Width:</span>
+                        <input type="number" id="designWidth" min="640" max="3840" step="1" value="1920" style="width: 80px;">
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Design Height:</span>
+                        <input type="number" id="designHeight" min="480" max="2160" step="1" value="1080" style="width: 80px;">
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Current Scale:</span>
+                        <span id="currentScale">1.0x</span>
+                    </div>
+                    <div class="property-row">
+                        <span class="property-label">Actual Size:</span>
+                        <span id="actualSize">1920x1080</span>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small" id="applyViewport">Apply Settings</button>
+                        <button class="btn small" id="resetViewport">Reset to Default</button>
+                    </div>
+                </div>
+
+                <!-- Player Controls Section -->
+                <div class="section">
+                    <h3>Player Controls</h3>
+                    <div class="platform-editor">
+                        <h4>Player Stats & Abilities</h4>
+
+                        <div class="property-group">
+                            <label>Health Settings</label>
+                            <div class="property-row">
+                                <span class="property-label">Max Health:</span>
+                                <input type="number" id="playerMaxHealth" min="50" max="1000" step="10" value="100" style="width: 80px;">
+                            </div>
+                            <div class="property-row">
+                                <span class="property-label">Health Regen:</span>
+                                <input type="number" id="playerHealthRegen" min="0" max="50" step="0.5" value="0" style="width: 80px;">
+                                <span style="font-size: 11px; color: #aaa;">HP/sec</span>
+                            </div>
+                        </div>
+
+                        <div class="property-group">
+                            <label>Stamina Settings</label>
+                            <div class="property-row">
+                                <span class="property-label">Max Stamina:</span>
+                                <input type="number" id="playerMaxStamina" min="50" max="1000" step="10" value="100" style="width: 80px;">
+                            </div>
+                            <div class="property-row">
+                                <span class="property-label">Stamina Regen:</span>
+                                <input type="number" id="playerStaminaRegen" min="0" max="50" step="0.5" value="5" style="width: 80px;">
+                                <span style="font-size: 11px; color: #aaa;">SP/sec</span>
+                            </div>
+                            <div class="property-row">
+                                <span class="property-label">Running Cost:</span>
+                                <input type="number" id="playerRunningCost" min="0" max="20" step="0.1" value="1.5" style="width: 80px;">
+                                <span style="font-size: 11px; color: #aaa;">SP/sec</span>
+                            </div>
+                            <div class="property-row">
+                                <span class="property-label">Jump Cost:</span>
+                                <input type="number" id="playerJumpCost" min="0" max="50" step="1" value="10" style="width: 80px;">
+                                <span style="font-size: 11px; color: #aaa;">SP/jump</span>
+                            </div>
+                        </div>
+
+                        <div class="property-group">
+                            <label>Combat Settings</label>
+                            <div class="property-row">
+                                <span class="property-label">Attack Damage:</span>
+                                <input type="number" id="playerAttackDamage" min="1" max="200" step="1" value="25" style="width: 80px;">
+                            </div>
+                        </div>
+
+                        <div class="property-group">
+                            <label>Movement Settings</label>
+                            <div class="property-row">
+                                <span class="property-label">Walk Speed:</span>
+                                <input type="number" id="playerWalkSpeed" min="1" max="20" step="0.5" value="5" style="width: 80px;">
+                            </div>
+                            <div class="property-row">
+                                <span class="property-label">Run Speed:</span>
+                                <input type="number" id="playerRunSpeed" min="1" max="30" step="0.5" value="10" style="width: 80px;">
+                            </div>
+                            <div class="property-row">
+                                <span class="property-label">Jump Force:</span>
+                                <input type="number" id="playerJumpForce" min="5" max="30" step="0.5" value="15" style="width: 80px;">
+                            </div>
+                        </div>
+
+                        <div class="property-row">
+                            <button class="btn small" id="applyPlayerSettings">Apply Settings</button>
+                            <button class="btn small" id="resetPlayerSettings">Reset to Default</button>
+                        </div>
+
+                        <div class="property-row">
+                            <button class="btn small" id="healPlayer">🩹 Full Heal</button>
+                            <button class="btn small" id="restoreStamina">⚡ Restore Stamina</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUI Settings Section -->
+                <div class="section">
+                    <h3>GUI Settings</h3>
+                    <div class="platform-editor">
+                        <h4>Interface Theme</h4>
+
+                        <div class="property-group">
+                            <label>GUI Theme</label>
+                            <div class="property-row">
+                                <span class="property-label">Theme:</span>
+                                <select id="guiThemeSelect" style="width: 200px;">
+                                    <option value="none">None (Default)</option>
+                                    <option value="fantasy-wooden">Fantasy Wooden GUI</option>
+                                </select>
+                            </div>
+                            <div class="property-row">
+                                <span style="color: #888; font-size: 12px;">Select a visual theme for inventory modals and UI elements</span>
+                            </div>
+                        </div>
+
+                        <div class="property-row">
+                            <button class="btn small" id="applyGUISettings">Apply Theme</button>
+                            <button class="btn small" id="resetGUISettings">Reset to Default</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Items Editor Section -->
+                <div class="section">
+                    <h3>Inventory Items Editor</h3>
+                    <div class="platform-editor">
+                        <div class="property-row">
+                            <a href="inventory-sprite-editor.html" class="btn small" target="_blank" style="text-decoration: none;">🎒 Open Inventory Sprite Editor</a>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Description:</span>
+                            <div style="background-color: #444; padding: 10px; border-radius: 4px; font-size: 13px; line-height: 1.4;">
+                                Inventory items belong to the entire game and are not placed on maps.
+                                Use the sprite editor to locate items in the sprite sheet and generate
+                                the proper data structure for gamedata.js.
+                            </div>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Current Items:</span>
+                            <div id="inventoryItemsList" style="background-color: #444; padding: 10px; border-radius: 4px; font-size: 12px; max-height: 150px; overflow-y: auto;">
+                                No inventory items defined yet. Use the sprite editor to add items.
+                            </div>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="refreshInventoryItems">Refresh Item List</button>
+                            <button class="btn small secondary" id="clearInventoryItems">Clear All Items</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
