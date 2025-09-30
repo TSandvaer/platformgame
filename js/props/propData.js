@@ -270,6 +270,15 @@ class PropData {
             targetY: y,
             movingDirection: 1, // 1 for forward along line, -1 for backward
             movementProgress: 0, // 0-1 position along the movement line
+            // Movement control properties
+            originalPosition: { x: x, y: y }, // Store original position for reset
+            // Movement easing and delay properties
+            useEasing: false, // Enable easing near movement zone ends
+            easingDistance: 0.2, // Distance from ends (0-1) where easing applies
+            easingMinSpeed: 0.2, // Minimum speed multiplier when easing (0-1, e.g. 0.2 = 20% of normal speed)
+            endDelay: 0, // Delay in milliseconds at movement zone ends
+            delayTimer: 0, // Current delay timer
+            isDelaying: false, // Whether prop is currently delaying at an end
             // Spinning properties
             isSpinning: false,
             spinSpeed: 1.0, // Rotations per second

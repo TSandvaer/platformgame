@@ -628,10 +628,22 @@ class PropSystem {
     updateMovement(deltaTime) {
         this.data.props.forEach(prop => {
             if (prop.isMoving && !prop.isDestroyed) {
+                // Handle delay at movement zone ends
+                if (prop.isDelaying) {
+                    prop.delayTimer -= deltaTime;
+                    if (prop.delayTimer <= 0) {
+                        prop.isDelaying = false;
+                        prop.delayTimer = 0;
+                    } else {
+                        // Prop is delaying, skip movement
+                        return;
+                    }
+                }
+
                 // Get movement speed in pixels per second
                 const moveSpeed = prop.moveSpeed || 2;
                 const pixelsPerMs = moveSpeed / 16.67; // Convert to pixels per 16.67ms (60fps)
-                const movement = pixelsPerMs * deltaTime;
+                let movement = pixelsPerMs * deltaTime;
 
                 if (prop.movementZone && prop.movementZone.enabled && this.hasValidMovementZone(prop.movementZone)) {
                     // Move along the defined line
@@ -641,6 +653,36 @@ class PropSystem {
                     const lineLength = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
                     if (lineLength === 0) return; // Avoid division by zero
 
+                    // Apply easing if enabled - only when approaching an endpoint, not leaving
+                    if (prop.useEasing) {
+                        const easingDistance = prop.easingDistance || 0.2;
+                        const distanceFromStart = prop.movementProgress;
+                        const distanceFromEnd = 1 - prop.movementProgress;
+
+                        // Calculate easing multiplier (0-1) based on distance from ends
+                        let easingMultiplier = 1.0;
+
+                        // Only ease when approaching the target endpoint
+                        if (prop.movingDirection === 1 && distanceFromEnd < easingDistance) {
+                            // Moving forward, approaching end - ease out
+                            easingMultiplier = distanceFromEnd / easingDistance;
+                        } else if (prop.movingDirection === -1 && distanceFromStart < easingDistance) {
+                            // Moving backward, approaching start - ease out
+                            easingMultiplier = distanceFromStart / easingDistance;
+                        }
+
+                        // Apply smoothstep function for smoother easing
+                        if (easingMultiplier < 1.0) {
+                            easingMultiplier = easingMultiplier * easingMultiplier * (3 - 2 * easingMultiplier);
+
+                            // Clamp minimum movement to prevent getting stuck near boundaries
+                            const minMultiplier = prop.easingMinSpeed || 0.2;
+                            easingMultiplier = Math.max(easingMultiplier, minMultiplier);
+                        }
+
+                        movement *= easingMultiplier;
+                    }
+
                     // Update movement progress along the line
                     const progressDelta = movement / lineLength;
                     prop.movementProgress += progressDelta * prop.movingDirection;
@@ -649,9 +691,19 @@ class PropSystem {
                     if (prop.movementProgress >= 1) {
                         prop.movementProgress = 1;
                         prop.movingDirection = -1;
+                        // Start delay if configured
+                        if (prop.endDelay > 0) {
+                            prop.isDelaying = true;
+                            prop.delayTimer = prop.endDelay;
+                        }
                     } else if (prop.movementProgress <= 0) {
                         prop.movementProgress = 0;
                         prop.movingDirection = 1;
+                        // Start delay if configured
+                        if (prop.endDelay > 0) {
+                            prop.isDelaying = true;
+                            prop.delayTimer = prop.endDelay;
+                        }
                     }
 
                     // Calculate center position based on progress along the line

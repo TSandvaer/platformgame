@@ -300,6 +300,15 @@ class UIEventHandler {
             }
         });
 
+        // Reset prop position button
+        document.getElementById('resetPropPosition').addEventListener('click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.resetToOriginalPosition(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
+            }
+        });
+
         // Bind to platform button
         document.getElementById('bindToPlatform').addEventListener('click', () => {
             if (this.game.propSystem.selectedProp) {

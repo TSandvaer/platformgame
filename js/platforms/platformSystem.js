@@ -271,10 +271,24 @@ class PlatformSystem {
             const previousY = platform.y;
 
             if (platform.isMoving && !platform.isMovementPaused) {
+                // Handle delay at movement zone ends
+                if (platform.isDelaying) {
+                    platform.delayTimer -= deltaTime;
+                    if (platform.delayTimer <= 0) {
+                        platform.isDelaying = false;
+                        platform.delayTimer = 0;
+                    } else {
+                        // Platform is delaying, skip movement
+                        platform.velocityX = 0;
+                        platform.velocityY = 0;
+                        return;
+                    }
+                }
+
                 // Get movement speed in pixels per second
                 const moveSpeed = platform.moveSpeed || 2;
                 const pixelsPerMs = moveSpeed / 16.67; // Convert to pixels per 16.67ms (60fps)
-                const movement = pixelsPerMs * deltaTime;
+                let movement = pixelsPerMs * deltaTime;
 
                 if (platform.movementZone && platform.movementZone.enabled && this.hasValidMovementZone(platform.movementZone)) {
                     // Move along the defined line
@@ -284,6 +298,36 @@ class PlatformSystem {
                     const lineLength = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
                     if (lineLength === 0) return; // Avoid division by zero
 
+                    // Apply easing if enabled - only when approaching an endpoint, not leaving
+                    if (platform.useEasing) {
+                        const easingDistance = platform.easingDistance || 0.2;
+                        const distanceFromStart = platform.movementProgress;
+                        const distanceFromEnd = 1 - platform.movementProgress;
+
+                        // Calculate easing multiplier (0-1) based on distance from ends
+                        let easingMultiplier = 1.0;
+
+                        // Only ease when approaching the target endpoint
+                        if (platform.movingDirection === 1 && distanceFromEnd < easingDistance) {
+                            // Moving forward, approaching end - ease out
+                            easingMultiplier = distanceFromEnd / easingDistance;
+                        } else if (platform.movingDirection === -1 && distanceFromStart < easingDistance) {
+                            // Moving backward, approaching start - ease out
+                            easingMultiplier = distanceFromStart / easingDistance;
+                        }
+
+                        // Apply smoothstep function for smoother easing
+                        if (easingMultiplier < 1.0) {
+                            easingMultiplier = easingMultiplier * easingMultiplier * (3 - 2 * easingMultiplier);
+
+                            // Clamp minimum movement to prevent getting stuck near boundaries
+                            const minMultiplier = platform.easingMinSpeed || 0.2;
+                            easingMultiplier = Math.max(easingMultiplier, minMultiplier);
+                        }
+
+                        movement *= easingMultiplier;
+                    }
+
                     // Update movement progress along the line
                     const progressDelta = movement / lineLength;
                     platform.movementProgress += progressDelta * platform.movingDirection;
@@ -292,9 +336,19 @@ class PlatformSystem {
                     if (platform.movementProgress >= 1) {
                         platform.movementProgress = 1;
                         platform.movingDirection = -1;
+                        // Start delay if configured
+                        if (platform.endDelay > 0) {
+                            platform.isDelaying = true;
+                            platform.delayTimer = platform.endDelay;
+                        }
                     } else if (platform.movementProgress <= 0) {
                         platform.movementProgress = 0;
                         platform.movingDirection = 1;
+                        // Start delay if configured
+                        if (platform.endDelay > 0) {
+                            platform.isDelaying = true;
+                            platform.delayTimer = platform.endDelay;
+                        }
                     }
 
                     // Calculate center position based on progress along the line

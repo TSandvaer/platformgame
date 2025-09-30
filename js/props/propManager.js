@@ -463,12 +463,37 @@ class PropManager {
             const isMoving = this.propData.selectedProp.isMoving || false;
             const propMovementSection = document.getElementById('propMovementSection');
             const propMovementZoneSection = document.getElementById('propMovementZoneSection');
+            const propMovementControlSection = document.getElementById('propMovementControlSection');
+            const propEasingSection = document.getElementById('propEasingSection');
+            const propEasingDistanceSection = document.getElementById('propEasingDistanceSection');
+            const propEasingMinSpeedSection = document.getElementById('propEasingMinSpeedSection');
+            const propEndDelaySection = document.getElementById('propEndDelaySection');
 
             if (propMovementSection) {
                 propMovementSection.style.display = isMoving ? 'block' : 'none';
             }
             if (propMovementZoneSection) {
                 propMovementZoneSection.style.display = isMoving ? 'block' : 'none';
+            }
+            if (propMovementControlSection) {
+                propMovementControlSection.style.display = isMoving ? 'block' : 'none';
+            }
+            if (propEasingSection) {
+                propEasingSection.style.display = isMoving ? 'block' : 'none';
+            }
+
+            // Show easing distance and min speed only if easing is enabled
+            const useEasing = this.propData.selectedProp.useEasing || false;
+            if (propEasingDistanceSection) {
+                propEasingDistanceSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+            }
+            if (propEasingMinSpeedSection) {
+                propEasingMinSpeedSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+            }
+
+            // Show end delay section when moving
+            if (propEndDelaySection) {
+                propEndDelaySection.style.display = isMoving ? 'block' : 'none';
             }
 
             // Show/hide movement zone controls based on movement enabled flag
@@ -494,6 +519,11 @@ class PropManager {
                 this.handleMovingCheckboxChange = () => {
                     const propMovementSection = document.getElementById('propMovementSection');
                     const propMovementZoneSection = document.getElementById('propMovementZoneSection');
+                    const propMovementControlSection = document.getElementById('propMovementControlSection');
+                    const propEasingSection = document.getElementById('propEasingSection');
+                    const propEasingDistanceSection = document.getElementById('propEasingDistanceSection');
+                    const propEasingMinSpeedSection = document.getElementById('propEasingMinSpeedSection');
+                    const propEndDelaySection = document.getElementById('propEndDelaySection');
                     const propMovementZoneControls = document.getElementById('propMovementZoneControls');
                     const propMovementZoneControls2 = document.getElementById('propMovementZoneControls2');
                     const propMovementZoneControls3 = document.getElementById('propMovementZoneControls3');
@@ -501,6 +531,19 @@ class PropManager {
                     const isMoving = isMovingInput.checked;
                     if (propMovementSection) propMovementSection.style.display = isMoving ? 'block' : 'none';
                     if (propMovementZoneSection) propMovementZoneSection.style.display = isMoving ? 'block' : 'none';
+                    if (propMovementControlSection) propMovementControlSection.style.display = isMoving ? 'block' : 'none';
+                    if (propEasingSection) propEasingSection.style.display = isMoving ? 'block' : 'none';
+                    if (propEndDelaySection) propEndDelaySection.style.display = isMoving ? 'block' : 'none';
+
+                    // Show easing distance and min speed only if easing is enabled
+                    const useEasingInput = document.getElementById('selectedPropUseEasing');
+                    const useEasing = useEasingInput?.checked || false;
+                    if (propEasingDistanceSection) {
+                        propEasingDistanceSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
+                    if (propEasingMinSpeedSection) {
+                        propEasingMinSpeedSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
 
                     // Hide zone controls if not moving
                     if (!isMoving) {
@@ -553,6 +596,17 @@ class PropManager {
             if (spinSpeedInput) spinSpeedInput.value = this.propData.selectedProp.spinSpeed || 1.0;
             if (spinClockwiseInput) spinClockwiseInput.checked = this.propData.selectedProp.spinClockwise !== false; // Default true
 
+            // Update easing and delay properties
+            const useEasingInput = document.getElementById('selectedPropUseEasing');
+            const easingDistanceInput = document.getElementById('selectedPropEasingDistance');
+            const easingMinSpeedInput = document.getElementById('selectedPropEasingMinSpeed');
+            const endDelayInput = document.getElementById('selectedPropEndDelay');
+
+            if (useEasingInput) useEasingInput.checked = this.propData.selectedProp.useEasing || false;
+            if (easingDistanceInput) easingDistanceInput.value = this.propData.selectedProp.easingDistance || 0.2;
+            if (easingMinSpeedInput) easingMinSpeedInput.value = this.propData.selectedProp.easingMinSpeed || 0.2;
+            if (endDelayInput) endDelayInput.value = this.propData.selectedProp.endDelay || 0;
+
             // Show/hide spinning sections based on isSpinning flag
             const isSpinning = this.propData.selectedProp.isSpinning || false;
             const propSpinningSection = document.getElementById('propSpinningSection');
@@ -577,6 +631,25 @@ class PropManager {
                     if (propSpinDirectionSection) propSpinDirectionSection.style.display = isSpinning ? 'block' : 'none';
                 };
                 isSpinningInput.addEventListener('change', this.handleSpinningCheckboxChange);
+            }
+
+            // Add event listener for easing checkbox
+            if (useEasingInput) {
+                useEasingInput.removeEventListener('change', this.handleEasingCheckboxChange);
+                this.handleEasingCheckboxChange = () => {
+                    const propEasingDistanceSection = document.getElementById('propEasingDistanceSection');
+                    const propEasingMinSpeedSection = document.getElementById('propEasingMinSpeedSection');
+                    const useEasing = useEasingInput.checked;
+                    const isMoving = this.propData.selectedProp?.isMoving || false;
+
+                    if (propEasingDistanceSection) {
+                        propEasingDistanceSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
+                    if (propEasingMinSpeedSection) {
+                        propEasingMinSpeedSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
+                };
+                useEasingInput.addEventListener('change', this.handleEasingCheckboxChange);
             }
 
             // Update the type display for single or multiple props
@@ -626,12 +699,22 @@ class PropManager {
             // Hide movement sections when no prop is selected
             const propMovementSection = document.getElementById('propMovementSection');
             const propMovementZoneSection = document.getElementById('propMovementZoneSection');
+            const propMovementControlSection = document.getElementById('propMovementControlSection');
+            const propEasingSection = document.getElementById('propEasingSection');
+            const propEasingDistanceSection = document.getElementById('propEasingDistanceSection');
+            const propEasingMinSpeedSection = document.getElementById('propEasingMinSpeedSection');
+            const propEndDelaySection = document.getElementById('propEndDelaySection');
             const propMovementZoneControls = document.getElementById('propMovementZoneControls');
             const propMovementZoneControls2 = document.getElementById('propMovementZoneControls2');
             const propMovementZoneControls3 = document.getElementById('propMovementZoneControls3');
 
             if (propMovementSection) propMovementSection.style.display = 'none';
             if (propMovementZoneSection) propMovementZoneSection.style.display = 'none';
+            if (propMovementControlSection) propMovementControlSection.style.display = 'none';
+            if (propEasingSection) propEasingSection.style.display = 'none';
+            if (propEasingDistanceSection) propEasingDistanceSection.style.display = 'none';
+            if (propEasingMinSpeedSection) propEasingMinSpeedSection.style.display = 'none';
+            if (propEndDelaySection) propEndDelaySection.style.display = 'none';
             if (propMovementZoneControls) propMovementZoneControls.style.display = 'none';
             if (propMovementZoneControls2) propMovementZoneControls2.style.display = 'none';
             if (propMovementZoneControls3) propMovementZoneControls3.style.display = 'none';
@@ -762,6 +845,25 @@ class PropManager {
         }
         if (spinClockwiseInput) {
             this.propData.selectedProp.spinClockwise = spinClockwiseInput.checked;
+        }
+
+        // Handle easing and delay properties
+        const useEasingInput = document.getElementById('selectedPropUseEasing');
+        const easingDistanceInput = document.getElementById('selectedPropEasingDistance');
+        const easingMinSpeedInput = document.getElementById('selectedPropEasingMinSpeed');
+        const endDelayInput = document.getElementById('selectedPropEndDelay');
+
+        if (useEasingInput) {
+            this.propData.selectedProp.useEasing = useEasingInput.checked;
+        }
+        if (easingDistanceInput) {
+            this.propData.selectedProp.easingDistance = parseFloat(easingDistanceInput.value) || 0.2;
+        }
+        if (easingMinSpeedInput) {
+            this.propData.selectedProp.easingMinSpeed = parseFloat(easingMinSpeedInput.value) || 0.2;
+        }
+        if (endDelayInput) {
+            this.propData.selectedProp.endDelay = parseFloat(endDelayInput.value) || 0;
         }
 
         this.updatePropList();
@@ -921,6 +1023,30 @@ class PropManager {
         prop.movingDirection = 1;
 
         console.log('🟣 Cleared movement zone for prop', prop.id);
+
+        // Update UI
+        this.updatePropProperties();
+    }
+
+    resetToOriginalPosition(prop) {
+        if (!prop || !prop.originalPosition) {
+            console.error('Cannot reset position: no prop or original position available');
+            return;
+        }
+
+        prop.x = prop.originalPosition.x;
+        prop.y = prop.originalPosition.y;
+        prop.movementProgress = 0;
+        prop.movingDirection = 1;
+
+        // Reset rotation to horizontal
+        prop.rotation = 0;
+
+        // Reset delay state
+        prop.isDelaying = false;
+        prop.delayTimer = 0;
+
+        console.log(`🟣 Prop ${prop.id} reset to original position (${prop.x}, ${prop.y}) and rotation`);
 
         // Update UI
         this.updatePropProperties();

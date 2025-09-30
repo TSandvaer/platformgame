@@ -51,6 +51,13 @@ class PlatformData {
             // Movement control properties
             isMovementPaused: false, // For stop/start control in dev mode
             originalPosition: { x: x, y: y }, // Store original position for reset
+            // Movement easing and delay properties
+            useEasing: false, // Enable easing near movement zone ends
+            easingDistance: 0.2, // Distance from ends (0-1) where easing applies
+            easingMinSpeed: 0.2, // Minimum speed multiplier when easing (0-1, e.g. 0.2 = 20% of normal speed)
+            endDelay: 0, // Delay in milliseconds at movement zone ends
+            delayTimer: 0, // Current delay timer
+            isDelaying: false, // Whether platform is currently delaying at an end
             // Spinning properties
             rotation: 0, // Current rotation angle in radians
             isSpinning: false,

@@ -501,6 +501,10 @@ class PlatformManager {
             const platformMovementSection = document.getElementById('platformMovementSection');
             const platformMovementZoneSection = document.getElementById('platformMovementZoneSection');
             const platformMovementControlSection = document.getElementById('platformMovementControlSection');
+            const platformEasingSection = document.getElementById('platformEasingSection');
+            const platformEasingDistanceSection = document.getElementById('platformEasingDistanceSection');
+            const platformEasingMinSpeedSection = document.getElementById('platformEasingMinSpeedSection');
+            const platformEndDelaySection = document.getElementById('platformEndDelaySection');
 
             if (platformMovementSection) {
                 platformMovementSection.style.display = isMoving ? 'block' : 'none';
@@ -510,6 +514,23 @@ class PlatformManager {
             }
             if (platformMovementControlSection) {
                 platformMovementControlSection.style.display = isMoving ? 'block' : 'none';
+            }
+            if (platformEasingSection) {
+                platformEasingSection.style.display = isMoving ? 'block' : 'none';
+            }
+
+            // Show easing distance and min speed only if easing is enabled
+            const useEasing = this.platformData.selectedPlatform.useEasing || false;
+            if (platformEasingDistanceSection) {
+                platformEasingDistanceSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+            }
+            if (platformEasingMinSpeedSection) {
+                platformEasingMinSpeedSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+            }
+
+            // Show end delay section when moving
+            if (platformEndDelaySection) {
+                platformEndDelaySection.style.display = isMoving ? 'block' : 'none';
             }
 
             // Show/hide movement zone controls based on movement enabled flag
@@ -535,6 +556,20 @@ class PlatformManager {
                     const isMoving = isMovingInput.checked;
                     if (platformMovementSection) platformMovementSection.style.display = isMoving ? 'block' : 'none';
                     if (platformMovementZoneSection) platformMovementZoneSection.style.display = isMoving ? 'block' : 'none';
+                    if (platformMovementControlSection) platformMovementControlSection.style.display = isMoving ? 'block' : 'none';
+                    if (platformEasingSection) platformEasingSection.style.display = isMoving ? 'block' : 'none';
+                    if (platformEndDelaySection) platformEndDelaySection.style.display = isMoving ? 'block' : 'none';
+
+                    // Show easing distance and min speed only if easing is enabled
+                    const useEasingInput = document.getElementById('selectedPlatformUseEasing');
+                    const useEasing = useEasingInput?.checked || false;
+                    if (platformEasingDistanceSection) {
+                        platformEasingDistanceSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
+                    const platformEasingMinSpeedSection = document.getElementById('platformEasingMinSpeedSection');
+                    if (platformEasingMinSpeedSection) {
+                        platformEasingMinSpeedSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
 
                     if (!isMoving) {
                         if (platformMovementZoneControls) platformMovementZoneControls.style.display = 'none';
@@ -578,6 +613,17 @@ class PlatformManager {
             if (spinSpeedInput) spinSpeedInput.value = this.platformData.selectedPlatform.spinSpeed || 1.0;
             if (spinClockwiseInput) spinClockwiseInput.checked = this.platformData.selectedPlatform.spinClockwise !== false; // Default true
 
+            // Update easing and delay properties
+            const useEasingInput = document.getElementById('selectedPlatformUseEasing');
+            const easingDistanceInput = document.getElementById('selectedPlatformEasingDistance');
+            const easingMinSpeedInput = document.getElementById('selectedPlatformEasingMinSpeed');
+            const endDelayInput = document.getElementById('selectedPlatformEndDelay');
+
+            if (useEasingInput) useEasingInput.checked = this.platformData.selectedPlatform.useEasing || false;
+            if (easingDistanceInput) easingDistanceInput.value = this.platformData.selectedPlatform.easingDistance || 0.2;
+            if (easingMinSpeedInput) easingMinSpeedInput.value = this.platformData.selectedPlatform.easingMinSpeed || 0.2;
+            if (endDelayInput) endDelayInput.value = this.platformData.selectedPlatform.endDelay || 0;
+
             // Show/hide spinning sections based on isSpinning flag
             const isSpinning = this.platformData.selectedPlatform.isSpinning || false;
             const platformSpinningSection = document.getElementById('platformSpinningSection');
@@ -602,6 +648,25 @@ class PlatformManager {
                     if (platformSpinDirectionSection) platformSpinDirectionSection.style.display = isSpinning ? 'block' : 'none';
                 };
                 isSpinningInput.addEventListener('change', this.handlePlatformSpinningCheckboxChange);
+            }
+
+            // Add event listener for easing checkbox
+            if (useEasingInput) {
+                useEasingInput.removeEventListener('change', this.handleEasingCheckboxChange);
+                this.handleEasingCheckboxChange = () => {
+                    const platformEasingDistanceSection = document.getElementById('platformEasingDistanceSection');
+                    const platformEasingMinSpeedSection = document.getElementById('platformEasingMinSpeedSection');
+                    const useEasing = useEasingInput.checked;
+                    const isMoving = this.platformData.selectedPlatform?.isMoving || false;
+
+                    if (platformEasingDistanceSection) {
+                        platformEasingDistanceSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
+                    if (platformEasingMinSpeedSection) {
+                        platformEasingMinSpeedSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
+                    }
+                };
+                useEasingInput.addEventListener('change', this.handleEasingCheckboxChange);
             }
 
             // Update movement control button text
@@ -687,6 +752,25 @@ class PlatformManager {
         }
         if (spinClockwiseInput) {
             this.platformData.selectedPlatform.spinClockwise = spinClockwiseInput.checked;
+        }
+
+        // Handle easing and delay properties
+        const useEasingInput = document.getElementById('selectedPlatformUseEasing');
+        const easingDistanceInput = document.getElementById('selectedPlatformEasingDistance');
+        const easingMinSpeedInput = document.getElementById('selectedPlatformEasingMinSpeed');
+        const endDelayInput = document.getElementById('selectedPlatformEndDelay');
+
+        if (useEasingInput) {
+            this.platformData.selectedPlatform.useEasing = useEasingInput.checked;
+        }
+        if (easingDistanceInput) {
+            this.platformData.selectedPlatform.easingDistance = parseFloat(easingDistanceInput.value) || 0.2;
+        }
+        if (easingMinSpeedInput) {
+            this.platformData.selectedPlatform.easingMinSpeed = parseFloat(easingMinSpeedInput.value) || 0.2;
+        }
+        if (endDelayInput) {
+            this.platformData.selectedPlatform.endDelay = parseFloat(endDelayInput.value) || 0;
         }
 
         // Update relative position display
@@ -995,7 +1079,14 @@ class PlatformManager {
         platform.movingDirection = 1;
         platform.isMovementPaused = true; // Stop movement when resetting
 
-        console.log(`🔵 Platform ${platform.id} reset to original position (${platform.x}, ${platform.y}) and stopped`);
+        // Reset rotation to horizontal
+        platform.rotation = 0;
+
+        // Reset delay state
+        platform.isDelaying = false;
+        platform.delayTimer = 0;
+
+        console.log(`🔵 Platform ${platform.id} reset to original position (${platform.x}, ${platform.y}), rotation, and stopped`);
 
         // Update UI
         this.updatePlatformProperties();
