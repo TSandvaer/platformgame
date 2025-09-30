@@ -29,7 +29,28 @@ class PlatformData {
             relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
             relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
             damagePerSecond: 0,     // Damage dealt to player per second when standing on platform
-            killEffect: 'normal'    // Kill effect: 'normal' (player lies on platform) or 'sink' (player sinks into platform)
+            killEffect: 'normal',   // Kill effect: 'normal' (player lies on platform) or 'sink' (player sinks into platform)
+            // Movement system properties
+            isMoving: false,
+            moveSpeed: 2,
+            movementZone: {
+                enabled: false,
+                startX: x - 50,
+                startY: y,
+                endX: x + 50,
+                endY: y,
+                angle: 0  // Angle in radians for line direction
+            },
+            // Movement state
+            velocityX: 0,
+            velocityY: 0,
+            targetX: x,
+            targetY: y,
+            movingDirection: 1, // 1 for forward along line, -1 for backward
+            movementProgress: 0, // 0-1 position along the movement line
+            // Movement control properties
+            isMovementPaused: false, // For stop/start control in dev mode
+            originalPosition: { x: x, y: y } // Store original position for reset
         };
 
         this.platforms.push(newPlatform);

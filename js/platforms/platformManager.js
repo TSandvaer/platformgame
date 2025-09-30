@@ -1,16 +1,46 @@
 class PlatformManager {
     constructor(platformData) {
         this.platformData = platformData;
+
+        // Movement zone drawing state
+        this.isDrawingMovementZone = false;
+        this.movementZoneStart = null;
+        this.movementZoneEnd = null;
+        this.movementTargetPlatform = null; // Platform whose movement zone is being drawn
+
+        // Movement zone editing state
+        this.isDraggingMovementZoneHandle = false;
+        this.draggingHandleType = null; // 'start' or 'end'
+        this.draggingHandlePlatform = null;
     }
 
     handleMouseDown(mouseX, mouseY, camera, viewport) {
+        // Check if movement zone drawing mode is active
+        if (this.isDrawingMovementZone) {
+            this.startMovementZoneDrawing(mouseX, mouseY);
+            return { handled: true, type: 'movementZoneStart' };
+        }
+
         // Check if platform placement mode is active
         if (this.platformData.platformPlacementMode) {
             this.placePlatform(mouseX, mouseY);
             return { handled: true, type: 'placement' };
         }
 
-        // Check for platform selection or resize
+        // First pass: Check for movement zone handles on ALL platforms (highest priority)
+        for (let platform of this.platformData.platforms) {
+            if (platform.movementZone && platform.movementZone.enabled) {
+                const handleResult = this.checkMovementZoneHandlesForPlatform(platform, mouseX, mouseY);
+                if (handleResult.handled) {
+                    // Select the platform if not already selected
+                    this.platformData.selectedPlatform = platform;
+                    this.updatePlatformProperties();
+                    return handleResult;
+                }
+            }
+        }
+
+        // Second pass: Check for platform selection or resize
         for (let platform of this.platformData.platforms) {
             // Get actual position based on positioning mode
             let actualPos, renderPlatform;
@@ -68,6 +98,18 @@ class PlatformManager {
     }
 
     handleMouseMove(mouseX, mouseY, viewport) {
+        // Update movement zone drawing
+        if (this.isDrawingMovementZone && this.movementZoneStart) {
+            this.movementZoneEnd = { x: mouseX, y: mouseY };
+            return true;
+        }
+
+        // Update movement zone handle dragging
+        if (this.isDraggingMovementZoneHandle && this.draggingHandlePlatform) {
+            this.updateMovementZoneHandle(mouseX, mouseY);
+            return true;
+        }
+
         if (!this.platformData.selectedPlatform) return false;
 
         if (this.platformData.isDragging) {
@@ -94,8 +136,22 @@ class PlatformManager {
                 constrainedY = Math.min(snappedPos.y, bottomEdge - platform.height);
             }
 
+            // Calculate how much the platform moved
+            const platformDeltaX = snappedPos.x - this.platformData.selectedPlatform.x;
+            const platformDeltaY = constrainedY - this.platformData.selectedPlatform.y;
+
             this.platformData.selectedPlatform.x = snappedPos.x;
             this.platformData.selectedPlatform.y = constrainedY;
+
+            // Move the movement zone with the platform
+            if (this.platformData.selectedPlatform.movementZone && this.platformData.selectedPlatform.movementZone.enabled) {
+                const zone = this.platformData.selectedPlatform.movementZone;
+                zone.startX += platformDeltaX;
+                zone.startY += platformDeltaY;
+                zone.endX += platformDeltaX;
+                zone.endY += platformDeltaY;
+            }
+
             return true;
         } else if (this.platformData.isResizing) {
             this.handlePlatformResize(mouseX, mouseY);
@@ -106,6 +162,18 @@ class PlatformManager {
     }
 
     handleMouseUp() {
+        // Finish movement zone drawing
+        if (this.isDrawingMovementZone && this.movementZoneStart && this.movementZoneEnd) {
+            this.finishMovementZoneDrawing();
+            return { handled: true, type: 'movementZoneFinish' };
+        }
+
+        // Finish movement zone handle dragging
+        if (this.isDraggingMovementZoneHandle) {
+            this.finishMovementZoneHandleDrag();
+            return { handled: true, type: 'movementZoneHandleFinish' };
+        }
+
         this.platformData.isDragging = false;
         this.platformData.isResizing = false;
         this.platformData.resizeHandle = null;
@@ -378,6 +446,9 @@ class PlatformManager {
         if (!propertiesDiv) return;
 
         if (this.platformData.selectedPlatform) {
+            // Ensure backward compatibility - initialize missing movement properties
+            this.ensureMovementProperties(this.platformData.selectedPlatform);
+
             propertiesDiv.style.display = 'block';
             const xInput = document.getElementById('platformX');
             const yInput = document.getElementById('platformY');
@@ -409,6 +480,97 @@ class PlatformManager {
             if (relativeRow) {
                 relativeRow.style.display = positioning === 'screen-relative' ? 'block' : 'none';
             }
+
+            // Update movement properties
+            const isMovingInput = document.getElementById('selectedPlatformIsMoving');
+            const moveSpeedInput = document.getElementById('selectedPlatformMoveSpeed');
+            const movementEnabledInput = document.getElementById('selectedPlatformMovementEnabled');
+            const zoneStartXInput = document.getElementById('selectedPlatformZoneStartX');
+            const zoneEndXInput = document.getElementById('selectedPlatformZoneEndX');
+            const zoneYInput = document.getElementById('selectedPlatformZoneY');
+
+            if (isMovingInput) isMovingInput.checked = this.platformData.selectedPlatform.isMoving || false;
+            if (moveSpeedInput) moveSpeedInput.value = this.platformData.selectedPlatform.moveSpeed || 2;
+            if (movementEnabledInput) movementEnabledInput.checked = this.platformData.selectedPlatform.movementZone?.enabled || false;
+            if (zoneStartXInput) zoneStartXInput.value = this.platformData.selectedPlatform.movementZone?.startX || 0;
+            if (zoneEndXInput) zoneEndXInput.value = this.platformData.selectedPlatform.movementZone?.endX || 0;
+            if (zoneYInput) zoneYInput.value = this.platformData.selectedPlatform.movementZone?.y || 0;
+
+            // Show/hide movement sections based on isMoving flag
+            const isMoving = this.platformData.selectedPlatform.isMoving || false;
+            const platformMovementSection = document.getElementById('platformMovementSection');
+            const platformMovementZoneSection = document.getElementById('platformMovementZoneSection');
+            const platformMovementControlSection = document.getElementById('platformMovementControlSection');
+
+            if (platformMovementSection) {
+                platformMovementSection.style.display = isMoving ? 'block' : 'none';
+            }
+            if (platformMovementZoneSection) {
+                platformMovementZoneSection.style.display = isMoving ? 'block' : 'none';
+            }
+            if (platformMovementControlSection) {
+                platformMovementControlSection.style.display = isMoving ? 'block' : 'none';
+            }
+
+            // Show/hide movement zone controls based on movement enabled flag
+            const movementEnabled = this.platformData.selectedPlatform.movementZone?.enabled || false;
+            const platformMovementZoneControls = document.getElementById('platformMovementZoneControls');
+            const platformMovementZoneControls2 = document.getElementById('platformMovementZoneControls2');
+            const platformMovementZoneControls3 = document.getElementById('platformMovementZoneControls3');
+
+            if (platformMovementZoneControls) {
+                platformMovementZoneControls.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+            }
+            if (platformMovementZoneControls2) {
+                platformMovementZoneControls2.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+            }
+            if (platformMovementZoneControls3) {
+                platformMovementZoneControls3.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+            }
+
+            // Add event listeners for movement checkboxes
+            if (isMovingInput) {
+                isMovingInput.removeEventListener('change', this.handlePlatformMovingCheckboxChange);
+                this.handlePlatformMovingCheckboxChange = () => {
+                    const isMoving = isMovingInput.checked;
+                    if (platformMovementSection) platformMovementSection.style.display = isMoving ? 'block' : 'none';
+                    if (platformMovementZoneSection) platformMovementZoneSection.style.display = isMoving ? 'block' : 'none';
+
+                    if (!isMoving) {
+                        if (platformMovementZoneControls) platformMovementZoneControls.style.display = 'none';
+                        if (platformMovementZoneControls2) platformMovementZoneControls2.style.display = 'none';
+                        if (platformMovementZoneControls3) platformMovementZoneControls3.style.display = 'none';
+                    } else {
+                        const movementEnabled = movementEnabledInput?.checked || false;
+                        if (platformMovementZoneControls) platformMovementZoneControls.style.display = movementEnabled ? 'block' : 'none';
+                        if (platformMovementZoneControls2) platformMovementZoneControls2.style.display = movementEnabled ? 'block' : 'none';
+                        if (platformMovementZoneControls3) platformMovementZoneControls3.style.display = movementEnabled ? 'block' : 'none';
+                    }
+                };
+                isMovingInput.addEventListener('change', this.handlePlatformMovingCheckboxChange);
+            }
+
+            if (movementEnabledInput) {
+                movementEnabledInput.removeEventListener('change', this.handlePlatformMovementEnabledCheckboxChange);
+                this.handlePlatformMovementEnabledCheckboxChange = () => {
+                    const movementEnabled = movementEnabledInput.checked;
+                    const isMoving = isMovingInput?.checked || false;
+
+                    if (platformMovementZoneControls) {
+                        platformMovementZoneControls.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+                    }
+                    if (platformMovementZoneControls2) {
+                        platformMovementZoneControls2.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+                    }
+                    if (platformMovementZoneControls3) {
+                        platformMovementZoneControls3.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+                    }
+                };
+                movementEnabledInput.addEventListener('change', this.handlePlatformMovementEnabledCheckboxChange);
+            }
+
+            // Update movement control button text
+            this.updateMovementControlButtons(this.platformData.selectedPlatform);
         } else {
             propertiesDiv.style.display = 'none';
         }
@@ -441,9 +603,359 @@ class PlatformManager {
         if (relativeXInput) this.platformData.selectedPlatform.relativeX = parseFloat(relativeXInput.value);
         if (relativeYInput) this.platformData.selectedPlatform.relativeY = parseFloat(relativeYInput.value);
 
+        // Handle movement properties
+        const isMovingInput = document.getElementById('selectedPlatformIsMoving');
+        const moveSpeedInput = document.getElementById('selectedPlatformMoveSpeed');
+        const movementEnabledInput = document.getElementById('selectedPlatformMovementEnabled');
+        const zoneStartXInput = document.getElementById('selectedPlatformZoneStartX');
+        const zoneEndXInput = document.getElementById('selectedPlatformZoneEndX');
+        const zoneYInput = document.getElementById('selectedPlatformZoneY');
+
+        if (isMovingInput) {
+            this.platformData.selectedPlatform.isMoving = isMovingInput.checked;
+        }
+        if (moveSpeedInput) {
+            this.platformData.selectedPlatform.moveSpeed = parseFloat(moveSpeedInput.value) || 2;
+        }
+        if (movementEnabledInput) {
+            // Initialize movement zone if it doesn't exist
+            if (!this.platformData.selectedPlatform.movementZone) {
+                this.platformData.selectedPlatform.movementZone = {
+                    enabled: false,
+                    startX: this.platformData.selectedPlatform.x - 50,
+                    endX: this.platformData.selectedPlatform.x + 50,
+                    y: this.platformData.selectedPlatform.y
+                };
+            }
+            this.platformData.selectedPlatform.movementZone.enabled = movementEnabledInput.checked;
+        }
+        if (zoneStartXInput && this.platformData.selectedPlatform.movementZone) {
+            this.platformData.selectedPlatform.movementZone.startX = parseFloat(zoneStartXInput.value) || 0;
+        }
+        if (zoneEndXInput && this.platformData.selectedPlatform.movementZone) {
+            this.platformData.selectedPlatform.movementZone.endX = parseFloat(zoneEndXInput.value) || 0;
+        }
+        if (zoneYInput && this.platformData.selectedPlatform.movementZone) {
+            this.platformData.selectedPlatform.movementZone.y = parseFloat(zoneYInput.value) || 0;
+        }
+
         // Update relative position display
         this.updatePlatformProperties();
 
         this.updatePlatformList();
+    }
+
+    // Movement zone drawing methods
+    startMovementZoneDrawing(mouseX, mouseY) {
+        this.movementZoneStart = { x: mouseX, y: mouseY };
+        this.movementZoneEnd = { x: mouseX, y: mouseY };
+        console.log('🔵 Started platform movement zone drawing at', mouseX, mouseY);
+    }
+
+    finishMovementZoneDrawing() {
+        if (!this.movementTargetPlatform || !this.movementZoneStart || !this.movementZoneEnd) {
+            this.cancelMovementZoneDrawing();
+            return;
+        }
+
+        // Calculate line start and end points
+        const startX = this.movementZoneStart.x;
+        const startY = this.movementZoneStart.y;
+        const endX = this.movementZoneEnd.x;
+        const endY = this.movementZoneEnd.y;
+
+        // Calculate angle of the line
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const angle = Math.atan2(deltaY, deltaX);
+
+        // Ensure movement zone exists
+        if (!this.movementTargetPlatform.movementZone) {
+            this.movementTargetPlatform.movementZone = {
+                enabled: false,
+                startX: 0,
+                startY: 0,
+                endX: 0,
+                endY: 0,
+                angle: 0
+            };
+        }
+
+        // Update platform movement zone
+        this.movementTargetPlatform.movementZone.startX = startX;
+        this.movementTargetPlatform.movementZone.startY = startY;
+        this.movementTargetPlatform.movementZone.endX = endX;
+        this.movementTargetPlatform.movementZone.endY = endY;
+        this.movementTargetPlatform.movementZone.angle = angle;
+        this.movementTargetPlatform.movementZone.enabled = true;
+
+        // Initialize movement progress to start of line
+        this.movementTargetPlatform.movementProgress = 0;
+
+        // Reposition platform to start of movement zone line (centered on start point)
+        this.movementTargetPlatform.x = startX - this.movementTargetPlatform.width / 2;
+        this.movementTargetPlatform.y = startY - this.movementTargetPlatform.height / 2;
+
+        // Update original position to match start of movement zone
+        this.movementTargetPlatform.originalPosition = {
+            x: this.movementTargetPlatform.x,
+            y: this.movementTargetPlatform.y
+        };
+
+        console.log(`🔵 Movement zone set for platform ${this.movementTargetPlatform.id}:`, {
+            startX, startY, endX, endY, angle: angle * 180 / Math.PI + '°',
+            platformRepositioned: `(${this.movementTargetPlatform.x}, ${this.movementTargetPlatform.y})`
+        });
+
+        // Reset drawing state
+        this.cancelMovementZoneDrawing();
+
+        // Update UI if available
+        this.updatePlatformProperties();
+    }
+
+    cancelMovementZoneDrawing() {
+        this.isDrawingMovementZone = false;
+        this.movementZoneStart = null;
+        this.movementZoneEnd = null;
+        this.movementTargetPlatform = null;
+        console.log('🔵 Platform movement zone drawing cancelled');
+    }
+
+    // Public methods to control movement zone drawing mode
+    startMovementZoneDrawingMode(platform) {
+        if (!platform) {
+            console.error('Cannot start movement zone drawing: no platform selected');
+            return;
+        }
+
+        this.movementTargetPlatform = platform;
+        this.isDrawingMovementZone = true;
+        console.log('🔵 Platform movement zone drawing mode started for platform', platform.id);
+        console.log('🔵 Press Escape to cancel drawing');
+    }
+
+    clearMovementZone(platform) {
+        if (!platform) {
+            console.error('Cannot clear movement zone: no platform selected');
+            return;
+        }
+
+        // Cancel any ongoing drawing
+        this.cancelMovementZoneDrawing();
+
+        // Clear movement zone
+        if (platform.movementZone) {
+            platform.movementZone.enabled = false;
+            platform.movementZone.startX = 0;
+            platform.movementZone.startY = 0;
+            platform.movementZone.endX = 0;
+            platform.movementZone.endY = 0;
+            platform.movementZone.angle = 0;
+        }
+
+        // Reset movement state
+        platform.movementProgress = 0;
+        platform.movingDirection = 1;
+
+        console.log('🔵 Cleared movement zone for platform', platform.id);
+
+        // Update UI
+        this.updatePlatformProperties();
+    }
+
+    // Render preview while drawing
+    renderMovementZonePreview(ctx, viewport, camera) {
+        if (!this.isDrawingMovementZone || !this.movementZoneStart || !this.movementZoneEnd) return;
+
+        ctx.save();
+
+        // Line points are already in world coordinates
+        const renderStartX = this.movementZoneStart.x;
+        const renderStartY = this.movementZoneStart.y;
+        const renderEndX = this.movementZoneEnd.x;
+        const renderEndY = this.movementZoneEnd.y;
+
+        // Draw preview line (cyan like enemy movement zones)
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 5]);
+        ctx.beginPath();
+        ctx.moveTo(renderStartX, renderStartY);
+        ctx.lineTo(renderEndX, renderEndY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Draw zone markers
+        ctx.fillStyle = 'cyan';
+        ctx.beginPath();
+        ctx.arc(renderStartX, renderStartY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(renderEndX, renderEndY, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Ensure platform has all required movement properties for backward compatibility
+    ensureMovementProperties(platform) {
+        // Initialize isMoving if missing
+        if (platform.isMoving === undefined) {
+            platform.isMoving = false;
+        }
+
+        // Initialize moveSpeed if missing
+        if (platform.moveSpeed === undefined) {
+            platform.moveSpeed = 2;
+        }
+
+        // Initialize movementZone if missing
+        if (!platform.movementZone) {
+            platform.movementZone = {
+                enabled: false,
+                startX: platform.x - 50,
+                startY: platform.y,
+                endX: platform.x + 50,
+                endY: platform.y,
+                angle: 0
+            };
+        }
+
+        // Initialize movement state properties if missing
+        if (platform.velocityX === undefined) platform.velocityX = 0;
+        if (platform.velocityY === undefined) platform.velocityY = 0;
+        if (platform.targetX === undefined) platform.targetX = platform.x;
+        if (platform.targetY === undefined) platform.targetY = platform.y;
+        if (platform.movingDirection === undefined) platform.movingDirection = 1;
+        if (platform.movementProgress === undefined) platform.movementProgress = 0;
+    }
+
+    // Movement zone handle methods
+    checkMovementZoneHandlesForPlatform(platform, mouseX, mouseY) {
+        // Check handles for the given platform
+        if (!platform || !platform.movementZone || !platform.movementZone.enabled) {
+            return { handled: false };
+        }
+
+        const zone = platform.movementZone;
+        const endHandleRadius = 12; // Larger radius for easier clicking (visual handle is 6px radius)
+        const startHandleRadius = 15; // Even larger for start handle since it's often overlapped by platform
+
+        // Check end handle first (higher priority since it doesn't move the platform)
+        const endDist = Math.sqrt((mouseX - zone.endX) ** 2 + (mouseY - zone.endY) ** 2);
+        if (endDist <= endHandleRadius) {
+            this.isDraggingMovementZoneHandle = true;
+            this.draggingHandleType = 'end';
+            this.draggingHandlePlatform = platform;
+            console.log('🔵 Started dragging platform movement zone end handle', {
+                mouseX, mouseY, zoneX: zone.endX, zoneY: zone.endY, distance: endDist
+            });
+            return { handled: true, type: 'movementZoneHandleEnd' };
+        }
+
+        // Check start handle
+        const startDist = Math.sqrt((mouseX - zone.startX) ** 2 + (mouseY - zone.startY) ** 2);
+        if (startDist <= startHandleRadius) {
+            this.isDraggingMovementZoneHandle = true;
+            this.draggingHandleType = 'start';
+            this.draggingHandlePlatform = platform;
+            console.log('🔵 Started dragging platform movement zone start handle', {
+                mouseX, mouseY, zoneX: zone.startX, zoneY: zone.startY, distance: startDist,
+                platformX: platform.x, platformY: platform.y
+            });
+            return { handled: true, type: 'movementZoneHandleStart' };
+        }
+
+        return { handled: false };
+    }
+
+    updateMovementZoneHandle(mouseX, mouseY) {
+        if (!this.draggingHandlePlatform || !this.draggingHandleType) return;
+
+        const zone = this.draggingHandlePlatform.movementZone;
+        const platform = this.draggingHandlePlatform;
+
+        if (this.draggingHandleType === 'start') {
+            // Calculate how much the start point moved
+            const deltaX = mouseX - zone.startX;
+            const deltaY = mouseY - zone.startY;
+
+            zone.startX = mouseX;
+            zone.startY = mouseY;
+
+            // Move the platform with the start handle (keep it centered on start point)
+            platform.x += deltaX;
+            platform.y += deltaY;
+
+            // Update original position to match
+            platform.originalPosition.x = platform.x;
+            platform.originalPosition.y = platform.y;
+        } else if (this.draggingHandleType === 'end') {
+            zone.endX = mouseX;
+            zone.endY = mouseY;
+        }
+
+        // Recalculate angle
+        const deltaX = zone.endX - zone.startX;
+        const deltaY = zone.endY - zone.startY;
+        zone.angle = Math.atan2(deltaY, deltaX);
+
+        // Reset movement progress to start when zone is modified
+        this.draggingHandlePlatform.movementProgress = 0;
+        this.draggingHandlePlatform.movingDirection = 1;
+    }
+
+    finishMovementZoneHandleDrag() {
+        if (this.draggingHandlePlatform) {
+            console.log(`🔵 Finished dragging platform movement zone ${this.draggingHandleType} handle`);
+
+            // Update UI to reflect changes
+            this.updatePlatformProperties();
+        }
+
+        this.isDraggingMovementZoneHandle = false;
+        this.draggingHandleType = null;
+        this.draggingHandlePlatform = null;
+    }
+
+    // Movement control methods
+    toggleMovementPause(platform) {
+        if (!platform) {
+            console.error('Cannot toggle movement pause: no platform provided');
+            return;
+        }
+
+        platform.isMovementPaused = !platform.isMovementPaused;
+        console.log(`🔵 Platform ${platform.id} movement ${platform.isMovementPaused ? 'paused' : 'resumed'}`);
+
+        // Update button text
+        this.updateMovementControlButtons(platform);
+    }
+
+    resetToOriginalPosition(platform) {
+        if (!platform || !platform.originalPosition) {
+            console.error('Cannot reset position: no platform or original position available');
+            return;
+        }
+
+        platform.x = platform.originalPosition.x;
+        platform.y = platform.originalPosition.y;
+        platform.movementProgress = 0;
+        platform.movingDirection = 1;
+        platform.isMovementPaused = true; // Stop movement when resetting
+
+        console.log(`🔵 Platform ${platform.id} reset to original position (${platform.x}, ${platform.y}) and stopped`);
+
+        // Update UI
+        this.updatePlatformProperties();
+        this.updateMovementControlButtons(platform);
+    }
+
+    updateMovementControlButtons(platform) {
+        const stopStartBtn = document.getElementById('stopStartPlatformMovement');
+        if (stopStartBtn && platform) {
+            stopStartBtn.textContent = platform.isMovementPaused ? 'Start Movement' : 'Stop Movement';
+        }
     }
 }

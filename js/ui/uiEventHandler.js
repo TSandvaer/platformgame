@@ -96,6 +96,42 @@ class UIEventHandler {
             this.game.platformSystem.deleteSelectedPlatform();
         });
 
+        // Draw platform movement zone button
+        document.getElementById('drawPlatformMovementZone').addEventListener('click', () => {
+            if (this.game.platformSystem.selectedPlatform) {
+                this.game.platformSystem.manager.startMovementZoneDrawingMode(this.game.platformSystem.selectedPlatform);
+            } else {
+                alert('Please select a platform first');
+            }
+        });
+
+        // Clear platform movement zone button
+        document.getElementById('clearPlatformMovementZone').addEventListener('click', () => {
+            if (this.game.platformSystem.selectedPlatform) {
+                this.game.platformSystem.manager.clearMovementZone(this.game.platformSystem.selectedPlatform);
+            } else {
+                alert('Please select a platform first');
+            }
+        });
+
+        // Stop/start platform movement button
+        document.getElementById('stopStartPlatformMovement').addEventListener('click', () => {
+            if (this.game.platformSystem.selectedPlatform) {
+                this.game.platformSystem.manager.toggleMovementPause(this.game.platformSystem.selectedPlatform);
+            } else {
+                alert('Please select a platform first');
+            }
+        });
+
+        // Reset platform position button
+        document.getElementById('resetPlatformPosition').addEventListener('click', () => {
+            if (this.game.platformSystem.selectedPlatform) {
+                this.game.platformSystem.manager.resetToOriginalPosition(this.game.platformSystem.selectedPlatform);
+            } else {
+                alert('Please select a platform first');
+            }
+        });
+
         // Platform positioning controls
         document.getElementById('platformPositioning').addEventListener('change', () => {
             this.game.platformSystem.updateSelectedPlatform();
@@ -243,6 +279,42 @@ class UIEventHandler {
         document.getElementById('bringToFront').addEventListener('click', () => {
             if (this.game.propSystem.selectedProp) {
                 this.game.propSystem.movePropToFront();
+            }
+        });
+
+        // Draw prop movement zone button
+        document.getElementById('drawPropMovementZone').addEventListener('click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.startMovementZoneDrawingMode(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
+            }
+        });
+
+        // Clear prop movement zone button
+        document.getElementById('clearPropMovementZone').addEventListener('click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.clearMovementZone(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
+            }
+        });
+
+        // Bind to platform button
+        document.getElementById('bindToPlatform').addEventListener('click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.startPlatformBinding(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
+            }
+        });
+
+        // Unbind from platform button
+        document.getElementById('unbindFromPlatform').addEventListener('click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.unbindFromPlatform(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
             }
         });
 

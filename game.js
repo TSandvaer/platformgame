@@ -507,6 +507,10 @@ class PlatformRPG {
         // Update prop destruction animations
         this.propSystem.updateDestruction(this.deltaTime, this.platformSystem);
         this.propSystem.updateChestAnimations(this.deltaTime);
+        this.propSystem.updateMovement(this.deltaTime);
+
+        // Update platform movement
+        this.platformSystem.updateMovement(this.deltaTime);
 
         // Update item drop system
         if (this.itemDropSystem) {
@@ -751,6 +755,9 @@ class PlatformRPG {
             // Render transition zone drag preview
             this.renderTransitionZoneDrag();
 
+            // Render movement zone drawing previews
+            this.renderMovementZoneDrawingPreviews();
+
             this.ctx.restore();
 
             // Render editor system development info
@@ -926,6 +933,24 @@ class PlatformRPG {
             this.ctx.save();
             this.cameraSystem.applyTransform(this.ctx);
             this.sceneSystem.renderTransitionPreview(this.ctx);
+            this.ctx.restore();
+        }
+    }
+
+    renderMovementZoneDrawingPreviews() {
+        // Render platform movement zone drawing preview
+        if (this.platformSystem?.manager?.isDrawingMovementZone) {
+            this.ctx.save();
+            this.cameraSystem.applyTransform(this.ctx);
+            this.platformSystem.manager.renderMovementZonePreview(this.ctx, this.viewport, this.cameraSystem.camera);
+            this.ctx.restore();
+        }
+
+        // Render prop movement zone drawing preview
+        if (this.propSystem?.manager?.isDrawingMovementZone) {
+            this.ctx.save();
+            this.cameraSystem.applyTransform(this.ctx);
+            this.propSystem.manager.renderMovementZonePreview(this.ctx, this.viewport, this.cameraSystem.camera);
             this.ctx.restore();
         }
     }

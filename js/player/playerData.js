@@ -80,6 +80,11 @@ class PlayerData {
         // Tracking
         this.lastValidPosition = { x: 100, y: 400 };
 
+        // Platform/Prop physics - for Newton's first law (object at rest stays at rest relative to moving platform/prop)
+        this.standingOnPlatform = null; // Reference to platform player is standing on
+        this.standingOnProp = null; // Reference to prop player is standing on
+        this.platformVelocity = { x: 0, y: 0 }; // Velocity inherited from platform/prop
+
         // Player inventory system
         this.playerInventory = []; // Array of items in player's inventory
 

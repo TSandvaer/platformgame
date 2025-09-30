@@ -251,7 +251,28 @@ class PropData {
             isDestroyed: false,
             isVisible: true,
             isDamaged: false,
-            damageTimer: 0
+            damageTimer: 0,
+            // Movement system properties
+            isMoving: false,
+            moveSpeed: 2,
+            movementZone: {
+                enabled: false,
+                startX: x - 50,
+                startY: y,
+                endX: x + 50,
+                endY: y,
+                angle: 0  // Angle in radians for line direction
+            },
+            // Movement state
+            velocityX: 0,
+            velocityY: 0,
+            targetX: x,
+            targetY: y,
+            movingDirection: 1, // 1 for forward along line, -1 for backward
+            movementProgress: 0, // 0-1 position along the movement line
+            // Platform binding properties
+            boundToPlatform: null, // Platform ID this prop is bound to
+            platformBindOffset: { x: 0, y: 0 } // Relative offset from platform center
         };
 
         this.props.push(newProp);

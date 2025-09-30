@@ -35,6 +35,29 @@ class DevelopmentInputHandler {
             }
         }
 
+        // Handle Escape key - cancel movement zone drawing
+        if (e.key === 'Escape') {
+            e.preventDefault();
+
+            // Cancel platform movement zone drawing
+            if (this.game.platformSystem.manager.isDrawingMovementZone) {
+                this.game.platformSystem.manager.cancelMovementZoneDrawing();
+                console.log('🔵 Platform movement zone drawing cancelled by Escape key');
+            }
+
+            // Cancel prop movement zone drawing
+            if (this.game.propSystem.manager.isDrawingMovementZone) {
+                this.game.propSystem.manager.cancelMovementZoneDrawing();
+                console.log('🟣 Prop movement zone drawing cancelled by Escape key');
+            }
+
+            // Cancel platform binding mode
+            if (this.game.propSystem.manager.isBindingToPlatform) {
+                this.game.propSystem.manager.cancelPlatformBinding();
+                console.log('🟣 Platform binding mode cancelled by Escape key');
+            }
+        }
+
         // Handle Delete key
         if (e.key === 'Delete' || e.key === 'Backspace') {
             e.preventDefault(); // Prevent default browser behavior

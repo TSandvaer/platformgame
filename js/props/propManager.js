@@ -4,9 +4,44 @@ class PropManager {
         this.isRotatingProp = false;
         this.rotationStartY = 0;
         this.rotationStartAngle = 0;
+
+        // Movement zone drawing state
+        this.isDrawingMovementZone = false;
+        this.movementZoneStart = null;
+        this.movementZoneEnd = null;
+        this.movementTargetProp = null; // Prop whose movement zone is being drawn
+
+        // Movement zone editing state
+        this.isDraggingMovementZoneHandle = false;
+        this.draggingHandleType = null; // 'start' or 'end'
+        this.draggingHandleProp = null;
+
+        // Platform binding state
+        this.isBindingToPlatform = false;
+        this.bindingTargetProp = null;
     }
 
     handleMouseDown(mouseX, mouseY, platformSystem, ctrlPressed = false, shiftPressed = false, viewport, camera) {
+        // Check if movement zone drawing mode is active
+        if (this.isDrawingMovementZone) {
+            this.startMovementZoneDrawing(mouseX, mouseY);
+            return { handled: true, type: 'movementZoneStart' };
+        }
+
+        // Check for platform binding mode
+        if (this.isBindingToPlatform) {
+            const bindResult = this.handlePlatformBinding(mouseX, mouseY, platformSystem, viewport);
+            if (bindResult.handled) {
+                return bindResult;
+            }
+        }
+
+        // Check for movement zone handle dragging (highest priority)
+        const handleResult = this.checkMovementZoneHandles(mouseX, mouseY);
+        if (handleResult.handled) {
+            return handleResult;
+        }
+
         // Check if prop placement mode is active
         if (this.propData.propPlacementMode) {
             this.placeProp(mouseX, mouseY);
@@ -143,6 +178,18 @@ class PropManager {
     }
 
     handleMouseMove(mouseX, mouseY, viewport, camera) {
+        // Update movement zone drawing
+        if (this.isDrawingMovementZone && this.movementZoneStart) {
+            this.movementZoneEnd = { x: mouseX, y: mouseY };
+            return true;
+        }
+
+        // Update movement zone handle dragging
+        if (this.isDraggingMovementZoneHandle && this.draggingHandleProp) {
+            this.updateMovementZoneHandle(mouseX, mouseY);
+            return true;
+        }
+
         if (this.propData.isDragSelecting && !this.propData.isDraggingProp && !this.propData.isDraggingMultiple) {
             // Update drag selection rectangle - only if not currently dragging props
             this.propData.updateDragSelection(mouseX, mouseY);
@@ -217,6 +264,18 @@ class PropManager {
     }
 
     handleMouseUp(ctrlPressed = false, viewport) {
+        // Finish movement zone drawing
+        if (this.isDrawingMovementZone && this.movementZoneStart && this.movementZoneEnd) {
+            this.finishMovementZoneDrawing();
+            return { handled: true, type: 'movementZoneFinish' };
+        }
+
+        // Finish movement zone handle dragging
+        if (this.isDraggingMovementZoneHandle) {
+            this.finishMovementZoneHandleDrag();
+            return { handled: true, type: 'movementZoneHandleFinish' };
+        }
+
         if (this.propData.isDragSelecting) {
             // Complete drag selection
             const selectedProps = this.propData.finishDragSelection(viewport, ctrlPressed);
@@ -332,6 +391,9 @@ class PropManager {
         }
 
         if (this.propData.selectedProp) {
+            // Ensure backward compatibility - initialize missing movement properties
+            this.ensureMovementProperties(this.propData.selectedProp);
+
             propertiesDiv.style.display = 'block';
             const xInput = document.getElementById('propX');
             const yInput = document.getElementById('propY');
@@ -382,6 +444,106 @@ class PropManager {
                 itemDropsButtons.style.display = isDestroyable ? 'block' : 'none';
             }
 
+            // Update movement properties
+            const isMovingInput = document.getElementById('selectedPropIsMoving');
+            const moveSpeedInput = document.getElementById('selectedPropMoveSpeed');
+            const movementEnabledInput = document.getElementById('selectedPropMovementEnabled');
+            const zoneStartXInput = document.getElementById('selectedPropZoneStartX');
+            const zoneEndXInput = document.getElementById('selectedPropZoneEndX');
+            const zoneYInput = document.getElementById('selectedPropZoneY');
+
+            if (isMovingInput) isMovingInput.checked = this.propData.selectedProp.isMoving || false;
+            if (moveSpeedInput) moveSpeedInput.value = this.propData.selectedProp.moveSpeed || 2;
+            if (movementEnabledInput) movementEnabledInput.checked = this.propData.selectedProp.movementZone?.enabled || false;
+            if (zoneStartXInput) zoneStartXInput.value = this.propData.selectedProp.movementZone?.startX || 0;
+            if (zoneEndXInput) zoneEndXInput.value = this.propData.selectedProp.movementZone?.endX || 0;
+            if (zoneYInput) zoneYInput.value = this.propData.selectedProp.movementZone?.y || 0;
+
+            // Show/hide movement sections based on isMoving flag
+            const isMoving = this.propData.selectedProp.isMoving || false;
+            const propMovementSection = document.getElementById('propMovementSection');
+            const propMovementZoneSection = document.getElementById('propMovementZoneSection');
+
+            if (propMovementSection) {
+                propMovementSection.style.display = isMoving ? 'block' : 'none';
+            }
+            if (propMovementZoneSection) {
+                propMovementZoneSection.style.display = isMoving ? 'block' : 'none';
+            }
+
+            // Show/hide movement zone controls based on movement enabled flag
+            const movementEnabled = this.propData.selectedProp.movementZone?.enabled || false;
+            const propMovementZoneControls = document.getElementById('propMovementZoneControls');
+            const propMovementZoneControls2 = document.getElementById('propMovementZoneControls2');
+            const propMovementZoneControls3 = document.getElementById('propMovementZoneControls3');
+
+            if (propMovementZoneControls) {
+                propMovementZoneControls.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+            }
+            if (propMovementZoneControls2) {
+                propMovementZoneControls2.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+            }
+            if (propMovementZoneControls3) {
+                propMovementZoneControls3.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+            }
+
+            // Add event listeners for movement checkboxes to update UI immediately
+            if (isMovingInput) {
+                // Remove existing listeners to avoid duplicates
+                isMovingInput.removeEventListener('change', this.handleMovingCheckboxChange);
+                this.handleMovingCheckboxChange = () => {
+                    const propMovementSection = document.getElementById('propMovementSection');
+                    const propMovementZoneSection = document.getElementById('propMovementZoneSection');
+                    const propMovementZoneControls = document.getElementById('propMovementZoneControls');
+                    const propMovementZoneControls2 = document.getElementById('propMovementZoneControls2');
+                    const propMovementZoneControls3 = document.getElementById('propMovementZoneControls3');
+
+                    const isMoving = isMovingInput.checked;
+                    if (propMovementSection) propMovementSection.style.display = isMoving ? 'block' : 'none';
+                    if (propMovementZoneSection) propMovementZoneSection.style.display = isMoving ? 'block' : 'none';
+
+                    // Hide zone controls if not moving
+                    if (!isMoving) {
+                        if (propMovementZoneControls) propMovementZoneControls.style.display = 'none';
+                        if (propMovementZoneControls2) propMovementZoneControls2.style.display = 'none';
+                        if (propMovementZoneControls3) propMovementZoneControls3.style.display = 'none';
+                    } else {
+                        // Show zone controls if movement enabled
+                        const movementEnabledInput = document.getElementById('selectedPropMovementEnabled');
+                        const movementEnabled = movementEnabledInput?.checked || false;
+                        if (propMovementZoneControls) propMovementZoneControls.style.display = movementEnabled ? 'block' : 'none';
+                        if (propMovementZoneControls2) propMovementZoneControls2.style.display = movementEnabled ? 'block' : 'none';
+                        if (propMovementZoneControls3) propMovementZoneControls3.style.display = movementEnabled ? 'block' : 'none';
+                    }
+                };
+                isMovingInput.addEventListener('change', this.handleMovingCheckboxChange);
+            }
+
+            if (movementEnabledInput) {
+                // Remove existing listeners to avoid duplicates
+                movementEnabledInput.removeEventListener('change', this.handleMovementEnabledCheckboxChange);
+                this.handleMovementEnabledCheckboxChange = () => {
+                    const propMovementZoneControls = document.getElementById('propMovementZoneControls');
+                    const propMovementZoneControls2 = document.getElementById('propMovementZoneControls2');
+                    const propMovementZoneControls3 = document.getElementById('propMovementZoneControls3');
+
+                    const movementEnabled = movementEnabledInput.checked;
+                    const isMovingInput = document.getElementById('selectedPropIsMoving');
+                    const isMoving = isMovingInput?.checked || false;
+
+                    if (propMovementZoneControls) {
+                        propMovementZoneControls.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+                    }
+                    if (propMovementZoneControls2) {
+                        propMovementZoneControls2.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+                    }
+                    if (propMovementZoneControls3) {
+                        propMovementZoneControls3.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
+                    }
+                };
+                movementEnabledInput.addEventListener('change', this.handleMovementEnabledCheckboxChange);
+            }
+
             // Update the type display for single or multiple props
             const selectedPropTypeElement = document.getElementById('selectedPropType');
             if (selectedPropTypeElement) {
@@ -425,6 +587,19 @@ class PropManager {
             if (itemDropsButtons) {
                 itemDropsButtons.style.display = 'none';
             }
+
+            // Hide movement sections when no prop is selected
+            const propMovementSection = document.getElementById('propMovementSection');
+            const propMovementZoneSection = document.getElementById('propMovementZoneSection');
+            const propMovementZoneControls = document.getElementById('propMovementZoneControls');
+            const propMovementZoneControls2 = document.getElementById('propMovementZoneControls2');
+            const propMovementZoneControls3 = document.getElementById('propMovementZoneControls3');
+
+            if (propMovementSection) propMovementSection.style.display = 'none';
+            if (propMovementZoneSection) propMovementZoneSection.style.display = 'none';
+            if (propMovementZoneControls) propMovementZoneControls.style.display = 'none';
+            if (propMovementZoneControls2) propMovementZoneControls2.style.display = 'none';
+            if (propMovementZoneControls3) propMovementZoneControls3.style.display = 'none';
         }
     }
 
@@ -441,6 +616,13 @@ class PropManager {
         const destroyableInput = document.getElementById('selectedPropDestroyable');
         const durabilityInput = document.getElementById('selectedPropDurability');
         const maxDurabilityInput = document.getElementById('selectedPropMaxDurability');
+        // Movement inputs
+        const isMovingInput = document.getElementById('selectedPropIsMoving');
+        const moveSpeedInput = document.getElementById('selectedPropMoveSpeed');
+        const movementEnabledInput = document.getElementById('selectedPropMovementEnabled');
+        const zoneStartXInput = document.getElementById('selectedPropZoneStartX');
+        const zoneEndXInput = document.getElementById('selectedPropZoneEndX');
+        const zoneYInput = document.getElementById('selectedPropZoneY');
 
         if (xInput) this.propData.selectedProp.x = parseInt(xInput.value);
         if (yInput) this.propData.selectedProp.y = parseInt(yInput.value);
@@ -486,6 +668,8 @@ class PropManager {
                 itemDropsButtons.style.display = destroyableInput.checked ? 'block' : 'none';
             }
         }
+
+        // Event listeners are now handled inside the selected prop block above
         if (maxDurabilityInput && this.propData.selectedProp.destroyable) {
             const newMaxDurability = parseFloat(maxDurabilityInput.value) || 100;
             this.propData.selectedProp.maxDurability = newMaxDurability;
@@ -499,6 +683,35 @@ class PropManager {
                 parseFloat(durabilityInput.value) || 0,
                 this.propData.selectedProp.maxDurability
             );
+        }
+
+        // Handle movement properties
+        if (isMovingInput) {
+            this.propData.selectedProp.isMoving = isMovingInput.checked;
+        }
+        if (moveSpeedInput) {
+            this.propData.selectedProp.moveSpeed = parseFloat(moveSpeedInput.value) || 2;
+        }
+        if (movementEnabledInput) {
+            // Initialize movement zone if it doesn't exist
+            if (!this.propData.selectedProp.movementZone) {
+                this.propData.selectedProp.movementZone = {
+                    enabled: false,
+                    startX: this.propData.selectedProp.x - 50,
+                    endX: this.propData.selectedProp.x + 50,
+                    y: this.propData.selectedProp.y
+                };
+            }
+            this.propData.selectedProp.movementZone.enabled = movementEnabledInput.checked;
+        }
+        if (zoneStartXInput && this.propData.selectedProp.movementZone) {
+            this.propData.selectedProp.movementZone.startX = parseFloat(zoneStartXInput.value) || 0;
+        }
+        if (zoneEndXInput && this.propData.selectedProp.movementZone) {
+            this.propData.selectedProp.movementZone.endX = parseFloat(zoneEndXInput.value) || 0;
+        }
+        if (zoneYInput && this.propData.selectedProp.movementZone) {
+            this.propData.selectedProp.movementZone.y = parseFloat(zoneYInput.value) || 0;
         }
 
         this.updatePropList();
@@ -553,5 +766,363 @@ class PropManager {
             this.updateDropConfigurationUI();
             console.log(`🎁 Removed drop item from prop ${this.propData.selectedProp.id}`);
         }
+    }
+
+    // Movement zone drawing methods
+    startMovementZoneDrawing(mouseX, mouseY) {
+        this.movementZoneStart = { x: mouseX, y: mouseY };
+        this.movementZoneEnd = { x: mouseX, y: mouseY };
+        console.log('🟣 Started prop movement zone drawing at', mouseX, mouseY);
+    }
+
+    finishMovementZoneDrawing() {
+        if (!this.movementTargetProp || !this.movementZoneStart || !this.movementZoneEnd) {
+            this.cancelMovementZoneDrawing();
+            return;
+        }
+
+        // Calculate line start and end points
+        const startX = this.movementZoneStart.x;
+        const startY = this.movementZoneStart.y;
+        const endX = this.movementZoneEnd.x;
+        const endY = this.movementZoneEnd.y;
+
+        // Calculate angle of the line
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+        const angle = Math.atan2(deltaY, deltaX);
+
+        // Ensure movement zone exists
+        if (!this.movementTargetProp.movementZone) {
+            this.movementTargetProp.movementZone = {
+                enabled: false,
+                startX: 0,
+                startY: 0,
+                endX: 0,
+                endY: 0,
+                angle: 0
+            };
+        }
+
+        // Update prop movement zone
+        this.movementTargetProp.movementZone.startX = startX;
+        this.movementTargetProp.movementZone.startY = startY;
+        this.movementTargetProp.movementZone.endX = endX;
+        this.movementTargetProp.movementZone.endY = endY;
+        this.movementTargetProp.movementZone.angle = angle;
+        this.movementTargetProp.movementZone.enabled = true;
+
+        // Initialize movement progress to start of line
+        this.movementTargetProp.movementProgress = 0;
+
+        console.log(`🟣 Movement zone set for prop ${this.movementTargetProp.id}:`, {
+            startX, startY, endX, endY, angle: angle * 180 / Math.PI + '°'
+        });
+
+        // Reset drawing state
+        this.cancelMovementZoneDrawing();
+
+        // Update UI if available
+        this.updatePropProperties();
+    }
+
+    cancelMovementZoneDrawing() {
+        this.isDrawingMovementZone = false;
+        this.movementZoneStart = null;
+        this.movementZoneEnd = null;
+        this.movementTargetProp = null;
+        console.log('🟣 Prop movement zone drawing cancelled');
+    }
+
+    // Public methods to control movement zone drawing mode
+    startMovementZoneDrawingMode(prop) {
+        if (!prop) {
+            console.error('Cannot start movement zone drawing: no prop selected');
+            return;
+        }
+
+        this.movementTargetProp = prop;
+        this.isDrawingMovementZone = true;
+        console.log('🟣 Prop movement zone drawing mode started for prop', prop.id);
+        console.log('🟣 Press Escape to cancel drawing');
+    }
+
+    clearMovementZone(prop) {
+        if (!prop) {
+            console.error('Cannot clear movement zone: no prop selected');
+            return;
+        }
+
+        // Cancel any ongoing drawing
+        this.cancelMovementZoneDrawing();
+
+        // Clear movement zone
+        if (prop.movementZone) {
+            prop.movementZone.enabled = false;
+            prop.movementZone.startX = 0;
+            prop.movementZone.startY = 0;
+            prop.movementZone.endX = 0;
+            prop.movementZone.endY = 0;
+            prop.movementZone.angle = 0;
+        }
+
+        // Reset movement state
+        prop.movementProgress = 0;
+        prop.movingDirection = 1;
+
+        console.log('🟣 Cleared movement zone for prop', prop.id);
+
+        // Update UI
+        this.updatePropProperties();
+    }
+
+    // Render preview while drawing
+    renderMovementZonePreview(ctx, viewport, camera) {
+        if (!this.isDrawingMovementZone || !this.movementZoneStart || !this.movementZoneEnd) return;
+
+        ctx.save();
+
+        // Line points are already in world coordinates
+        const renderStartX = this.movementZoneStart.x;
+        const renderStartY = this.movementZoneStart.y;
+        const renderEndX = this.movementZoneEnd.x;
+        const renderEndY = this.movementZoneEnd.y;
+
+        // Draw preview line (purple/magenta for props to distinguish from platforms)
+        ctx.strokeStyle = 'rgba(255, 0, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 5]);
+        ctx.beginPath();
+        ctx.moveTo(renderStartX, renderStartY);
+        ctx.lineTo(renderEndX, renderEndY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Draw zone markers
+        ctx.fillStyle = 'magenta';
+        ctx.beginPath();
+        ctx.arc(renderStartX, renderStartY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(renderEndX, renderEndY, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Ensure prop has all required movement properties for backward compatibility
+    ensureMovementProperties(prop) {
+        // Initialize isMoving if missing
+        if (prop.isMoving === undefined) {
+            prop.isMoving = false;
+        }
+
+        // Initialize moveSpeed if missing
+        if (prop.moveSpeed === undefined) {
+            prop.moveSpeed = 2;
+        }
+
+        // Initialize movementZone if missing
+        if (!prop.movementZone) {
+            prop.movementZone = {
+                enabled: false,
+                startX: prop.x - 50,
+                startY: prop.y,
+                endX: prop.x + 50,
+                endY: prop.y,
+                angle: 0
+            };
+        }
+
+        // Initialize movement state properties if missing
+        if (prop.velocityX === undefined) prop.velocityX = 0;
+        if (prop.velocityY === undefined) prop.velocityY = 0;
+        if (prop.targetX === undefined) prop.targetX = prop.x;
+        if (prop.targetY === undefined) prop.targetY = prop.y;
+        if (prop.movingDirection === undefined) prop.movingDirection = 1;
+        if (prop.movementProgress === undefined) prop.movementProgress = 0;
+
+        // Initialize platform binding properties if missing
+        if (prop.boundToPlatform === undefined) prop.boundToPlatform = null;
+        if (!prop.platformBindOffset) prop.platformBindOffset = { x: 0, y: 0 };
+    }
+
+    // Movement zone handle methods
+    checkMovementZoneHandles(mouseX, mouseY) {
+        // Only check handles for the selected prop with valid movement zone
+        const prop = this.propData.selectedProp;
+        if (!prop || !prop.movementZone || !prop.movementZone.enabled) {
+            return { handled: false };
+        }
+
+        const zone = prop.movementZone;
+        const handleRadius = 8; // Slightly larger than visual handle for easier clicking
+
+        // Check start handle
+        const startDist = Math.sqrt((mouseX - zone.startX) ** 2 + (mouseY - zone.startY) ** 2);
+        if (startDist <= handleRadius) {
+            this.isDraggingMovementZoneHandle = true;
+            this.draggingHandleType = 'start';
+            this.draggingHandleProp = prop;
+            console.log('🟣 Started dragging prop movement zone start handle');
+            return { handled: true, type: 'movementZoneHandleStart' };
+        }
+
+        // Check end handle
+        const endDist = Math.sqrt((mouseX - zone.endX) ** 2 + (mouseY - zone.endY) ** 2);
+        if (endDist <= handleRadius) {
+            this.isDraggingMovementZoneHandle = true;
+            this.draggingHandleType = 'end';
+            this.draggingHandleProp = prop;
+            console.log('🟣 Started dragging prop movement zone end handle');
+            return { handled: true, type: 'movementZoneHandleEnd' };
+        }
+
+        return { handled: false };
+    }
+
+    updateMovementZoneHandle(mouseX, mouseY) {
+        if (!this.draggingHandleProp || !this.draggingHandleType) return;
+
+        const zone = this.draggingHandleProp.movementZone;
+        const prop = this.draggingHandleProp;
+
+        if (this.draggingHandleType === 'start') {
+            // Calculate how much the start point moved
+            const deltaX = mouseX - zone.startX;
+            const deltaY = mouseY - zone.startY;
+
+            zone.startX = mouseX;
+            zone.startY = mouseY;
+
+            // Move the prop with the start handle (keep it centered on start point)
+            prop.x += deltaX;
+            prop.y += deltaY;
+
+            // Update original position to match
+            if (prop.originalPosition) {
+                prop.originalPosition.x = prop.x;
+                prop.originalPosition.y = prop.y;
+            }
+        } else if (this.draggingHandleType === 'end') {
+            zone.endX = mouseX;
+            zone.endY = mouseY;
+        }
+
+        // Recalculate angle
+        const deltaX = zone.endX - zone.startX;
+        const deltaY = zone.endY - zone.startY;
+        zone.angle = Math.atan2(deltaY, deltaX);
+
+        // Reset movement progress to start when zone is modified
+        this.draggingHandleProp.movementProgress = 0;
+        this.draggingHandleProp.movingDirection = 1;
+    }
+
+    finishMovementZoneHandleDrag() {
+        if (this.draggingHandleProp) {
+            console.log(`🟣 Finished dragging prop movement zone ${this.draggingHandleType} handle`);
+
+            // Update UI to reflect changes
+            this.updatePropProperties();
+        }
+
+        this.isDraggingMovementZoneHandle = false;
+        this.draggingHandleType = null;
+        this.draggingHandleProp = null;
+    }
+
+    // Platform binding methods
+    startPlatformBinding(prop) {
+        if (!prop) {
+            console.error('Cannot start platform binding: no prop selected');
+            return;
+        }
+
+        // Check if prop is already bound
+        if (prop.boundToPlatform) {
+            alert('This prop is already bound to a platform. Please unbind first.');
+            return;
+        }
+
+        this.bindingTargetProp = prop;
+        this.isBindingToPlatform = true;
+        console.log('🟣 Platform binding mode started for prop', prop.id);
+        console.log('🟣 Click on a platform to bind the prop to it');
+    }
+
+    handlePlatformBinding(mouseX, mouseY, platformSystem, viewport) {
+        if (!this.bindingTargetProp || !platformSystem) {
+            return { handled: false };
+        }
+
+        // Check if mouse is over any platform
+        for (let platform of platformSystem.platforms) {
+            // Get actual position based on positioning mode
+            const actualPos = platformSystem.data.getActualPosition(platform, viewport.designWidth, viewport.designHeight);
+            const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
+
+            if (platformSystem.data.isPointInPlatform(mouseX, mouseY, renderPlatform)) {
+                this.bindPropToPlatform(this.bindingTargetProp, platform, viewport);
+                this.cancelPlatformBinding();
+                return { handled: true, type: 'platformBinding' };
+            }
+        }
+
+        // If clicked outside any platform, cancel binding
+        this.cancelPlatformBinding();
+        return { handled: true, type: 'platformBindingCancel' };
+    }
+
+    bindPropToPlatform(prop, platform, viewport) {
+        // Calculate the prop's center position
+        const propType = this.propData.propTypes[prop.type];
+        const actualWidth = propType ? (propType.width || 32) * (prop.sizeMultiplier || 1) : 32;
+        const actualHeight = propType ? (propType.height || 32) * (prop.sizeMultiplier || 1) : 32;
+        const propCenterX = prop.x + actualWidth / 2;
+        const propCenterY = prop.y + actualHeight / 2;
+
+        // Calculate platform center
+        const platformCenterX = platform.x + platform.width / 2;
+        const platformCenterY = platform.y + platform.height / 2;
+
+        // Calculate relative offset from platform center
+        const offsetX = propCenterX - platformCenterX;
+        const offsetY = propCenterY - platformCenterY;
+
+        // Bind the prop
+        prop.boundToPlatform = platform.id;
+        prop.platformBindOffset = { x: offsetX, y: offsetY };
+
+        console.log(`🟣 Bound prop ${prop.id} to platform ${platform.id} with offset (${offsetX.toFixed(1)}, ${offsetY.toFixed(1)})`);
+
+        // Update UI
+        this.updatePropProperties();
+    }
+
+    unbindFromPlatform(prop) {
+        if (!prop) {
+            console.error('Cannot unbind from platform: no prop selected');
+            return;
+        }
+
+        if (!prop.boundToPlatform) {
+            alert('This prop is not bound to any platform.');
+            return;
+        }
+
+        console.log(`🟣 Unbound prop ${prop.id} from platform ${prop.boundToPlatform}`);
+
+        prop.boundToPlatform = null;
+        prop.platformBindOffset = { x: 0, y: 0 };
+
+        // Update UI
+        this.updatePropProperties();
+    }
+
+    cancelPlatformBinding() {
+        this.isBindingToPlatform = false;
+        this.bindingTargetProp = null;
+        console.log('🟣 Platform binding mode cancelled');
     }
 }

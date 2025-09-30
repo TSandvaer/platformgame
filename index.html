@@ -1223,6 +1223,22 @@
                             <input type="number" id="selectedPropMaxDurability" min="1" max="1000" step="1" style="width: 60px;">
                             <span style="font-size: 11px; color: #aaa;">durability</span>
                         </div>
+                        <div class="property-row">
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="selectedPropIsMoving">
+                                <span>Moving Platform/Prop</span>
+                            </label>
+                        </div>
+                        <div class="property-row" id="propMovementSection" style="display: none;">
+                            <span class="property-label">Move Speed:</span>
+                            <input type="number" id="selectedPropMoveSpeed" min="0.5" max="10" step="0.5" style="width: 80px;" value="2">
+                            <span style="font-size: 11px; color: #aaa;">units/sec</span>
+                        </div>
+                        <div class="property-row" id="propMovementZoneSection" style="display: none;">
+                            <button class="btn small" id="drawPropMovementZone">Draw Movement Zone</button>
+                            <button class="btn small danger" id="clearPropMovementZone">Clear Zone</button>
+                            <span style="font-size: 11px; color: #aaa; margin-left: 10px;">Click then drag on map</span>
+                        </div>
                         <div class="property-row" id="itemDropsSection" style="display: none;">
                             <h4 style="margin: 10px 0 5px 0; color: #4CAF50;">Item Drops</h4>
                             <div id="propDropsList" style="background-color: #333; padding: 8px; border-radius: 4px; margin: 5px 0; max-height: 150px; overflow-y: auto;">
@@ -1250,6 +1266,10 @@
                         <div class="property-row">
                             <button class="btn small" id="groupProps">Group Selected</button>
                             <button class="btn small" id="ungroupProps">Ungroup</button>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="bindToPlatform">Bind to Platform</button>
+                            <button class="btn small danger" id="unbindFromPlatform">Unbind from Platform</button>
                         </div>
                         <div class="property-row" id="alignmentControls" style="display: none;">
                             <span class="property-label">Align:</span>
@@ -1424,6 +1444,26 @@
                                 <option value="normal">Normal</option>
                                 <option value="sink">Sink</option>
                             </select>
+                        </div>
+                        <div class="property-row">
+                            <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="selectedPlatformIsMoving">
+                                <span>Moving Platform</span>
+                            </label>
+                        </div>
+                        <div class="property-row" id="platformMovementSection" style="display: none;">
+                            <span class="property-label">Move Speed:</span>
+                            <input type="number" id="selectedPlatformMoveSpeed" min="0.5" max="10" step="0.5" style="width: 80px;" value="2">
+                            <span style="font-size: 11px; color: #aaa;">units/sec</span>
+                        </div>
+                        <div class="property-row" id="platformMovementZoneSection" style="display: none;">
+                            <button class="btn small" id="drawPlatformMovementZone">Draw Movement Zone</button>
+                            <button class="btn small danger" id="clearPlatformMovementZone">Clear Zone</button>
+                            <span style="font-size: 11px; color: #aaa; margin-left: 10px;">Click then drag on map</span>
+                        </div>
+                        <div class="property-row" id="platformMovementControlSection" style="display: none;">
+                            <button class="btn small" id="stopStartPlatformMovement">Stop Movement</button>
+                            <button class="btn small" id="resetPlatformPosition">Reset Position</button>
                         </div>
                         <div class="property-row">
                             <button class="btn small" id="updatePlatform">Update</button>

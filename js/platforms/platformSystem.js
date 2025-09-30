@@ -63,7 +63,75 @@ class PlatformSystem {
             const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
 
             this.renderer.renderPlatform(renderPlatform, isDevelopmentMode, isSelected);
+
+            // Render movement zone in development mode for selected platform
+            if (isDevelopmentMode && isSelected && platform.movementZone && platform.movementZone.enabled && this.hasValidMovementZone(platform.movementZone)) {
+                this.renderMovementZone(platform, viewport);
+            }
         });
+    }
+
+    // Render movement zone for a platform
+    renderMovementZone(platform, viewport) {
+        const ctx = this.renderer.ctx;
+        if (!ctx) return;
+
+        ctx.save();
+
+        const { startX, startY, endX, endY } = platform.movementZone;
+
+        // Use world coordinates directly - camera transformation is applied by the caller
+        const renderStartX = startX;
+        const renderStartY = startY;
+        const renderEndX = endX;
+        const renderEndY = endY;
+
+        // Draw movement zone line (cyan like enemy movement zones)
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(renderStartX, renderStartY);
+        ctx.lineTo(renderEndX, renderEndY);
+        ctx.stroke();
+
+        // Draw zone markers (drag handles)
+        ctx.fillStyle = 'cyan';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+
+        // Start handle
+        ctx.beginPath();
+        ctx.arc(renderStartX, renderStartY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // End handle
+        ctx.beginPath();
+        ctx.arc(renderEndX, renderEndY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw inner dots to indicate drag handles
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(renderStartX, renderStartY, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(renderEndX, renderEndY, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw zone label
+        ctx.fillStyle = 'cyan';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
+        ctx.font = `${10 * (viewport ? viewport.scaleX : 1)}px Arial`;
+        ctx.textAlign = 'center';
+        const labelX = (renderStartX + renderEndX) / 2;
+        const labelY = (renderStartY + renderEndY) / 2 - 8;
+        ctx.strokeText('movement zone', labelX, labelY);
+        ctx.fillText('movement zone', labelX, labelY);
+
+        ctx.restore();
     }
 
     // Collision detection
@@ -156,7 +224,7 @@ class PlatformSystem {
 
     // State management
     get isDragging() {
-        return this.data.isDragging;
+        return this.data.isDragging || this.manager.isDraggingMovementZoneHandle;
     }
 
     set isDragging(value) {
@@ -193,5 +261,70 @@ class PlatformSystem {
 
     set resizeStartState(value) {
         this.data.resizeStartState = value;
+    }
+
+    // Update moving platforms
+    updateMovement(deltaTime) {
+        this.data.platforms.forEach(platform => {
+            // Store previous position to calculate velocity
+            const previousX = platform.x;
+            const previousY = platform.y;
+
+            if (platform.isMoving && !platform.isMovementPaused) {
+                // Get movement speed in pixels per second
+                const moveSpeed = platform.moveSpeed || 2;
+                const pixelsPerMs = moveSpeed / 16.67; // Convert to pixels per 16.67ms (60fps)
+                const movement = pixelsPerMs * deltaTime;
+
+                if (platform.movementZone && platform.movementZone.enabled && this.hasValidMovementZone(platform.movementZone)) {
+                    // Move along the defined line
+                    const { startX, startY, endX, endY } = platform.movementZone;
+
+                    // Calculate line length and direction
+                    const lineLength = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+                    if (lineLength === 0) return; // Avoid division by zero
+
+                    // Update movement progress along the line
+                    const progressDelta = movement / lineLength;
+                    platform.movementProgress += progressDelta * platform.movingDirection;
+
+                    // Check boundaries and reverse direction if needed
+                    if (platform.movementProgress >= 1) {
+                        platform.movementProgress = 1;
+                        platform.movingDirection = -1;
+                    } else if (platform.movementProgress <= 0) {
+                        platform.movementProgress = 0;
+                        platform.movingDirection = 1;
+                    }
+
+                    // Calculate center position based on progress along the line
+                    const centerX = startX + (endX - startX) * platform.movementProgress;
+                    const centerY = startY + (endY - startY) * platform.movementProgress;
+
+                    // Set platform position so its center follows the line
+                    platform.x = centerX - platform.width / 2;
+                    platform.y = centerY - platform.height / 2;
+                }
+                // No fallback movement - platforms only move with valid drawn movement zones
+            }
+
+            // Calculate and store platform velocity for this frame
+            platform.velocityX = platform.x - previousX;
+            platform.velocityY = platform.y - previousY;
+        });
+    }
+
+    // Check if a movement zone has valid coordinates (not all zeros and has actual length)
+    hasValidMovementZone(movementZone) {
+        if (!movementZone) return false;
+
+        const { startX, startY, endX, endY } = movementZone;
+
+        // Check if the line has any length
+        // Return false if all coordinates are zero OR if start and end points are the same
+        const hasLength = Math.abs(endX - startX) > 0.1 || Math.abs(endY - startY) > 0.1;
+        const notAllZeros = !(startX === 0 && startY === 0 && endX === 0 && endY === 0);
+
+        return hasLength && notAllZeros;
     }
 }

@@ -113,6 +113,83 @@ class PropSystem {
             viewport,
             camera
         );
+
+        // Render movement zones for selected props in development mode
+        if (isDevelopmentMode && this.data.selectedProp) {
+            this.renderMovementZone(this.data.selectedProp, viewport, camera);
+        }
+    }
+
+    // Render movement zone for a prop
+    renderMovementZone(prop, viewport, camera) {
+        if (!prop.movementZone || !prop.movementZone.enabled || !this.hasValidMovementZone(prop.movementZone)) return;
+
+        const ctx = this.renderer.ctx;
+        if (!ctx || !camera) return;
+
+        ctx.save();
+
+        const { startX, startY, endX, endY } = prop.movementZone;
+
+        // Apply camera transformation
+        let renderStartX = startX;
+        let renderStartY = startY;
+        let renderEndX = endX;
+        let renderEndY = endY;
+
+        if (viewport && camera) {
+            renderStartX = (startX - camera.x) * viewport.scaleX + viewport.offsetX;
+            renderStartY = (startY - camera.y) * viewport.scaleY + viewport.offsetY;
+            renderEndX = (endX - camera.x) * viewport.scaleX + viewport.offsetX;
+            renderEndY = (endY - camera.y) * viewport.scaleY + viewport.offsetY;
+        }
+
+        // Draw movement zone line (magenta for props to distinguish from platforms)
+        ctx.strokeStyle = 'rgba(255, 0, 255, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(renderStartX, renderStartY);
+        ctx.lineTo(renderEndX, renderEndY);
+        ctx.stroke();
+
+        // Draw zone markers (drag handles)
+        ctx.fillStyle = 'magenta';
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+
+        // Start handle
+        ctx.beginPath();
+        ctx.arc(renderStartX, renderStartY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // End handle
+        ctx.beginPath();
+        ctx.arc(renderEndX, renderEndY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw inner dots to indicate drag handles
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(renderStartX, renderStartY, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(renderEndX, renderEndY, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw zone label
+        ctx.fillStyle = 'magenta';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
+        ctx.font = `${10 * (viewport ? viewport.scaleX : 1)}px Arial`;
+        ctx.textAlign = 'center';
+        const labelX = (renderStartX + renderEndX) / 2;
+        const labelY = (renderStartY + renderEndY) / 2 - 8;
+        ctx.strokeText('movement zone', labelX, labelY);
+        ctx.fillText('movement zone', labelX, labelY);
+
+        ctx.restore();
     }
 
     // Render all torch particles - call this once per frame after rendering props
@@ -545,5 +622,115 @@ class PropSystem {
     // Respawn all destroyed props (called on game start/reload)
     respawnAllProps() {
         return this.data.respawnAllProps();
+    }
+
+    // Update moving props and platforms
+    updateMovement(deltaTime) {
+        this.data.props.forEach(prop => {
+            if (prop.isMoving && !prop.isDestroyed) {
+                // Get movement speed in pixels per second
+                const moveSpeed = prop.moveSpeed || 2;
+                const pixelsPerMs = moveSpeed / 16.67; // Convert to pixels per 16.67ms (60fps)
+                const movement = pixelsPerMs * deltaTime;
+
+                if (prop.movementZone && prop.movementZone.enabled && this.hasValidMovementZone(prop.movementZone)) {
+                    // Move along the defined line
+                    const { startX, startY, endX, endY } = prop.movementZone;
+
+                    // Calculate line length and direction
+                    const lineLength = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+                    if (lineLength === 0) return; // Avoid division by zero
+
+                    // Update movement progress along the line
+                    const progressDelta = movement / lineLength;
+                    prop.movementProgress += progressDelta * prop.movingDirection;
+
+                    // Check boundaries and reverse direction if needed
+                    if (prop.movementProgress >= 1) {
+                        prop.movementProgress = 1;
+                        prop.movingDirection = -1;
+                    } else if (prop.movementProgress <= 0) {
+                        prop.movementProgress = 0;
+                        prop.movingDirection = 1;
+                    }
+
+                    // Calculate center position based on progress along the line
+                    const centerX = startX + (endX - startX) * prop.movementProgress;
+                    const centerY = startY + (endY - startY) * prop.movementProgress;
+
+                    // Set prop position so its center follows the line
+                    // For props, we need to calculate the actual size including any size multiplier
+                    const propType = this.data.propTypes[prop.type];
+                    const actualWidth = propType ? (propType.width || 32) * (prop.sizeMultiplier || 1) : 32;
+                    const actualHeight = propType ? (propType.height || 32) * (prop.sizeMultiplier || 1) : 32;
+
+                    prop.x = centerX - actualWidth / 2;
+                    prop.y = centerY - actualHeight / 2;
+                }
+                // No fallback movement - props only move with valid drawn movement zones
+            }
+        });
+
+        // Update bound props to follow their platforms
+        this.updateBoundProps();
+    }
+
+    // Update props that are bound to platforms
+    updateBoundProps() {
+        // Get platform system for position lookup
+        const platformSystem = this.game?.platformSystem;
+        if (!platformSystem) return;
+
+        this.data.props.forEach(prop => {
+            // Store previous position to calculate velocity (for Newton's law)
+            const previousX = prop.x;
+            const previousY = prop.y;
+
+            if (prop.boundToPlatform && !prop.isDestroyed) {
+                // Find the platform this prop is bound to
+                const boundPlatform = platformSystem.data.platforms.find(p => p.id === prop.boundToPlatform);
+                if (boundPlatform) {
+                    // Calculate platform center
+                    const platformCenterX = boundPlatform.x + boundPlatform.width / 2;
+                    const platformCenterY = boundPlatform.y + boundPlatform.height / 2;
+
+                    // Calculate prop size for proper positioning
+                    const propType = this.data.propTypes[prop.type];
+                    const actualWidth = propType ? (propType.width || 32) * (prop.sizeMultiplier || 1) : 32;
+                    const actualHeight = propType ? (propType.height || 32) * (prop.sizeMultiplier || 1) : 32;
+
+                    // Calculate new prop position based on platform center + offset
+                    const newPropCenterX = platformCenterX + prop.platformBindOffset.x;
+                    const newPropCenterY = platformCenterY + prop.platformBindOffset.y;
+
+                    // Set prop position (top-left corner)
+                    prop.x = newPropCenterX - actualWidth / 2;
+                    prop.y = newPropCenterY - actualHeight / 2;
+                } else {
+                    // Platform no longer exists, unbind the prop
+                    console.warn(`🟣 Platform ${prop.boundToPlatform} no longer exists, unbinding prop ${prop.id}`);
+                    prop.boundToPlatform = null;
+                    prop.platformBindOffset = { x: 0, y: 0 };
+                }
+            }
+
+            // Calculate and store prop velocity for this frame (for Newton's law when player stands on prop)
+            prop.velocityX = prop.x - previousX;
+            prop.velocityY = prop.y - previousY;
+        });
+    }
+
+    // Check if a movement zone has valid coordinates (not all zeros and has actual length)
+    hasValidMovementZone(movementZone) {
+        if (!movementZone) return false;
+
+        const { startX, startY, endX, endY } = movementZone;
+
+        // Check if the line has any length
+        // Return false if all coordinates are zero OR if start and end points are the same
+        const hasLength = Math.abs(endX - startX) > 0.1 || Math.abs(endY - startY) > 0.1;
+        const notAllZeros = !(startX === 0 && startY === 0 && endX === 0 && endY === 0);
+
+        return hasLength && notAllZeros;
     }
 }

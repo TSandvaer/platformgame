@@ -114,6 +114,21 @@ class InputMouse {
             return;
         }
 
+        // Check if prop binding mode is active (needs to happen before platform interaction)
+        if (this.game.propSystem && this.game.propSystem.manager && this.game.propSystem.manager.isBindingToPlatform) {
+            const bindResult = this.game.propSystem.handleMouseDown(
+                mouseX, mouseY,
+                this.game.platformSystem,
+                e.ctrlKey || e.metaKey,
+                e.shiftKey,
+                this.game.viewport,
+                this.game.cameraSystem.camera
+            );
+            if (bindResult && bindResult.handled) {
+                return; // Binding handled, stop processing
+            }
+        }
+
         // Handle platform interaction
         console.log('🎯 About to handle platform interaction at', mouseX, mouseY);
         const platformResult = this.game.platformSystem.handleMouseDown(

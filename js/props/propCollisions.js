@@ -1,5 +1,8 @@
 class PropCollisions {
     checkPlayerPropCollisions(player, props, propTypes) {
+        // Reset prop reference (will be set if player lands on a prop)
+        player.standingOnProp = null;
+
         // Check collision with obstacle props - 4-sided collision (exclude destroyed/destroying/invisible props)
         props.filter(prop => prop.isObstacle && !prop.isDestroyed && !prop.isDestroying && prop.isVisible !== false).forEach(prop => {
             if (this.checkCollision(player, this.getPropBounds(prop, propTypes))) {
@@ -32,6 +35,7 @@ class PropCollisions {
                         player.y = bounds.y - player.height;
                         player.velocityY = 0;
                         player.onGround = true;
+                        player.standingOnProp = prop; // Store reference to prop for Newton's law
                     } else {
                         // Colliding with bottom side of prop (hitting from below)
                         player.y = bounds.y + bounds.height;

@@ -1,6 +1,7 @@
 class PlatformCollisions {
     checkPlayerPlatformCollisions(player, platforms) {
         player.onGround = false;
+        player.standingOnPlatform = null; // Reset platform reference
 
         platforms.forEach(platform => {
             if (this.checkCollision(player, platform)) {
@@ -8,6 +9,7 @@ class PlatformCollisions {
                     player.y = platform.y - player.height;
                     player.velocityY = 0;
                     player.onGround = true;
+                    player.standingOnPlatform = platform; // Store reference to platform
 
                     // Check if this platform causes damage when player stands on it
                     if (platform.damagePerSecond > 0) {

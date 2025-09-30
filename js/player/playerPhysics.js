@@ -62,6 +62,30 @@ class PlayerPhysics {
 
         platformSystem.checkPlayerPlatformCollisions(this.data, viewport);
 
+        // Apply Newton's first law: player inherits platform/prop velocity when standing on it
+        if (this.data.standingOnPlatform) {
+            const platform = this.data.standingOnPlatform;
+            // Add platform velocity to player position (player moves with platform)
+            if (platform.velocityX !== undefined) {
+                this.data.x += platform.velocityX;
+            }
+            if (platform.velocityY !== undefined) {
+                this.data.y += platform.velocityY;
+            }
+        }
+
+        // Apply Newton's first law for props (including props bound to moving platforms)
+        if (this.data.standingOnProp) {
+            const prop = this.data.standingOnProp;
+            // Add prop velocity to player position (player moves with prop)
+            if (prop.velocityX !== undefined) {
+                this.data.x += prop.velocityX;
+            }
+            if (prop.velocityY !== undefined) {
+                this.data.y += prop.velocityY;
+            }
+        }
+
         // Check if platform collision caused teleportation
         if (Math.abs(this.data.x - beforeCollisionX) > 200 ||
             Math.abs(this.data.y - beforeCollisionY) > 200) {
