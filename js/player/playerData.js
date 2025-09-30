@@ -209,12 +209,28 @@ class PlayerData {
             return false;
         }
 
-        // Simply replace whatever was in the slot (belt is just references now)
-        // No need to return to inventory since items aren't moved
+        const existingItem = this.belt[slotIndex];
 
-        // Place item reference in belt slot
+        // If slot is empty, just place the item
+        if (!existingItem) {
+            this.belt[slotIndex] = { ...item };
+            console.log(`⚔️ Added ${item.name} to belt slot ${slotIndex + 1}`);
+            return true;
+        }
+
+        // If same item type, stack them
+        if (existingItem.id === item.id) {
+            const itemQuantity = item.quantity || 1;
+            existingItem.quantity = (existingItem.quantity || 1) + itemQuantity;
+            console.log(`⚔️ Stacked ${item.name} in belt slot ${slotIndex + 1} (quantity: ${existingItem.quantity})`);
+            return true;
+        }
+
+        // Different item type - replace the existing item
+        // Return the displaced item to inventory
+        this.addItemToInventory(existingItem);
         this.belt[slotIndex] = { ...item };
-        console.log(`⚔️ Added ${item.name} to belt slot ${slotIndex + 1}`);
+        console.log(`⚔️ Replaced ${existingItem.name} with ${item.name} in belt slot ${slotIndex + 1} (returned ${existingItem.name} to inventory)`);
         return true;
     }
 
@@ -241,48 +257,37 @@ class PlayerData {
             return false;
         }
 
-        // Find the actual item in inventory
-        const actualItem = this.playerInventory.find(item => item.id === beltItem.id);
-        if (!actualItem) {
-            console.log(`⚔️ Item ${beltItem.name} no longer in inventory`);
-            this.belt[slotIndex] = null; // Remove from belt if not in inventory
-            return false;
-        }
-
-        // Use the consumable item (apply its effects)
-        if (actualItem.healAmount || beltItem.healAmount) {
-            const healAmount = actualItem.healAmount || beltItem.healAmount;
+        // Use the consumable item directly from belt (apply its effects)
+        if (beltItem.healAmount) {
+            const healAmount = beltItem.healAmount;
             this.health = Math.min(this.health + healAmount, this.maxHealth);
-            console.log(`💊 Used ${actualItem.name} - Healed ${healAmount} HP`);
+            console.log(`💊 Used ${beltItem.name} - Healed ${healAmount} HP`);
         }
 
-        if (actualItem.staminaAmount || beltItem.staminaAmount) {
-            const staminaAmount = actualItem.staminaAmount || beltItem.staminaAmount;
+        if (beltItem.staminaAmount) {
+            const staminaAmount = beltItem.staminaAmount;
             this.stamina = Math.min(this.stamina + staminaAmount, this.maxStamina);
-            console.log(`⚡ Used ${actualItem.name} - Restored ${staminaAmount} stamina`);
+            console.log(`⚡ Used ${beltItem.name} - Restored ${staminaAmount} stamina`);
         }
 
         // Apply any other effects
-        if (actualItem.effects) {
-            if (actualItem.effects.health) {
-                this.health = Math.min(this.health + actualItem.effects.health, this.maxHealth);
+        if (beltItem.effects) {
+            if (beltItem.effects.health) {
+                this.health = Math.min(this.health + beltItem.effects.health, this.maxHealth);
             }
-            if (actualItem.effects.stamina) {
-                this.stamina = Math.min(this.stamina + actualItem.effects.stamina, this.maxStamina);
+            if (beltItem.effects.stamina) {
+                this.stamina = Math.min(this.stamina + beltItem.effects.stamina, this.maxStamina);
             }
         }
 
-        // Remove from inventory
-        this.removeItemFromInventory(actualItem.id, 1);
-
-        // Update belt reference if item still exists in inventory
-        const stillExists = this.playerInventory.find(item => item.id === beltItem.id);
-        if (!stillExists) {
-            this.belt[slotIndex] = null; // Remove from belt if exhausted
-            console.log(`⚔️ Belt slot ${slotIndex + 1} is now empty`);
+        // Handle quantity - reduce by 1 or remove completely
+        if (beltItem.quantity && beltItem.quantity > 1) {
+            beltItem.quantity -= 1;
+            console.log(`⚔️ ${beltItem.name} quantity reduced to ${beltItem.quantity} in belt slot ${slotIndex + 1}`);
         } else {
-            // Update the belt reference with current inventory state
-            this.belt[slotIndex] = { ...stillExists };
+            // Remove from belt when used up
+            this.belt[slotIndex] = null;
+            console.log(`⚔️ Belt slot ${slotIndex + 1} is now empty`);
         }
 
         return true;

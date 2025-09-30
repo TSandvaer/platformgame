@@ -717,10 +717,15 @@ class PlayerInventorySystem {
     // Render belt items in the inventory modal
     renderBeltItems() {
         const beltGrid = document.getElementById('playerBeltGrid');
-        if (!beltGrid) return;
+        if (!beltGrid) {
+            console.log('❌ Belt grid not found');
+            return;
+        }
 
         const playerBelt = this.game.playerSystem?.data?.belt || [null, null, null, null];
         const beltSlots = beltGrid.querySelectorAll('.belt-slot');
+
+        console.log('🔄 Rendering belt items:', playerBelt);
 
         beltSlots.forEach((slot, index) => {
             const item = playerBelt[index];
@@ -863,43 +868,50 @@ class PlayerInventorySystem {
                 const itemIndex = parseInt(e.dataTransfer.getData('itemIndex'));
 
                 if (source === 'inventory') {
-                    // Adding item reference to belt (not moving)
+                    // Moving item from inventory to belt
                     const playerInventory = this.getPlayerInventory();
                     const item = playerInventory[itemIndex];
 
                     if (item && item.type === 'consumable') {
-                        // Create a reference to the item for the belt
-                        // Belt just holds a reference, item stays in inventory
-                        const beltItem = {
-                            ...item,
-                            inventoryIndex: itemIndex // Track which inventory slot it came from
-                        };
+                        // Create the belt item (actual item, not reference)
+                        const beltItem = { ...item };
 
-                        // Add to belt (just a reference)
+                        // Add to belt
                         const success = this.game.playerSystem.data.addItemToBelt(slotIndex, beltItem);
 
                         if (success) {
-                            // Don't remove from inventory - belt is just a shortcut!
-                            // Re-render to update belt display
+                            // Remove from inventory since it's now in the belt
+                            this.game.playerSystem.data.removeItemFromInventory(item.id, 1);
+
+                            console.log(`⚔️ Moved ${item.name} from inventory to belt slot ${slotIndex + 1}`);
+                            console.log('🔍 Belt after move:', this.game.playerSystem.data.belt);
+
+                            // Re-render to update both inventory and belt display
                             this.renderPlayerInventory();
 
-                            console.log(`⚔️ Added ${item.name} to belt slot ${slotIndex + 1} (quick access)`);
+                            // Also explicitly re-render belt items after a short delay
+                            setTimeout(() => {
+                                this.renderBeltItems();
+                            }, 50);
                         }
                     }
                 }
             });
 
-            // Click on belt slot to remove item from belt
+            // Click on belt slot to move item back to inventory
             slot.addEventListener('click', () => {
                 const item = this.game.playerSystem?.data?.belt[slotIndex];
                 if (item) {
-                    // Remove from belt only (item stays in inventory)
+                    // Add back to inventory
+                    this.game.playerSystem.data.addItemToInventory(item);
+
+                    // Remove from belt
                     this.game.playerSystem.data.removeItemFromBelt(slotIndex);
 
                     // Re-render
                     this.renderPlayerInventory();
 
-                    console.log(`⚔️ Removed ${item.name} from belt slot ${slotIndex + 1}`);
+                    console.log(`⚔️ Moved ${item.name} from belt slot ${slotIndex + 1} back to inventory`);
                 }
             });
         });
