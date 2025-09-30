@@ -12,12 +12,16 @@ class ItemDropSystem {
     }
 
     // Drop an item at specified coordinates
-    dropItem(itemId, x, y, platforms) {
+    dropItem(itemId, x, y, platforms, isEnemyDrop = false) {
         const closestPlatform = this.findClosestPlatform(x, y, platforms);
         if (!closestPlatform) {
             console.warn('No platform found for item drop');
             return null;
         }
+
+        // Calculate initial velocity based on source
+        const baseVelocityY = -0.5; // Base velocity for prop drops
+        const actualVelocityY = isEnemyDrop ? baseVelocityY * 1.2 : baseVelocityY; // 20% more for enemy drops
 
         // Item drops exactly at the provided position with consistent physics
         const droppedItem = {
@@ -26,7 +30,7 @@ class ItemDropSystem {
             x: x - 8, // Center the 16px item at the drop position
             y: y - 16, // Start above the spawn point to ensure upward motion is visible
             velocityX: (Math.random() - 0.5) * 0.5, // Small random horizontal drift
-            velocityY: -0.5, // Very small upward pop - just 20% of previous height
+            velocityY: actualVelocityY, // Upward pop (more for enemy drops)
             targetPlatform: closestPlatform, // Store reference to target platform
             onGround: false,
             bounceCount: 0,
@@ -36,7 +40,10 @@ class ItemDropSystem {
             rotationSpeed: (Math.random() - 0.5) * 0.05, // Natural tumbling rotation
             floatOffset: Math.random() * Math.PI * 2, // Random start for floating animation
             pickupTimer: 0,
-            collected: false
+            collected: false,
+            isEnemyDrop: isEnemyDrop,
+            spawnDelay: isEnemyDrop ? 1000 : 0, // 1 second delay for enemy drops
+            visible: !isEnemyDrop // Enemy drops start invisible
         };
 
         console.log(`📦 Created item at (${droppedItem.x.toFixed(1)}, ${droppedItem.y.toFixed(1)}) with velocity (${droppedItem.velocityX.toFixed(2)}, ${droppedItem.velocityY.toFixed(2)})`);
@@ -49,6 +56,16 @@ class ItemDropSystem {
     update(deltaTime, platforms, player) {
         this.droppedItems = this.droppedItems.filter(item => {
             if (item.collected) return false;
+
+            // Handle spawn delay for enemy drops
+            if (item.spawnDelay > 0) {
+                item.spawnDelay -= deltaTime;
+                if (item.spawnDelay <= 0) {
+                    item.spawnDelay = 0;
+                    item.visible = true; // Make visible when delay expires
+                }
+                return true; // Keep item but don't update physics yet
+            }
 
             // Update physics
             this.updateItemPhysics(item, deltaTime, platforms);

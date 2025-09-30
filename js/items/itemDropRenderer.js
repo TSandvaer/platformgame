@@ -32,6 +32,7 @@ class ItemDropRenderer {
 
         for (const item of droppedItems) {
             if (item.collected) continue;
+            if (!item.visible) continue; // Skip rendering if item is not yet visible (spawn delay)
 
             // Get item definition from inventory data
             const itemData = this.game.inventoryItemsData?.inventoryItems[item.itemId];

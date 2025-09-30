@@ -280,11 +280,11 @@ class EnemySystem {
                 console.log(`🎁 Creating ${quantity} ${dropItem.itemId} drops`);
 
                 for (let i = 0; i < quantity; i++) {
-                    const createdItem = this.game.itemDropSystem.dropItem(dropItem.itemId, dropX, dropY, platforms);
+                    const createdItem = this.game.itemDropSystem.dropItem(dropItem.itemId, dropX, dropY, platforms, true); // true = isEnemyDrop
                     if (createdItem) {
-                        console.log(`🎁 Successfully created drop ${i + 1}/${quantity}: ${createdItem.id}`);
+                        console.log(`🎁 Successfully created enemy drop ${i + 1}/${quantity}: ${createdItem.id}`);
                     } else {
-                        console.warn(`🎁 Failed to create drop ${i + 1}/${quantity}`);
+                        console.warn(`🎁 Failed to create enemy drop ${i + 1}/${quantity}`);
                     }
                 }
             } else {
