@@ -82,6 +82,9 @@ class PlayerData {
 
         // Player inventory system
         this.playerInventory = []; // Array of items in player's inventory
+
+        // Belt system - 4 slots for quick access (keys 1-4)
+        this.belt = [null, null, null, null]; // 4 belt slots for consumables
     }
 
     reset() {
@@ -124,6 +127,7 @@ class PlayerData {
 
         // Clear player inventory (as requested - no save feature yet)
         this.playerInventory = [];
+        this.belt = [null, null, null, null];
     }
 
     // Player inventory management methods
@@ -190,6 +194,103 @@ class PlayerData {
     clearInventory() {
         this.playerInventory = [];
         console.log('🗑️ Player inventory cleared');
+    }
+
+    // Belt management methods
+    addItemToBelt(slotIndex, item) {
+        if (slotIndex < 0 || slotIndex >= 4) {
+            console.error('❌ Invalid belt slot index:', slotIndex);
+            return false;
+        }
+
+        // Check if item is consumable
+        if (!item || item.type !== 'consumable') {
+            console.error('❌ Only consumable items can be placed in belt');
+            return false;
+        }
+
+        // Simply replace whatever was in the slot (belt is just references now)
+        // No need to return to inventory since items aren't moved
+
+        // Place item reference in belt slot
+        this.belt[slotIndex] = { ...item };
+        console.log(`⚔️ Added ${item.name} to belt slot ${slotIndex + 1}`);
+        return true;
+    }
+
+    removeItemFromBelt(slotIndex) {
+        if (slotIndex < 0 || slotIndex >= 4) {
+            console.error('❌ Invalid belt slot index:', slotIndex);
+            return null;
+        }
+
+        const item = this.belt[slotIndex];
+        this.belt[slotIndex] = null;
+        return item;
+    }
+
+    useBeltItem(slotIndex) {
+        if (slotIndex < 0 || slotIndex >= 4) {
+            console.error('❌ Invalid belt slot index:', slotIndex);
+            return false;
+        }
+
+        const beltItem = this.belt[slotIndex];
+        if (!beltItem) {
+            console.log(`⚔️ No item in belt slot ${slotIndex + 1}`);
+            return false;
+        }
+
+        // Find the actual item in inventory
+        const actualItem = this.playerInventory.find(item => item.id === beltItem.id);
+        if (!actualItem) {
+            console.log(`⚔️ Item ${beltItem.name} no longer in inventory`);
+            this.belt[slotIndex] = null; // Remove from belt if not in inventory
+            return false;
+        }
+
+        // Use the consumable item (apply its effects)
+        if (actualItem.healAmount || beltItem.healAmount) {
+            const healAmount = actualItem.healAmount || beltItem.healAmount;
+            this.health = Math.min(this.health + healAmount, this.maxHealth);
+            console.log(`💊 Used ${actualItem.name} - Healed ${healAmount} HP`);
+        }
+
+        if (actualItem.staminaAmount || beltItem.staminaAmount) {
+            const staminaAmount = actualItem.staminaAmount || beltItem.staminaAmount;
+            this.stamina = Math.min(this.stamina + staminaAmount, this.maxStamina);
+            console.log(`⚡ Used ${actualItem.name} - Restored ${staminaAmount} stamina`);
+        }
+
+        // Apply any other effects
+        if (actualItem.effects) {
+            if (actualItem.effects.health) {
+                this.health = Math.min(this.health + actualItem.effects.health, this.maxHealth);
+            }
+            if (actualItem.effects.stamina) {
+                this.stamina = Math.min(this.stamina + actualItem.effects.stamina, this.maxStamina);
+            }
+        }
+
+        // Remove from inventory
+        this.removeItemFromInventory(actualItem.id, 1);
+
+        // Update belt reference if item still exists in inventory
+        const stillExists = this.playerInventory.find(item => item.id === beltItem.id);
+        if (!stillExists) {
+            this.belt[slotIndex] = null; // Remove from belt if exhausted
+            console.log(`⚔️ Belt slot ${slotIndex + 1} is now empty`);
+        } else {
+            // Update the belt reference with current inventory state
+            this.belt[slotIndex] = { ...stillExists };
+        }
+
+        return true;
+    }
+
+    clearBelt() {
+        this.belt = [null, null, null, null];
+        console.log('🗑️ Belt cleared');
     }
 
     setPosition(x, y) {

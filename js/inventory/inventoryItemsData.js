@@ -1,5 +1,9 @@
 class InventoryItemsData {
     constructor() {
+        // Load the spritesheet
+        this.spritesheet = new Image();
+        this.spritesheet.src = 'sprites/Inventory item sprite sets/inventory_items_pack1.png';
+
         // Available inventory items with their sprite coordinates and properties
         this.inventoryItems = {
             // Example items - these can be generated using the inventory sprite editor

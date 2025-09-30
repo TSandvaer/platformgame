@@ -10,6 +10,14 @@ class PlayerController {
         // Store key state
         this.keys[key.toLowerCase()] = true;
 
+        // Handle belt item usage (keys 1-4) - only in production mode
+        if (!isDevelopmentMode && ['1', '2', '3', '4'].includes(key)) {
+            const slotIndex = parseInt(key) - 1;
+            if (this.data.useBeltItem(slotIndex)) {
+                return true; // Handled - item was used
+            }
+        }
+
         // Handle space key for jump (one-time trigger)
         if (key === ' ' && this.data.onGround && !this.data.spaceKeyPressed) {
             // Check if player has enough stamina to jump

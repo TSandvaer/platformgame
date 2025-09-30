@@ -482,7 +482,8 @@ class PlayerInventorySystem {
             html += `<div class="player-inventory-item ${isConsumable ? 'consumable' : ''}"
                           data-item-index="${index}"
                           data-item-id="${item.id}"
-                          data-item-type="${item.type}">
+                          data-item-type="${item.type}"
+                          draggable="${isConsumable ? 'true' : 'false'}">
                 ${spriteHtml}
                 ${item.quantity && item.quantity > 1 ? `<div class="chest-item-quantity">${item.quantity}</div>` : ''}
             </div>`;
@@ -523,6 +524,19 @@ class PlayerInventorySystem {
                 this.updateTooltipPosition(e);
             });
         });
+
+        // Render belt items (with retry if spritesheet not loaded)
+        this.renderBeltItems();
+
+        // If spritesheet isn't loaded yet, try again after a short delay
+        if (this.game.inventoryItemsData && this.game.inventoryItemsData.spritesheet && !this.game.inventoryItemsData.spritesheet.complete) {
+            setTimeout(() => {
+                this.renderBeltItems();
+            }, 100);
+        }
+
+        // Attach drag and drop listeners
+        this.attachDragDropListeners();
     }
 
     // Create sprite HTML for player inventory item
@@ -698,5 +712,196 @@ class PlayerInventorySystem {
                 descElement.textContent = 'Your items are displayed below';
             }
         }
+    }
+
+    // Render belt items in the inventory modal
+    renderBeltItems() {
+        const beltGrid = document.getElementById('playerBeltGrid');
+        if (!beltGrid) return;
+
+        const playerBelt = this.game.playerSystem?.data?.belt || [null, null, null, null];
+        const beltSlots = beltGrid.querySelectorAll('.belt-slot');
+
+        beltSlots.forEach((slot, index) => {
+            const item = playerBelt[index];
+
+            // Clear ALL existing content first
+            while (slot.firstChild) {
+                slot.removeChild(slot.firstChild);
+            }
+
+            // Re-add the number label
+            const numberSpan = document.createElement('span');
+            numberSpan.style.cssText = 'position: absolute; top: 2px; left: 4px; color: #FFD700; font-size: 12px; font-weight: bold; z-index: 10;';
+            numberSpan.textContent = String(index + 1);
+            slot.appendChild(numberSpan);
+
+            if (item) {
+                let spriteAdded = false;
+
+                // Try to create proper sprite for the item
+                if (item.sprite && this.game.inventoryItemsData && this.game.inventoryItemsData.spritesheet) {
+                    const spritesheet = this.game.inventoryItemsData.spritesheet;
+
+                    // Check if spritesheet is loaded
+                    if (spritesheet.complete || spritesheet.naturalWidth > 0) {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 40;
+                        canvas.height = 40;
+                        canvas.style.cssText = 'width: 40px; height: 40px; margin: auto; image-rendering: pixelated; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; background: transparent;';
+
+                        const ctx = canvas.getContext('2d', { alpha: true });
+                        ctx.imageSmoothingEnabled = false;
+
+                        try {
+                            // Clear canvas with transparency
+                            ctx.clearRect(0, 0, 40, 40);
+
+                            // Calculate proper scaling to maintain aspect ratio
+                            const spriteAspect = item.sprite.width / item.sprite.height;
+                            let drawWidth = 32;
+                            let drawHeight = 32;
+
+                            if (spriteAspect > 1) {
+                                // Wider than tall
+                                drawHeight = 32 / spriteAspect;
+                            } else {
+                                // Taller than wide
+                                drawWidth = 32 * spriteAspect;
+                            }
+
+                            const drawX = (40 - drawWidth) / 2;
+                            const drawY = (40 - drawHeight) / 2;
+
+                            ctx.drawImage(
+                                spritesheet,
+                                item.sprite.x, item.sprite.y,
+                                item.sprite.width, item.sprite.height,
+                                drawX, drawY, drawWidth, drawHeight
+                            );
+                            slot.appendChild(canvas);
+                            spriteAdded = true;
+                            console.log(`✅ Drew sprite for ${item.name} in belt slot`);
+                        } catch (e) {
+                            console.warn('Failed to draw belt sprite:', e);
+                            spriteAdded = false;
+                        }
+                    } else {
+                        console.log('Spritesheet not yet loaded for belt');
+                    }
+                }
+
+                // Only add fallback if sprite wasn't successfully added
+                if (!spriteAdded) {
+                    console.log(`⚠️ Using colored fallback for ${item.name || item.id}`);
+                    // Fallback colored div if no sprite
+                    const itemDiv = document.createElement('div');
+                    const color = item.id === 'healthPotion' ? '#FF4444' :
+                                 item.id === 'staminaPotion' ? '#FFD700' : '#4CAF50';
+                    itemDiv.style.cssText = `width: 40px; height: 40px; background: ${color}; margin: auto; border-radius: 4px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1;`;
+                    slot.appendChild(itemDiv);
+                }
+
+                // Add item name label with higher z-index
+                const nameDiv = document.createElement('div');
+                nameDiv.style.cssText = 'position: absolute; bottom: 2px; left: 2px; right: 2px; background: rgba(0,0,0,0.7); color: white; font-size: 9px; padding: 1px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 15;';
+                nameDiv.textContent = item.name || item.id;
+                slot.appendChild(nameDiv);
+
+                // Add quantity if > 1 with higher z-index
+                if (item.quantity > 1) {
+                    const qtyDiv = document.createElement('div');
+                    qtyDiv.style.cssText = 'position: absolute; top: 16px; right: 2px; background: rgba(0,0,0,0.8); color: white; font-size: 11px; font-weight: bold; padding: 1px 3px; border-radius: 2px; z-index: 15;';
+                    qtyDiv.textContent = item.quantity;
+                    slot.appendChild(qtyDiv);
+                }
+
+                slot.dataset.itemId = item.id;
+            } else {
+                slot.dataset.itemId = '';
+            }
+        });
+    }
+
+    // Attach drag and drop event listeners
+    attachDragDropListeners() {
+        // Inventory items (draggable)
+        const inventoryItems = document.querySelectorAll('.player-inventory-item[draggable="true"]');
+        inventoryItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('itemIndex', item.dataset.itemIndex);
+                e.dataTransfer.setData('itemId', item.dataset.itemId);
+                e.dataTransfer.setData('source', 'inventory');
+                item.classList.add('dragging');
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+            });
+        });
+
+        // Belt slots (drop targets)
+        const beltSlots = document.querySelectorAll('.belt-slot');
+        beltSlots.forEach((slot, slotIndex) => {
+            slot.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                slot.style.backgroundColor = '#666';
+            });
+
+            slot.addEventListener('dragleave', () => {
+                slot.style.backgroundColor = '#555';
+            });
+
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slot.style.backgroundColor = '#555';
+
+                const source = e.dataTransfer.getData('source');
+                const itemId = e.dataTransfer.getData('itemId');
+                const itemIndex = parseInt(e.dataTransfer.getData('itemIndex'));
+
+                if (source === 'inventory') {
+                    // Adding item reference to belt (not moving)
+                    const playerInventory = this.getPlayerInventory();
+                    const item = playerInventory[itemIndex];
+
+                    if (item && item.type === 'consumable') {
+                        // Create a reference to the item for the belt
+                        // Belt just holds a reference, item stays in inventory
+                        const beltItem = {
+                            ...item,
+                            inventoryIndex: itemIndex // Track which inventory slot it came from
+                        };
+
+                        // Add to belt (just a reference)
+                        const success = this.game.playerSystem.data.addItemToBelt(slotIndex, beltItem);
+
+                        if (success) {
+                            // Don't remove from inventory - belt is just a shortcut!
+                            // Re-render to update belt display
+                            this.renderPlayerInventory();
+
+                            console.log(`⚔️ Added ${item.name} to belt slot ${slotIndex + 1} (quick access)`);
+                        }
+                    }
+                }
+            });
+
+            // Click on belt slot to remove item from belt
+            slot.addEventListener('click', () => {
+                const item = this.game.playerSystem?.data?.belt[slotIndex];
+                if (item) {
+                    // Remove from belt only (item stays in inventory)
+                    this.game.playerSystem.data.removeItemFromBelt(slotIndex);
+
+                    // Re-render
+                    this.renderPlayerInventory();
+
+                    console.log(`⚔️ Removed ${item.name} from belt slot ${slotIndex + 1}`);
+                }
+            });
+        });
     }
 }
