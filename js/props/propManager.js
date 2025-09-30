@@ -370,6 +370,18 @@ class PropManager {
                 maxDurabilityInput.value = maxDurability !== undefined ? maxDurability : 100;
             }
 
+            // Show/hide Item Drops section based on destroyable flag
+            const itemDropsSection = document.getElementById('itemDropsSection');
+            const itemDropsButtons = document.getElementById('itemDropsButtons');
+            const isDestroyable = this.propData.selectedProp.destroyable || false;
+
+            if (itemDropsSection) {
+                itemDropsSection.style.display = isDestroyable ? 'block' : 'none';
+            }
+            if (itemDropsButtons) {
+                itemDropsButtons.style.display = isDestroyable ? 'block' : 'none';
+            }
+
             // Update the type display for single or multiple props
             const selectedPropTypeElement = document.getElementById('selectedPropType');
             if (selectedPropTypeElement) {
@@ -402,6 +414,16 @@ class PropManager {
             const chestInventoryButtonRow = document.getElementById('chestInventoryButtonRow');
             if (chestInventoryButtonRow) {
                 chestInventoryButtonRow.style.display = 'none';
+            }
+
+            // Hide Item Drops section when no prop is selected
+            const itemDropsSection = document.getElementById('itemDropsSection');
+            const itemDropsButtons = document.getElementById('itemDropsButtons');
+            if (itemDropsSection) {
+                itemDropsSection.style.display = 'none';
+            }
+            if (itemDropsButtons) {
+                itemDropsButtons.style.display = 'none';
             }
         }
     }
@@ -453,6 +475,16 @@ class PropManager {
 
             // Ensure the prop has all required destruction properties
             this.propData.ensureDestructionProperties(this.propData.selectedProp);
+
+            // Update Item Drops section visibility immediately
+            const itemDropsSection = document.getElementById('itemDropsSection');
+            const itemDropsButtons = document.getElementById('itemDropsButtons');
+            if (itemDropsSection) {
+                itemDropsSection.style.display = destroyableInput.checked ? 'block' : 'none';
+            }
+            if (itemDropsButtons) {
+                itemDropsButtons.style.display = destroyableInput.checked ? 'block' : 'none';
+            }
         }
         if (maxDurabilityInput && this.propData.selectedProp.destroyable) {
             const newMaxDurability = parseFloat(maxDurabilityInput.value) || 100;
