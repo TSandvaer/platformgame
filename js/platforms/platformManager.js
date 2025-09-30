@@ -569,6 +569,41 @@ class PlatformManager {
                 movementEnabledInput.addEventListener('change', this.handlePlatformMovementEnabledCheckboxChange);
             }
 
+            // Update spinning properties
+            const isSpinningInput = document.getElementById('selectedPlatformIsSpinning');
+            const spinSpeedInput = document.getElementById('selectedPlatformSpinSpeed');
+            const spinClockwiseInput = document.getElementById('selectedPlatformSpinClockwise');
+
+            if (isSpinningInput) isSpinningInput.checked = this.platformData.selectedPlatform.isSpinning || false;
+            if (spinSpeedInput) spinSpeedInput.value = this.platformData.selectedPlatform.spinSpeed || 1.0;
+            if (spinClockwiseInput) spinClockwiseInput.checked = this.platformData.selectedPlatform.spinClockwise !== false; // Default true
+
+            // Show/hide spinning sections based on isSpinning flag
+            const isSpinning = this.platformData.selectedPlatform.isSpinning || false;
+            const platformSpinningSection = document.getElementById('platformSpinningSection');
+            const platformSpinDirectionSection = document.getElementById('platformSpinDirectionSection');
+
+            if (platformSpinningSection) {
+                platformSpinningSection.style.display = isSpinning ? 'block' : 'none';
+            }
+            if (platformSpinDirectionSection) {
+                platformSpinDirectionSection.style.display = isSpinning ? 'block' : 'none';
+            }
+
+            // Add event listener for spinning checkbox
+            if (isSpinningInput) {
+                isSpinningInput.removeEventListener('change', this.handlePlatformSpinningCheckboxChange);
+                this.handlePlatformSpinningCheckboxChange = () => {
+                    const platformSpinningSection = document.getElementById('platformSpinningSection');
+                    const platformSpinDirectionSection = document.getElementById('platformSpinDirectionSection');
+                    const isSpinning = isSpinningInput.checked;
+
+                    if (platformSpinningSection) platformSpinningSection.style.display = isSpinning ? 'block' : 'none';
+                    if (platformSpinDirectionSection) platformSpinDirectionSection.style.display = isSpinning ? 'block' : 'none';
+                };
+                isSpinningInput.addEventListener('change', this.handlePlatformSpinningCheckboxChange);
+            }
+
             // Update movement control button text
             this.updateMovementControlButtons(this.platformData.selectedPlatform);
         } else {
@@ -610,6 +645,10 @@ class PlatformManager {
         const zoneStartXInput = document.getElementById('selectedPlatformZoneStartX');
         const zoneEndXInput = document.getElementById('selectedPlatformZoneEndX');
         const zoneYInput = document.getElementById('selectedPlatformZoneY');
+        // Spinning inputs
+        const isSpinningInput = document.getElementById('selectedPlatformIsSpinning');
+        const spinSpeedInput = document.getElementById('selectedPlatformSpinSpeed');
+        const spinClockwiseInput = document.getElementById('selectedPlatformSpinClockwise');
 
         if (isMovingInput) {
             this.platformData.selectedPlatform.isMoving = isMovingInput.checked;
@@ -637,6 +676,17 @@ class PlatformManager {
         }
         if (zoneYInput && this.platformData.selectedPlatform.movementZone) {
             this.platformData.selectedPlatform.movementZone.y = parseFloat(zoneYInput.value) || 0;
+        }
+
+        // Handle spinning properties
+        if (isSpinningInput) {
+            this.platformData.selectedPlatform.isSpinning = isSpinningInput.checked;
+        }
+        if (spinSpeedInput) {
+            this.platformData.selectedPlatform.spinSpeed = parseFloat(spinSpeedInput.value) || 1.0;
+        }
+        if (spinClockwiseInput) {
+            this.platformData.selectedPlatform.spinClockwise = spinClockwiseInput.checked;
         }
 
         // Update relative position display

@@ -544,6 +544,41 @@ class PropManager {
                 movementEnabledInput.addEventListener('change', this.handleMovementEnabledCheckboxChange);
             }
 
+            // Update spinning properties
+            const isSpinningInput = document.getElementById('selectedPropIsSpinning');
+            const spinSpeedInput = document.getElementById('selectedPropSpinSpeed');
+            const spinClockwiseInput = document.getElementById('selectedPropSpinClockwise');
+
+            if (isSpinningInput) isSpinningInput.checked = this.propData.selectedProp.isSpinning || false;
+            if (spinSpeedInput) spinSpeedInput.value = this.propData.selectedProp.spinSpeed || 1.0;
+            if (spinClockwiseInput) spinClockwiseInput.checked = this.propData.selectedProp.spinClockwise !== false; // Default true
+
+            // Show/hide spinning sections based on isSpinning flag
+            const isSpinning = this.propData.selectedProp.isSpinning || false;
+            const propSpinningSection = document.getElementById('propSpinningSection');
+            const propSpinDirectionSection = document.getElementById('propSpinDirectionSection');
+
+            if (propSpinningSection) {
+                propSpinningSection.style.display = isSpinning ? 'block' : 'none';
+            }
+            if (propSpinDirectionSection) {
+                propSpinDirectionSection.style.display = isSpinning ? 'block' : 'none';
+            }
+
+            // Add event listener for spinning checkbox
+            if (isSpinningInput) {
+                isSpinningInput.removeEventListener('change', this.handleSpinningCheckboxChange);
+                this.handleSpinningCheckboxChange = () => {
+                    const propSpinningSection = document.getElementById('propSpinningSection');
+                    const propSpinDirectionSection = document.getElementById('propSpinDirectionSection');
+                    const isSpinning = isSpinningInput.checked;
+
+                    if (propSpinningSection) propSpinningSection.style.display = isSpinning ? 'block' : 'none';
+                    if (propSpinDirectionSection) propSpinDirectionSection.style.display = isSpinning ? 'block' : 'none';
+                };
+                isSpinningInput.addEventListener('change', this.handleSpinningCheckboxChange);
+            }
+
             // Update the type display for single or multiple props
             const selectedPropTypeElement = document.getElementById('selectedPropType');
             if (selectedPropTypeElement) {
@@ -623,6 +658,10 @@ class PropManager {
         const zoneStartXInput = document.getElementById('selectedPropZoneStartX');
         const zoneEndXInput = document.getElementById('selectedPropZoneEndX');
         const zoneYInput = document.getElementById('selectedPropZoneY');
+        // Spinning inputs
+        const isSpinningInput = document.getElementById('selectedPropIsSpinning');
+        const spinSpeedInput = document.getElementById('selectedPropSpinSpeed');
+        const spinClockwiseInput = document.getElementById('selectedPropSpinClockwise');
 
         if (xInput) this.propData.selectedProp.x = parseInt(xInput.value);
         if (yInput) this.propData.selectedProp.y = parseInt(yInput.value);
@@ -712,6 +751,17 @@ class PropManager {
         }
         if (zoneYInput && this.propData.selectedProp.movementZone) {
             this.propData.selectedProp.movementZone.y = parseFloat(zoneYInput.value) || 0;
+        }
+
+        // Handle spinning properties
+        if (isSpinningInput) {
+            this.propData.selectedProp.isSpinning = isSpinningInput.checked;
+        }
+        if (spinSpeedInput) {
+            this.propData.selectedProp.spinSpeed = parseFloat(spinSpeedInput.value) || 1.0;
+        }
+        if (spinClockwiseInput) {
+            this.propData.selectedProp.spinClockwise = spinClockwiseInput.checked;
         }
 
         this.updatePropList();

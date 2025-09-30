@@ -113,6 +113,19 @@ class PlatformRenderer {
     }
 
     renderPlatform(platform, isDevelopmentMode, isSelected) {
+        // Save context state for rotation
+        this.ctx.save();
+
+        // Apply rotation if platform has rotation value
+        if (platform.rotation && platform.rotation !== 0) {
+            // Translate to platform center, rotate, then translate back
+            const centerX = platform.x + platform.width / 2;
+            const centerY = platform.y + platform.height / 2;
+            this.ctx.translate(centerX, centerY);
+            this.ctx.rotate(platform.rotation);
+            this.ctx.translate(-centerX, -centerY);
+        }
+
         if (platform.spriteType === 'transparent') {
             // Handle transparent platforms
             if (isDevelopmentMode) {
@@ -163,6 +176,9 @@ class PlatformRenderer {
                 this.drawResizeHandles(platform);
             }
         }
+
+        // Restore context state (removes rotation)
+        this.ctx.restore();
     }
 
     drawPlatformSprite(platform) {

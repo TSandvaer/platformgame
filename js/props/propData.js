@@ -270,6 +270,10 @@ class PropData {
             targetY: y,
             movingDirection: 1, // 1 for forward along line, -1 for backward
             movementProgress: 0, // 0-1 position along the movement line
+            // Spinning properties
+            isSpinning: false,
+            spinSpeed: 1.0, // Rotations per second
+            spinClockwise: true, // true for clockwise, false for counter-clockwise
             // Platform binding properties
             boundToPlatform: null, // Platform ID this prop is bound to
             platformBindOffset: { x: 0, y: 0 } // Relative offset from platform center

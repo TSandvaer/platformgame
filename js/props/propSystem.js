@@ -673,6 +673,36 @@ class PropSystem {
 
         // Update bound props to follow their platforms
         this.updateBoundProps();
+
+        // Update spinning props
+        this.updateSpinning(deltaTime);
+    }
+
+    // Update spinning props
+    updateSpinning(deltaTime) {
+        this.data.props.forEach(prop => {
+            if (prop.isSpinning && !prop.isDestroyed) {
+                // Calculate rotation change based on spin speed and deltaTime
+                // spinSpeed is in rotations per second, convert to radians per millisecond
+                const rotationsPerSecond = prop.spinSpeed || 1.0;
+                const radiansPerSecond = rotationsPerSecond * 2 * Math.PI;
+                const radiansPerMs = radiansPerSecond / 1000;
+                const rotationDelta = radiansPerMs * deltaTime;
+
+                // Apply rotation in the correct direction
+                if (prop.spinClockwise) {
+                    prop.rotation += rotationDelta;
+                } else {
+                    prop.rotation -= rotationDelta;
+                }
+
+                // Keep rotation in the range [0, 2*PI] to avoid overflow
+                prop.rotation = prop.rotation % (2 * Math.PI);
+                if (prop.rotation < 0) {
+                    prop.rotation += 2 * Math.PI;
+                }
+            }
+        });
     }
 
     // Update props that are bound to platforms

@@ -50,7 +50,12 @@ class PlatformData {
             movementProgress: 0, // 0-1 position along the movement line
             // Movement control properties
             isMovementPaused: false, // For stop/start control in dev mode
-            originalPosition: { x: x, y: y } // Store original position for reset
+            originalPosition: { x: x, y: y }, // Store original position for reset
+            // Spinning properties
+            rotation: 0, // Current rotation angle in radians
+            isSpinning: false,
+            spinSpeed: 1.0, // Rotations per second
+            spinClockwise: true // true for clockwise, false for counter-clockwise
         };
 
         this.platforms.push(newPlatform);

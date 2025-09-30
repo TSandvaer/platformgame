@@ -312,6 +312,36 @@ class PlatformSystem {
             platform.velocityX = platform.x - previousX;
             platform.velocityY = platform.y - previousY;
         });
+
+        // Update spinning platforms
+        this.updateSpinning(deltaTime);
+    }
+
+    // Update spinning platforms
+    updateSpinning(deltaTime) {
+        this.data.platforms.forEach(platform => {
+            if (platform.isSpinning) {
+                // Calculate rotation change based on spin speed and deltaTime
+                // spinSpeed is in rotations per second, convert to radians per millisecond
+                const rotationsPerSecond = platform.spinSpeed || 1.0;
+                const radiansPerSecond = rotationsPerSecond * 2 * Math.PI;
+                const radiansPerMs = radiansPerSecond / 1000;
+                const rotationDelta = radiansPerMs * deltaTime;
+
+                // Apply rotation in the correct direction
+                if (platform.spinClockwise) {
+                    platform.rotation += rotationDelta;
+                } else {
+                    platform.rotation -= rotationDelta;
+                }
+
+                // Keep rotation in the range [0, 2*PI] to avoid overflow
+                platform.rotation = platform.rotation % (2 * Math.PI);
+                if (platform.rotation < 0) {
+                    platform.rotation += 2 * Math.PI;
+                }
+            }
+        });
     }
 
     // Check if a movement zone has valid coordinates (not all zeros and has actual length)
