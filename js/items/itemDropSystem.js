@@ -32,6 +32,7 @@ class ItemDropSystem {
             velocityX: (Math.random() - 0.5) * 0.5, // Small random horizontal drift
             velocityY: actualVelocityY, // Upward pop (more for enemy drops)
             targetPlatform: closestPlatform, // Store reference to target platform
+            standingOnPlatform: null, // Platform the item is currently standing on (for Newton's law)
             onGround: false,
             bounceCount: 0,
             maxBounces: 4, // Several bounces like a real object
@@ -134,11 +135,24 @@ class ItemDropSystem {
             // Check platform collisions with deltaTime for proper calculation
             this.checkPlatformCollisions(item, platforms, deltaTime);
         }
+
+        // Apply Newton's first law: item inherits platform velocity when on ground
+        if (item.onGround && item.standingOnPlatform) {
+            const platform = item.standingOnPlatform;
+            // Add platform velocity to item position (item moves with platform)
+            if (platform.velocityX !== undefined) {
+                item.x += platform.velocityX;
+            }
+            if (platform.velocityY !== undefined) {
+                item.y += platform.velocityY;
+            }
+        }
     }
 
     checkPlatformCollisions(item, platforms, deltaTime) {
         // Don't check collisions while moving upward (let item rise freely)
         if (item.velocityY < 0) {
+            item.standingOnPlatform = null; // Clear platform reference when in air
             return;
         }
 
@@ -167,6 +181,7 @@ class ItemDropSystem {
                 // Land on platform
                 item.y = platformTop - 16; // Item height
                 item.bounceCount++;
+                item.standingOnPlatform = platform; // Store platform reference for Newton's law
 
                 // Calculate bounce velocity based on impact speed
                 const impactSpeed = Math.abs(item.velocityY);
