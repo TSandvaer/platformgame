@@ -392,6 +392,9 @@ class PropManager {
                 const isChest = this.propData.selectedProp.type && this.propData.selectedProp.type.toLowerCase().includes('chest');
                 chestInventoryButtonRow.style.display = isChest ? 'block' : 'none';
             }
+
+            // Update drop configuration UI
+            this.updateDropConfigurationUI();
         } else {
             propertiesDiv.style.display = 'none';
 
@@ -483,5 +486,40 @@ class PropManager {
         this.propData.moveToBack(this.propData.selectedProp);
         this.updatePropProperties();
         this.updatePropList();
+    }
+
+    updateDropConfigurationUI() {
+        const dropsList = document.getElementById('propDropsList');
+        if (!dropsList || !this.propData.selectedProp) return;
+
+        // Get the drop items for this specific prop instance
+        const drops = this.propData.selectedProp.dropItems || [];
+
+        if (drops.length === 0) {
+            dropsList.innerHTML = '<div style="color: #888; font-size: 12px; text-align: center; padding: 10px;">No drops configured for this prop</div>';
+        } else {
+            dropsList.innerHTML = drops.map((drop, index) => `
+                <div style="background-color: #444; padding: 8px; margin: 4px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; color: #4CAF50;">${drop.itemId}</div>
+                        <div style="font-size: 11px; color: #ccc;">${(drop.chance * 100).toFixed(1)}% chance • Qty: ${drop.quantity || 1}</div>
+                    </div>
+                    <button class="btn small danger" onclick="window.propManager.removeDrop(${index})" style="padding: 2px 6px; font-size: 10px;">✕</button>
+                </div>
+            `).join('');
+        }
+    }
+
+    removeDrop(index) {
+        if (!this.propData.selectedProp) return;
+
+        if (this.propData.selectedProp.dropItems && this.propData.selectedProp.dropItems[index]) {
+            this.propData.selectedProp.dropItems.splice(index, 1);
+            if (this.propData.selectedProp.dropItems.length === 0) {
+                delete this.propData.selectedProp.dropItems;
+            }
+            this.updateDropConfigurationUI();
+            console.log(`🎁 Removed drop item from prop ${this.propData.selectedProp.id}`);
+        }
     }
 }

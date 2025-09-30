@@ -277,6 +277,51 @@ class UIEventHandler {
             this.game.propSystem.updatePropList();
         });
 
+        // Drop configuration event listeners
+        document.getElementById('addPropDropBtn').addEventListener('click', () => {
+            this.showDropConfigModal();
+        });
+
+        document.getElementById('clearPropDropsBtn').addEventListener('click', () => {
+            if (this.game.propSystem.selectedProp && confirm('Clear all drops for this prop?')) {
+                delete this.game.propSystem.selectedProp.dropItems;
+                this.game.propSystem.manager.updateDropConfigurationUI();
+                console.log(`🎁 Cleared all drops for prop ${this.game.propSystem.selectedProp.id}`);
+            }
+        });
+
+        // Drop configuration modal event listeners
+        document.getElementById('closeDropConfigModal').addEventListener('click', () => {
+            document.getElementById('dropConfigModal').style.display = 'none';
+        });
+
+        document.getElementById('cancelDropConfig').addEventListener('click', () => {
+            document.getElementById('dropConfigModal').style.display = 'none';
+        });
+
+        document.getElementById('addDropConfirm').addEventListener('click', () => {
+            // Check if this is for enemy or prop drops
+            if (this._isEnemyDropModal) {
+                this.addDropToSelectedEnemy();
+            } else {
+                this.addDropToSelectedProp();
+            }
+        });
+
+        // Enemy drop configuration event listeners
+        document.getElementById('addEnemyDropBtn').addEventListener('click', () => {
+            this.showEnemyDropConfigModal();
+        });
+
+        document.getElementById('clearEnemyDropsBtn').addEventListener('click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy && confirm('Clear all drops for this enemy?')) {
+                delete selectedEnemy.dropItems;
+                this.updateEnemyDropConfigurationUI(selectedEnemy);
+                console.log(`🎁 Cleared all drops for enemy ${selectedEnemy.id}`);
+            }
+        });
+
         // Enemy properties event listeners
         document.getElementById('updateEnemy').addEventListener('click', () => {
             const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
@@ -506,6 +551,9 @@ class UIEventHandler {
             if (isMovingInput) isMovingInput.checked = selectedEnemy.isMoving;
             if (attractionEnabledInput) attractionEnabledInput.checked = selectedEnemy.attractionZone.enabled;
             if (movementEnabledInput) movementEnabledInput.checked = selectedEnemy.movementZone.enabled;
+
+            // Update enemy drop configuration UI
+            this.updateEnemyDropConfigurationUI(selectedEnemy);
         } else {
             propertiesDiv.style.display = 'none';
         }
@@ -1176,5 +1224,194 @@ class UIEventHandler {
         // Initialize enemy UI
         this.updateEnemyList();
         this.updateEnemyProperties();
+    }
+
+    showDropConfigModal() {
+        if (!this.game.propSystem.selectedProp) return;
+
+        // Populate the item dropdown
+        const itemSelect = document.getElementById('dropItemSelect');
+        if (itemSelect && this.game.inventoryItemsData) {
+            itemSelect.innerHTML = '<option value="">Choose an item...</option>';
+
+            // Add all available inventory items
+            const inventoryItems = this.game.inventoryItemsData.inventoryItems;
+            for (const itemId in inventoryItems) {
+                const item = inventoryItems[itemId];
+                const option = document.createElement('option');
+                option.value = itemId;
+                option.textContent = `${item.name} (${itemId})`;
+                itemSelect.appendChild(option);
+            }
+        }
+
+        // Reset form values
+        document.getElementById('dropChanceInput').value = '40';
+        document.getElementById('dropQuantityInput').value = '1';
+
+        // Update modal title
+        document.getElementById('dropConfigModalTitle').textContent = 'Configure Item Drops';
+
+        // Show modal
+        document.getElementById('dropConfigModal').style.display = 'flex';
+        this._isEnemyDropModal = false; // Flag to indicate this is for prop drops
+    }
+
+    addDropToSelectedProp() {
+        if (!this.game.propSystem.selectedProp) return;
+
+        const itemId = document.getElementById('dropItemSelect').value;
+        const inputPercent = parseFloat(document.getElementById('dropChanceInput').value);
+        const chance = inputPercent / 100; // Convert percentage to decimal
+        const quantity = parseInt(document.getElementById('dropQuantityInput').value) || 1;
+
+        // console.log(`🎁 UI Input: ${inputPercent}% -> Converted to: ${chance} (${(chance * 100).toFixed(1)}%)`);
+
+        if (!itemId) {
+            alert('Please select an item');
+            return;
+        }
+
+        if (inputPercent <= 0 || inputPercent > 100) {
+            alert('Drop chance must be between 1 and 100%');
+            return;
+        }
+
+        // Initialize dropItems array on the prop instance if it doesn't exist
+        if (!this.game.propSystem.selectedProp.dropItems) {
+            this.game.propSystem.selectedProp.dropItems = [];
+        }
+
+        // Check if this item is already configured
+        const existingIndex = this.game.propSystem.selectedProp.dropItems.findIndex(drop => drop.itemId === itemId);
+        if (existingIndex !== -1) {
+            // Update existing drop
+            this.game.propSystem.selectedProp.dropItems[existingIndex] = { itemId, chance, quantity };
+            console.log(`🎁 Updated drop for ${itemId} on prop ${this.game.propSystem.selectedProp.id}: ${(chance * 100).toFixed(1)}% chance, qty ${quantity}`);
+        } else {
+            // Add new drop
+            this.game.propSystem.selectedProp.dropItems.push({ itemId, chance, quantity });
+            console.log(`🎁 Added drop for ${itemId} to prop ${this.game.propSystem.selectedProp.id}: ${(chance * 100).toFixed(1)}% chance, qty ${quantity}`);
+        }
+
+        // Update UI
+        this.game.propSystem.manager.updateDropConfigurationUI();
+
+        // Close modal
+        document.getElementById('dropConfigModal').style.display = 'none';
+    }
+
+    updateEnemyDropConfigurationUI(enemy) {
+        const dropsList = document.getElementById('enemyDropsList');
+        if (!dropsList || !enemy) return;
+
+        // Get the drop items for this specific enemy instance
+        const drops = enemy.dropItems || [];
+
+        if (drops.length === 0) {
+            dropsList.innerHTML = '<div style="color: #888; font-size: 12px; text-align: center; padding: 10px;">No drops configured for this enemy</div>';
+        } else {
+            dropsList.innerHTML = drops.map((drop, index) => `
+                <div style="background-color: #444; padding: 8px; margin: 4px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: bold; color: #4CAF50;">${drop.itemId}</div>
+                        <div style="font-size: 11px; color: #ccc;">${(drop.chance * 100).toFixed(1)}% chance • Qty: ${drop.quantity || 1}</div>
+                    </div>
+                    <button class="btn small danger" onclick="window.uiEventHandler.removeEnemyDrop(${index})" style="padding: 2px 6px; font-size: 10px;">✕</button>
+                </div>
+            `).join('');
+        }
+    }
+
+    removeEnemyDrop(index) {
+        const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+        if (!selectedEnemy) return;
+
+        if (selectedEnemy.dropItems && selectedEnemy.dropItems[index]) {
+            selectedEnemy.dropItems.splice(index, 1);
+            if (selectedEnemy.dropItems.length === 0) {
+                delete selectedEnemy.dropItems;
+            }
+            this.updateEnemyDropConfigurationUI(selectedEnemy);
+            console.log(`🎁 Removed drop item from enemy ${selectedEnemy.id}`);
+        }
+    }
+
+    showEnemyDropConfigModal() {
+        const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+        if (!selectedEnemy) return;
+
+        // Populate the item dropdown
+        const itemSelect = document.getElementById('dropItemSelect');
+        if (itemSelect && this.game.inventoryItemsData) {
+            itemSelect.innerHTML = '<option value="">Choose an item...</option>';
+
+            // Add all available inventory items
+            const inventoryItems = this.game.inventoryItemsData.inventoryItems;
+            for (const itemId in inventoryItems) {
+                const item = inventoryItems[itemId];
+                const option = document.createElement('option');
+                option.value = itemId;
+                option.textContent = `${item.name} (${itemId})`;
+                itemSelect.appendChild(option);
+            }
+        }
+
+        // Reset form values
+        document.getElementById('dropChanceInput').value = '40';
+        document.getElementById('dropQuantityInput').value = '1';
+
+        // Update modal title
+        document.getElementById('dropConfigModalTitle').textContent = 'Configure Enemy Death Drops';
+
+        // Show modal
+        document.getElementById('dropConfigModal').style.display = 'flex';
+        this._isEnemyDropModal = true; // Flag to indicate this is for enemy drops
+    }
+
+    addDropToSelectedEnemy() {
+        const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+        if (!selectedEnemy) return;
+
+        const itemId = document.getElementById('dropItemSelect').value;
+        const inputPercent = parseFloat(document.getElementById('dropChanceInput').value);
+        const chance = inputPercent / 100; // Convert percentage to decimal
+        const quantity = parseInt(document.getElementById('dropQuantityInput').value) || 1;
+
+        // console.log(`🎁 Enemy UI Input: ${inputPercent}% -> Converted to: ${chance} (${(chance * 100).toFixed(1)}%)`);
+
+        if (!itemId) {
+            alert('Please select an item');
+            return;
+        }
+
+        if (inputPercent <= 0 || inputPercent > 100) {
+            alert('Drop chance must be between 1 and 100%');
+            return;
+        }
+
+        // Initialize dropItems array on the enemy instance if it doesn't exist
+        if (!selectedEnemy.dropItems) {
+            selectedEnemy.dropItems = [];
+        }
+
+        // Check if this item is already configured
+        const existingIndex = selectedEnemy.dropItems.findIndex(drop => drop.itemId === itemId);
+        if (existingIndex !== -1) {
+            // Update existing drop
+            selectedEnemy.dropItems[existingIndex] = { itemId, chance, quantity };
+            console.log(`🎁 Updated drop for ${itemId} on enemy ${selectedEnemy.id}: ${(chance * 100).toFixed(1)}% chance, qty ${quantity}`);
+        } else {
+            // Add new drop
+            selectedEnemy.dropItems.push({ itemId, chance, quantity });
+            console.log(`🎁 Added drop for ${itemId} to enemy ${selectedEnemy.id}: ${(chance * 100).toFixed(1)}% chance, qty ${quantity}`);
+        }
+
+        // Update UI
+        this.updateEnemyDropConfigurationUI(selectedEnemy);
+
+        // Close modal
+        document.getElementById('dropConfigModal').style.display = 'none';
+        this._isEnemyDropModal = false;
     }
 }

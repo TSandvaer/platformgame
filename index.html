@@ -1224,6 +1224,16 @@
                             <span style="font-size: 11px; color: #aaa;">durability</span>
                         </div>
                         <div class="property-row">
+                            <h4 style="margin: 10px 0 5px 0; color: #4CAF50;">Item Drops</h4>
+                            <div id="propDropsList" style="background-color: #333; padding: 8px; border-radius: 4px; margin: 5px 0; max-height: 150px; overflow-y: auto;">
+                                <div style="color: #888; font-size: 12px; text-align: center; padding: 10px;">No drops configured</div>
+                            </div>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="addPropDropBtn">+ Add Drop</button>
+                            <button class="btn small danger" id="clearPropDropsBtn">Clear All</button>
+                        </div>
+                        <div class="property-row">
                             <button class="btn small" id="updateProp">Update Prop</button>
                             <button class="btn small danger" id="deleteProp">Delete Prop</button>
                         </div>
@@ -1488,6 +1498,16 @@
                             <button class="btn small" id="drawMovementZone" style="margin-left: 10px;">Draw Movement Zone</button>
                         </div>
                         <div class="property-row">
+                            <h4 style="margin: 10px 0 5px 0; color: #4CAF50;">Death Drops</h4>
+                            <div id="enemyDropsList" style="background-color: #333; padding: 8px; border-radius: 4px; margin: 5px 0; max-height: 150px; overflow-y: auto;">
+                                <div style="color: #888; font-size: 12px; text-align: center; padding: 10px;">No drops configured</div>
+                            </div>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="addEnemyDropBtn">+ Add Drop</button>
+                            <button class="btn small danger" id="clearEnemyDropsBtn">Clear All</button>
+                        </div>
+                        <div class="property-row">
                             <button class="btn small" id="updateEnemy">Update Enemy</button>
                             <button class="btn small danger" id="deleteEnemy">Delete Enemy</button>
                         </div>
@@ -1653,6 +1673,10 @@
 
     <!-- Inventory System Scripts -->
     <script src="js/inventory/inventoryItemsData.js"></script>
+
+    <!-- Item Drop System Scripts -->
+    <script src="js/items/itemDropSystem.js"></script>
+    <script src="js/items/itemDropRenderer.js"></script>
     <script src="js/props/propRenderer.js"></script>
     <script src="js/props/propCollisions.js"></script>
     <script src="js/props/propManager.js"></script>
@@ -1844,6 +1868,37 @@
         <div id="tooltipTitle" style="font-weight: bold; color: #4CAF50; margin-bottom: 4px;"></div>
         <div id="tooltipDescription" style="color: #ccc;"></div>
         <div id="tooltipDetails" style="color: #aaa; font-size: 10px; margin-top: 4px;"></div>
+    </div>
+
+    <!-- Drop Configuration Modal -->
+    <div id="dropConfigModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 500px; max-height: 600px;">
+            <div class="modal-header">
+                <h3 id="dropConfigModalTitle">Configure Item Drops</h3>
+                <button class="modal-close" id="closeDropConfigModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-row">
+                    <span class="property-label">Select Item:</span>
+                    <select id="dropItemSelect" style="width: 200px;">
+                        <option value="">Choose an item...</option>
+                    </select>
+                </div>
+                <div class="property-row">
+                    <span class="property-label">Drop Chance:</span>
+                    <input type="number" id="dropChanceInput" min="0" max="100" step="1" value="40" style="width: 80px;">
+                    <span style="font-size: 11px; color: #aaa;">%</span>
+                </div>
+                <div class="property-row">
+                    <span class="property-label">Quantity:</span>
+                    <input type="number" id="dropQuantityInput" min="1" max="10" step="1" value="1" style="width: 80px;">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn small" id="addDropConfirm">Add Drop</button>
+                    <button class="btn small" id="cancelDropConfig">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Game Script -->

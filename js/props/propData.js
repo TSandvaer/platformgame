@@ -4,6 +4,7 @@ class PropData {
         this.nextPropId = 1;
         this.nextPropZOrder = 1;
         this.selectedProp = null;
+        this.game = null; // Will be set by PropSystem
 
         // Multi-selection and grouping
         this.selectedProps = []; // Array of selected props
@@ -54,7 +55,13 @@ class PropData {
             bush: { tileX: 6, tileY: 2, width: 32, height: 16, name: 'Bush' },
 
             // Decorative Items
-            barrel: { tileX: 6.05, tileY: 1, width: 29, height: 32, name: 'Barrel' },
+            barrel: {
+                tileX: 6.05,
+                tileY: 1,
+                width: 29,
+                height: 32,
+                name: 'Barrel'
+            },
             crate: { tileX: 4, tileY: 1, width: 32, height: 32, name: 'Crate' },
             bigCrate: { tileX: 1.31, tileY: 0.59, width: 44, height: 45, name: 'bigCrate' },
             fence: { tileX: 5, tileY: 2, width: 32, height: 16, name: 'Fence' },
@@ -1008,6 +1015,9 @@ class PropData {
         prop.destructionFrameIndex = 0;
         prop.destructionTimer = 0;
         prop.currentDurability = 0;
+
+        // Trigger item drops if this prop has drop items configured
+        this.triggerItemDrops(prop);
     }
 
     updateDestruction(prop, deltaTime) {
@@ -1238,5 +1248,67 @@ class PropData {
         }
 
         return respawnedCount + restoredCount;
+    }
+
+    triggerItemDrops(prop) {
+        // console.log(`🎁 triggerItemDrops called for prop ${prop.id} (${prop.type})`);
+        // console.log(`🎁 Prop dropItems:`, prop.dropItems);
+        // console.log(`🎁 Game instance available:`, !!this.game);
+
+        // Check if this specific prop instance has drop items configured
+        if (!prop.dropItems) {
+            console.log(`🎁 No dropItems configured for prop ${prop.id} - skipping drops`);
+            return;
+        }
+
+        if (!this.game) {
+            console.log(`🎁 No game instance available - skipping drops`);
+            return;
+        }
+
+        // Get prop type for dimensions
+        const propType = this.propTypes[prop.type];
+        if (!propType) {
+            console.log(`🎁 No prop type found for ${prop.type} - skipping drops`);
+            return;
+        }
+
+        // Calculate drop position (center-bottom of prop for better visual)
+        const dropX = prop.x + (propType.width / 2);
+        const dropY = prop.y + propType.height - 8; // Bottom of prop, slightly raised
+
+        // console.log(`🎁 Processing ${prop.dropItems.length} possible drops for prop ${prop.id} (${prop.type}) at (${dropX}, ${dropY})`);
+
+        // Process each possible drop for this specific prop
+        prop.dropItems.forEach((dropItem, index) => {
+            // console.log(`🎁 Drop ${index + 1}: ${dropItem.itemId}, chance: ${dropItem.chance} (${(dropItem.chance * 100).toFixed(1)}%), quantity: ${dropItem.quantity || 1}`);
+
+            // Roll for drop chance
+            const roll = Math.random();
+            if (roll <= dropItem.chance) {
+                // Item should drop!
+                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - SUCCESS!`);
+
+                // Drop the item using the game's item drop system
+                if (this.game.itemDropSystem) {
+                    const platforms = this.game.platformSystem ? this.game.platformSystem.platforms : [];
+                    const quantity = dropItem.quantity || 1;
+                    console.log(`🎁 Creating ${quantity} ${dropItem.itemId} drops`);
+
+                    for (let i = 0; i < quantity; i++) {
+                        const createdItem = this.game.itemDropSystem.dropItem(dropItem.itemId, dropX, dropY, platforms);
+                        if (createdItem) {
+                            console.log(`🎁 Successfully created drop ${i + 1}/${quantity}: ${createdItem.id}`);
+                        } else {
+                            console.warn(`🎁 Failed to create drop ${i + 1}/${quantity}`);
+                        }
+                    }
+                } else {
+                    console.warn('ItemDropSystem not available on game instance');
+                }
+            } else {
+                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - no drop`);
+            }
+        });
     }
 }

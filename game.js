@@ -68,6 +68,53 @@ class PlatformRPG {
         // Initialize player inventory system
         this.playerInventorySystem = new PlayerInventorySystem(this);
 
+        // Initialize item drop system
+        this.itemDropSystem = new ItemDropSystem(this);
+        this.itemDropRenderer = new ItemDropRenderer(this);
+        this.itemDropSystem.renderer = this.itemDropRenderer;
+
+        // Debug: Add global test function for item drops
+        if (this.isDevelopmentMode) {
+            window.testItemDrop = (x, y, itemId) => {
+                return this.itemDropSystem.testDrop(x, y, itemId);
+            };
+
+            window.checkPropDrops = (propId) => {
+                const prop = this.propSystem.data.props.find(p => p.id === propId);
+                if (prop) {
+                    console.log(`🔍 Prop ${propId} (${prop.type}) drops:`, prop.dropItems || 'No drops configured');
+                    return prop.dropItems || null;
+                } else {
+                    console.log(`🔍 Prop ${propId} not found`);
+                    return null;
+                }
+            };
+
+            window.listAllProps = () => {
+                console.log('🔍 All props in scene:');
+                this.propSystem.data.props.forEach(prop => {
+                    const hasDrops = prop.dropItems && prop.dropItems.length > 0;
+                    console.log(`  Prop ${prop.id} (${prop.type}) at (${prop.x}, ${prop.y}) - Drops: ${hasDrops ? prop.dropItems.length : 'None'}`);
+                });
+            };
+
+            window.checkDroppedItems = () => {
+                console.log('📦 Currently dropped items:');
+                console.log(`📦 Total dropped items: ${this.itemDropSystem.droppedItems.length}`);
+                this.itemDropSystem.droppedItems.forEach((item, index) => {
+                    console.log(`  ${index + 1}. ${item.itemId} (${item.id}) at (${item.x.toFixed(1)}, ${item.y.toFixed(1)}) - onGround: ${item.onGround}, collected: ${item.collected}`);
+                });
+                console.log(`📦 Renderer available: ${!!this.itemDropSystem.renderer}`);
+                console.log(`📦 Sprites loaded: ${!!this.itemDropSystem.renderer?.spritesLoaded}`);
+            };
+
+            window.clearStuckItems = () => {
+                const before = this.itemDropSystem.droppedItems.length;
+                this.itemDropSystem.clearAllDrops();
+                console.log(`🧹 Cleared ${before} dropped items`);
+            };
+        }
+
         // Initialize lootable system
         console.log('🍯 Initializing lootable system...');
         this.lootableSystem = new LootableSystem(this.ctx, () => {
@@ -79,6 +126,7 @@ class PlatformRPG {
 
         // Initialize enemy system (mouse handler will be initialized later)
         this.enemySystem = new EnemySystem();
+        this.enemySystem.game = this; // Add game reference for drop system
 
         // Initialize scene system
         this.sceneSystem = new SceneSystem(this);
@@ -231,6 +279,7 @@ class PlatformRPG {
         // Initialize UI Event Handler
         this.uiEventHandler = new UIEventHandler(this);
         window.uiEventHandler = this.uiEventHandler; // Make globally accessible
+        window.propManager = this.propSystem.manager; // Make prop manager globally accessible for drop management
 
         // Initialize feedback system
         this.feedbackSystem = new FeedbackSystem(this);
@@ -459,6 +508,11 @@ class PlatformRPG {
         this.propSystem.updateDestruction(this.deltaTime, this.platformSystem);
         this.propSystem.updateChestAnimations(this.deltaTime);
 
+        // Update item drop system
+        if (this.itemDropSystem) {
+            this.itemDropSystem.update(this.deltaTime, this.platformSystem.platforms, this.playerSystem.data);
+        }
+
         // Update lootable animations
         if (this.lootableSystem) {
             this.lootableSystem.update();
@@ -670,6 +724,11 @@ class PlatformRPG {
 
         // Render enemies AFTER obstacle props so they appear on top and can be selected
         this.enemySystem.render(this.viewport, this.cameraSystem.camera, this.isDevelopmentMode);
+
+        // Render dropped items AFTER enemies so they appear on top
+        if (this.itemDropSystem) {
+            this.itemDropSystem.render(this.ctx, this.cameraSystem.camera, this.viewport);
+        }
 
         if (this.isDevelopmentMode) {
             // Apply viewport scaling for dev rendering

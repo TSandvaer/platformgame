@@ -147,6 +147,9 @@ class EnemySystem {
             enemy.flashTimer = 0; // Initialize flash timer for death effect
             animator.startDeath();
             console.log(`Enemy ${enemy.id} died - corpse will disappear in 2 seconds`);
+
+            // Trigger item drops if configured
+            this.triggerEnemyDrops(enemy);
         } else {
             animator.takeDamage();
         }
@@ -239,6 +242,55 @@ class EnemySystem {
                 animator.setAnimation('idle');
             }
         }
+    }
+
+    triggerEnemyDrops(enemy) {
+        console.log(`🎁 triggerEnemyDrops called for enemy ${enemy.id} (${enemy.type})`);
+
+        // Check if this enemy has drop items configured
+        if (!enemy.dropItems || enemy.dropItems.length === 0) {
+            console.log(`🎁 No dropItems configured for enemy ${enemy.id} - skipping drops`);
+            return;
+        }
+
+        if (!this.game || !this.game.itemDropSystem) {
+            console.log(`🎁 No game or itemDropSystem available - skipping drops`);
+            return;
+        }
+
+        // Calculate drop position (center-bottom of enemy for better visual)
+        const dropX = enemy.x + (enemy.width / 2);
+        const dropY = enemy.y + enemy.height - 8; // Bottom of enemy, slightly raised
+
+        console.log(`🎁 Processing ${enemy.dropItems.length} possible drops for enemy ${enemy.id} at (${dropX}, ${dropY})`);
+
+        // Process each possible drop
+        enemy.dropItems.forEach((dropItem, index) => {
+            console.log(`🎁 Drop ${index + 1}: ${dropItem.itemId}, chance: ${dropItem.chance} (${(dropItem.chance * 100).toFixed(1)}%), quantity: ${dropItem.quantity || 1}`);
+
+            // Roll for drop chance
+            const roll = Math.random();
+            if (roll <= dropItem.chance) {
+                // Item should drop!
+                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - SUCCESS!`);
+
+                // Drop the item using the game's item drop system
+                const platforms = this.game.platformSystem ? this.game.platformSystem.platforms : [];
+                const quantity = dropItem.quantity || 1;
+                console.log(`🎁 Creating ${quantity} ${dropItem.itemId} drops`);
+
+                for (let i = 0; i < quantity; i++) {
+                    const createdItem = this.game.itemDropSystem.dropItem(dropItem.itemId, dropX, dropY, platforms);
+                    if (createdItem) {
+                        console.log(`🎁 Successfully created drop ${i + 1}/${quantity}: ${createdItem.id}`);
+                    } else {
+                        console.warn(`🎁 Failed to create drop ${i + 1}/${quantity}`);
+                    }
+                }
+            } else {
+                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - no drop`);
+            }
+        });
     }
 
     // Save/load functionality

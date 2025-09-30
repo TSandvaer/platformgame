@@ -10,6 +10,16 @@ class PropSystem {
         this.data.initializePropZOrders();
     }
 
+    // Game reference setter - pass it down to PropData
+    set game(value) {
+        this._game = value;
+        this.data.game = value;
+    }
+
+    get game() {
+        return this._game;
+    }
+
     // Data access methods
     get props() {
         return this.data.props;
