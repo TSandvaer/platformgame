@@ -68,22 +68,14 @@ class ItemDropRenderer {
             }
 
             // Add visual effects based on item state
-            let verticalOffset = 0;
             if (!item.onGround) {
-                // Floating effect while in air - gentle sine wave
-                const floatTime = (item.pickupTimer * 0.002 + (item.floatOffset || 0));
-                verticalOffset = Math.sin(floatTime) * 2;
-
-                // Also add subtle scaling pulse while floating
-                const scalePulse = 1 + Math.sin(floatTime * 2) * 0.05;
-                ctx.scale(scalePulse, scalePulse);
-            } else if (item.pickupTimer < 2000) {
-                // Gentle bounce effect when on ground
-                verticalOffset = Math.sin(item.pickupTimer * 0.008) * 1.5;
+                // No floating effect - items should fall naturally
+                // Just apply the physics-based position
+            } else if (item.pickupTimer > 500 && item.pickupTimer < 3000) {
+                // Very subtle idle animation when resting (barely noticeable)
+                const idleOffset = Math.sin(item.pickupTimer * 0.003) * 0.5;
+                ctx.translate(0, idleOffset);
             }
-
-            // Apply vertical offset
-            ctx.translate(0, verticalOffset);
 
             // Draw the item sprite
             const sprite = itemData.sprite;

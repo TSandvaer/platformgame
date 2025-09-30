@@ -1273,9 +1273,9 @@ class PropData {
             return;
         }
 
-        // Calculate drop position (center-bottom of prop for better visual)
+        // Calculate drop position (center of prop for better animation)
         const dropX = prop.x + (propType.width / 2);
-        const dropY = prop.y + propType.height - 8; // Bottom of prop, slightly raised
+        const dropY = prop.y + (propType.height / 2); // Center of prop
 
         // console.log(`🎁 Processing ${prop.dropItems.length} possible drops for prop ${prop.id} (${prop.type}) at (${dropX}, ${dropY})`);
 

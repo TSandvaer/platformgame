@@ -258,9 +258,9 @@ class EnemySystem {
             return;
         }
 
-        // Calculate drop position (center-bottom of enemy for better visual)
+        // Calculate drop position (center of enemy for better animation)
         const dropX = enemy.x + (enemy.width / 2);
-        const dropY = enemy.y + enemy.height - 8; // Bottom of enemy, slightly raised
+        const dropY = enemy.y + (enemy.height / 2); // Center of enemy
 
         console.log(`🎁 Processing ${enemy.dropItems.length} possible drops for enemy ${enemy.id} at (${dropX}, ${dropY})`);
 

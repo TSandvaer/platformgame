@@ -2,9 +2,9 @@ class ItemDropSystem {
     constructor(game) {
         this.game = game;
         this.droppedItems = []; // Array of items currently falling/dropped
-        this.gravity = 0.2; // Even slower gravity for more graceful falling
-        this.friction = 0.92; // More air resistance
-        this.bounce = 0.6; // Higher bounce for more realistic effect
+        this.gravity = 0.015; // MUCH slower gravity for graceful falling
+        this.friction = 0.99; // Very light air resistance
+        this.bounce = 0.6; // Good bounce retention for visible bounces
         this.pickupDistance = 30; // Distance at which player auto-picks up items
 
         // Initialize renderer
@@ -24,16 +24,16 @@ class ItemDropSystem {
             id: this.generateDropId(),
             itemId: itemId,
             x: x - 8, // Center the 16px item at the drop position
-            y: y - 8, // Center the 16px item at the drop position
-            velocityX: (Math.random() - 0.5) * 0.8, // Small random horizontal spread
-            velocityY: -4.5, // Higher initial pop for more visible arc
+            y: y - 16, // Start above the spawn point to ensure upward motion is visible
+            velocityX: (Math.random() - 0.5) * 0.5, // Small random horizontal drift
+            velocityY: -0.5, // Very small upward pop - just 20% of previous height
             targetPlatform: closestPlatform, // Store reference to target platform
             onGround: false,
             bounceCount: 0,
-            maxBounces: 3, // More bounces for realistic effect
+            maxBounces: 4, // Several bounces like a real object
             scale: 0.6, // Smaller than normal inventory size
             rotation: 0,
-            rotationSpeed: (Math.random() - 0.5) * 0.03, // Gentle rotation for floating effect
+            rotationSpeed: (Math.random() - 0.5) * 0.05, // Natural tumbling rotation
             floatOffset: Math.random() * Math.PI * 2, // Random start for floating animation
             pickupTimer: 0,
             collected: false
@@ -93,15 +93,20 @@ class ItemDropSystem {
                 return;
             }
 
-            // Apply normal gravity
+            // Apply gravity acceleration (increases falling speed over time)
             item.velocityY += this.gravity * deltaTime;
 
-            // Apply friction to horizontal movement
+            // Add very subtle random horizontal drift (wind effect)
+            if (Math.random() < 0.05) { // 5% chance per frame
+                item.velocityX += (Math.random() - 0.5) * 0.02;
+            }
+
+            // Apply air friction to horizontal movement (very light)
             item.velocityX *= this.friction;
 
-            // Limit velocities to prevent runaway physics
-            const maxHorizontalVelocity = 1.5;
-            const maxVerticalVelocity = 5; // Controlled max speed
+            // Limit velocities for slow, graceful motion
+            const maxHorizontalVelocity = 1.0;
+            const maxVerticalVelocity = 3; // Very slow max fall speed
             item.velocityX = Math.max(-maxHorizontalVelocity, Math.min(maxHorizontalVelocity, item.velocityX));
             item.velocityY = Math.max(-maxVerticalVelocity, Math.min(maxVerticalVelocity, item.velocityY));
 
@@ -109,15 +114,19 @@ class ItemDropSystem {
             item.x += item.velocityX * deltaTime;
             item.y += item.velocityY * deltaTime;
 
-            // Check platform collisions (adapted from enemy system)
-            this.checkPlatformCollisions(item, platforms);
+            // Check platform collisions with deltaTime for proper calculation
+            this.checkPlatformCollisions(item, platforms, deltaTime);
         }
     }
 
-    checkPlatformCollisions(item, platforms) {
+    checkPlatformCollisions(item, platforms, deltaTime) {
+        // Don't check collisions while moving upward (let item rise freely)
+        if (item.velocityY < 0) {
+            return;
+        }
+
         const itemBottom = item.y + 16; // Assuming 16px height for small items
         const itemRight = item.x + 16; // Assuming 16px width for small items
-        const prevBottom = (item.y - item.velocityY * 16) + 16; // Previous frame position
 
         // Find platforms that item overlaps horizontally
         let overlappingPlatforms = platforms.filter(p =>
@@ -131,9 +140,8 @@ class ItemDropSystem {
         for (const platform of overlappingPlatforms) {
             const platformTop = platform.y;
 
-            // Check if item is falling and crossed through the platform this frame
-            // This prevents fast-moving items from passing through platforms
-            if (item.velocityY > 0 && itemBottom >= platformTop && prevBottom <= platformTop + 10) {
+            // Simple collision: if falling and touching/below platform top
+            if (item.velocityY >= 0 && itemBottom >= platformTop && itemBottom <= platformTop + 20) {
                 const isTargetPlatform = item.targetPlatform &&
                     platform.x === item.targetPlatform.x && platform.y === item.targetPlatform.y;
 
@@ -143,25 +151,38 @@ class ItemDropSystem {
                 item.y = platformTop - 16; // Item height
                 item.bounceCount++;
 
-                // Check if should stop bouncing
-                if (item.bounceCount >= item.maxBounces || Math.abs(item.velocityY) < 1) {
+                // Calculate bounce velocity based on impact speed
+                const impactSpeed = Math.abs(item.velocityY);
+
+                // Check if should stop bouncing (velocity too small or max bounces)
+                if (item.bounceCount >= item.maxBounces || impactSpeed < 0.3) {
                     // Stop bouncing - item settles
                     item.velocityY = 0;
-                    item.velocityX *= 0.2; // Greatly reduce horizontal movement
+                    item.velocityX *= 0.1; // Almost stop horizontal movement
                     item.onGround = true;
-                    item.rotationSpeed *= 0.05; // Almost stop rotation
+                    item.rotationSpeed = 0; // Stop rotation completely
                     // console.log(`📦 Item settled on platform`);
                 } else {
-                    // Continue bouncing with reduced velocity
-                    if (item.bounceCount > 1) {
-                        // After first bounce, reduce bounce factor progressively
-                        item.velocityY = -Math.abs(item.velocityY) * this.bounce * Math.pow(0.7, item.bounceCount - 1);
+                    // Visible bounce with good height retention
+                    let bounceMultiplier = this.bounce;
+                    if (item.bounceCount === 0) {
+                        bounceMultiplier = 0.7; // First bounce keeps 70% height
+                    } else if (item.bounceCount === 1) {
+                        bounceMultiplier = 0.5; // Second bounce keeps 50%
+                    } else if (item.bounceCount === 2) {
+                        bounceMultiplier = 0.3; // Third bounce keeps 30%
                     } else {
-                        // First bounce
-                        item.velocityY = -Math.abs(item.velocityY) * this.bounce;
+                        bounceMultiplier = 0.15; // Final tiny bounces
                     }
-                    // Apply some horizontal damping on each bounce
+
+                    item.velocityY = -impactSpeed * bounceMultiplier;
+
+                    // Small horizontal wobble on bounce
                     item.velocityX *= 0.8;
+                    item.velocityX += (Math.random() - 0.5) * 0.1;
+
+                    // Gentle rotation change
+                    item.rotationSpeed = (Math.random() - 0.5) * 0.03;
                 }
                 return; // Stop checking other platforms once landed
             }
