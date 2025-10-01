@@ -468,17 +468,24 @@ class SceneManager {
 
                 // CRITICAL: Detect if lootables have been collected during gameplay
                 // This prevents collected coins/hearts from being permanently lost from scene data
+                // BUT: In development mode, allow deletions (user is editing, not playing)
                 const originalCount = currentScene.lootables ? currentScene.lootables.length : 0;
                 const currentCount = currentLootableData.length;
 
-                if (originalCount > 0 && currentCount < originalCount) {
-                    // Lootables have been collected - preserve original configuration
-                    console.warn('🚨 LOOTABLE PROTECTION: Detected collected lootables');
+                if (originalCount > 0 && currentCount < originalCount && !this.game.isDevelopmentMode) {
+                    // Lootables have been collected during gameplay (not in dev mode) - preserve original configuration
+                    console.warn('🚨 LOOTABLE PROTECTION: Detected collected lootables during gameplay');
                     console.warn('🚨 Scene originally had:', originalCount, 'lootables');
                     console.warn('🚨 Current memory has:', currentCount, 'lootables');
                     console.warn('🚨 Preserving original lootable configuration to prevent permanent loss');
 
                     lootableDataToSave = currentScene.lootables;
+                } else if (currentCount < originalCount && this.game.isDevelopmentMode) {
+                    // Lootables were deleted in development mode - save current state
+                    console.log('💾 Lootables deleted in editor - saving current state');
+                    console.log('💾 Original:', originalCount, 'lootables, Current:', currentCount, 'lootables');
+
+                    lootableDataToSave = currentLootableData;
                 } else if (currentCount > originalCount) {
                     // New lootables have been added in the editor - save current state
                     console.log('💾 New lootables detected - saving current state');

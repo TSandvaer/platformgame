@@ -256,11 +256,19 @@ class InputKeyboard {
         if (this.game.lootableSystem) {
             if (this.game.lootableSystem.selectedLootables && this.game.lootableSystem.selectedLootables.length > 0) {
                 const count = this.game.lootableSystem.selectedLootables.length;
+                // Get position of first selected lootable for feedback message
+                const firstLootable = this.game.lootableSystem.selectedLootables[0];
+                const msgX = firstLootable ? firstLootable.x : null;
+                const msgY = firstLootable ? firstLootable.y : null;
                 this.game.lootableSystem.deleteSelectedLootables();
-                this.game.showFeedbackMessage(`Deleted ${count} lootable(s)`);
+                this.game.showFeedbackMessage(`Deleted ${count} lootable(s)`, msgX, msgY);
             } else if (this.game.lootableSystem.selectedLootable) {
+                // Get position of selected lootable for feedback message
+                const lootable = this.game.lootableSystem.selectedLootable;
+                const msgX = lootable ? lootable.x : null;
+                const msgY = lootable ? lootable.y : null;
                 this.game.lootableSystem.deleteSelectedLootable();
-                this.game.showFeedbackMessage('Deleted 1 lootable');
+                this.game.showFeedbackMessage('Deleted 1 lootable', msgX, msgY);
             }
         }
     }

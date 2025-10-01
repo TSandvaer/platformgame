@@ -37,6 +37,14 @@ class LootableData {
         };
     }
 
+    // Get all lootable types as an array
+    getLootableTypes() {
+        return Object.keys(this.lootableTypes).map(id => ({
+            id: id,
+            ...this.lootableTypes[id]
+        }));
+    }
+
     // Basic lootable management
     addLootable(type, x, y) {
         if (!this.lootableTypes[type]) {

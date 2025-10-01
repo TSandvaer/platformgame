@@ -4,6 +4,7 @@ class LootableSystem {
         this.data = new LootableData();
         this.renderer = new LootableRenderer(ctx);
         this.manager = new LootableManager(this.data);
+        this.game = null; // Will be set after construction
 
         console.log('🍯 LootableSystem components created');
         console.log('🍯 Data:', !!this.data);
@@ -13,6 +14,16 @@ class LootableSystem {
         // Load sprites
         this.renderer.loadSprites(onSpritesLoadedCallback);
         console.log('🍯 Started loading lootable sprites');
+    }
+
+    // Game reference setter - pass it down to LootableData
+    set game(value) {
+        this._game = value;
+        this.data.game = value;
+    }
+
+    get game() {
+        return this._game;
     }
 
     // Data access methods

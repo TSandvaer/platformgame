@@ -122,6 +122,7 @@ class PlatformRPG {
             this.spritesLoaded.lootables = true;
             this.checkAllSpritesLoaded();
         });
+        this.lootableSystem.game = this; // Set the game reference
         console.log('🍯 Lootable system initialized:', !!this.lootableSystem);
 
         // Initialize enemy system (mouse handler will be initialized later)

@@ -1126,14 +1126,10 @@
                 <div class="platform-editor" id="lootablesEditor" style="display: none;">
                     <h4>Lootables Editor</h4>
                     <div class="property-row">
-                        <span class="property-label">Lootable Type:</span>
-                        <select id="lootableTypeSelect" style="width: 120px;">
-                            <option value="coin">Gold Coin</option>
-                            <option value="heart">Heart</option>
-                        </select>
+                        <button class="btn small" id="openLootablesEditorBtn">Open Lootables Editor</button>
                     </div>
-                    <div class="property-row">
-                        <button class="btn small" id="toggleLootablePlacement">Place Lootable</button>
+                    <div class="property-row" id="exitLootablePlacementRow" style="display: none;">
+                        <button class="btn small danger" id="exitLootablePlacementBtn">Exit Lootable Placement</button>
                     </div>
                     <div class="property-row">
                         <button class="btn small danger" id="clearLootablesBtn">Clear All Lootables</button>
@@ -1891,6 +1887,43 @@
                             <button class="btn small" id="refreshInventoryItems">Refresh Item List</button>
                             <button class="btn small secondary" id="clearInventoryItems">Clear All Items</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lootables Editor Modal -->
+    <div id="lootablesEditorModal" class="modal no-theme" style="display: none;">
+        <div class="modal-content no-theme" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>Lootables Editor</h3>
+                <button class="modal-close" id="closeLootablesEditorModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Lootable Selection Grid -->
+                <div class="section">
+                    <h3>Select Lootable Type</h3>
+                    <div id="lootablesGridContainer">
+                        <div class="lootables-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <!-- Lootables will be rendered here as thumbnails -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="section">
+                    <div id="selectedLootableConfig" style="display: none;">
+                        <div class="property-row">
+                            <span class="property-label">Selected:</span>
+                            <span id="selectedLootableTypeName" style="font-weight: bold; color: #4CAF50;"></span>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn" id="modalAddLootableBtn">Add Lootable (Click on map)</button>
+                        </div>
+                    </div>
+                    <div id="noLootableSelected" style="color: #888; font-size: 12px; text-align: center; padding: 20px;">
+                        Select a lootable from the grid above to place it
                     </div>
                 </div>
             </div>

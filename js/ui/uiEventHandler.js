@@ -203,7 +203,7 @@ class UIEventHandler {
             });
         }
 
-        // Lootable controls
+        // Lootable controls (old UI - optional, kept for backward compatibility)
         const toggleLootablePlacementBtn = document.getElementById('toggleLootablePlacement');
         if (toggleLootablePlacementBtn) {
             toggleLootablePlacementBtn.addEventListener('click', () => {
@@ -1346,6 +1346,7 @@ class UIEventHandler {
         this.setupAdditionalListeners();
         this.setupSceneEditorListeners();
         this.setupPropsEditorListeners();
+        this.setupLootablesEditorListeners();
 
         // Initialize enemy UI
         this.updateEnemyList();
@@ -1861,5 +1862,254 @@ class UIEventHandler {
         this.game.propSystem.togglePropPlacement();
 
         console.log(`Props editor: Selected ${this.selectedModalPropType} for placement`);
+    }
+
+    // Lootables Editor Modal Methods
+    setupLootablesEditorListeners() {
+        // Open lootables editor button
+        const openBtn = document.getElementById('openLootablesEditorBtn');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                this.openLootablesEditorModal();
+            });
+        }
+
+        // Close lootables editor modal
+        const closeBtn = document.getElementById('closeLootablesEditorModal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.closeLootablesEditorModal();
+            });
+        }
+
+        // Click outside to close
+        const modal = document.getElementById('lootablesEditorModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeLootablesEditorModal();
+                }
+            });
+        }
+
+        // Modal "Add Lootable" button
+        const modalAddBtn = document.getElementById('modalAddLootableBtn');
+        if (modalAddBtn) {
+            modalAddBtn.addEventListener('click', () => {
+                this.addLootableFromModal();
+            });
+        }
+
+        // Exit lootable placement button
+        const exitPlacementBtn = document.getElementById('exitLootablePlacementBtn');
+        if (exitPlacementBtn) {
+            exitPlacementBtn.addEventListener('click', () => {
+                if (this.game.lootableSystem) {
+                    this.game.lootableSystem.lootablePlacementMode = false;
+                    this.updateLootablePlacementUI();
+                }
+            });
+        }
+    }
+
+    updateLootablePlacementUI() {
+        const exitPlacementRow = document.getElementById('exitLootablePlacementRow');
+        if (exitPlacementRow && this.game.lootableSystem) {
+            exitPlacementRow.style.display = this.game.lootableSystem.lootablePlacementMode ? 'flex' : 'none';
+        }
+    }
+
+    openLootablesEditorModal() {
+        const modal = document.getElementById('lootablesEditorModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            this.renderLootablesGrid();
+        }
+    }
+
+    closeLootablesEditorModal() {
+        const modal = document.getElementById('lootablesEditorModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        // Clear selection
+        this.selectedModalLootableType = null;
+        this.updateModalLootableConfig();
+    }
+
+    renderLootablesGrid() {
+        const container = document.querySelector('#lootablesGridContainer .lootables-grid');
+        if (!container) return;
+
+        const lootableData = this.game.lootableSystem.data;
+        const lootables = lootableData.getLootableTypes();
+
+        let html = '';
+
+        lootables.forEach(lootable => {
+            const isSelected = this.selectedModalLootableType === lootable.id;
+            html += `<div class="lootable-grid-item ${isSelected ? 'selected' : ''}" data-lootable-id="${lootable.id}" style="
+                cursor: pointer;
+                padding: 6px;
+                background-color: ${isSelected ? '#2a4a2a' : '#333'};
+                border: 2px solid ${isSelected ? '#4CAF50' : 'transparent'};
+                border-radius: 4px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+                transition: all 0.2s;
+                min-height: 120px;
+            ">
+                <div style="
+                    width: 100%;
+                    flex: 1;
+                    background-color: #F9F7F5;
+                    border-radius: 3px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 4px;
+                ">
+                    <canvas class="lootable-thumbnail" data-lootable-id="${lootable.id}" width="64" height="64" style="image-rendering: pixelated; max-width: 100%; max-height: 100%; background: transparent;"></canvas>
+                </div>
+                <div style="font-size: 11px; color: #ccc; text-align: center; word-wrap: break-word; width: 100%;">${lootable.name}</div>
+            </div>`;
+        });
+
+        container.innerHTML = html;
+
+        // Add hover effects
+        const style = document.createElement('style');
+        style.textContent = `
+            .lootable-grid-item:hover {
+                background-color: #3a3a3a !important;
+                border-color: #666 !important;
+            }
+            .lootable-grid-item.selected:hover {
+                background-color: #2a4a2a !important;
+                border-color: #4CAF50 !important;
+            }
+        `;
+        if (!document.getElementById('lootablesGridStyles')) {
+            style.id = 'lootablesGridStyles';
+            document.head.appendChild(style);
+        }
+
+        // Render thumbnails
+        this.renderLootableThumbnails();
+
+        // Add click handlers
+        container.querySelectorAll('.lootable-grid-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const lootableId = item.dataset.lootableId;
+                this.selectLootableType(lootableId);
+            });
+        });
+    }
+
+    renderLootableThumbnails() {
+        const lootableRenderer = this.game.lootableSystem.renderer;
+        const canvases = document.querySelectorAll('.lootable-thumbnail');
+
+        canvases.forEach(canvas => {
+            const lootableId = canvas.dataset.lootableId;
+            const sprite = lootableRenderer.sprites[lootableId];
+
+            if (!sprite || !sprite.image || !sprite.image.complete) {
+                // If image isn't loaded yet, try again after a short delay
+                setTimeout(() => {
+                    this.renderLootableThumbnails();
+                }, 100);
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+
+            // Calculate scaling to fit in max 64x64, maintaining aspect ratio
+            const maxSize = 64;
+            const scale = Math.min(maxSize / sprite.width, maxSize / sprite.height, 2.0); // Allow up to 2x scale for small sprites
+            const renderWidth = sprite.width * scale;
+            const renderHeight = sprite.height * scale;
+
+            // Resize canvas to actual render size
+            canvas.width = renderWidth;
+            canvas.height = renderHeight;
+            canvas.style.width = renderWidth + 'px';
+            canvas.style.height = renderHeight + 'px';
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the first frame of the sprite (frame 0)
+            ctx.drawImage(
+                sprite.image,
+                0, 0, sprite.width, sprite.height,
+                0, 0, renderWidth, renderHeight
+            );
+        });
+    }
+
+    selectLootableType(lootableId) {
+        this.selectedModalLootableType = lootableId;
+
+        // Update visual selection
+        document.querySelectorAll('.lootable-grid-item').forEach(item => {
+            const isSelected = item.dataset.lootableId === lootableId;
+            item.classList.toggle('selected', isSelected);
+            item.style.backgroundColor = isSelected ? '#2a4a2a' : '#333';
+            item.style.borderColor = isSelected ? '#4CAF50' : 'transparent';
+        });
+
+        // Update configuration panel
+        this.updateModalLootableConfig();
+    }
+
+    updateModalLootableConfig() {
+        const configDiv = document.getElementById('selectedLootableConfig');
+        const noSelectionDiv = document.getElementById('noLootableSelected');
+        const lootableNameSpan = document.getElementById('selectedLootableTypeName');
+
+        if (this.selectedModalLootableType) {
+            const lootableType = this.game.lootableSystem.data.lootableTypes[this.selectedModalLootableType];
+            if (lootableType) {
+                configDiv.style.display = 'block';
+                noSelectionDiv.style.display = 'none';
+                lootableNameSpan.textContent = lootableType.name;
+            }
+        } else {
+            configDiv.style.display = 'none';
+            noSelectionDiv.style.display = 'block';
+        }
+    }
+
+    addLootableFromModal() {
+        if (!this.selectedModalLootableType) {
+            alert('Please select a lootable type first');
+            return;
+        }
+
+        // Save the selected type before closing modal (which clears it)
+        const selectedType = this.selectedModalLootableType;
+
+        // Store the selected type so lootableSystem can use it when placing
+        this.game.lootableSystem.pendingLootableConfig = {
+            type: selectedType
+        };
+
+        // Close modal
+        this.closeLootablesEditorModal();
+
+        // Activate lootable placement mode
+        this.game.lootableSystem.toggleLootablePlacement();
+
+        // Update UI to show exit placement button
+        this.updateLootablePlacementUI();
+
+        console.log(`Lootables editor: Selected ${selectedType} for placement`);
     }
 }

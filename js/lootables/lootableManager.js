@@ -119,7 +119,21 @@ class LootableManager {
     placeLootable(mouseX, mouseY) {
         if (!this.data.lootablePlacementMode) return;
 
-        const newLootable = this.data.addLootable(this.currentLootableType, mouseX, mouseY);
+        let lootableType = this.currentLootableType;
+
+        // Check if we have pending config from the modal (via game reference)
+        if (this.data.game && this.data.game.lootableSystem && this.data.game.lootableSystem.pendingLootableConfig) {
+            const config = this.data.game.lootableSystem.pendingLootableConfig;
+            lootableType = config.type;
+
+            // Update currentLootableType so subsequent placements use the same type
+            this.currentLootableType = lootableType;
+
+            // Clear the pending config after transferring to currentLootableType
+            delete this.data.game.lootableSystem.pendingLootableConfig;
+        }
+
+        const newLootable = this.data.addLootable(lootableType, mouseX, mouseY);
         if (newLootable) {
             this.data.selectedLootable = newLootable;
             this.data.selectedLootables = [newLootable];
