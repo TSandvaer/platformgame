@@ -254,19 +254,21 @@ class InputKeyboard {
 
         // Delete selected lootables
         if (this.game.lootableSystem) {
-            if (this.game.lootableSystem.selectedLootables && this.game.lootableSystem.selectedLootables.length > 0) {
-                const count = this.game.lootableSystem.selectedLootables.length;
-                // Get position of first selected lootable for feedback message
-                const firstLootable = this.game.lootableSystem.selectedLootables[0];
+            const selectedLootables = this.game.lootableSystem.selectedLootables;
+            const selectedLootable = this.game.lootableSystem.selectedLootable;
+
+            if (selectedLootables && selectedLootables.length > 0) {
+                const count = selectedLootables.length;
+                // Get position of first selected lootable for feedback message (before deletion)
+                const firstLootable = selectedLootables[0];
                 const msgX = firstLootable ? firstLootable.x : null;
                 const msgY = firstLootable ? firstLootable.y : null;
                 this.game.lootableSystem.deleteSelectedLootables();
                 this.game.showFeedbackMessage(`Deleted ${count} lootable(s)`, msgX, msgY);
-            } else if (this.game.lootableSystem.selectedLootable) {
-                // Get position of selected lootable for feedback message
-                const lootable = this.game.lootableSystem.selectedLootable;
-                const msgX = lootable ? lootable.x : null;
-                const msgY = lootable ? lootable.y : null;
+            } else if (selectedLootable) {
+                // Get position of selected lootable for feedback message (before deletion)
+                const msgX = selectedLootable.x;
+                const msgY = selectedLootable.y;
                 this.game.lootableSystem.deleteSelectedLootable();
                 this.game.showFeedbackMessage('Deleted 1 lootable', msgX, msgY);
             }

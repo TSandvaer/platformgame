@@ -448,16 +448,27 @@ class SceneManager {
             // Check if we're about to wipe out existing lootables
             if (currentScene.lootables && currentScene.lootables.length > 0 &&
                 (!this.game.lootableSystem?.lootables || this.game.lootableSystem.lootables.length === 0)) {
-                if (!isInitialLoading) {
-                    console.warn('⚠️ WARNING: Attempting to save empty lootables over existing lootables!');
+                if (isInitialLoading) {
+                    // During initial loading, this indicates lootables weren't loaded properly - restore them
+                    console.warn('⚠️ Initial loading: Scene had lootables but lootableSystem is empty - restoring');
+                    const lootablesCopy = JSON.parse(JSON.stringify(currentScene.lootables));
+                    if (this.game.lootableSystem) {
+                        this.game.lootableSystem.lootables = lootablesCopy;
+                    }
+                } else if (!this.game.isDevelopmentMode) {
+                    // During gameplay (not dev mode), preserve lootables if they've all been collected
+                    console.warn('⚠️ WARNING: Attempting to save empty lootables over existing lootables during gameplay!');
                     console.warn('⚠️ Scene had', currentScene.lootables.length, 'lootables but lootableSystem has 0');
-                    console.warn('⚠️ This likely means the lootables weren\'t loaded properly into memory');
-                }
+                    console.warn('⚠️ Preserving lootables to prevent collected items from being lost permanently');
 
-                // Try to reload the lootables into memory from the scene
-                const lootablesCopy = JSON.parse(JSON.stringify(currentScene.lootables));
-                if (this.game.lootableSystem) {
-                    this.game.lootableSystem.lootables = lootablesCopy;
+                    // Try to reload the lootables into memory from the scene
+                    const lootablesCopy = JSON.parse(JSON.stringify(currentScene.lootables));
+                    if (this.game.lootableSystem) {
+                        this.game.lootableSystem.lootables = lootablesCopy;
+                    }
+                } else {
+                    // In dev mode with no lootables, user deleted them all - allow it
+                    console.log('💾 All lootables deleted in development mode - allowing save of empty array');
                 }
             }
 
