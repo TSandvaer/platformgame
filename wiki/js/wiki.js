@@ -7,7 +7,9 @@ class WikiApp {
         this.pageOrder = [
             'overview', 'quick-start', 'architecture',
             'player-system', 'platform-system', 'prop-system', 'scene-system', 'camera-system', 'input-system',
-            'editor-overview', 'development-mode', 'editing-tools', 'data-management',
+            'editor-overview', 'platform-editor', 'props-editor', 'advanced-movement', 'lootables-editor',
+            'development-mode', 'editing-tools', 'data-management',
+            'controls', 'combat', 'movement', 'items',
             'rendering-pipeline', 'game-loop', 'technologies', 'extending',
             'api-reference', 'troubleshooting', 'contributing'
         ];
@@ -506,6 +508,11 @@ Canvas Rendering ← Visual Systems ← Transformed Data</code></pre>
         // Load additional system pages
         if (typeof additionalPages !== 'undefined') {
             Object.assign(this.pages, additionalPages);
+        }
+
+        // Load complete documentation pages
+        if (typeof wikiPages !== 'undefined') {
+            Object.assign(this.pages, wikiPages);
         }
 
         // Editor and advanced topic pages
