@@ -165,6 +165,43 @@ class PropData {
             metalStar: { tileX: 27.06, tileY: 3.06, width: 29, height: 29, name: 'Metal Star' },
             metalSpikeMat: { tileX: 24.94, tileY: 3.63, width: 34, height: 13, name: 'Metal Spike Mat' },
         };
+
+        // Prop categories for organized display
+        this.propCategories = {
+            'Buildings': ['house', 'tower', 'windmill', 'woodenPole', 'woodenPoleArm'],
+            'Structures': ['bannerPole', 'poleBarrier'],
+            'Fences & Walls': ['fenceNail', 'fencePole1', 'fencePole2', 'fencePole3', 'fenceBoard1', 'fenceBoard2', 'fenceBoard3', 'fencePoleSpiked', 'fenceBoardShort', 'boardFenceComplete', 'mossyBrickWall'],
+            'Decorative': ['table', 'chair', 'mug', 'graveStone1', 'graveStone2', 'cart', 'cartWheel', 'hayStack1', 'hayStack2', 'bonFire', 'sackClosed', 'sackOpen', 'banner', 'scareCrow', 'trainingTargetDoll', 'anvil', 'prayingStatue', 'celticCrossStone', 'crossStone', 'fireBowl'],
+            'Food & Consumables': ['wine', 'apple', 'cake', 'pumpkin1', 'pumpkin2'],
+            'Nature': ['tree1', 'tree2', 'bush'],
+            'Signs': ['signpost', 'signPostDirectional', 'signPostMultidirectional', 'signText1', 'signText2', 'signText3', 'signText4', 'signText5', 'signWall', 'signPaper1', 'signPaper2', 'signPaper3', 'signPaper4'],
+            'Items': ['barrel', 'crate', 'bigCrate', 'chest1', 'chest2', 'chest3', 'chest4', 'fence', 'well', 'bucket', 'lamp', 'lampLighted', 'torch', 'bigPot', 'mediumPot', 'smallPot'],
+            'Vegetation': ['bush1', 'bush2', 'bush3', 'tree1', 'flower1', 'flower2', 'flower3', 'stone1', 'stone2', 'stone3', 'treeStump', 'flowerBundle', 'grass1', 'grass2', 'grass3', 'grass4', 'grass5', 'grass6', 'grass7', 'grass8', 'grass9', 'corn1', 'corn2', 'corn3', 'corn4', 'corn5'],
+            'Weapons & Tools': ['toolRackFrame', 'sword1', 'sword2', 'spear', 'axe', 'hoe', 'hammer', 'bowTrainingTarget', 'arrow', 'metalStar', 'metalSpikeMat']
+        };
+    }
+
+    // Get all category names
+    getCategories() {
+        return Object.keys(this.propCategories);
+    }
+
+    // Get props by category
+    getPropsByCategory(category) {
+        const propIds = this.propCategories[category] || [];
+        return propIds.map(id => ({
+            id: id,
+            ...this.propTypes[id]
+        })).filter(prop => prop.name); // Filter out any undefined props
+    }
+
+    // Get all props organized by category
+    getAllPropsByCategory() {
+        const result = {};
+        for (const category in this.propCategories) {
+            result[category] = this.getPropsByCategory(category);
+        }
+        return result;
     }
 
     initializePropZOrders() {

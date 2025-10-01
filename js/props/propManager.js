@@ -293,25 +293,41 @@ class PropManager {
     }
 
     placeProp(mouseX, mouseY) {
-        // Get prop type, obstacle setting, size, damage, and destroyable from UI
-        const propTypeSelect = document.getElementById('propTypeSelect');
-        const obstacleCheck = document.getElementById('propObstacleCheck');
-        const sizeInput = document.getElementById('propSizeInput');
-        const damageInput = document.getElementById('propDamageInput');
-        const destroyableCheck = document.getElementById('propDestroyableCheck');
-        const durabilityInput = document.getElementById('propDurabilityInput');
+        let propType, isObstacle, sizeMultiplier, damagePerSecond, destroyable, maxDurability;
 
-        if (!propTypeSelect || !obstacleCheck || !sizeInput || !damageInput || !destroyableCheck || !durabilityInput) {
-            console.error('UI elements not found for prop placement');
-            return;
+        // Check if we have pending config from the modal
+        if (this.propData.game && this.propData.game.propSystem && this.propData.game.propSystem.pendingPropConfig) {
+            const config = this.propData.game.propSystem.pendingPropConfig;
+            propType = config.type;
+            isObstacle = config.isObstacle;
+            sizeMultiplier = config.size;
+            damagePerSecond = config.damage;
+            destroyable = config.destroyable;
+            maxDurability = config.durability;
+
+            // Clear the pending config
+            delete this.propData.game.propSystem.pendingPropConfig;
+        } else {
+            // Fallback to old UI elements (if they still exist)
+            const propTypeSelect = document.getElementById('propTypeSelect');
+            const obstacleCheck = document.getElementById('propObstacleCheck');
+            const sizeInput = document.getElementById('propSizeInput');
+            const damageInput = document.getElementById('propDamageInput');
+            const destroyableCheck = document.getElementById('propDestroyableCheck');
+            const durabilityInput = document.getElementById('propDurabilityInput');
+
+            if (!propTypeSelect || !obstacleCheck || !sizeInput || !damageInput || !destroyableCheck || !durabilityInput) {
+                console.error('UI elements not found for prop placement and no pending config available');
+                return;
+            }
+
+            propType = propTypeSelect.value;
+            isObstacle = obstacleCheck.checked;
+            sizeMultiplier = parseFloat(sizeInput.value) || 1.0;
+            damagePerSecond = parseFloat(damageInput.value) || 0;
+            destroyable = destroyableCheck.checked;
+            maxDurability = parseFloat(durabilityInput.value) || 100;
         }
-
-        const propType = propTypeSelect.value;
-        const isObstacle = obstacleCheck.checked;
-        const sizeMultiplier = parseFloat(sizeInput.value) || 1.0;
-        const damagePerSecond = parseFloat(damageInput.value) || 0;
-        const destroyable = destroyableCheck.checked;
-        const maxDurability = parseFloat(durabilityInput.value) || 100;
 
         this.propData.addProp(
             propType,
