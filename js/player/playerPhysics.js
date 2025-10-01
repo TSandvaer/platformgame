@@ -23,12 +23,19 @@ class PlayerPhysics {
         // Use delta time for framerate-independent physics (60fps = 16.67ms baseline)
         // physicsMultiplier already declared above
 
-        // Apply gravity
-        this.data.velocityY += this.gravity * physicsMultiplier;
+        // Don't apply physics if player is dead (they should stay where they died)
+        if (!this.data.isDead) {
+            // Apply gravity
+            this.data.velocityY += this.gravity * physicsMultiplier;
 
-        // Update position
-        this.data.x += this.data.velocityX * physicsMultiplier;
-        this.data.y += this.data.velocityY * physicsMultiplier;
+            // Update position
+            this.data.x += this.data.velocityX * physicsMultiplier;
+            this.data.y += this.data.velocityY * physicsMultiplier;
+        } else {
+            // When dead, stop all velocity
+            this.data.velocityX = 0;
+            this.data.velocityY = 0;
+        }
 
         // Detect large jumps in position (potential teleportation)
         const deltaX = Math.abs(this.data.x - startX);
@@ -63,7 +70,8 @@ class PlayerPhysics {
         platformSystem.checkPlayerPlatformCollisions(this.data, viewport);
 
         // Apply Newton's first law: player inherits platform/prop velocity when standing on it
-        if (this.data.standingOnPlatform) {
+        // Don't inherit velocity if player is dead (they should stay on the platform that killed them)
+        if (this.data.standingOnPlatform && !this.data.isDead) {
             const platform = this.data.standingOnPlatform;
             // Add platform velocity to player position (player moves with platform)
             if (platform.velocityX !== undefined) {

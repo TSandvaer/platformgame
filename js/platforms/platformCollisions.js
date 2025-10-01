@@ -5,6 +5,7 @@ class PlatformCollisions {
 
         // Track which platforms are colliding this frame
         const collidingPlatforms = new Set();
+        let highestDamagingPlatformBelow = null;
 
         platforms.forEach(platform => {
             if (this.checkCollision(player, platform)) {
@@ -40,7 +41,67 @@ class PlatformCollisions {
                     platform.pausedByBlockPlayer = false;
                 }
             }
+
+            // Check if this platform is below the player (for damage detection when on moving platform)
+            if (player.standingOnPlatform && player.standingOnPlatform !== platform) {
+                // Check if player's bottom overlaps with this platform horizontally
+                const playerBottom = player.y + player.height;
+                const platformTop = platform.y;
+
+                // Check horizontal overlap
+                const horizontalOverlap = player.x < platform.x + platform.width &&
+                                         player.x + player.width > platform.x;
+
+                // Check if player has reached or passed through the platform's surface
+                // The player's bottom must be at or below the platform's top surface
+                const hasReachedSurface = playerBottom >= platformTop;
+
+                if (horizontalOverlap && hasReachedSurface && platform.damagePerSecond > 0) {
+                    // Track the highest damaging platform the player has reached
+                    if (!highestDamagingPlatformBelow ||
+                        platform.y < highestDamagingPlatformBelow.y ||
+                        (platform.y === highestDamagingPlatformBelow.y &&
+                         platform.damagePerSecond > highestDamagingPlatformBelow.damagePerSecond)) {
+                        highestDamagingPlatformBelow = platform;
+                    }
+                }
+            }
         });
+
+        // If player is on a moving platform and has reached a damaging platform's surface, handle collision
+        if (highestDamagingPlatformBelow && player.standingOnPlatform) {
+            const playerBottom = player.y + player.height;
+            const platformTop = highestDamagingPlatformBelow.y;
+
+            // Only process if player has actually reached the platform's surface
+            if (playerBottom >= platformTop) {
+                // Add the damaging platform to the player's list (needed for kill effect determination)
+                player.addDamagingPlatform(highestDamagingPlatformBelow);
+
+                // Check if the damaging platform is lethal (very high damage)
+                if (highestDamagingPlatformBelow.damagePerSecond >= 100) {
+                    // Instantly kill the player
+                    player.health = 0;
+
+                    // Transfer player to the damaging platform surface
+                    player.standingOnPlatform = highestDamagingPlatformBelow;
+                    player.y = highestDamagingPlatformBelow.y - player.height;
+                    player.onGround = true;
+
+                    // Stop player movement
+                    player.velocityX = 0;
+                    player.velocityY = 0;
+
+                    console.log('💀 Player killed by reaching lava surface!', {
+                        platform: highestDamagingPlatformBelow,
+                        damage: highestDamagingPlatformBelow.damagePerSecond,
+                        killEffect: highestDamagingPlatformBelow.killEffect,
+                        playerBottom: playerBottom,
+                        platformTop: platformTop
+                    });
+                }
+            }
+        }
     }
 
     resolveBlockingCollision(player, platform) {
