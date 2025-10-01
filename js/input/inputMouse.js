@@ -295,7 +295,7 @@ class InputMouse {
         }
 
         // Handle platform dragging/resizing
-        this.game.platformSystem.handleMouseMove(mouseX, mouseY, this.game.viewport);
+        this.game.platformSystem.handleMouseMove(mouseX, mouseY, this.game.viewport, e.shiftKey);
 
         // Handle prop dragging
         this.game.propSystem.handleMouseMove(mouseX, mouseY, this.game.viewport, this.game.cameraSystem.camera);

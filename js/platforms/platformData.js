@@ -30,6 +30,7 @@ class PlatformData {
             relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
             damagePerSecond: 0,     // Damage dealt to player per second when standing on platform
             killEffect: 'normal',   // Kill effect: 'normal' (player lies on platform) or 'sink' (player sinks into platform)
+            blockPlayer: false,     // If true, blocks player from all sides and stops movement on collision
             // Movement system properties
             isMoving: false,
             moveSpeed: 2,

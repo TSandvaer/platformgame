@@ -97,7 +97,7 @@ class PlatformManager {
         return { handled: false };
     }
 
-    handleMouseMove(mouseX, mouseY, viewport) {
+    handleMouseMove(mouseX, mouseY, viewport, shiftKey = false) {
         // Update movement zone drawing
         if (this.isDrawingMovementZone && this.movementZoneStart) {
             this.movementZoneEnd = { x: mouseX, y: mouseY };
@@ -106,7 +106,7 @@ class PlatformManager {
 
         // Update movement zone handle dragging
         if (this.isDraggingMovementZoneHandle && this.draggingHandlePlatform) {
-            this.updateMovementZoneHandle(mouseX, mouseY);
+            this.updateMovementZoneHandle(mouseX, mouseY, shiftKey);
             return true;
         }
 
@@ -470,6 +470,9 @@ class PlatformManager {
             if (damageInput) damageInput.value = this.platformData.selectedPlatform.damagePerSecond || 0;
             if (killEffectInput) killEffectInput.value = this.platformData.selectedPlatform.killEffect || 'normal';
 
+            const blockPlayerInput = document.getElementById('platformBlockPlayer');
+            if (blockPlayerInput) blockPlayerInput.checked = this.platformData.selectedPlatform.blockPlayer || false;
+
             // Handle positioning properties
             const positioning = this.platformData.selectedPlatform.positioning || 'absolute';
             if (positioningInput) positioningInput.value = positioning;
@@ -697,6 +700,9 @@ class PlatformManager {
         if (spriteTypeInput) this.platformData.selectedPlatform.spriteType = spriteTypeInput.value;
         if (damageInput) this.platformData.selectedPlatform.damagePerSecond = Math.max(0, parseFloat(damageInput.value) || 0);
         if (killEffectInput) this.platformData.selectedPlatform.killEffect = killEffectInput.value;
+
+        const blockPlayerInput = document.getElementById('platformBlockPlayer');
+        if (blockPlayerInput) this.platformData.selectedPlatform.blockPlayer = blockPlayerInput.checked;
 
         // Handle positioning properties
         if (positioningInput) this.platformData.selectedPlatform.positioning = positioningInput.value;
@@ -1004,19 +1010,42 @@ class PlatformManager {
         return { handled: false };
     }
 
-    updateMovementZoneHandle(mouseX, mouseY) {
+    updateMovementZoneHandle(mouseX, mouseY, shiftKey = false) {
         if (!this.draggingHandlePlatform || !this.draggingHandleType) return;
 
         const zone = this.draggingHandlePlatform.movementZone;
         const platform = this.draggingHandlePlatform;
 
+        // Apply shift snapping if shift key is held
+        let snappedX = mouseX;
+        let snappedY = mouseY;
+
+        if (shiftKey) {
+            // Determine the reference point for snapping
+            const refX = this.draggingHandleType === 'start' ? zone.endX : zone.startX;
+            const refY = this.draggingHandleType === 'start' ? zone.endY : zone.startY;
+
+            // Calculate deltas
+            const deltaX = mouseX - refX;
+            const deltaY = mouseY - refY;
+
+            // Snap to horizontal or vertical based on which is closer
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                // Snap to horizontal
+                snappedY = refY;
+            } else {
+                // Snap to vertical
+                snappedX = refX;
+            }
+        }
+
         if (this.draggingHandleType === 'start') {
             // Calculate how much the start point moved
-            const deltaX = mouseX - zone.startX;
-            const deltaY = mouseY - zone.startY;
+            const deltaX = snappedX - zone.startX;
+            const deltaY = snappedY - zone.startY;
 
-            zone.startX = mouseX;
-            zone.startY = mouseY;
+            zone.startX = snappedX;
+            zone.startY = snappedY;
 
             // Move the platform with the start handle (keep it centered on start point)
             platform.x += deltaX;
@@ -1026,8 +1055,8 @@ class PlatformManager {
             platform.originalPosition.x = platform.x;
             platform.originalPosition.y = platform.y;
         } else if (this.draggingHandleType === 'end') {
-            zone.endX = mouseX;
-            zone.endY = mouseY;
+            zone.endX = snappedX;
+            zone.endY = snappedY;
         }
 
         // Recalculate angle
