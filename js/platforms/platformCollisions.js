@@ -53,8 +53,9 @@ class PlatformCollisions {
                                          player.x + player.width > platform.x;
 
                 // Check if player has reached or passed through the platform's surface
-                // The player's bottom must be at or below the platform's top surface
-                const hasReachedSurface = playerBottom >= platformTop;
+                // The player's bottom must be at or just below the platform's top surface (from above)
+                // Also ensure the player is above the platform (player.y < platformTop)
+                const hasReachedSurface = playerBottom >= platformTop && player.y < platformTop;
 
                 if (horizontalOverlap && hasReachedSurface && platform.damagePerSecond > 0) {
                     // Track the highest damaging platform the player has reached

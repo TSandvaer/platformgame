@@ -696,7 +696,7 @@ class PlatformManager {
         if (xInput) this.platformData.selectedPlatform.x = parseInt(xInput.value);
         if (yInput) this.platformData.selectedPlatform.y = parseInt(yInput.value);
         if (widthInput) this.platformData.selectedPlatform.width = parseInt(widthInput.value);
-        if (heightInput) this.platformData.selectedPlatform.height = Math.min(32, Math.max(10, parseInt(heightInput.value)));
+        if (heightInput) this.platformData.selectedPlatform.height = parseInt(heightInput.value);
         if (spriteTypeInput) this.platformData.selectedPlatform.spriteType = spriteTypeInput.value;
         if (damageInput) this.platformData.selectedPlatform.damagePerSecond = Math.max(0, parseFloat(damageInput.value) || 0);
         if (killEffectInput) this.platformData.selectedPlatform.killEffect = killEffectInput.value;
