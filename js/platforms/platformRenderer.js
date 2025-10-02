@@ -33,6 +33,7 @@ class PlatformRenderer {
             wood: { tileset: 'tileset', tileX: 4, tileY: 1 }, // Wood plank texture
             darkWood: { tileset: 'tileset', tileX: 5, tileY: 1 }, // Dark wood variation
             logs: { tileset: 'tileset', tileX: 4, tileY: 0 }, // Log-like texture
+            box: {tileset: 'tileset', tileX: 0, tileY: 11},
 
             // Ice/Crystal textures
             ice: { tileset: 'tileset', tileX: 7, tileY: 3 }, // Blue ice-like texture
