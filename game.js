@@ -698,8 +698,19 @@ class PlatformRPG {
         // Render props (background props first, then obstacle props)
         this.propSystem.renderBackgroundProps(this.isDevelopmentMode, this.viewport);
 
-        // Render enemies, NPCs, and player with depth sorting (Y-position based) - INSIDE camera transform
-        // Collect all entities with Y positions
+        // Render NPCs first (so player is always in front)
+        if (this.npcSystem && this.npcSystem.data) {
+            this.npcSystem.data.npcs.forEach(npc => {
+                if (npc.isVisible !== false) {
+                    const animator = this.npcSystem.animators.get(npc.id);
+                    if (animator) {
+                        this.npcSystem.renderer.renderNPC(npc, animator, null, null, this.isDevelopmentMode, this.npcSystem.getSelectedNPC());
+                    }
+                }
+            });
+        }
+
+        // Render enemies and player with depth sorting (Y-position based)
         const entities = [];
 
         // Add enemies
@@ -711,21 +722,12 @@ class PlatformRPG {
             });
         }
 
-        // Add NPCs
-        if (this.npcSystem && this.npcSystem.data) {
-            this.npcSystem.data.npcs.forEach(npc => {
-                if (npc.isVisible !== false) {
-                    entities.push({ type: 'npc', obj: npc, y: npc.y + npc.height });
-                }
-            });
-        }
-
         // Add player
         if (this.player) {
             entities.push({ type: 'player', obj: this.player, y: this.player.y + this.player.height });
         }
 
-        // Sort by Y position (back to front)
+        // Sort by Y position (back to front - lower Y renders first/behind)
         entities.sort((a, b) => a.y - b.y);
 
         // Render in sorted order (camera transform is already applied, so pass null viewport/camera)
@@ -734,11 +736,6 @@ class PlatformRPG {
                 const animator = this.enemySystem.animators.get(entity.obj.id);
                 if (animator) {
                     this.enemySystem.renderer.renderEnemy(entity.obj, animator, null, null, this.isDevelopmentMode, this.enemySystem.getSelectedEnemy());
-                }
-            } else if (entity.type === 'npc') {
-                const animator = this.npcSystem.animators.get(entity.obj.id);
-                if (animator) {
-                    this.npcSystem.renderer.renderNPC(entity.obj, animator, null, null, this.isDevelopmentMode, this.npcSystem.getSelectedNPC());
                 }
             } else if (entity.type === 'player') {
                 this.playerSystem.render(this.ctx, this.isDevelopmentMode);
