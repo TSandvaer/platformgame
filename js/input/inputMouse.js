@@ -161,8 +161,19 @@ class InputMouse {
             );
             const enemyHandled = enemyResult && enemyResult.handled;
 
-            // Handle lootable interaction if no enemy was clicked and not in placement mode
-            if (!enemyHandled && this.game.lootableSystem && !this.game.lootableSystem.lootablePlacementMode) {
+            // Handle NPC interaction if no enemy was clicked
+            let npcResult = null;
+            if (!enemyHandled && this.game.npcSystem) {
+                npcResult = this.game.npcSystem.handleMouseDown(
+                    mouseX, mouseY,
+                    e.ctrlKey || e.metaKey,
+                    e.shiftKey
+                );
+            }
+            const npcHandled = npcResult && npcResult.handled;
+
+            // Handle lootable interaction if no enemy or NPC was clicked and not in placement mode
+            if (!enemyHandled && !npcHandled && this.game.lootableSystem && !this.game.lootableSystem.lootablePlacementMode) {
                 lootableResult = this.game.lootableSystem.handleMouseDown(
                     mouseX, mouseY,
                     e.ctrlKey || e.metaKey,
@@ -170,9 +181,9 @@ class InputMouse {
                 );
             }
 
-            // Handle prop interaction only if no enemy or lootable was clicked
+            // Handle prop interaction only if no enemy, NPC, or lootable was clicked
             let propResult = null;
-            if (!enemyHandled && (!lootableResult || !lootableResult.handled)) {
+            if (!enemyHandled && !npcHandled && (!lootableResult || !lootableResult.handled)) {
                 propResult = this.game.propSystem.handleMouseDown(
                     mouseX, mouseY,
                     this.game.platformSystem,
@@ -250,6 +261,11 @@ class InputMouse {
         // Handle enemy operations
         this.game.enemySystem.handleMouseUp(e.ctrlKey || e.metaKey);
 
+        // Handle NPC operations
+        if (this.game.npcSystem) {
+            this.game.npcSystem.handleMouseUp(e.ctrlKey || e.metaKey);
+        }
+
         // Stop dragging player start position
         this.game.isDraggingStartPosition = false;
 
@@ -311,6 +327,11 @@ class InputMouse {
 
         // Handle enemy dragging
         this.game.enemySystem.handleMouseMove(mouseX, mouseY);
+
+        // Handle NPC dragging
+        if (this.game.npcSystem) {
+            this.game.npcSystem.handleMouseMove(mouseX, mouseY);
+        }
 
         // Update cursor based on what we're hovering over
         this.updateCursor(mouseX, mouseY);

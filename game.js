@@ -129,6 +129,9 @@ class PlatformRPG {
         this.enemySystem = new EnemySystem();
         this.enemySystem.game = this; // Add game reference for drop system
 
+        // Initialize NPC system (mouse handler will be initialized later)
+        this.npcSystem = new NPCSystem();
+
         // Initialize scene system
         this.sceneSystem = new SceneSystem(this);
 
@@ -331,6 +334,9 @@ class PlatformRPG {
         // Initialize enemy system now that viewport and camera are ready
         this.enemySystem.initialize(this.ctx, this.platformSystem, this.viewport, this.cameraSystem.camera);
 
+        // Initialize NPC system now that viewport and camera are ready
+        this.npcSystem.initialize(this.ctx, this.platformSystem, this.viewport, this.cameraSystem.camera);
+
         // Reload enemies from current scene now that enemy system is ready
         const currentScene = this.sceneSystem.currentScene;
         console.log('🎯 DEBUG: currentScene:', currentScene);
@@ -473,6 +479,9 @@ class PlatformRPG {
 
         // Update enemy system
         this.enemySystem.update(this.deltaTime, this.playerSystem.data, this.platformSystem.platforms);
+
+        // Update NPC system
+        this.npcSystem.update(this.deltaTime);
 
         // Check player attacks on props (only in production mode)
         if (!this.isDevelopmentMode) {
@@ -683,21 +692,58 @@ class PlatformRPG {
         if (this.platformSystem.isDragging || this.propSystem.isDraggingProp || this.isDraggingStartPosition) {
         }
 
-        // Render player behind platforms if sinking
-        if (this.playerSystem.shouldRenderBehindPlatforms()) {
-            this.playerSystem.render(this.ctx, this.isDevelopmentMode);
-        }
-
         // Render platforms using the platform system
         this.platformSystem.renderPlatforms(this.isDevelopmentMode, this.viewport);
 
         // Render props (background props first, then obstacle props)
         this.propSystem.renderBackgroundProps(this.isDevelopmentMode, this.viewport);
 
-        // Render player normally if not sinking
-        if (!this.playerSystem.shouldRenderBehindPlatforms()) {
-            this.playerSystem.render(this.ctx, this.isDevelopmentMode);
+        // Render enemies, NPCs, and player with depth sorting (Y-position based) - INSIDE camera transform
+        // Collect all entities with Y positions
+        const entities = [];
+
+        // Add enemies
+        if (this.enemySystem && this.enemySystem.data) {
+            this.enemySystem.data.enemies.forEach(enemy => {
+                if (enemy.isVisible !== false) {
+                    entities.push({ type: 'enemy', obj: enemy, y: enemy.y + enemy.height });
+                }
+            });
         }
+
+        // Add NPCs
+        if (this.npcSystem && this.npcSystem.data) {
+            this.npcSystem.data.npcs.forEach(npc => {
+                if (npc.isVisible !== false) {
+                    entities.push({ type: 'npc', obj: npc, y: npc.y + npc.height });
+                }
+            });
+        }
+
+        // Add player
+        if (this.player) {
+            entities.push({ type: 'player', obj: this.player, y: this.player.y + this.player.height });
+        }
+
+        // Sort by Y position (back to front)
+        entities.sort((a, b) => a.y - b.y);
+
+        // Render in sorted order (camera transform is already applied, so pass null viewport/camera)
+        entities.forEach(entity => {
+            if (entity.type === 'enemy') {
+                const animator = this.enemySystem.animators.get(entity.obj.id);
+                if (animator) {
+                    this.enemySystem.renderer.renderEnemy(entity.obj, animator, null, null, this.isDevelopmentMode, this.enemySystem.getSelectedEnemy());
+                }
+            } else if (entity.type === 'npc') {
+                const animator = this.npcSystem.animators.get(entity.obj.id);
+                if (animator) {
+                    this.npcSystem.renderer.renderNPC(entity.obj, animator, null, null, this.isDevelopmentMode, this.npcSystem.getSelectedNPC());
+                }
+            } else if (entity.type === 'player') {
+                this.playerSystem.render(this.ctx, this.isDevelopmentMode);
+            }
+        });
 
         this.ctx.restore();
 
@@ -727,10 +773,7 @@ class PlatformRPG {
             this.lootableSystem.renderer.renderPickupEffects(this.viewport, this.cameraSystem.camera);
         }
 
-        // Render enemies AFTER obstacle props so they appear on top and can be selected
-        this.enemySystem.render(this.viewport, this.cameraSystem.camera, this.isDevelopmentMode);
-
-        // Render dropped items AFTER enemies so they appear on top
+        // Render dropped items AFTER all characters so they appear on top
         if (this.itemDropSystem) {
             this.itemDropSystem.render(this.ctx, this.cameraSystem.camera, this.viewport);
         }

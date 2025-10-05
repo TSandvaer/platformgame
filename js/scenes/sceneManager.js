@@ -283,6 +283,34 @@ class SceneManager {
             }
         }
 
+        // Load NPCs
+        if (this.game.npcSystem && this.game.npcSystem.data) {
+            console.log('🔄 Loading NPCs from scene');
+            console.log('🔄 Current NPCs in memory:', this.game.npcSystem.data.npcs.length);
+            console.log('🔄 Scene NPCs to load:', scene.npcs ? scene.npcs.length : 'NULL/UNDEFINED');
+            console.log('🔄 Scene NPCs data:', scene.npcs);
+
+            this.game.npcSystem.data.npcs = [...(scene.npcs || [])];
+            this.game.npcSystem.animators.clear(); // Clear animators, they'll be recreated
+
+            console.log('🔄 After loading - NPCs in memory:', this.game.npcSystem.data.npcs.length);
+            console.log('🔄 NPC objects in memory:', this.game.npcSystem.data.npcs);
+
+            // Update nextNPCId to prevent ID conflicts
+            if (scene.npcs && scene.npcs.length > 0) {
+                this.game.npcSystem.data.nextNPCId = Math.max(...scene.npcs.map(n => n.id || 0)) + 1;
+            }
+
+            console.log('🎯 Loaded', scene.npcs?.length || 0, 'NPCs for scene', scene.name);
+            console.log('🎯 NPC system has', this.game.npcSystem.data.npcs.length, 'NPCs after load');
+
+            // Update NPC UI to reflect loaded NPCs
+            if (window.uiEventHandler) {
+                window.uiEventHandler.updateNPCList();
+                window.uiEventHandler.updateNPCProperties();
+            }
+        }
+
         // Verify props were actually loaded
         if (scene.props && scene.props.length > 0 && this.game.propSystem.props.length === 0) {
             console.error('❌ CRITICAL: Props failed to load into propSystem!');
@@ -544,11 +572,29 @@ class SceneManager {
                 return prop;
             });
 
+            // Get NPC data to save - check if NPC system is initialized
+            let npcDataToSave = [];
+            if (this.game.npcSystem && this.game.npcSystem.isInitialized) {
+                npcDataToSave = this.game.npcSystem.data.npcs;
+                console.log('💾 Saving NPCs:', npcDataToSave.length, 'NPCs');
+                if (npcDataToSave.length > 0) {
+                    console.log('💾 NPC IDs:', npcDataToSave.map(n => `${n.id}(${n.type})`));
+                }
+            } else {
+                // Don't save NPC data if NPC system isn't initialized - preserve existing NPC data
+                console.log(`💾 NPC system not initialized - preserving existing NPC data in scene`);
+                if (currentScene.npcs && currentScene.npcs.length > 0) {
+                    console.log('💾 Preserving', currentScene.npcs.length, 'NPCs from scene data');
+                    npcDataToSave = currentScene.npcs; // Preserve existing NPCs
+                }
+            }
+
             this.sceneData.updateSceneData(
                 currentScene.id,
                 this.game.platformSystem.platforms,
                 propsDataToSave,
                 enemyDataToSave,
+                npcDataToSave,
                 lootableDataToSave
             );
         }

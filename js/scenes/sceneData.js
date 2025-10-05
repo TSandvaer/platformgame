@@ -25,6 +25,7 @@ class SceneData {
             // Initialize empty arrays for other scene elements
             defaultScene.props = defaultScene.props || [];
             defaultScene.enemies = defaultScene.enemies || [];
+            defaultScene.npcs = defaultScene.npcs || [];
             defaultScene.lootables = defaultScene.lootables || [];
 
             this.currentSceneId = defaultScene.id;
@@ -40,6 +41,7 @@ class SceneData {
             platforms: [],
             props: [],
             enemies: [],
+            npcs: [],
             lootables: [],
             background: {
                 name: 'none',
@@ -221,15 +223,17 @@ class SceneData {
         return scene ? scene.transitions.zones : [];
     }
 
-    updateSceneData(sceneId, platforms, props, enemies = [], lootables = []) {
+    updateSceneData(sceneId, platforms, props, enemies = [], npcs = [], lootables = []) {
         const scene = this.getSceneById(sceneId);
         if (scene) {
             console.log(`📝 updateSceneData called for scene ${sceneId}:`, {
                 platforms: platforms.length,
                 props: props.length,
                 enemies: enemies.length,
+                npcs: npcs.length,
                 lootables: lootables.length,
                 existingEnemies: scene.enemies?.length || 0,
+                existingNPCs: scene.npcs?.length || 0,
                 existingLootables: scene.lootables?.length || 0
             });
 
@@ -243,12 +247,13 @@ class SceneData {
                 console.error('🚨 Call stack:', new Error().stack);
             }
 
-            // Update platforms, props, enemies, and lootables, but preserve all other scene data
+            // Update platforms, props, enemies, NPCs, and lootables, but preserve all other scene data
             scene.platforms = JSON.parse(JSON.stringify(platforms));
             scene.props = JSON.parse(JSON.stringify(props));
             scene.enemies = JSON.parse(JSON.stringify(enemies));
+            scene.npcs = JSON.parse(JSON.stringify(npcs));
             scene.lootables = JSON.parse(JSON.stringify(lootables));
-            console.log(`📝 Scene data updated successfully: enemies = ${enemies.length}, lootables = ${lootables.length}`);
+            console.log(`📝 Scene data updated successfully: enemies = ${enemies.length}, npcs = ${npcs.length}, lootables = ${lootables.length}`);
             console.log(`📝 Enemy IDs:`, enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible ? 'visible' : 'hidden'})`));
             console.log(`📝 Lootable IDs:`, lootables.map(l => `${l.id}(${l.type})`));
 
@@ -274,6 +279,7 @@ class SceneData {
             console.log('🔍 IMPORT DEBUG: Raw scene data from localStorage:');
             data.scenes.forEach((scene, i) => {
                 console.log(`🔍 Scene ${i} "${scene.name}" enemies:`, scene.enemies);
+                console.log(`🔍 Scene ${i} "${scene.name}" npcs:`, scene.npcs);
             });
 
             // Migrate/validate each scene to ensure it has all required properties
@@ -282,6 +288,7 @@ class SceneData {
             console.log('🔍 IMPORT DEBUG: After migration:');
             this.scenes.forEach((scene, i) => {
                 console.log(`🔍 Scene ${i} "${scene.name}" enemies:`, scene.enemies);
+                console.log(`🔍 Scene ${i} "${scene.name}" npcs:`, scene.npcs);
             });
 
             // Debug: check what we have after migration
@@ -307,6 +314,7 @@ class SceneData {
             platforms: [],
             props: [],
             enemies: [],
+            npcs: [],
             lootables: [],
             background: {
                 name: 'none',
@@ -341,6 +349,7 @@ class SceneData {
             platforms: scene.platforms || defaults.platforms,
             props: scene.props || defaults.props,
             enemies: scene.enemies || defaults.enemies,
+            npcs: scene.npcs || defaults.npcs,
             lootables: scene.lootables || defaults.lootables,
             background: { ...defaults.background, ...(scene.background || {}) },
             transitions: { ...defaults.transitions, ...(scene.transitions || {}) },

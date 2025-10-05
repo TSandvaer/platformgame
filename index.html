@@ -1407,6 +1407,58 @@
             </div>
 
             <div class="section">
+                <h3>Scene NPCs</h3>
+                <div class="platform-editor" id="npcEditor">
+                    <h4>NPC Manager</h4>
+                    <div class="property-row">
+                        <span class="property-label">NPC Type:</span>
+                        <select id="npcTypeSelect" style="width: 100px;">
+                            <option value="blacksmith">Blacksmith</option>
+                        </select>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small" id="addNPCBtn">Add NPC (Click on map)</button>
+                    </div>
+                    <div class="property-row">
+                        <button class="btn small danger" id="clearNPCsBtn">Clear All NPCs</button>
+                    </div>
+
+                    <div id="npcList"></div>
+
+                    <div id="npcProperties" style="display: none;">
+                        <h4>Selected NPC</h4>
+                        <div class="property-row">
+                            <span class="property-label">X:</span>
+                            <input type="number" id="npcX" min="0">
+                            <span class="property-label">Y:</span>
+                            <input type="number" id="npcY" min="0">
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Facing:</span>
+                            <select id="npcFacing" style="width: 100px;">
+                                <option value="right">Right</option>
+                                <option value="left">Left</option>
+                            </select>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Interaction Radius:</span>
+                            <input type="number" id="npcInteractionRadius" min="0" max="200" step="10" style="width: 80px;">
+                        </div>
+                        <div class="property-row">
+                            <label>
+                                <input type="checkbox" id="npcCanInteract">
+                                Can Interact
+                            </label>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="updateNPC">Update NPC</button>
+                            <button class="btn small danger" id="deleteNPC">Delete NPC</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
                 <h3>Characters</h3>
                 <div id="charactersList">
                     <div class="item">
@@ -1509,6 +1561,14 @@
     <script src="js/enemy/enemyManager.js"></script>
     <script src="js/enemy/enemyMouseHandler.js"></script>
     <script src="js/enemy/enemySystem.js"></script>
+
+    <!-- NPC System Scripts -->
+    <script src="js/npc/npcData.js"></script>
+    <script src="js/npc/npcAnimator.js"></script>
+    <script src="js/npc/npcRenderer.js"></script>
+    <script src="js/npc/npcManager.js"></script>
+    <script src="js/npc/npcMouseHandler.js"></script>
+    <script src="js/npc/npcSystem.js"></script>
 
     <!-- Input System Scripts -->
     <script src="js/input/inputKeyboard.js"></script>

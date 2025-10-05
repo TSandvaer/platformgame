@@ -248,6 +248,20 @@ class UIEventHandler {
             }
         });
 
+        // NPC controls
+        document.getElementById('addNPCBtn').addEventListener('click', () => {
+            console.log('🎯 Add NPC button clicked');
+            this.game.npcSystem.toggleNPCPlacement();
+        });
+
+        document.getElementById('clearNPCsBtn').addEventListener('click', () => {
+            if (confirm('Clear all NPCs? This cannot be undone.')) {
+                this.game.npcSystem.clearAllNPCs();
+                this.updateNPCList();
+                this.updateNPCProperties();
+            }
+        });
+
     }
 
     setupAdditionalListeners() {
@@ -584,6 +598,29 @@ class UIEventHandler {
             playerStartY.addEventListener('change', updatePlayerStart);
         }
 
+        // NPC properties event listeners
+        document.getElementById('updateNPC').addEventListener('click', () => {
+            const selectedNPC = this.game.npcSystem.getSelectedNPC();
+            if (selectedNPC) {
+                selectedNPC.x = parseInt(document.getElementById('npcX').value);
+                selectedNPC.y = parseInt(document.getElementById('npcY').value);
+                selectedNPC.facing = document.getElementById('npcFacing').value;
+                selectedNPC.interactionRadius = parseInt(document.getElementById('npcInteractionRadius').value);
+                selectedNPC.canInteract = document.getElementById('npcCanInteract').checked;
+
+                this.updateNPCList();
+            }
+        });
+
+        document.getElementById('deleteNPC').addEventListener('click', () => {
+            const selectedNPC = this.game.npcSystem.getSelectedNPC();
+            if (selectedNPC && confirm('Delete this NPC? This cannot be undone.')) {
+                this.game.npcSystem.removeNPCFromScene(selectedNPC.id);
+                this.updateNPCList();
+                this.updateNPCProperties();
+            }
+        });
+
     }
 
     // Enemy UI methods
@@ -642,6 +679,58 @@ class UIEventHandler {
 
             // Update enemy drop configuration UI
             this.updateEnemyDropConfigurationUI(selectedEnemy);
+        } else {
+            propertiesDiv.style.display = 'none';
+        }
+    }
+
+    // NPC UI methods
+    updateNPCList() {
+        const listElement = document.getElementById('npcList');
+        if (!listElement) return;
+
+        listElement.innerHTML = this.game.npcSystem.data.npcs.map(npc => {
+            const isSelected = this.game.npcSystem.getSelectedNPC() === npc;
+            return `<div class="item ${isSelected ? 'selected' : ''}" data-npc-id="${npc.id}">
+                <div class="item-name">${npc.type} (${Math.round(npc.x)}, ${Math.round(npc.y)})</div>
+                <div class="item-details">ID: ${npc.id}, Facing: ${npc.facing}</div>
+            </div>`;
+        }).join('');
+
+        // Add click listeners to NPC items
+        listElement.querySelectorAll('[data-npc-id]').forEach(item => {
+            item.addEventListener('click', () => {
+                const npcId = parseInt(item.dataset.npcId);
+                const npc = this.game.npcSystem.data.getNPCById(npcId);
+                if (npc) {
+                    this.game.npcSystem.selectNPC(npc);
+                    this.updateNPCProperties();
+                    this.updateNPCList();
+                }
+            });
+        });
+    }
+
+    updateNPCProperties() {
+        const propertiesDiv = document.getElementById('npcProperties');
+        if (!propertiesDiv) return;
+
+        const selectedNPC = this.game.npcSystem.getSelectedNPC();
+        if (selectedNPC) {
+            propertiesDiv.style.display = 'block';
+
+            // Update input values
+            const xInput = document.getElementById('npcX');
+            const yInput = document.getElementById('npcY');
+            const facingInput = document.getElementById('npcFacing');
+            const interactionRadiusInput = document.getElementById('npcInteractionRadius');
+            const canInteractInput = document.getElementById('npcCanInteract');
+
+            if (xInput) xInput.value = Math.round(selectedNPC.x);
+            if (yInput) yInput.value = Math.round(selectedNPC.y);
+            if (facingInput) facingInput.value = selectedNPC.facing;
+            if (interactionRadiusInput) interactionRadiusInput.value = selectedNPC.interactionRadius;
+            if (canInteractInput) canInteractInput.checked = selectedNPC.canInteract;
         } else {
             propertiesDiv.style.display = 'none';
         }
@@ -1351,6 +1440,10 @@ class UIEventHandler {
         // Initialize enemy UI
         this.updateEnemyList();
         this.updateEnemyProperties();
+
+        // Initialize NPC UI
+        this.updateNPCList();
+        this.updateNPCProperties();
     }
 
     showDropConfigModal() {
