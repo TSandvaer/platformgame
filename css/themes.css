@@ -1,6 +1,6 @@
 /* Fantasy Wooden GUI Theme Styles */
 .gui-theme-fantasy-wooden .modal-content:not(.no-theme) {
-    background: url('GUI/graphics/Fantasy Wooden GUI/PNG/UI board Medium  stone.png') center/cover no-repeat;
+    background: url('../GUI/graphics/Fantasy Wooden GUI/PNG/UI board Medium  stone.png') center/cover no-repeat;
     border: none;
     border-radius: 0;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -20,7 +20,7 @@
     left: 20px;
     right: 20px;
     bottom: 20px;
-    background: url('GUI/graphics/Fantasy Wooden GUI/PNG/UI board Medium  parchment.png') center/cover no-repeat;
+    background: url('../GUI/graphics/Fantasy Wooden GUI/PNG/UI board Medium  parchment.png') center/cover no-repeat;
     z-index: 1;
     pointer-events: none;
 }
@@ -43,7 +43,7 @@
 }
 
 .gui-theme-fantasy-wooden .modal-content:not(.no-theme) .modal-close {
-    background: url('GUI/graphics/Fantasy Wooden GUI/PNG/Close Button.png') center/contain no-repeat;
+    background: url('../GUI/graphics/Fantasy Wooden GUI/PNG/Close Button.png') center/contain no-repeat;
     color: transparent;
     width: 35px;
     height: 35px;
@@ -54,7 +54,7 @@
 }
 
 .gui-theme-fantasy-wooden .modal-content:not(.no-theme) .modal-close:hover {
-    background: url('GUI/graphics/Fantasy Wooden GUI/PNG/Close Button.png') center/contain no-repeat;
+    background: url('../GUI/graphics/Fantasy Wooden GUI/PNG/Close Button.png') center/contain no-repeat;
     transform: scale(1.05);
     color: transparent;
 }
@@ -92,7 +92,7 @@
 }
 
 .gui-theme-fantasy-wooden .item-tooltip {
-    background: url('GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png') center/cover no-repeat;
+    background: url('../GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png') center/cover no-repeat;
     background-color: #F5E6D3;
     border: 1px solid #8B4513;
     color: #4A2C17;
@@ -107,7 +107,7 @@
 }
 
 .gui-theme-fantasy-wooden .context-menu {
-    background: url('GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png') center/cover no-repeat;
+    background: url('../GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png') center/cover no-repeat;
     background-color: #F5E6D3;
     border: 1px solid #8B4513;
     border-radius: 0;
