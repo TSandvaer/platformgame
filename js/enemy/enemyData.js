@@ -20,6 +20,23 @@ class EnemyData {
                     hurt: { file: 'Orc-Hurt.png', frames: 4 },
                     death: { file: 'Orc-Death.png', frames: 4 }
                 }
+            },
+            skeleton: {
+                name: 'Skeleton',
+                spriteFolder: 'sprites/Tiny RPG assets/Characters(100x100)/Skeleton/Skeleton',
+                defaultHealth: 75,
+                defaultDamage: 15,
+                fleeHealthThreshold: 0.3, // Flee when health drops below 30%
+                width: 44,
+                height: 59,
+                scale: 1.25,
+                animations: {
+                    idle: { file: 'Skeleton-Idle.png', frames: 6 },
+                    walk: { file: 'Skeleton-Walk.png', frames: 8 },
+                    attack: { file: 'Skeleton-Attack01.png', frames: 4 },
+                    hurt: { file: 'Skeleton-Hurt.png', frames: 4 },
+                    death: { file: 'Skeleton-Death.png', frames: 4 }
+                }
             }
         };
     }
