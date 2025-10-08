@@ -1,0 +1,92 @@
+/* Scene Management Styles */
+.scene-item {
+    background-color: #444;
+    border: 1px solid #666;
+    border-radius: 4px;
+    margin: 5px 0;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.scene-item:hover {
+    background-color: #555;
+}
+
+.scene-item.current {
+    border-color: #4CAF50;
+    background-color: #2a4a2a;
+}
+
+.scene-item.start {
+    border-color: #FF9800;
+}
+
+.scene-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.scene-name {
+    font-weight: bold;
+    color: #fff;
+}
+
+.scene-name:hover {
+    color: #4CAF50;
+    text-decoration: underline;
+}
+
+.scene-badges {
+    display: flex;
+    gap: 4px;
+}
+
+.badge {
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.start-badge {
+    background-color: #FF9800;
+    color: white;
+}
+
+.current-badge {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.scene-description {
+    font-size: 12px;
+    color: #ccc;
+    margin: 4px 0;
+}
+
+.scene-stats {
+    font-size: 11px;
+    color: #999;
+    margin: 4px 0;
+}
+
+.scene-actions {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.transition-item {
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 6px;
+    margin: 3px 0;
+    font-size: 11px;
+}
+
+.transition-info {
+    color: #ccc;
+    margin-bottom: 4px;
+}

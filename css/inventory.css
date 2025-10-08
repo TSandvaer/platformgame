@@ -1,0 +1,94 @@
+/* Player Chest Modal Styles */
+.chest-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px solid rgba(85, 85, 85, 0.4);
+    border-radius: 3px;
+    padding: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    width: fit-content;
+    height: fit-content;
+    min-width: auto;
+    min-height: auto;
+}
+
+.chest-item:hover {
+    border-color: #4CAF50;
+    background-color: rgba(64, 64, 64, 0.3);
+    transform: scale(1.05);
+}
+
+.chest-item:active {
+    transform: scale(0.95);
+}
+
+.chest-item-sprite {
+    image-rendering: pixelated;
+    margin-bottom: 4px;
+}
+
+.chest-item-quantity {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    background-color: rgba(76, 175, 80, 0.9);
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 1px 3px;
+    border-radius: 2px;
+    min-width: 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.chest-empty {
+    width: 100%;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 40px 20px;
+}
+
+/* Player inventory specific styles */
+.player-inventory-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px solid rgba(85, 85, 85, 0.4);
+    border-radius: 3px;
+    padding: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    width: fit-content;
+    height: fit-content;
+    min-width: auto;
+    min-height: auto;
+}
+
+.player-inventory-item:hover {
+    border-color: #4CAF50;
+    background-color: rgba(64, 64, 64, 0.3);
+    transform: scale(1.05);
+}
+
+.player-inventory-item.consumable:hover {
+    border-color: #8BC34A;
+    background-color: rgba(64, 64, 64, 0.3);
+}
+
+.inventory-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 40px 20px;
+}
