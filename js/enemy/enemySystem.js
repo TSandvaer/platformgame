@@ -63,7 +63,15 @@ class EnemySystem {
             // Get or create animator for this enemy
             let animator = this.animators.get(enemy.id);
             if (!animator) {
-                animator = new EnemyAnimator(enemy, this.data.enemyTypes[enemy.type]);
+                // Defensive check: verify enemy type exists before creating animator
+                const enemyTypeData = this.data.enemyTypes[enemy.type];
+                if (!enemyTypeData) {
+                    console.error(`❌ Enemy ${enemy.id} has unknown type "${enemy.type}". Available types:`, Object.keys(this.data.enemyTypes));
+                    console.error(`❌ Skipping animator creation for enemy ${enemy.id} to prevent crash`);
+                    continue; // Skip this enemy and move to next one
+                }
+
+                animator = new EnemyAnimator(enemy, enemyTypeData);
                 this.animators.set(enemy.id, animator);
             }
 

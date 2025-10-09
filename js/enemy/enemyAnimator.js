@@ -10,10 +10,23 @@ class EnemyAnimator {
             death: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 }
         };
         this.spritesLoaded = false;
+
+        // Defensive check: ensure enemyTypeData is valid
+        if (!enemyTypeData) {
+            console.error(`❌ EnemyAnimator created with undefined enemyTypeData for enemy ${enemy.id} (type: ${enemy.type})`);
+            return; // Don't attempt to load sprites
+        }
+
         this.loadSprites();
     }
 
     loadSprites() {
+        // Additional safety check
+        if (!this.enemyTypeData || !this.enemyTypeData.animations) {
+            console.error(`❌ Cannot load sprites: missing enemyTypeData or animations for enemy ${this.enemy.id}`);
+            return;
+        }
+
         const animations = this.enemyTypeData.animations;
         const baseFolder = this.enemyTypeData.spriteFolder;
 
