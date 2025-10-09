@@ -37,6 +37,27 @@ class EnemySystem {
             if (enemy.isDead && enemy.isVisible) {
                 enemy.deathTimer -= deltaTime;
                 enemy.flashTimer += deltaTime; // Update flash timer for blinking effect
+
+                // Make floating enemies fall to ground during death animation (like a stone)
+                if (enemy.deathFallOffset && enemy.deathFallOffset < 0) {
+                    // Calculate fall progress (0 to 1 over first 0.3 seconds for fast drop)
+                    const deathDuration = 2000; // 2 seconds total
+                    const fallDuration = 300; // Fall in 0.3 seconds (fast like a stone)
+                    const timeElapsed = deathDuration - enemy.deathTimer;
+
+                    if (timeElapsed < fallDuration) {
+                        // Falling - use squared easing for gravity effect
+                        const fallProgress = timeElapsed / fallDuration;
+                        const easedProgress = fallProgress * fallProgress; // Quadratic easing (accelerates)
+                        enemy.renderOffsetY = enemy.deathFallOffset * (1 - easedProgress);
+                        enemy.collisionOffsetY = enemy.deathFallOffset * (1 - easedProgress);
+                    } else {
+                        // Already hit ground
+                        enemy.renderOffsetY = 0;
+                        enemy.collisionOffsetY = 0;
+                    }
+                }
+
                 if (enemy.deathTimer <= 0) {
                     // Hide the corpse instead of removing from data (only once)
                     console.log(`👻 Enemy ${enemy.id} corpse hidden after 2 seconds - preserved in data for revival`);
@@ -207,6 +228,10 @@ class EnemySystem {
             enemy.isDead = true;
             enemy.deathTimer = 2000; // 2 seconds in milliseconds
             enemy.flashTimer = 0; // Initialize flash timer for death effect
+
+            // Store original offset for falling animation
+            enemy.deathFallOffset = enemy.renderOffsetY || 0;
+
             animator.startDeath();
             console.log(`Enemy ${enemy.id} died - corpse will disappear in 2 seconds`);
 

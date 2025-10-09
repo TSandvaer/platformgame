@@ -96,7 +96,7 @@ class EnemyData {
                 width: 100,  // Collision box width - covers large dragon body
                 height: 80, // Collision box height - covers large dragon body
                 scale: 1.5, // Visual sprite scale multiplier (make sprites larger)
-                renderOffsetY: 18, // Ground-based dragon (not floating)
+                renderOffsetY: 20, // Ground-based dragon (not floating)
                 collisionOffsetY: 0, // Collision box on ground
                 facingInverted: true, // Sprite faces opposite direction from orcs/skeletons
                 attackType: 'ranged', // Dragon shoots fire projectiles

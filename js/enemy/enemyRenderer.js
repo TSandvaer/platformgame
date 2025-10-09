@@ -56,7 +56,8 @@ class EnemyRenderer {
         // Get enemy type data for scale and rendering offsets
         const enemyTypeData = window.game?.enemySystem?.data?.enemyTypes?.[enemy.type];
         const typeScale = enemyTypeData?.scale || 1.0;
-        const renderOffsetY = enemyTypeData?.renderOffsetY || 0; // Y offset for floating enemies
+        // Check enemy instance first (for dynamic changes like death fall), then type data
+        const renderOffsetY = (enemy.renderOffsetY !== undefined) ? enemy.renderOffsetY : (enemyTypeData?.renderOffsetY || 0);
 
         // Calculate sprite render dimensions using actual frame dimensions and type scale
         const spriteRenderWidth = Math.round(frame.frameWidth * typeScale);
