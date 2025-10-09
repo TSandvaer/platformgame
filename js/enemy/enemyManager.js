@@ -27,8 +27,12 @@ class EnemyManager {
             // Only return visible enemies
             if (!enemy.isVisible) continue;
 
+            const collisionOffsetY = enemy.collisionOffsetY || 0;
+            const enemyTop = enemy.y + collisionOffsetY;
+            const enemyBottom = enemyTop + enemy.height;
+
             if (x >= enemy.x - tolerance && x <= enemy.x + enemy.width + tolerance &&
-                y >= enemy.y - tolerance && y <= enemy.y + enemy.height + tolerance) {
+                y >= enemyTop - tolerance && y <= enemyBottom + tolerance) {
                 return enemy;
             }
         }

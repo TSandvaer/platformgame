@@ -2,7 +2,7 @@
   "gameInfo": {
     "title": "Platform RPG Game",
     "version": "1.0.0",
-    "lastModified": "2025-09-28"
+    "lastModified": "2025-10-09"
   },
   "scenes": [
     {
@@ -23,7 +23,9 @@
           "isGroundPlatform": true,
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 5,
@@ -38,7 +40,9 @@
           "isGroundPlatform": true,
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 7,
@@ -50,7 +54,9 @@
           "spriteType": "grass",
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 8,
@@ -62,7 +68,9 @@
           "spriteType": "dirt",
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 9,
@@ -74,7 +82,9 @@
           "spriteType": "grass",
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 10,
@@ -88,7 +98,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "damagePerSecond": 0,
-          "killEffect": "normal"
+          "killEffect": "normal",
+          "velocityX": 0,
+          "velocityY": 0
         }
       ],
       "props": [
@@ -101,18 +113,22 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 4,
-          "x": 668.9418672930124,
-          "y": 825.1409277745156,
+          "x": 669.7921773018697,
+          "y": 826.8415477922305,
           "type": "well",
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 5,
@@ -123,19 +139,23 @@
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 6,
-          "x": 853.6882196634191,
-          "y": 592.0575730735164,
+          "x": 852.8379096545617,
+          "y": 590.3569530558017,
           "type": "mediumPot",
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.2,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 7,
@@ -147,19 +167,23 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.2,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 8,
-          "x": 798.0354295837024,
-          "y": 590.7581930912313,
+          "x": 808.2391496899911,
+          "y": 587.3569530558018,
           "type": "bigPot",
           "isObstacle": false,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.4,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 9,
@@ -171,7 +195,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 10,
@@ -184,7 +210,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 11,
@@ -197,7 +225,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 12,
@@ -209,7 +239,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 13,
@@ -222,7 +254,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 14,
@@ -235,7 +269,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 15,
@@ -248,7 +284,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 16,
@@ -261,7 +299,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 17,
@@ -274,7 +314,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 18,
@@ -287,7 +329,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 19,
@@ -300,7 +344,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 20,
@@ -313,7 +359,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 21,
@@ -326,7 +374,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 22,
@@ -339,7 +389,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 24,
@@ -352,7 +404,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 2,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 25,
@@ -383,7 +437,9 @@
           "debrisHasLanded": false,
           "debrisLandingTimer": 0,
           "debrisVelocityY": 0,
-          "debrisGravity": 0
+          "debrisGravity": 0,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 26,
@@ -396,7 +452,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 27,
@@ -409,7 +467,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 28,
@@ -422,7 +482,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 30,
@@ -435,7 +497,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 31,
@@ -448,7 +512,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 32,
@@ -461,7 +527,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 33,
@@ -474,7 +542,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 35,
@@ -488,7 +558,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0.11930758988015897,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 36,
@@ -501,7 +573,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 37,
@@ -514,7 +588,9 @@
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 41,
@@ -528,7 +604,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 42,
@@ -542,7 +620,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": -0.09353410097431379,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 43,
@@ -556,7 +636,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0.09353410097431265,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 45,
@@ -570,7 +652,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 46,
@@ -585,7 +669,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 47,
@@ -600,7 +686,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 48,
@@ -615,7 +703,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 49,
@@ -630,7 +720,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 50,
@@ -645,7 +737,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 51,
@@ -660,7 +754,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 52,
@@ -675,7 +771,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 53,
@@ -690,7 +788,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 54,
@@ -705,7 +805,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 55,
@@ -720,7 +822,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 56,
@@ -735,7 +839,28 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1497.5642161204607,
+            "startY": 881.1594331266609,
+            "endX": 1597.5642161204607,
+            "endY": 881.1594331266609,
+            "angle": 0
+          },
+          "targetX": 1547.5642161204607,
+          "targetY": 881.1594331266609,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          }
         },
         {
           "id": 57,
@@ -750,7 +875,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 58,
@@ -765,7 +892,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "groupId": 6,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 59,
@@ -779,7 +908,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 62,
@@ -793,7 +924,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
           "rotation": -1.5730735163861824,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 63,
@@ -807,7 +940,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.6,
           "rotation": -1.5730735163861824,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 64,
@@ -821,7 +956,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": -1.5730735163861829,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 65,
@@ -835,7 +972,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": -1.5730735163861824,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 66,
@@ -849,7 +988,28 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.2,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1555.1825022629544,
+            "startY": 878.4233835252436,
+            "endX": 1655.1825022629544,
+            "endY": 878.4233835252436,
+            "angle": 0
+          },
+          "targetX": 1605.1825022629544,
+          "targetY": 878.4233835252436,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          }
         },
         {
           "id": 67,
@@ -863,7 +1023,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 70,
@@ -877,7 +1039,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 71,
@@ -891,7 +1055,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 72,
@@ -905,7 +1071,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 73,
@@ -919,7 +1087,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 74,
@@ -933,7 +1103,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 75,
@@ -947,7 +1119,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 78,
@@ -961,7 +1135,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 79,
@@ -975,7 +1151,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 80,
@@ -989,7 +1167,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 81,
@@ -1003,7 +1183,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 82,
@@ -1017,7 +1199,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 84,
@@ -1032,7 +1216,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "damagePerSecond": 20,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 85,
@@ -1046,7 +1232,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 86,
@@ -1060,7 +1248,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 87,
@@ -1074,7 +1264,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 0.7,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 88,
@@ -1088,7 +1280,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 89,
@@ -1102,7 +1296,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 90,
@@ -1116,7 +1312,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 91,
@@ -1130,7 +1328,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 92,
@@ -1144,7 +1344,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0.39114260407440155,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 93,
@@ -1158,7 +1360,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 94,
@@ -1172,7 +1376,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1,
           "rotation": -0.2125775022143489,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 95,
@@ -1186,7 +1392,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 96,
@@ -1200,7 +1408,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0.24658990256864513,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 97,
@@ -1214,7 +1424,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 98,
@@ -1228,7 +1440,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": -3.9029229406554475,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 99,
@@ -1242,7 +1456,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 100,
@@ -1256,7 +1472,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 101,
@@ -1270,7 +1488,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 102,
@@ -1284,7 +1504,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 103,
@@ -1298,7 +1520,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 104,
@@ -1312,7 +1536,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 105,
@@ -1326,7 +1552,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 106,
@@ -1340,7 +1568,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 107,
@@ -1354,7 +1584,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 108,
@@ -1368,7 +1600,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 0.7,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 110,
@@ -1382,7 +1616,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 111,
@@ -1396,7 +1632,9 @@
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
           "rotation": -0.22292237453693375,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 112,
@@ -1411,7 +1649,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "damagePerSecond": 0,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 113,
@@ -1426,7 +1666,9 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "damagePerSecond": 10,
-          "debris": []
+          "debris": [],
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 114,
@@ -1441,46 +1683,14 @@
           "sizeMultiplier": 1.5,
           "rotation": 0,
           "damagePerSecond": 0,
-          "debris": []
-        },
-        {
-          "id": 115,
-          "type": "barrel",
-          "x": 1078.9007971656335,
-          "y": 579.8944198405669,
-          "isObstacle": true,
-          "zOrder": 1,
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5,
-          "sizeMultiplier": 1.5,
-          "rotation": 0,
-          "damagePerSecond": 0,
-          "destroyable": true,
-          "maxDurability": 100,
-          "currentDurability": 100,
-          "isDestroying": false,
-          "destructionFrameIndex": 0,
-          "destructionTimer": 0,
-          "destructionFrameRate": 150,
-          "isDestroyed": false,
-          "isVisible": true,
-          "isDamaged": false,
-          "damageTimer": 0,
           "debris": [],
-          "isFallingDebris": false,
-          "fallingVelocityY": 0,
-          "fallingVelocityX": 0,
-          "gravity": 0.4,
-          "debrisVelocityY": 0,
-          "debrisGravity": 0,
-          "debrisHasLanded": false,
-          "debrisLandingTimer": 0
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 117,
           "type": "chest1",
-          "x": 319.7165633303809,
+          "x": 320.56687333923827,
           "y": 861.4526129317982,
           "isObstacle": false,
           "zOrder": 1,
@@ -1491,8 +1701,8 @@
           "rotation": 0,
           "damagePerSecond": 0,
           "isChest": true,
-          "chestState": "closed",
-          "chestAnimFrame": 0,
+          "chestState": "open",
+          "chestAnimFrame": 6,
           "chestAnimTimer": 0,
           "chestAnimSpeed": 100,
           "destroyable": false,
@@ -1505,7 +1715,33 @@
           "isDestroyed": false,
           "isVisible": true,
           "isDamaged": false,
-          "damageTimer": 0
+          "damageTimer": 0,
+          "chestInventory": [
+            {
+              "id": "healthPotion",
+              "name": "Health Potion",
+              "type": "consumable",
+              "description": "Restores 50 health points when consumed.",
+              "sprite": {
+                "src": "sprites/Inventory item sprite sets/inventory_items_pack1.png",
+                "x": 18,
+                "y": 0,
+                "width": 11,
+                "height": 16
+              },
+              "stackable": true,
+              "maxStack": 99,
+              "rarity": "common",
+              "value": 50,
+              "effects": {
+                "health": 50
+              },
+              "quantity": 2
+            }
+          ],
+          "onOpenCallback": null,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 118,
@@ -1535,7 +1771,10 @@
           "isDestroyed": false,
           "isVisible": true,
           "isDamaged": false,
-          "damageTimer": 0
+          "damageTimer": 0,
+          "onOpenCallback": null,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 119,
@@ -1565,7 +1804,10 @@
           "isDestroyed": false,
           "isVisible": true,
           "isDamaged": false,
-          "damageTimer": 0
+          "damageTimer": 0,
+          "onOpenCallback": null,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 120,
@@ -1595,13 +1837,16 @@
           "isDestroyed": false,
           "isVisible": true,
           "isDamaged": false,
-          "damageTimer": 0
+          "damageTimer": 0,
+          "onOpenCallback": null,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 121,
           "type": "chest1",
           "x": 1344.340124003543,
-          "y": 737.3073516386183,
+          "y": 736.457041629761,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
@@ -1625,14 +1870,74 @@
           "isDestroyed": false,
           "isVisible": true,
           "isDamaged": false,
-          "damageTimer": 0
+          "damageTimer": 0,
+          "onOpenCallback": null,
+          "velocityX": 0,
+          "velocityY": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1294.340124003543,
+            "startY": 737.3073516386183,
+            "endX": 1394.340124003543,
+            "endY": 737.3073516386183,
+            "angle": 0
+          },
+          "targetX": 1344.340124003543,
+          "targetY": 737.3073516386183,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": 122,
+          "type": "barrel",
+          "x": 82,
+          "y": 873,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isFallingDebris": false,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0,
+          "velocityX": 0,
+          "velocityY": 0
         }
       ],
       "enemies": [
         {
           "id": 2,
           "type": "orc",
-          "x": 731.6847122977715,
+          "x": 986.8878462121866,
           "y": 570.482488190211,
           "width": 44,
           "height": 59,
@@ -1654,11 +1959,11 @@
             "height": 71.4260407440213
           },
           "currentAnimation": "walk",
-          "frameIndex": 0,
-          "frameTimer": 41.5,
+          "frameIndex": 3,
+          "frameTimer": 62.5,
           "frameRate": 150,
-          "facing": "left",
-          "velocityX": -1.0373433767344167,
+          "facing": "right",
+          "velocityX": 0.9305935112731453,
           "velocityY": 0,
           "onGround": true,
           "speed": 3,
@@ -1669,11 +1974,11 @@
           "attackTimer": 0,
           "attackDuration": 600,
           "attackCooldown": 1000,
-          "lastAttackTime": 1759038994817,
+          "lastAttackTime": 1759052484167,
           "isDead": false,
           "isDamaged": false,
           "damageTimer": 0,
-          "patrolDirection": -1,
+          "patrolDirection": 1,
           "patrolSpeed": 1,
           "deathTimer": 0,
           "flashTimer": 0,
@@ -1687,11 +1992,11 @@
         {
           "id": 5,
           "type": "orc",
-          "x": 1029.2821970345644,
+          "x": 1545.7109588528049,
           "y": 861,
           "width": 44,
           "height": 59,
-          "health": 0,
+          "health": 100,
           "maxHealth": 100,
           "damage": 20,
           "isMoving": true,
@@ -1708,34 +2013,31 @@
             "width": 1366.4481842338355,
             "height": 235.53587245349877
           },
-          "currentAnimation": "death",
-          "frameIndex": 3,
-          "frameTimer": 41.69999999999891,
+          "currentAnimation": "walk",
+          "frameIndex": 5,
+          "frameTimer": 25,
           "frameRate": 150,
           "facing": "right",
-          "velocityX": 1.5473066255544765,
+          "velocityX": 0.6203956741820968,
           "velocityY": 0,
           "onGround": true,
           "speed": 2,
-          "aiState": "fleeing",
-          "target": {
-            "x": 958.0321189962956,
-            "y": 890.5
-          },
+          "aiState": "patrolling",
+          "target": null,
           "lastPlayerPosition": null,
           "isAttacking": false,
           "attackTimer": 0,
           "attackDuration": 600,
           "attackCooldown": 1000,
-          "lastAttackTime": 1759039094307,
-          "isDead": true,
+          "lastAttackTime": 1759948003534,
+          "isDead": false,
           "isDamaged": false,
-          "damageTimer": -0.6999999999998181,
-          "deathTimer": -2.2000000000007276,
-          "flashTimer": 2002.2000000000007,
+          "damageTimer": 0,
+          "deathTimer": 0,
+          "flashTimer": 0,
           "patrolDirection": 1,
           "patrolSpeed": 1,
-          "isVisible": false,
+          "isVisible": true,
           "fleeHealthThreshold": 0.4,
           "originalPosition": {
             "x": 1636.2990648686944,
@@ -1744,47 +2046,13 @@
           "fleeRecoveryTime": null
         }
       ],
+      "npcs": [],
       "lootables": [
         {
           "id": 6,
           "type": "heart",
           "x": 1564.5704162976092,
           "y": 698.1930912311778,
-          "isVisible": true
-        },
-        {
-          "id": 7,
-          "type": "coin",
-          "x": 371.58547387068205,
-          "y": 830.8414526129318,
-          "isVisible": true
-        },
-        {
-          "id": 8,
-          "type": "coin",
-          "x": 1414.0655447298495,
-          "y": 698.193091231178,
-          "isVisible": true
-        },
-        {
-          "id": 9,
-          "type": "coin",
-          "x": 1441.2754650132863,
-          "y": 687.1390611160318,
-          "isVisible": true
-        },
-        {
-          "id": 10,
-          "type": "coin",
-          "x": 1465.0841452612933,
-          "y": 697.3427812223206,
-          "isVisible": true
-        },
-        {
-          "id": 11,
-          "type": "coin",
-          "x": 1486.3418954827282,
-          "y": 719.4508414526128,
           "isVisible": true
         }
       ],
@@ -1817,11 +2085,12 @@
         "playerStartY": 801,
         "gravity": 0.8,
         "playerSpeed": 5,
-        "defaultBackgroundColor": "#000000"
+        "defaultBackgroundColor": "#000000",
+        "backgroundName": "The Dawn"
       },
       "metadata": {
         "created": "2025-09-21T13:10:21.130Z",
-        "modified": "2025-09-28T05:59:03.670Z"
+        "modified": "2025-10-08T19:35:32.059Z"
       }
     },
     {
@@ -1833,98 +2102,835 @@
           "id": 9,
           "x": 3,
           "y": 669.607617360496,
-          "width": 3136,
+          "width": 224,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "cobblestone",
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": -47,
+            "startY": 669.607617360496,
+            "endX": 53,
+            "endY": 669.607617360496,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 3,
+          "targetY": 669.607617360496,
+          "movingDirection": 1,
+          "movementProgress": 0
         },
         {
           "id": 10,
-          "x": 436.0062001771479,
-          "y": 554.0212577502215,
-          "width": 320,
+          "x": 303.3578387953942,
+          "y": 590.5845881310894,
+          "width": 800,
           "height": 32,
           "color": "#4ECDC4",
           "spriteType": "cobblestone",
           "positioning": "absolute",
           "relativeX": 0.5,
-          "relativeY": 0.5
-        },
-        {
-          "id": 11,
-          "x": 954.0425531914893,
-          "y": 520.8510638297872,
-          "width": 150,
-          "height": 20,
-          "color": "#4ECDC4",
-          "spriteType": "color",
-          "positioning": "absolute",
-          "relativeX": 0.5,
-          "relativeY": 0.5
+          "relativeY": 0.5,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
           "id": 12,
-          "x": 650,
-          "y": 964,
-          "width": 1344,
-          "height": 32,
+          "x": 3,
+          "y": 932,
+          "width": 1984,
+          "height": 64,
           "color": "#4ECDC4",
           "spriteType": "lava",
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "damagePerSecond": 10000,
-          "killEffect": "sink"
+          "killEffect": "sink",
+          "velocityX": 0,
+          "velocityY": 0
+        },
+        {
+          "id": 13,
+          "x": 1248.3351032165256,
+          "y": 394.6380641925188,
+          "width": 288,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "cobblestone",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "movementZone": {
+            "enabled": true,
+            "startX": 1430.2831095594001,
+            "startY": 341.6228984497837,
+            "endX": 1175.4276435946658,
+            "endY": 805.122668769095,
+            "angle": 2.0735245615291773
+          },
+          "movementProgress": 0.1489001077501929,
+          "isMoving": true,
+          "moveSpeed": 2,
+          "velocityX": 0.20444477581577303,
+          "velocityY": -0.3718190083737909,
+          "targetX": 1136.698609404572,
+          "targetY": 558.5845881310894,
+          "movingDirection": -1,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 1284.727349578925,
+            "y": 324.35849523276516
+          },
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": false,
+          "rotation": 0,
+          "isDelaying": false,
+          "delayTimer": 0,
+          "useEasing": true,
+          "easingDistance": 0.2,
+          "endDelay": 0
         }
       ],
       "props": [
         {
-          "id": 1,
-          "type": "barrel",
-          "x": 531.9269547518987,
-          "y": 507.49411077398565,
+          "id": 2,
+          "type": "signPostMultidirectional",
+          "x": 64.62356067316209,
+          "y": 585.9521700620016,
           "isObstacle": false,
-          "zOrder": 1,
+          "zOrder": 2,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "velocityX": 0,
+          "velocityY": 0
         },
         {
-          "id": 2,
-          "type": "barrel",
-          "x": 611.9269547518987,
-          "y": 505.7919831144111,
+          "id": 3,
+          "type": "signText1",
+          "x": 71.4260407440213,
+          "y": 601.2577502214349,
+          "isObstacle": false,
+          "zOrder": 3,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "velocityX": 0,
+          "velocityY": 0
+        },
+        {
+          "id": 4,
+          "type": "signText4",
+          "x": 77.37821080602305,
+          "y": 625.9167404782994,
+          "isObstacle": false,
+          "zOrder": 4,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "velocityX": 0,
+          "velocityY": 0
+        },
+        {
+          "id": 5,
+          "type": "metalStar",
+          "x": 241.98527985268902,
+          "y": 457.4855207325955,
+          "isObstacle": false,
+          "zOrder": 5,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 4.420542004179326,
+          "damagePerSecond": 30,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isMoving": true,
+          "moveSpeed": 8,
+          "movementZone": {
+            "enabled": true,
+            "startX": 263.4458259325045,
+            "startY": 456.8028419182948,
+            "endX": 266.8561278863233,
+            "endY": 721.101243339254,
+            "angle": 1.5578938170168588
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 239,
+          "targetY": 625,
+          "movingDirection": -1,
+          "movementProgress": 0.084876331804108,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          },
+          "isSpinning": true,
+          "spinSpeed": 5,
+          "spinClockwise": true,
+          "useEasing": true,
+          "easingDistance": 1,
+          "endDelay": 500,
+          "isDelaying": false,
+          "delayTimer": 0,
+          "easingMinSpeed": 0.5
+        },
+        {
+          "id": 6,
+          "type": "chest4",
+          "x": 860,
+          "y": 532,
+          "isObstacle": false,
+          "zOrder": 6,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": true,
+          "chestState": "closed",
+          "chestAnimFrame": 0,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": [
+            {
+              "id": "healthPotion",
+              "name": "Health Potion",
+              "type": "consumable",
+              "description": "Restores 50 health points when consumed.",
+              "sprite": {
+                "src": "sprites/Inventory item sprite sets/inventory_items_pack1.png",
+                "x": 18,
+                "y": 0,
+                "width": 11,
+                "height": 16
+              },
+              "stackable": true,
+              "maxStack": 99,
+              "rarity": "common",
+              "value": 50,
+              "effects": {
+                "health": 50
+              },
+              "quantity": 1
+            }
+          ],
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "onOpenCallback": null,
+          "dropItems": [
+            {
+              "itemId": "healthPotion",
+              "chance": 1,
+              "quantity": 1
+            },
+            {
+              "itemId": "ironSword",
+              "chance": 1,
+              "quantity": 1
+            },
+            {
+              "itemId": "manaPotion",
+              "chance": 1,
+              "quantity": 1
+            }
+          ],
+          "velocityX": 0,
+          "velocityY": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 810,
+            "startY": 532,
+            "endX": 910,
+            "endY": 532,
+            "angle": 0
+          },
+          "targetX": 860,
+          "targetY": 532,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          },
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0
+        },
+        {
+          "id": 7,
+          "type": "bigPot",
+          "x": 382.8525754884547,
+          "y": 545.8525754884547,
+          "isObstacle": true,
+          "zOrder": 7,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isFallingDebris": false,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0,
+          "velocityX": 0,
+          "velocityY": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 332,
+            "startY": 545,
+            "endX": 432,
+            "endY": 545,
+            "angle": 0
+          },
+          "targetX": 382,
+          "targetY": 545,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          },
+          "dropItems": [
+            {
+              "itemId": "healthPotion",
+              "chance": 1,
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "type": "mossyBrickWall",
+          "x": 487.2276350752877,
+          "y": 528.9813994685563,
           "isObstacle": false,
           "zOrder": 1,
           "positioning": "absolute",
           "relativeX": 0.5,
           "relativeY": 0.5,
           "sizeMultiplier": 1.5,
-          "rotation": 0
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "velocityX": 0,
+          "velocityY": 0
+        },
+        {
+          "id": 18,
+          "type": "barrel",
+          "x": 1433.7375358303386,
+          "y": 347.49781617632885,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isFallingDebris": false,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0,
+          "dropItems": [
+            {
+              "itemId": "healthPotion",
+              "chance": 1,
+              "quantity": 10
+            }
+          ],
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1261.4529307282417,
+            "startY": 511.30728241563054,
+            "endX": 1361.4529307282417,
+            "endY": 511.30728241563054,
+            "angle": 0
+          },
+          "velocityX": 0.2006251751192849,
+          "velocityY": -0.364872388496849,
+          "targetX": 1311.4529307282417,
+          "targetY": 511.30728241563054,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": 13,
+          "platformBindOffset": {
+            "x": 63.356877389628835,
+            "y": -39.51206702456375
+          }
+        },
+        {
+          "id": 19,
+          "type": "crate",
+          "x": 1335.6114257060046,
+          "y": 365.144352588407,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "dropItems": [
+            {
+              "itemId": "healthPotion",
+              "chance": 1,
+              "quantity": 1
+            }
+          ],
+          "isFallingDebris": false,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1157.0071047957372,
+            "startY": 527.8525754884547,
+            "endX": 1257.0071047957372,
+            "endY": 527.8525754884547,
+            "angle": 0
+          },
+          "velocityX": 0.2006251751192849,
+          "velocityY": -0.364872388496849,
+          "targetX": 1207.0071047957372,
+          "targetY": 527.8525754884547,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": 13,
+          "platformBindOffset": {
+            "x": -40.519232734705156,
+            "y": -29.8655306124856
+          }
+        },
+        {
+          "id": 20,
+          "type": "barrel",
+          "x": 994,
+          "y": 544,
+          "isObstacle": true,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1332.02486678508,
+            "startY": 437.1936056838366,
+            "endX": 1432.02486678508,
+            "endY": 437.1936056838366,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 1382.02486678508,
+          "targetY": 437.1936056838366,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          },
+          "destroyable": true,
+          "maxDurability": 100,
+          "currentDurability": 100,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "dropItems": [
+            {
+              "itemId": "healthPotion",
+              "chance": 1,
+              "quantity": 1
+            }
+          ],
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isFallingDebris": false,
+          "debrisVelocityY": 0,
+          "debrisGravity": 0,
+          "debrisHasLanded": false,
+          "debrisLandingTimer": 0,
+          "isDestroyed": false,
+          "isVisible": true
+        },
+        {
+          "id": 21,
+          "type": "torch",
+          "x": 927.6021314387212,
+          "y": 436.3410301953818,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 355.8259325044405,
+            "startY": 459.3605683836589,
+            "endX": 455.8259325044405,
+            "endY": 459.3605683836589,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 405.8259325044405,
+          "targetY": 459.3605683836589,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "originalPosition": {
+            "x": 405.8259325044405,
+            "y": 459.3605683836589
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        {
+          "id": 22,
+          "type": "torch",
+          "x": 423.73001776198936,
+          "y": 436.3410301953818,
+          "isObstacle": false,
+          "zOrder": 2,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 0,
+          "damagePerSecond": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 494.79573712255774,
+            "startY": 473.0017761989343,
+            "endX": 594.7957371225577,
+            "endY": 473.0017761989343,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 544.7957371225577,
+          "targetY": 473.0017761989343,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": null,
+          "platformBindOffset": {
+            "x": 0,
+            "y": 0
+          }
         }
       ],
-      "enemies": [],
-      "lootables": [],
+      "enemies": [
+        {
+          "id": 6,
+          "type": "orc",
+          "x": 1058.3835505671477,
+          "y": 531.5845881310894,
+          "width": 44,
+          "height": 59,
+          "health": 100,
+          "maxHealth": 100,
+          "damage": 20,
+          "isMoving": true,
+          "movementZone": {
+            "enabled": true,
+            "startX": 302.71036315323295,
+            "endX": 1100.3011514614705,
+            "y": 589.7342781222321
+          },
+          "attractionZone": {
+            "enabled": true,
+            "x": 305.26129317980514,
+            "y": 374.2249778565102,
+            "width": 793.3392382639504,
+            "height": 216.82905225863595
+          },
+          "currentAnimation": "walk",
+          "frameIndex": 3,
+          "frameTimer": 20.80000000000109,
+          "frameRate": 150,
+          "facing": "left",
+          "velocityX": -0.6208383207778808,
+          "velocityY": 0,
+          "onGround": true,
+          "speed": 2,
+          "aiState": "patrolling",
+          "target": null,
+          "lastPlayerPosition": null,
+          "fleeHealthThreshold": 0.4,
+          "originalPosition": {
+            "x": 534.8533163434655,
+            "y": 531.5845881310894
+          },
+          "isAttacking": false,
+          "attackTimer": 0,
+          "attackDuration": 600,
+          "attackCooldown": 1000,
+          "lastAttackTime": 1759582592938,
+          "isDead": false,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "deathTimer": 0,
+          "flashTimer": 0,
+          "isVisible": true,
+          "patrolDirection": -1,
+          "patrolSpeed": 1,
+          "dropItems": [
+            {
+              "itemId": "healthPotion",
+              "chance": 1,
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "npcs": [],
+      "lootables": [
+        {
+          "id": 1,
+          "type": "coin",
+          "x": 1090.4440497335702,
+          "y": 640.9591474245115,
+          "isVisible": true
+        }
+      ],
       "background": {
-        "name": "Flay_Night_4_BG",
+        "name": "DarkForest",
         "layers": []
       },
       "transitions": {
         "zones": [
           {
             "id": 1,
-            "x": 4.251550044286979,
-            "y": 526.4304694419841,
-            "width": 19.557130203720106,
-            "height": 389.44198405668726,
+            "x": 1.7006200177147919,
+            "y": 358.91939769707704,
+            "width": 44.21612046058459,
+            "height": 312.06377325066427,
             "targetSceneId": 1,
-            "playerStartX": 4239,
-            "playerStartY": 783
+            "playerStartX": 3733,
+            "playerStartY": 713
           }
         ]
       },
@@ -1935,18 +2941,835 @@
         "bottom": 1000
       },
       "settings": {
-        "playerStartX": 101,
-        "playerStartY": 363,
+        "playerStartX": 95,
+        "playerStartY": 541,
         "gravity": 0.8,
-        "playerSpeed": 5
+        "playerSpeed": 5,
+        "backgroundName": "PixelFantasy_Caves",
+        "defaultBackgroundColor": "#000000"
       },
       "metadata": {
         "created": "2025-09-21T13:12:09.327Z",
-        "modified": "2025-09-28T05:56:50.421Z"
+        "modified": "2025-10-08T17:37:09.634Z"
+      }
+    },
+    {
+      "id": 3,
+      "name": "scene 2",
+      "description": "",
+      "platforms": [
+        {
+          "id": 0,
+          "x": -1,
+          "y": -86,
+          "width": 1920,
+          "height": 288,
+          "color": "#4ECDC4",
+          "spriteType": "bricks",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 808.8131089459699,
+            "startY": 421.84233835252434,
+            "endX": 908.8131089459699,
+            "endY": 421.84233835252434,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 858.8131089459699,
+          "targetY": 421.84233835252434,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 858.8131089459699,
+            "y": 421.84233835252434
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "blockPlayer": true
+        },
+        {
+          "id": 1,
+          "x": -1,
+          "y": 708.4005540787242,
+          "width": 416,
+          "height": 288,
+          "color": "#4ECDC4",
+          "spriteType": "bricks",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 959.317980513729,
+            "startY": 665.881310894597,
+            "endX": 1059.317980513729,
+            "endY": 665.881310894597,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 1009.317980513729,
+          "targetY": 665.881310894597,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 1009.317980513729,
+            "y": 665.881310894597
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        },
+        {
+          "id": 2,
+          "x": 195.19162659499403,
+          "y": 489.22656092342777,
+          "width": 96,
+          "height": 96,
+          "color": "#4ECDC4",
+          "spriteType": "bricks",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 20,
+          "killEffect": "normal",
+          "isMoving": true,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": true,
+            "startX": 243.19162659499403,
+            "startY": 509.94946002445795,
+            "endX": 243.19162659499403,
+            "endY": 654.8272807794508,
+            "angle": 1.5707963267948966
+          },
+          "velocityX": 0,
+          "velocityY": -0.5038992201559722,
+          "targetX": 1039.078830823738,
+          "targetY": 537.4844995571302,
+          "movingDirection": -1,
+          "movementProgress": 0.18827658199731562,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 194.59658294073287,
+            "y": 560.6995596127953
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "blockPlayer": true
+        },
+        {
+          "id": 3,
+          "x": 1055,
+          "y": 556,
+          "width": 896,
+          "height": 448,
+          "color": "#4ECDC4",
+          "spriteType": "bricks",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1257.7767936226749,
+            "startY": 780.6731620903455,
+            "endX": 1357.7767936226749,
+            "endY": 780.6731620903455,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 1307.7767936226749,
+          "targetY": 780.6731620903455,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 1307.7767936226749,
+            "y": 780.6731620903455
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "blockPlayer": true
+        },
+        {
+          "id": 4,
+          "x": -1,
+          "y": 202,
+          "width": 416,
+          "height": 256,
+          "color": "#4ECDC4",
+          "spriteType": "bricks",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "blockPlayer": false,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 781.6031886625332,
+            "startY": 477.96279893711244,
+            "endX": 881.6031886625332,
+            "endY": 477.96279893711244,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 831.6031886625332,
+          "targetY": 477.96279893711244,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 831.6031886625332,
+            "y": 477.96279893711244
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        },
+        {
+          "id": 5,
+          "x": 483.0611160318866,
+          "y": 614.250380464217,
+          "width": 192,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "bricks",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "blockPlayer": false,
+          "isMoving": true,
+          "moveSpeed": 4,
+          "movementZone": {
+            "enabled": true,
+            "startX": 579.0611160318866,
+            "startY": 316.40389725420727,
+            "endX": 579.0611160318866,
+            "endY": 946.4836138175376,
+            "angle": 1.5707963267948966
+          },
+          "velocityX": 0,
+          "velocityY": -1.0077984403119444,
+          "targetX": 677.6970770593446,
+          "targetY": 626.7670504871568,
+          "movingDirection": -1,
+          "movementProgress": 0.49810599351116325,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 483.0611160318866,
+            "y": 300.40389725420727
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        },
+        {
+          "id": 6,
+          "x": 782.37023914969,
+          "y": 458.9895353081729,
+          "width": 192,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "bricks",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "blockPlayer": false,
+          "isMoving": true,
+          "moveSpeed": 5,
+          "movementZone": {
+            "enabled": true,
+            "startX": 878.37023914969,
+            "startY": 258.58281665190435,
+            "endX": 878.37023914969,
+            "endY": 957.5376439326837,
+            "angle": 1.5707963267948966
+          },
+          "velocityX": 0,
+          "velocityY": 1.2597480503899305,
+          "targetX": 1007.6173604960142,
+          "targetY": 582.5509300265722,
+          "movingDirection": 1,
+          "movementProgress": 0.3096147421975456,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 782.37023914969,
+            "y": 242.58281665190435
+          },
+          "useEasing": true,
+          "easingDistance": 0.4,
+          "easingMinSpeed": 0.3,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        },
+        {
+          "id": 7,
+          "x": 415,
+          "y": 812,
+          "width": 640,
+          "height": 192,
+          "color": "#4ECDC4",
+          "spriteType": "lava",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 1000,
+          "killEffect": "sink",
+          "blockPlayer": false,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 508.6536758193091,
+            "startY": 900.5668733392383,
+            "endX": 608.6536758193091,
+            "endY": 900.5668733392383,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 558.6536758193091,
+          "targetY": 900.5668733392383,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 558.6536758193091,
+            "y": 900.5668733392383
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        }
+      ],
+      "props": [
+        {
+          "id": 2,
+          "type": "metalSpikeMat",
+          "x": 194.9688503161548,
+          "y": 583.1414004814284,
+          "isObstacle": false,
+          "zOrder": 1,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 3.1468286413457767,
+          "damagePerSecond": 0,
+          "isChest": false,
+          "chestState": null,
+          "chestAnimFrame": null,
+          "chestAnimTimer": 0,
+          "chestAnimSpeed": 100,
+          "chestInventory": null,
+          "destroyable": false,
+          "maxDurability": 0,
+          "currentDurability": 0,
+          "isDestroying": false,
+          "destructionFrameIndex": 0,
+          "destructionTimer": 0,
+          "destructionFrameRate": 150,
+          "isDestroyed": false,
+          "isVisible": true,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 270.56687333923827,
+            "startY": 639.5217006200177,
+            "endX": 370.56687333923827,
+            "endY": 639.5217006200177,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": -0.491901619676014,
+          "targetX": 320.56687333923827,
+          "targetY": 639.5217006200177,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "originalPosition": {
+            "x": 320.56687333923827,
+            "y": 639.5217006200177
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "boundToPlatform": 2,
+          "platformBindOffset": {
+            "x": -22.722776278839234,
+            "y": 55.160940337844636
+          }
+        },
+        {
+          "id": 3,
+          "type": "metalSpikeMat",
+          "x": 242.05565279622556,
+          "y": 583.4948105788598,
+          "isObstacle": false,
+          "zOrder": 2,
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "sizeMultiplier": 1.5,
+          "rotation": 3.1468286413457767,
+          "damagePerSecond": 0,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 282.47121346324184,
+            "startY": 636.9707705934455,
+            "endX": 382.47121346324184,
+            "endY": 636.9707705934455,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": -0.491901619676014,
+          "targetX": 332.47121346324184,
+          "targetY": 636.9707705934455,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "boundToPlatform": 2,
+          "platformBindOffset": {
+            "x": 24.364026201231553,
+            "y": 55.514350435276015
+          },
+          "destroyable": false,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true,
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0
+        }
+      ],
+      "enemies": [
+        {
+          "id": 1,
+          "type": "skeleton",
+          "x": 1716.9773089435616,
+          "y": 497,
+          "width": 44,
+          "height": 59,
+          "health": 100,
+          "maxHealth": 100,
+          "damage": 15,
+          "isMoving": true,
+          "movementZone": {
+            "enabled": true,
+            "startX": 1176.1702127659573,
+            "endX": 1827.2340425531913,
+            "y": 556
+          },
+          "attractionZone": {
+            "enabled": true,
+            "x": 1054.468085106383,
+            "y": 365.9574468085106,
+            "width": 777.0212765957447,
+            "height": 184.68085106382983
+          },
+          "currentAnimation": "walk",
+          "frameIndex": 5,
+          "frameTimer": 29.100000000000023,
+          "frameRate": 150,
+          "facing": "right",
+          "velocityX": 0.652288288940055,
+          "velocityY": 0,
+          "onGround": true,
+          "speed": 2,
+          "aiState": "patrolling",
+          "target": null,
+          "lastPlayerPosition": null,
+          "fleeHealthThreshold": 0.3,
+          "originalPosition": {
+            "x": 1221.793428025562,
+            "y": 497
+          },
+          "isAttacking": false,
+          "attackTimer": 0,
+          "attackDuration": 600,
+          "attackCooldown": 1000,
+          "lastAttackTime": 1759945509168,
+          "isDead": false,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "deathTimer": 0,
+          "flashTimer": 0,
+          "isVisible": true,
+          "patrolDirection": 1,
+          "patrolSpeed": 1,
+          "dropItems": [
+            {
+              "itemId": "healthPotion",
+              "chance": 1,
+              "quantity": 1
+            }
+          ]
+        }
+      ],
+      "npcs": [],
+      "lootables": [],
+      "background": {
+        "name": "none",
+        "layers": []
+      },
+      "transitions": {
+        "zones": []
+      },
+      "boundaries": {
+        "left": 0,
+        "right": 2000,
+        "top": 0,
+        "bottom": 1000
+      },
+      "settings": {
+        "playerStartX": 55,
+        "playerStartY": 538,
+        "gravity": 0.8,
+        "playerSpeed": 5,
+        "defaultBackgroundColor": "#000000",
+        "backgroundName": "none"
+      },
+      "metadata": {
+        "created": "2025-10-01T07:36:22.760Z",
+        "modified": "2025-10-09T06:33:45.991Z"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Level 1",
+      "description": "Start level, the player steps into the world",
+      "platforms": [
+        {
+          "id": 0,
+          "x": 0,
+          "y": 838,
+          "width": 608,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "box",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "blockPlayer": false,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 264.6147032772365,
+            "startY": 716.8999114260407,
+            "endX": 364.6147032772365,
+            "endY": 716.8999114260407,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 314.6147032772365,
+          "targetY": 716.8999114260407,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 314.6147032772365,
+            "y": 716.8999114260407
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        },
+        {
+          "id": 1,
+          "x": 608,
+          "y": 902,
+          "width": 640,
+          "height": 32,
+          "color": "#4ECDC4",
+          "spriteType": "box",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "blockPlayer": false,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 1123.191489361702,
+            "startY": 630.6382978723404,
+            "endX": 1223.191489361702,
+            "endY": 630.6382978723404,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 1173.191489361702,
+          "targetY": 630.6382978723404,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 1173.191489361702,
+            "y": 630.6382978723404
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        },
+        {
+          "id": 2,
+          "x": 0,
+          "y": 870,
+          "width": 608,
+          "height": 128,
+          "color": "#4ECDC4",
+          "spriteType": "dirt",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "blockPlayer": false,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 372.12765957446805,
+            "startY": 950.6382978723404,
+            "endX": 472.12765957446805,
+            "endY": 950.6382978723404,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 422.12765957446805,
+          "targetY": 950.6382978723404,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 422.12765957446805,
+            "y": 950.6382978723404
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        },
+        {
+          "id": 3,
+          "x": 608,
+          "y": 934,
+          "width": 640,
+          "height": 64,
+          "color": "#4ECDC4",
+          "spriteType": "dirt",
+          "positioning": "absolute",
+          "relativeX": 0.5,
+          "relativeY": 0.5,
+          "damagePerSecond": 0,
+          "killEffect": "normal",
+          "blockPlayer": false,
+          "isMoving": false,
+          "moveSpeed": 2,
+          "movementZone": {
+            "enabled": false,
+            "startX": 694.6808510638298,
+            "startY": 840,
+            "endX": 794.6808510638298,
+            "endY": 840,
+            "angle": 0
+          },
+          "velocityX": 0,
+          "velocityY": 0,
+          "targetX": 744.6808510638298,
+          "targetY": 840,
+          "movingDirection": 1,
+          "movementProgress": 0,
+          "isMovementPaused": false,
+          "originalPosition": {
+            "x": 744.6808510638298,
+            "y": 840
+          },
+          "useEasing": false,
+          "easingDistance": 0.2,
+          "easingMinSpeed": 0.2,
+          "endDelay": 0,
+          "delayTimer": 0,
+          "isDelaying": false,
+          "rotation": 0,
+          "isSpinning": false,
+          "spinSpeed": 1,
+          "spinClockwise": true
+        }
+      ],
+      "props": [],
+      "enemies": [
+       
+      ],
+      "npcs": [
+        {
+          "id": 1,
+          "type": "blacksmith",
+          "x": 946.8510638297872,
+          "y": 878.7446808510638,
+          "width": 48,
+          "height": 48,
+          "currentAnimation": "idle",
+          "frameIndex": 0,
+          "frameTimer": 62.59999999997672,
+          "frameRate": 150,
+          "facing": "right",
+          "interactionRadius": 50,
+          "canInteract": true,
+          "dialogueId": null,
+          "isVisible": true
+        }
+      ],
+      "lootables": [],
+      "background": {
+        "name": "none",
+        "layers": []
+      },
+      "transitions": {
+        "zones": []
+      },
+      "boundaries": {
+        "left": 0,
+        "right": 2000,
+        "top": 0,
+        "bottom": 1000
+      },
+      "settings": {
+        "playerStartX": 247,
+        "playerStartY": 758,
+        "gravity": 0.8,
+        "playerSpeed": 5,
+        "defaultBackgroundColor": "#87CEEB",
+        "backgroundName": "Parallax_Forest_Background_Blue"
+      },
+      "metadata": {
+        "created": "2025-10-02T06:32:35.572Z",
+        "modified": "2025-10-09T10:57:36.215Z"
       }
     }
   ],
-  "currentSceneId": "1",
+  "currentSceneId": "4",
   "startSceneId": "1",
   "characters": [],
   "classes": [],
@@ -1955,11 +3778,11 @@
   "gameSettings": {
     "hud": {
       "position": {
-        "x": 8,
-        "y": 158
+        "x": 50,
+        "y": 127
       },
-      "width": 231,
-      "height": 122
+      "width": 302,
+      "height": 129
     }
   },
   "playerSettings": {
@@ -1970,8 +3793,12 @@
     "attackDamage": 25,
     "walkSpeed": 5,
     "runSpeed": 10,
-    "jumpForce": 17,
-    "runningCost": 15,
-    "jumpCost": 0.8
+    "jumpForce": 15,
+    "runningCost": 16,
+    "jumpCost": 0.1
+  },
+  "inventoryItems": [],
+  "GUISettings": {
+    "theme": "fantasy-wooden"
   }
 }

@@ -12,13 +12,14 @@ class EnemyData {
                 fleeHealthThreshold: 0.4, // Flee when health drops below 40%
                 width: 44,
                 height: 59,
-                scale: 1.25,
+                scale: 3.2, // Visual sprite scale multiplier (100px sprite → 320px render)
+                renderOffsetY: 137, // Adjust sprite position to align feet with collision box bottom
                 animations: {
-                    idle: { file: 'Orc-Idle.png', frames: 6 },
-                    walk: { file: 'Orc-Walk.png', frames: 8 },
-                    attack: { file: 'Orc-Attack01.png', frames: 4 },
-                    hurt: { file: 'Orc-Hurt.png', frames: 4 },
-                    death: { file: 'Orc-Death.png', frames: 4 }
+                    idle: { file: 'Orc-Idle.png', frames: 6, frameWidth: 100, frameHeight: 100 },
+                    walk: { file: 'Orc-Walk.png', frames: 8, frameWidth: 100, frameHeight: 100 },
+                    attack: { file: 'Orc-Attack01.png', frames: 4, frameWidth: 100, frameHeight: 100 },
+                    hurt: { file: 'Orc-Hurt.png', frames: 4, frameWidth: 100, frameHeight: 100 },
+                    death: { file: 'Orc-Death.png', frames: 4, frameWidth: 100, frameHeight: 100 }
                 }
             },
             skeleton: {
@@ -29,13 +30,55 @@ class EnemyData {
                 fleeHealthThreshold: 0.3, // Flee when health drops below 30%
                 width: 44,
                 height: 59,
-                scale: 1.25,
+                scale: 3.2, // Visual sprite scale multiplier (100px sprite → 320px render)
+                renderOffsetY: 137, // Adjust sprite position to align feet with collision box bottom
                 animations: {
-                    idle: { file: 'Skeleton-Idle.png', frames: 6 },
-                    walk: { file: 'Skeleton-Walk.png', frames: 8 },
-                    attack: { file: 'Skeleton-Attack01.png', frames: 4 },
-                    hurt: { file: 'Skeleton-Hurt.png', frames: 4 },
-                    death: { file: 'Skeleton-Death.png', frames: 4 }
+                    idle: { file: 'Skeleton-Idle.png', frames: 6, frameWidth: 100, frameHeight: 100 },
+                    walk: { file: 'Skeleton-Walk.png', frames: 8, frameWidth: 100, frameHeight: 100 },
+                    attack: { file: 'Skeleton-Attack01.png', frames: 4, frameWidth: 100, frameHeight: 100 },
+                    hurt: { file: 'Skeleton-Hurt.png', frames: 4, frameWidth: 100, frameHeight: 100 },
+                    death: { file: 'Skeleton-Death.png', frames: 4, frameWidth: 100, frameHeight: 100 }
+                }
+            },
+            babyDragon: {
+                name: 'Baby Dragon',
+                spriteFolder: 'sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline',
+                defaultHealth: 150,
+                defaultDamage: 30,
+                fleeHealthThreshold: 0.2, // Flee when health drops below 20%
+                width: 45,  // Collision box width - fits dragon body
+                height: 38, // Collision box height - fits dragon body
+                scale: 1.2, // Visual sprite scale multiplier
+                renderOffsetY: -15, // Negative = float above ground (sprite visual)
+                collisionOffsetY: -15, // Collision box also floats to match visual position
+                facingInverted: true, // Sprite faces opposite direction from orcs/skeletons
+                animations: {
+                    idle: { file: 'IDLE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    walk: { file: 'MOVE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    attack: { file: 'ATTACK.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    hurt: { file: 'HURT.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    death: { file: 'DEATH.png', frames: 4, frameWidth: 158, frameHeight: 125 }
+                }
+            },
+            // Alias for backward compatibility
+            dragon: {
+                name: 'Baby Dragon',
+                spriteFolder: 'sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline',
+                defaultHealth: 150,
+                defaultDamage: 30,
+                fleeHealthThreshold: 0.2,
+                width: 45,
+                height: 38,
+                scale: 1.2,
+                renderOffsetY: -15,
+                collisionOffsetY: -15,
+                facingInverted: true,
+                animations: {
+                    idle: { file: 'IDLE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    walk: { file: 'MOVE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    attack: { file: 'ATTACK.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    hurt: { file: 'HURT.png', frames: 4, frameWidth: 158, frameHeight: 125 },
+                    death: { file: 'DEATH.png', frames: 4, frameWidth: 158, frameHeight: 125 }
                 }
             }
         };
@@ -97,6 +140,8 @@ class EnemyData {
             target: null,
             lastPlayerPosition: null,
             fleeHealthThreshold: typeData.fleeHealthThreshold || 0.4,
+            facingInverted: typeData.facingInverted || false, // Some sprites face opposite direction
+            collisionOffsetY: typeData.collisionOffsetY || 0, // Y offset for collision box (for floating enemies)
             originalPosition: null, // Store original position for returning after fleeing
 
             // Combat state

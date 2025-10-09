@@ -2,12 +2,13 @@ class EnemyAnimator {
     constructor(enemy, enemyTypeData) {
         this.enemy = enemy;
         this.enemyTypeData = enemyTypeData;
+        // Initialize sprites object - dimensions will be set when loading sprites
         this.sprites = {
-            idle: { image: null, frames: 6, frameWidth: 100, frameHeight: 100 },
-            walk: { image: null, frames: 8, frameWidth: 100, frameHeight: 100 },
-            attack: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
-            hurt: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
-            death: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 }
+            idle: { image: null, frames: 0, frameWidth: 100, frameHeight: 100 },
+            walk: { image: null, frames: 0, frameWidth: 100, frameHeight: 100 },
+            attack: { image: null, frames: 0, frameWidth: 100, frameHeight: 100 },
+            hurt: { image: null, frames: 0, frameWidth: 100, frameHeight: 100 },
+            death: { image: null, frames: 0, frameWidth: 100, frameHeight: 100 }
         };
         this.spritesLoaded = false;
 
@@ -53,6 +54,9 @@ class EnemyAnimator {
             img.src = `${baseFolder}/${animData.file}`;
             this.sprites[animName].image = img;
             this.sprites[animName].frames = animData.frames;
+            // Use per-animation dimensions from enemy type definition, with fallback to 100x100
+            this.sprites[animName].frameWidth = animData.frameWidth || 100;
+            this.sprites[animName].frameHeight = animData.frameHeight || 100;
         }
     }
 

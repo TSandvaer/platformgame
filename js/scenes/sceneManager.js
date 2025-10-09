@@ -450,21 +450,24 @@ class SceneManager {
             if (this.game.enemySystem && this.game.enemySystem.isInitialized) {
                 const currentEnemyData = this.game.enemySystem.data.enemies;
 
-                // CRITICAL: Never save empty enemy array if the scene previously had enemies
-                // This prevents race conditions where enemies are temporarily cleared during death processing
-                if (currentScene.enemies && currentScene.enemies.length > 0 &&
+                // Only prevent saving empty array during initial loading phase
+                // During normal operation, allow empty arrays (user may have deleted all enemies)
+                if (isInitialLoading &&
+                    currentScene.enemies && currentScene.enemies.length > 0 &&
                     (!currentEnemyData || currentEnemyData.length === 0)) {
 
-                    console.warn('🚨 RACE CONDITION PREVENTED: Refusing to save empty enemy array when scene had enemies');
+                    console.warn('🚨 INITIAL LOAD: Preserving enemy data from scene (not saving empty array)');
                     console.warn('🚨 Scene previously had:', currentScene.enemies.length, 'enemies');
                     console.warn('🚨 Current memory has:', currentEnemyData ? currentEnemyData.length : 'null', 'enemies');
-                    console.warn('🚨 Preserving existing enemy data to prevent corruption');
 
-                    // Preserve existing enemy data instead of overwriting with empty array
+                    // Preserve existing enemy data during initialization
                     enemyDataToSave = currentScene.enemies;
                 } else {
-                    // Safe to use current enemy data
+                    // Safe to use current enemy data (including empty array from intentional deletions)
                     enemyDataToSave = currentEnemyData;
+                    if (currentEnemyData && currentEnemyData.length === 0 && currentScene.enemies && currentScene.enemies.length > 0) {
+                        console.log('💾 All enemies deleted - saving empty enemy array');
+                    }
                 }
             } else {
                 // Enemy system not initialized - preserve existing enemy data

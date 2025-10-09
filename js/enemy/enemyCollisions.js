@@ -109,11 +109,12 @@ class EnemyCollisions {
 
     // Utility methods for getting bounds
     getEnemyBounds(enemy) {
+        const collisionOffsetY = enemy.collisionOffsetY || 0;
         return {
             left: enemy.x,
             right: enemy.x + enemy.width,
-            top: enemy.y,
-            bottom: enemy.y + enemy.height
+            top: enemy.y + collisionOffsetY,
+            bottom: enemy.y + collisionOffsetY + enemy.height
         };
     }
 
@@ -148,6 +149,7 @@ class EnemyCollisions {
         const attackReach = 40; // How far the enemy can attack
         const attackWidth = 30; // Width of attack area
         const attackHeight = enemy.height * 0.8; // Height of attack area
+        const collisionOffsetY = enemy.collisionOffsetY || 0;
 
         let attackX, attackY;
 
@@ -157,7 +159,7 @@ class EnemyCollisions {
             attackX = enemy.x - attackReach;
         }
 
-        attackY = enemy.y + (enemy.height - attackHeight) / 2;
+        attackY = (enemy.y + collisionOffsetY) + (enemy.height - attackHeight) / 2;
 
         return {
             left: attackX,

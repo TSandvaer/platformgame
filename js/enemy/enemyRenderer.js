@@ -53,13 +53,18 @@ class EnemyRenderer {
             renderY = (enemy.y - camera.y) * viewport.scaleY + viewport.offsetY;
         }
 
-        // Calculate sprite render dimensions with pixel-perfect scaling
-        const baseSpriteSize = 100; // Match actual sprite dimensions (100x100)
-        const enemyScale = (enemy.width / 35) * 2.56; // Scale to maintain original size (256/100 = 2.56)
-        const spriteRenderWidth = Math.round(baseSpriteSize * enemyScale);
-        const spriteRenderHeight = Math.round(baseSpriteSize * enemyScale);
+        // Get enemy type data for scale and rendering offsets
+        const enemyTypeData = window.game?.enemySystem?.data?.enemyTypes?.[enemy.type];
+        const typeScale = enemyTypeData?.scale || 1.0;
+        const renderOffsetY = enemyTypeData?.renderOffsetY || 0; // Y offset for floating enemies
+
+        // Calculate sprite render dimensions using actual frame dimensions and type scale
+        const spriteRenderWidth = Math.round(frame.frameWidth * typeScale);
+        const spriteRenderHeight = Math.round(frame.frameHeight * typeScale);
+
+        // Center sprite horizontally on enemy collision box, align bottom (with optional offset)
         const spriteOffsetX = Math.round((enemy.width - spriteRenderWidth) / 2);
-        const spriteOffsetY = Math.round(enemy.height - spriteRenderHeight + (43 * enemyScale)); // Adjusted for 100px sprite (110/2.56 ≈ 43)
+        const spriteOffsetY = Math.round(enemy.height - spriteRenderHeight) + renderOffsetY;
 
         // Apply viewport scaling to offsets with pixel-perfect rounding
         const scaledOffsetX = Math.round(spriteOffsetX * (viewport ? viewport.scaleX : 1));
@@ -67,8 +72,11 @@ class EnemyRenderer {
         const scaledWidth = Math.round(spriteRenderWidth * (viewport ? viewport.scaleX : 1));
         const scaledHeight = Math.round(spriteRenderHeight * (viewport ? viewport.scaleY : 1));
 
-        // Flip sprite horizontally if facing left
-        if (enemy.facing === 'left') {
+        // Flip sprite horizontally based on facing direction
+        // If facingInverted is true, flip the logic (for sprites oriented opposite way)
+        const shouldFlip = enemy.facingInverted ? (enemy.facing === 'right') : (enemy.facing === 'left');
+
+        if (shouldFlip) {
             this.ctx.scale(-1, 1);
             this.ctx.drawImage(
                 frame.image,
@@ -142,11 +150,16 @@ class EnemyRenderer {
         let renderWidth = enemy.width;
         let renderHeight = enemy.height;
 
+        // Apply collision box offset for floating enemies
+        const collisionOffsetY = enemy.collisionOffsetY || 0;
+
         if (viewport && camera) {
             renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
-            renderY = (enemy.y - camera.y) * viewport.scaleY + viewport.offsetY;
+            renderY = ((enemy.y + collisionOffsetY) - camera.y) * viewport.scaleY + viewport.offsetY;
             renderWidth = enemy.width * viewport.scaleX;
             renderHeight = enemy.height * viewport.scaleY;
+        } else {
+            renderY = enemy.y + collisionOffsetY;
         }
 
         // Draw collision box
