@@ -240,6 +240,9 @@ class SceneManager {
             this.game.enemySystem.data.enemies = [...(scene.enemies || [])];
             this.game.enemySystem.animators.clear(); // Clear animators, they'll be recreated
 
+            // Migrate enemy properties from type definitions (ensures enemies use current type data)
+            this.migrateEnemyProperties(this.game.enemySystem.data.enemies, this.game.enemySystem.data.enemyTypes);
+
             console.log('🔄 After loading - enemies in memory:', this.game.enemySystem.data.enemies.length);
 
             // Update nextEnemyId to prevent ID conflicts
@@ -267,6 +270,9 @@ class SceneManager {
                 const emergencyEnemiesCopy = JSON.parse(JSON.stringify(scene.enemies));
                 this.game.enemySystem.data.enemies = emergencyEnemiesCopy;
                 this.game.enemySystem.animators.clear();
+
+                // Migrate enemy properties from type definitions
+                this.migrateEnemyProperties(this.game.enemySystem.data.enemies, this.game.enemySystem.data.enemyTypes);
 
                 // Update nextEnemyId to prevent ID conflicts
                 if (scene.enemies && scene.enemies.length > 0) {
@@ -1048,6 +1054,11 @@ class SceneManager {
             currentScene.settings.playerStartX = startX;
             currentScene.settings.playerStartY = startY;
             currentScene.metadata.modified = new Date().toISOString();
+
+            // Save to localStorage to persist the change
+            if (this.game && this.game.sceneSystem) {
+                this.game.sceneSystem.saveScenes();
+            }
         }
     }
 
@@ -1239,6 +1250,93 @@ class SceneManager {
             );
         } else {
             console.log(`Current scene "${currentScene.name}" has no transition zones`);
+        }
+    }
+
+    // Migrate enemy properties from type definitions
+    // This ensures enemies loaded from saves use current type definition values
+    migrateEnemyProperties(enemies, enemyTypes) {
+        if (!enemies || !enemyTypes) return;
+
+        let migratedCount = 0;
+        for (const enemy of enemies) {
+            const typeData = enemyTypes[enemy.type];
+            if (!typeData) {
+                console.warn(`⚠️ Enemy ${enemy.id} has unknown type "${enemy.type}", skipping migration`);
+                continue;
+            }
+
+            // Track if any properties were updated
+            let wasUpdated = false;
+
+            // Update collision box dimensions
+            if (enemy.width !== typeData.width) {
+                console.log(`🔄 Migrating enemy ${enemy.id} width: ${enemy.width} → ${typeData.width}`);
+                enemy.width = typeData.width;
+                wasUpdated = true;
+            }
+            if (enemy.height !== typeData.height) {
+                console.log(`🔄 Migrating enemy ${enemy.id} height: ${enemy.height} → ${typeData.height}`);
+                enemy.height = typeData.height;
+                wasUpdated = true;
+            }
+
+            // Update collision offset for floating enemies
+            const expectedOffsetY = typeData.collisionOffsetY || 0;
+            if ((enemy.collisionOffsetY || 0) !== expectedOffsetY) {
+                console.log(`🔄 Migrating enemy ${enemy.id} collisionOffsetY: ${enemy.collisionOffsetY || 0} → ${expectedOffsetY}`);
+                enemy.collisionOffsetY = expectedOffsetY;
+                wasUpdated = true;
+            }
+
+            // Update render offset for floating enemies
+            const expectedRenderOffsetY = typeData.renderOffsetY || 0;
+            if ((enemy.renderOffsetY || 0) !== expectedRenderOffsetY) {
+                console.log(`🔄 Migrating enemy ${enemy.id} renderOffsetY: ${enemy.renderOffsetY || 0} → ${expectedRenderOffsetY}`);
+                enemy.renderOffsetY = expectedRenderOffsetY;
+                wasUpdated = true;
+            }
+
+            // Update attack properties
+            const expectedAttackType = typeData.attackType || 'melee';
+            if ((enemy.attackType || 'melee') !== expectedAttackType) {
+                console.log(`🔄 Migrating enemy ${enemy.id} attackType: ${enemy.attackType || 'melee'} → ${expectedAttackType}`);
+                enemy.attackType = expectedAttackType;
+                wasUpdated = true;
+            }
+
+            const expectedAttackRange = typeData.attackRange || 60;
+            if ((enemy.attackRange || 60) !== expectedAttackRange) {
+                console.log(`🔄 Migrating enemy ${enemy.id} attackRange: ${enemy.attackRange || 60} → ${expectedAttackRange}`);
+                enemy.attackRange = expectedAttackRange;
+                wasUpdated = true;
+            }
+
+            // Update facingInverted flag
+            const expectedFacingInverted = typeData.facingInverted || false;
+            if ((enemy.facingInverted || false) !== expectedFacingInverted) {
+                console.log(`🔄 Migrating enemy ${enemy.id} facingInverted: ${enemy.facingInverted || false} → ${expectedFacingInverted}`);
+                enemy.facingInverted = expectedFacingInverted;
+                wasUpdated = true;
+            }
+
+            // Update projectile speed for ranged enemies
+            if (enemy.attackType === 'ranged') {
+                const expectedProjectileSpeed = typeData.projectileSpeed || 300;
+                if ((enemy.projectileSpeed || 300) !== expectedProjectileSpeed) {
+                    console.log(`🔄 Migrating enemy ${enemy.id} projectileSpeed: ${enemy.projectileSpeed || 300} → ${expectedProjectileSpeed}`);
+                    enemy.projectileSpeed = expectedProjectileSpeed;
+                    wasUpdated = true;
+                }
+            }
+
+            if (wasUpdated) {
+                migratedCount++;
+            }
+        }
+
+        if (migratedCount > 0) {
+            console.log(`✅ Migrated ${migratedCount} enemies to current type definitions`);
         }
     }
 }

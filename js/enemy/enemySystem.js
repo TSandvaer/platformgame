@@ -7,12 +7,15 @@ class EnemySystem {
         this.renderer = null;
         this.animators = new Map();
         this.mouseHandler = null;
+        this.projectileSystem = new EnemyProjectileSystem();
+        this.projectileAnimator = null;
         this.isInitialized = false;
     }
 
     initialize(ctx, platformSystem, viewport, camera) {
         this.renderer = new EnemyRenderer(ctx);
         this.mouseHandler = new EnemyMouseHandler(this, platformSystem, viewport, camera);
+        this.projectileAnimator = new EnemyProjectileAnimator();
         this.isInitialized = true;
         console.log('Enemy system initialized');
     }
@@ -85,6 +88,11 @@ class EnemySystem {
                 this.handleCombat(enemy, player, animator);
             }
         }
+
+        // Update projectile system
+        if (this.projectileSystem) {
+            this.projectileSystem.update(deltaTime, player, this.collisions);
+        }
     }
 
     handleCombat(enemy, player, animator) {
@@ -96,11 +104,30 @@ class EnemySystem {
             if (currentTime - enemy.lastAttackTime > enemy.attackCooldown) {
                 enemy.lastAttackTime = currentTime;
                 animator.startAttack();
+
+                // For ranged enemies, create a projectile (only if facing the player)
+                if (enemy.attackType === 'ranged' && this.projectileSystem) {
+                    const enemyCenter = enemy.x + enemy.width / 2;
+                    const playerCenter = {
+                        x: player.x + player.width / 2,
+                        y: player.y + player.height / 2
+                    };
+
+                    // Check if player is in the direction the enemy is facing
+                    const playerInFront = (enemy.facing === 'right' && playerCenter.x > enemyCenter) ||
+                                         (enemy.facing === 'left' && playerCenter.x < enemyCenter);
+
+                    if (playerInFront) {
+                        this.projectileSystem.createProjectile(enemy, playerCenter.x, playerCenter.y);
+                    } else {
+                        console.log(`🔥 Dragon ${enemy.id} cannot attack - player is behind (facing: ${enemy.facing})`);
+                    }
+                }
             }
         }
 
-        // Check enemy attack collision with player
-        if (enemy.isAttacking) {
+        // Check enemy attack collision with player (for melee attacks only)
+        if (enemy.isAttacking && enemy.attackType !== 'ranged') {
             const attackCollision = this.collisions.checkEnemyAttackCollision(enemy, player);
             if (attackCollision && !player.isDamaged) {
                 // Damage player using player's takeDamage method
@@ -178,6 +205,11 @@ class EnemySystem {
                 this.renderer.renderEnemy(enemy, animator, viewport, camera, isDevelopmentMode, selectedEnemy);
                 this.renderer.renderHealthBar(enemy, viewport, camera);
             }
+        }
+
+        // Render projectiles
+        if (this.projectileSystem && this.projectileAnimator) {
+            this.projectileSystem.render(this.renderer.ctx, viewport, camera, this.projectileAnimator);
         }
 
         // Render attraction zone drawing preview

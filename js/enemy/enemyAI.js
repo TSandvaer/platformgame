@@ -118,12 +118,12 @@ class EnemyAI {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from chasing (health: ${Math.round(healthPercentage * 100)}%)`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if (!playerInAttractionZone && distanceToPlayer > 200) {
-                    // Lost player, return to previous state
+                } else if (!playerInAttractionZone) {
+                    // Lost player (left attraction zone), return to previous state
                     enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                     enemy.target = null;
-                } else if (distanceToPlayer < 60) {
-                    // Close enough to attack
+                } else if (distanceToPlayer < enemy.attackRange) {
+                    // Close enough to attack (uses enemy's attack range - 60 for melee, 250 for ranged)
                     enemy.aiState = 'attacking';
                     enemy.target = playerCenter;
                 } else {
@@ -138,7 +138,8 @@ class EnemyAI {
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
                 } else {
-                    // Face the player when attacking (playerCenter already declared above)
+                    // Face the player when attacking
+                    // Facing always represents the actual direction (renderer handles sprite inversion)
                     enemy.facing = playerCenter.x > enemyCenter.x ? 'right' : 'left';
                     enemy.target = playerCenter;
 
@@ -146,7 +147,7 @@ class EnemyAI {
                         // Player left attraction zone, return to idle or patrolling
                         enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                         enemy.target = null;
-                    } else if (distanceToPlayer > 80) {
+                    } else if (distanceToPlayer > enemy.attackRange + 30) {
                         // Player still in attraction zone but moved out of attack range, resume chasing
                         enemy.aiState = 'chasing';
                         enemy.target = playerCenter;
@@ -313,12 +314,16 @@ class EnemyAI {
         // Update facing direction (but not during attacking state, and face away when fleeing)
         if (enemy.aiState === 'fleeing') {
             // Face away from player when fleeing
+            // Facing always represents actual direction (renderer handles sprite inversion)
             if (enemy.target) {
                 const enemyCenter = enemy.x + enemy.width / 2;
                 const targetX = enemy.target.x;
                 enemy.facing = targetX > enemyCenter ? 'left' : 'right';
             }
         } else if (enemy.aiState !== 'attacking') {
+            // Update facing based on movement direction
+            // The facing always matches the direction of movement
+            // The renderer handles sprite inversion via facingInverted flag
             if (enemy.velocityX > 0.1) {
                 enemy.facing = 'right';
             } else if (enemy.velocityX < -0.1) {
@@ -497,7 +502,7 @@ class EnemyAI {
         const enemyCenter = this.getEnemyCenter(enemy);
         const distance = this.getDistance(enemyCenter, playerCenter);
 
-        return distance < 60; // Attack range
+        return distance < enemy.attackRange; // Use enemy's attack range (60 for melee, 250 for ranged)
     }
 
     getAttackDirection(enemy, player) {

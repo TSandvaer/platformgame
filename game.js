@@ -742,6 +742,16 @@ class PlatformRPG {
             }
         });
 
+        // Render enemy projectiles (flying through air, should be on top of characters)
+        if (this.enemySystem && this.enemySystem.projectileSystem && this.enemySystem.projectileAnimator) {
+            this.enemySystem.projectileSystem.render(
+                this.ctx,
+                null,
+                null,
+                this.enemySystem.projectileAnimator
+            );
+        }
+
         this.ctx.restore();
 
         // Restore viewport scaling as well for obstacle props

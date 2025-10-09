@@ -46,12 +46,15 @@ class EnemyData {
                 defaultHealth: 150,
                 defaultDamage: 30,
                 fleeHealthThreshold: 0.2, // Flee when health drops below 20%
-                width: 45,  // Collision box width - fits dragon body
-                height: 38, // Collision box height - fits dragon body
+                width: 95,  // Collision box width - covers dragon body (158 * 0.6)
+                height: 75, // Collision box height - covers dragon body (125 * 0.6)
                 scale: 1.2, // Visual sprite scale multiplier
-                renderOffsetY: -15, // Negative = float above ground (sprite visual)
-                collisionOffsetY: -15, // Collision box also floats to match visual position
+                renderOffsetY: -40, // Negative = float above ground (sprite visual)
+                collisionOffsetY: -40, // Collision box also floats to match visual position
                 facingInverted: true, // Sprite faces opposite direction from orcs/skeletons
+                attackType: 'ranged', // Dragon shoots fire projectiles
+                attackRange: 250, // Ranged attack distance (vs 60 for melee)
+                projectileSpeed: 300, // Fire projectile speed (pixels/second)
                 animations: {
                     idle: { file: 'IDLE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
                     walk: { file: 'MOVE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
@@ -67,12 +70,15 @@ class EnemyData {
                 defaultHealth: 150,
                 defaultDamage: 30,
                 fleeHealthThreshold: 0.2,
-                width: 45,
-                height: 38,
+                width: 95,
+                height: 75,
                 scale: 1.2,
-                renderOffsetY: -15,
-                collisionOffsetY: -15,
+                renderOffsetY: -40,
+                collisionOffsetY: -40,
                 facingInverted: true,
+                attackType: 'ranged',
+                attackRange: 250,
+                projectileSpeed: 300,
                 animations: {
                     idle: { file: 'IDLE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
                     walk: { file: 'MOVE.png', frames: 4, frameWidth: 158, frameHeight: 125 },
@@ -142,7 +148,13 @@ class EnemyData {
             fleeHealthThreshold: typeData.fleeHealthThreshold || 0.4,
             facingInverted: typeData.facingInverted || false, // Some sprites face opposite direction
             collisionOffsetY: typeData.collisionOffsetY || 0, // Y offset for collision box (for floating enemies)
+            renderOffsetY: typeData.renderOffsetY || 0, // Y offset for visual sprite rendering (for floating enemies)
             originalPosition: null, // Store original position for returning after fleeing
+
+            // Attack type (melee or ranged)
+            attackType: typeData.attackType || 'melee', // 'melee' or 'ranged'
+            attackRange: typeData.attackRange || 60, // Attack distance
+            projectileSpeed: typeData.projectileSpeed || 300, // For ranged attacks
 
             // Combat state
             isAttacking: false,

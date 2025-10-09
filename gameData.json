@@ -3720,7 +3720,63 @@
       ],
       "props": [],
       "enemies": [
-       
+        {
+          "id": 1,
+          "type": "babyDragon",
+          "x": 461,
+          "y": 800,
+          "width": 45,
+          "height": 38,
+          "health": 150,
+          "maxHealth": 150,
+          "damage": 30,
+          "isMoving": true,
+          "movementZone": {
+            "enabled": false,
+            "startX": 410.62971175166297,
+            "endX": 510.62971175166297,
+            "y": 769.019955654102
+          },
+          "attractionZone": {
+            "enabled": true,
+            "x": 334.6164079822616,
+            "y": 733.2594235033258,
+            "width": 266.50110864745017,
+            "height": 103.02439024390253
+          },
+          "currentAnimation": "idle",
+          "frameIndex": 0,
+          "frameTimer": 25.09999999999127,
+          "frameRate": 150,
+          "facing": "right",
+          "velocityX": 0,
+          "velocityY": 0,
+          "onGround": true,
+          "speed": 2,
+          "aiState": "idle",
+          "target": null,
+          "lastPlayerPosition": null,
+          "fleeHealthThreshold": 0.2,
+          "facingInverted": true,
+          "collisionOffsetY": -15,
+          "originalPosition": null,
+          "attackType": "ranged",
+          "attackRange": 250,
+          "projectileSpeed": 300,
+          "isAttacking": false,
+          "attackTimer": 0,
+          "attackDuration": 600,
+          "attackCooldown": 1000,
+          "lastAttackTime": 1760021312889,
+          "isDead": false,
+          "isDamaged": false,
+          "damageTimer": 0,
+          "deathTimer": 0,
+          "flashTimer": 0,
+          "isVisible": true,
+          "patrolDirection": 1,
+          "patrolSpeed": 1
+        }
       ],
       "npcs": [
         {
@@ -3731,8 +3787,8 @@
           "width": 48,
           "height": 48,
           "currentAnimation": "idle",
-          "frameIndex": 0,
-          "frameTimer": 62.59999999997672,
+          "frameIndex": 6,
+          "frameTimer": 104.29999999998836,
           "frameRate": 150,
           "facing": "right",
           "interactionRadius": 50,
@@ -3765,7 +3821,7 @@
       },
       "metadata": {
         "created": "2025-10-02T06:32:35.572Z",
-        "modified": "2025-10-09T10:57:36.215Z"
+        "modified": "2025-10-09T14:49:08.957Z"
       }
     }
   ],
