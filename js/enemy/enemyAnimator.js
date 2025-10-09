@@ -119,6 +119,17 @@ class EnemyAnimator {
         if (!this.enemy.isAttacking && !this.enemy.isDead) {
             this.enemy.isAttacking = true;
             this.enemy.attackTimer = 0;
+
+            // Calculate attack duration based on animation frame count
+            const animationData = this.enemyTypeData?.animations?.[attackAnimation];
+            if (animationData && animationData.frames) {
+                // Duration = frames × frameRate (e.g., 13 frames × 150ms = 1950ms)
+                this.enemy.attackDuration = animationData.frames * this.enemy.frameRate;
+            }
+
+            // Store current attack animation name
+            this.enemy.currentAttackAnimation = attackAnimation;
+
             this.setAnimation(attackAnimation);
             return true;
         }

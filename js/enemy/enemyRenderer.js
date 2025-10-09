@@ -57,15 +57,25 @@ class EnemyRenderer {
         const enemyTypeData = window.game?.enemySystem?.data?.enemyTypes?.[enemy.type];
         const typeScale = enemyTypeData?.scale || 1.0;
         // Check enemy instance first (for dynamic changes like death fall), then type data
-        const renderOffsetY = (enemy.renderOffsetY !== undefined) ? enemy.renderOffsetY : (enemyTypeData?.renderOffsetY || 0);
+        let renderOffsetY = (enemy.renderOffsetY !== undefined) ? enemy.renderOffsetY : (enemyTypeData?.renderOffsetY || 0);
 
         // Calculate sprite render dimensions using actual frame dimensions and type scale
         const spriteRenderWidth = Math.round(frame.frameWidth * typeScale);
         const spriteRenderHeight = Math.round(frame.frameHeight * typeScale);
 
+        // Compensate for different animation heights (e.g., attack_melee is shorter)
+        // Get the "standard" sprite height (idle animation) for comparison
+        const standardHeight = enemyTypeData?.animations?.idle?.frameHeight || frame.frameHeight;
+        const standardRenderHeight = Math.round(standardHeight * typeScale);
+        const heightDifference = standardRenderHeight - spriteRenderHeight;
+
+        // If current animation is shorter, adjust offset to keep sprite at same vertical position
+        // (subtract the difference to move sprite up)
+        const heightCompensation = heightDifference;
+
         // Center sprite horizontally on enemy collision box, align bottom (with optional offset)
         const spriteOffsetX = Math.round((enemy.width - spriteRenderWidth) / 2);
-        const spriteOffsetY = Math.round(enemy.height - spriteRenderHeight) + renderOffsetY;
+        const spriteOffsetY = Math.round(enemy.height - spriteRenderHeight) + renderOffsetY - heightCompensation;
 
         // Apply viewport scaling to offsets with pixel-perfect rounding
         const scaledOffsetX = Math.round(spriteOffsetX * (viewport ? viewport.scaleX : 1));

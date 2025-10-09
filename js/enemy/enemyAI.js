@@ -78,7 +78,8 @@ class EnemyAI {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from idle (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if (playerInAttractionZone && !inRecoveryPeriodIdle) {
+                } else if ((playerInAttractionZone || distanceToPlayer < 150) && !inRecoveryPeriodIdle) {
+                    // Chase if player is in attraction zone OR player is very close (within 150px)
                     // Only chase if not in recovery period
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
@@ -104,7 +105,8 @@ class EnemyAI {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from patrolling (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if (playerInAttractionZone && !inRecoveryPeriod) {
+                } else if ((playerInAttractionZone || distanceToPlayer < 150) && !inRecoveryPeriod) {
+                    // Chase if player is in attraction zone OR player is very close (within 150px)
                     // Only chase if not in recovery period
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
@@ -118,8 +120,9 @@ class EnemyAI {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from chasing (health: ${Math.round(healthPercentage * 100)}%)`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if (!playerInAttractionZone) {
-                    // Lost player (left attraction zone), return to previous state
+                } else if (!playerInAttractionZone && distanceToPlayer > 300) {
+                    // Lost player (left attraction zone AND moved far away), return to previous state
+                    // Buffer distance prevents disengagement when player is pushed to zone edge
                     enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                     enemy.target = null;
                 } else if (distanceToPlayer < enemy.attackRange) {
@@ -139,16 +142,25 @@ class EnemyAI {
                     enemy.target = playerCenter;
                 } else {
                     // Face the player when attacking
-                    // Facing always represents the actual direction (renderer handles sprite inversion)
-                    enemy.facing = playerCenter.x > enemyCenter.x ? 'right' : 'left';
+                    // Add buffer zone to prevent rapid facing changes when player is very close
+                    const facingBuffer = 20; // Don't change facing if player is within 20px of center
+                    const dx = playerCenter.x - enemyCenter.x;
+
+                    if (Math.abs(dx) > facingBuffer) {
+                        // Only change facing if player is clearly to one side or the other
+                        enemy.facing = dx > 0 ? 'right' : 'left';
+                    }
+                    // If player is within buffer zone, keep current facing
+
                     enemy.target = playerCenter;
 
-                    if (!playerInAttractionZone) {
-                        // Player left attraction zone, return to idle or patrolling
+                    if (!playerInAttractionZone && distanceToPlayer > 300) {
+                        // Player left attraction zone AND moved far away, return to idle or patrolling
+                        // Buffer distance prevents disengagement when player is pushed to zone edge during combat
                         enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                         enemy.target = null;
                     } else if (distanceToPlayer > enemy.attackRange + 30) {
-                        // Player still in attraction zone but moved out of attack range, resume chasing
+                        // Player moved out of attack range, resume chasing
                         enemy.aiState = 'chasing';
                         enemy.target = playerCenter;
                     }

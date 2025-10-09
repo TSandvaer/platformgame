@@ -139,25 +139,36 @@ class EnemySystem {
                 const enemyTypeData = this.data.enemyTypes[enemy.type];
                 const hasMeleeAttack = enemyTypeData?.animations?.attack_melee;
                 const hasRangedAttack = enemyTypeData?.animations?.attack_ranged;
+                const isAdultDragon = enemy.type === 'adultDragon';
                 const meleeRange = 100; // Close range for melee attack
 
                 // Determine attack type based on distance
                 let attackAnimation = 'attack';
                 let useMeleeAttack = false;
 
-                if (hasMeleeAttack && hasRangedAttack && distanceToPlayer < meleeRange) {
-                    // Close range - use melee bite attack
+                if (isAdultDragon && hasMeleeAttack && hasRangedAttack) {
+                    // Adult dragon: bite at close range, fire breath at medium range
+                    if (distanceToPlayer < meleeRange) {
+                        attackAnimation = 'attack_melee'; // ATTACK 1 - bite
+                        useMeleeAttack = true;
+                    } else {
+                        attackAnimation = 'attack_ranged'; // ATTACK 2 - fire breath (visual only, melee damage)
+                        useMeleeAttack = true; // Fire breath also uses melee hitbox, not projectiles
+                    }
+                } else if (hasMeleeAttack && hasRangedAttack && distanceToPlayer < meleeRange) {
+                    // Other enemies with dual attacks - close range uses melee
                     attackAnimation = 'attack_melee';
                     useMeleeAttack = true;
                 } else if (hasRangedAttack && distanceToPlayer >= meleeRange) {
-                    // Long range - use fire breath attack
+                    // Other enemies - long range uses ranged attack
                     attackAnimation = 'attack_ranged';
                 }
 
                 animator.startAttack(attackAnimation);
 
-                // For ranged attacks, create a projectile (only if facing the player)
-                if (enemy.attackType === 'ranged' && !useMeleeAttack && this.projectileSystem) {
+                // For ranged enemies (baby dragon only), create projectiles
+                // Adult dragon never creates projectiles (uses melee damage for both attacks)
+                if (enemy.attackType === 'ranged' && !isAdultDragon && !useMeleeAttack && this.projectileSystem) {
                     // Check if player is in the direction the enemy is facing
                     const playerInFront = (enemy.facing === 'right' && playerCenter.x > enemyCenter) ||
                                          (enemy.facing === 'left' && playerCenter.x < enemyCenter);
