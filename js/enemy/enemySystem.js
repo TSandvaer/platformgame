@@ -103,16 +103,40 @@ class EnemySystem {
             const currentTime = Date.now();
             if (currentTime - enemy.lastAttackTime > enemy.attackCooldown) {
                 enemy.lastAttackTime = currentTime;
-                animator.startAttack();
 
-                // For ranged enemies, create a projectile (only if facing the player)
-                if (enemy.attackType === 'ranged' && this.projectileSystem) {
-                    const enemyCenter = enemy.x + enemy.width / 2;
-                    const playerCenter = {
-                        x: player.x + player.width / 2,
-                        y: player.y + player.height / 2
-                    };
+                // Calculate distance to player
+                const enemyCenter = enemy.x + enemy.width / 2;
+                const playerCenter = {
+                    x: player.x + player.width / 2,
+                    y: player.y + player.height / 2
+                };
+                const dx = playerCenter.x - enemyCenter;
+                const dy = playerCenter.y - (enemy.y + enemy.height / 2);
+                const distanceToPlayer = Math.sqrt(dx * dx + dy * dy);
 
+                // Check if enemy has multiple attack animations (adult dragon)
+                const enemyTypeData = this.data.enemyTypes[enemy.type];
+                const hasMeleeAttack = enemyTypeData?.animations?.attack_melee;
+                const hasRangedAttack = enemyTypeData?.animations?.attack_ranged;
+                const meleeRange = 100; // Close range for melee attack
+
+                // Determine attack type based on distance
+                let attackAnimation = 'attack';
+                let useMeleeAttack = false;
+
+                if (hasMeleeAttack && hasRangedAttack && distanceToPlayer < meleeRange) {
+                    // Close range - use melee bite attack
+                    attackAnimation = 'attack_melee';
+                    useMeleeAttack = true;
+                } else if (hasRangedAttack && distanceToPlayer >= meleeRange) {
+                    // Long range - use fire breath attack
+                    attackAnimation = 'attack_ranged';
+                }
+
+                animator.startAttack(attackAnimation);
+
+                // For ranged attacks, create a projectile (only if facing the player)
+                if (enemy.attackType === 'ranged' && !useMeleeAttack && this.projectileSystem) {
                     // Check if player is in the direction the enemy is facing
                     const playerInFront = (enemy.facing === 'right' && playerCenter.x > enemyCenter) ||
                                          (enemy.facing === 'left' && playerCenter.x < enemyCenter);
@@ -123,11 +147,14 @@ class EnemySystem {
                         console.log(`🔥 Dragon ${enemy.id} cannot attack - player is behind (facing: ${enemy.facing})`);
                     }
                 }
+
+                // Store whether this is a melee attack for collision detection
+                enemy.currentAttackIsMelee = useMeleeAttack;
             }
         }
 
-        // Check enemy attack collision with player (for melee attacks only)
-        if (enemy.isAttacking && enemy.attackType !== 'ranged') {
+        // Check enemy attack collision with player (for melee attacks)
+        if (enemy.isAttacking && (enemy.attackType !== 'ranged' || enemy.currentAttackIsMelee)) {
             const attackCollision = this.collisions.checkEnemyAttackCollision(enemy, player);
             if (attackCollision && !player.isDamaged) {
                 // Damage player using player's takeDamage method

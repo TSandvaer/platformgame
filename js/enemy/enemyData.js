@@ -86,6 +86,31 @@ class EnemyData {
                     hurt: { file: 'HURT.png', frames: 4, frameWidth: 158, frameHeight: 125 },
                     death: { file: 'DEATH.png', frames: 4, frameWidth: 158, frameHeight: 125 }
                 }
+            },
+            adultDragon: {
+                name: 'Adult Dragon',
+                spriteFolder: 'sprites/Mattz Art/Dragon 2D Pixel Art v1.2/Sprites/without_outline',
+                defaultHealth: 250,
+                defaultDamage: 40,
+                fleeHealthThreshold: 0.15, // Flee when health drops below 15% (tougher than baby)
+                width: 100,  // Collision box width - covers large dragon body
+                height: 80, // Collision box height - covers large dragon body
+                scale: 1.5, // Visual sprite scale multiplier (make sprites larger)
+                renderOffsetY: 18, // Ground-based dragon (not floating)
+                collisionOffsetY: 0, // Collision box on ground
+                facingInverted: true, // Sprite faces opposite direction from orcs/skeletons
+                attackType: 'ranged', // Dragon shoots fire projectiles
+                attackRange: 300, // Ranged attack distance (longer than baby)
+                projectileSpeed: 350, // Fire projectile speed (faster than baby)
+                animations: {
+                    idle: { file: 'IDLE.png', frames: 9, frameWidth: 144, frameHeight: 96 },
+                    walk: { file: 'RUN.png', frames: 8, frameWidth: 144, frameHeight: 96 },
+                    attack: { file: 'ATTACK 2.png', frames: 17, frameWidth: 144, frameHeight: 96 }, // Default ranged
+                    attack_melee: { file: 'ATTACK 1.png', frames: 13, frameWidth: 144, frameHeight: 96 }, // Close range bite
+                    attack_ranged: { file: 'ATTACK 2.png', frames: 17, frameWidth: 144, frameHeight: 96 }, // Long range fire
+                    hurt: { file: 'HURT.png', frames: 3, frameWidth: 144, frameHeight: 96 },
+                    death: { file: 'DEATH.png', frames: 7, frameWidth: 144, frameHeight: 96 }
+                }
             }
         };
     }

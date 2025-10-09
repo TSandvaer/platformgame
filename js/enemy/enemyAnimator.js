@@ -35,6 +35,11 @@ class EnemyAnimator {
         const totalSprites = Object.keys(animations).length;
 
         for (const [animName, animData] of Object.entries(animations)) {
+            // Initialize sprite entry if it doesn't exist (for custom animations like attack_melee)
+            if (!this.sprites[animName]) {
+                this.sprites[animName] = { image: null, frames: 0, frameWidth: 100, frameHeight: 100 };
+            }
+
             const img = new Image();
             img.onload = () => {
                 loadedCount++;
@@ -92,7 +97,7 @@ class EnemyAnimator {
 
     setAnimation(animationName) {
         // Don't change animation if currently attacking (unless setting to attack)
-        if (this.enemy.isAttacking && animationName !== 'attack') {
+        if (this.enemy.isAttacking && !animationName.startsWith('attack')) {
             return false;
         }
 
@@ -110,11 +115,11 @@ class EnemyAnimator {
         return false;
     }
 
-    startAttack() {
+    startAttack(attackAnimation = 'attack') {
         if (!this.enemy.isAttacking && !this.enemy.isDead) {
             this.enemy.isAttacking = true;
             this.enemy.attackTimer = 0;
-            this.setAnimation('attack');
+            this.setAnimation(attackAnimation);
             return true;
         }
         return false;
