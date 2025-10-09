@@ -13,6 +13,26 @@ class NPCData {
                 animations: {
                     idle: { file: 'BLACKSMITH.png', frames: 7, frameWidth: 96, frameHeight: 96 }
                 }
+            },
+            alchemist: {
+                name: 'Alchemist',
+                spriteFolder: 'sprites/NPC',
+                width: 48,
+                height: 48,
+                scale: 1.0,
+                animations: {
+                    idle: { file: 'ALCHEMIST.png', frames: 8, frameWidth: 96, frameHeight: 96 }
+                }
+            },
+            enchanter: {
+                name: 'Enchanter',
+                spriteFolder: 'sprites/NPC',
+                width: 64,
+                height: 48,
+                scale: 1.0,
+                animations: {
+                    idle: { file: 'ENCHANTER.png', frames: 8, frameWidth: 128, frameHeight: 96 }
+                }
             }
         };
     }
