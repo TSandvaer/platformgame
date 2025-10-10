@@ -80,11 +80,11 @@ class PlayerCharacters {
                 },
 
                 // Visual scale - how much larger the sprite should be than the hitbox
-                visualScale: 1.3,  // Dwarf sprite renders at 1.3x (128*1.3=166, 96*1.3=125)
+                visualScale: 1.6,  // Dwarf sprite renders at 1.6x (128*1.6=205, 96*1.6=154)
 
                 // Sprite bottom offset - adjusts vertical position (in sprite pixels before scaling)
                 // Positive value moves sprite DOWN, negative moves UP
-                spriteBottomOffset: 23,  // Dwarf sprite adjustment - aligns feet with collision box bottom
+                spriteBottomOffset: 25,  // Dwarf sprite adjustment - aligns feet with collision box bottom
 
                 // Sprite facing - set to true if the sprite sheet faces left by default
                 invertFacing: true,  // Dwarf sprites face left, so invert the facing logic
