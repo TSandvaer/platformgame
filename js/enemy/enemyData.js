@@ -106,7 +106,7 @@ class EnemyData {
                     idle: { file: 'IDLE.png', frames: 9, frameWidth: 144, frameHeight: 96 },
                     walk: { file: 'RUN.png', frames: 8, frameWidth: 144, frameHeight: 96 },
                     attack: { file: 'ATTACK 2.png', frames: 17, frameWidth: 144, frameHeight: 96 }, // Default ranged
-                    attack_melee: { file: 'ATTACK 1.png', frames: 13, frameWidth: 144, frameHeight: 76 }, // Close range bite (1872x76)
+                    attack_melee: { file: 'ATTACK 1.png', frames: 13, frameWidth: 144, frameHeight: 96 }, // Close range bite (1872x96)
                     attack_ranged: { file: 'ATTACK 2.png', frames: 17, frameWidth: 144, frameHeight: 96 }, // Long range fire
                     hurt: { file: 'HURT.png', frames: 3, frameWidth: 144, frameHeight: 96 },
                     death: { file: 'DEATH.png', frames: 7, frameWidth: 144, frameHeight: 96 }
