@@ -723,6 +723,7 @@
     <script src="js/camera/cameraSystem.js"></script>
 
     <!-- Player System Scripts -->
+    <script src="js/player/playerCharacters.js"></script>
     <script src="js/player/playerData.js"></script>
     <script src="js/player/playerDataStorage.js"></script>
     <script src="js/player/playerInventorySystem.js"></script>
@@ -969,6 +970,32 @@
                         <button class="btn small" id="exportGameData">Export Game Data</button>
                         <input type="file" id="importGameData" accept=".json" style="display: none;">
                         <button class="btn small" id="importGameDataBtn">Import Game Data</button>
+                    </div>
+                </div>
+
+                <!-- Character Selection Section -->
+                <div class="section">
+                    <h3>Character Selection</h3>
+                    <div class="platform-editor">
+                        <h4>Choose Your Character</h4>
+
+                        <div class="property-row">
+                            <span class="property-label">Current Character:</span>
+                            <span id="currentCharacterName" style="color: #4CAF50; font-weight: bold;">Soldier</span>
+                        </div>
+
+                        <div id="characterSelectionGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin: 15px 0;">
+                            <!-- Character cards will be dynamically populated here -->
+                        </div>
+
+                        <div class="property-row">
+                            <button class="btn small" id="applyCharacterSelection">Apply Character</button>
+                            <button class="btn small" id="resetCharacterSelection">Reset to Soldier</button>
+                        </div>
+
+                        <div class="property-row">
+                            <span style="color: #888; font-size: 12px;">Character changes will take effect immediately</span>
+                        </div>
                     </div>
                 </div>
 

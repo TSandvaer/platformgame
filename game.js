@@ -25,6 +25,10 @@ class PlatformRPG {
         this.lastTime = 0;
         this.deltaTime = 0;
 
+        // Initialize player characters (global instance for character selection)
+        window.playerCharacters = new PlayerCharacters();
+        console.log('🎮 Player characters initialized:', window.playerCharacters.getCharacterIds());
+
         // Initialize player system
         this.playerSystem = new PlayerSystem();
         this.playerSystem.init();

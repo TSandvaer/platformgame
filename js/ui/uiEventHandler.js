@@ -1021,6 +1021,188 @@ class UIEventHandler {
         console.log('🔄 GUI settings reset to defaults');
     }
 
+    setupCharacterSelectionListeners() {
+        // Load current character values into the controls
+        this.loadCharacterValues();
+
+        // Apply Character button
+        const applyBtn = document.getElementById('applyCharacterSelection');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.applyCharacterSelection();
+            });
+        }
+
+        // Reset Character button
+        const resetBtn = document.getElementById('resetCharacterSelection');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetCharacterSelection();
+            });
+        }
+    }
+
+    loadCharacterValues() {
+        if (!this.game.playerSystem || !this.game.playerSystem.data) {
+            console.warn('⚠️ Player system not available for loading character values');
+            return;
+        }
+
+        const player = this.game.playerSystem.data;
+        const currentCharacter = player.selectedCharacter || 'soldier';
+
+        // Update current character display
+        const currentCharacterName = document.getElementById('currentCharacterName');
+        if (currentCharacterName && window.playerCharacters) {
+            const charConfig = window.playerCharacters.getCharacter(currentCharacter);
+            currentCharacterName.textContent = charConfig.name;
+        }
+
+        // Render character selection grid
+        this.renderCharacterSelectionGrid(currentCharacter);
+    }
+
+    renderCharacterSelectionGrid(selectedCharacterId) {
+        const gridContainer = document.getElementById('characterSelectionGrid');
+        if (!gridContainer || !window.playerCharacters) return;
+
+        const characters = window.playerCharacters.getAllCharacters();
+        this.selectedCharacterId = selectedCharacterId || 'soldier';
+
+        let html = '';
+
+        characters.forEach(character => {
+            const isSelected = this.selectedCharacterId === character.id;
+            html += `<div class="character-card ${isSelected ? 'selected' : ''}" data-character-id="${character.id}" style="
+                cursor: pointer;
+                padding: 12px;
+                background-color: ${isSelected ? '#2a4a2a' : '#333'};
+                border: 2px solid ${isSelected ? '#4CAF50' : '#555'};
+                border-radius: 6px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.2s;
+            ">
+                <div style="font-weight: bold; color: ${isSelected ? '#4CAF50' : '#fff'}; font-size: 14px;">
+                    ${character.name}
+                </div>
+                <div style="color: #aaa; font-size: 11px; text-align: center;">
+                    ${character.description}
+                </div>
+                <div style="color: #888; font-size: 10px;">
+                    Size: ${character.playerSize.width}x${character.playerSize.height}
+                </div>
+                ${isSelected ? '<div style="color: #4CAF50; font-size: 11px; font-weight: bold;">✓ Selected</div>' : ''}
+            </div>`;
+        });
+
+        gridContainer.innerHTML = html;
+
+        // Add hover effects style
+        const style = document.createElement('style');
+        style.textContent = `
+            .character-card:hover {
+                background-color: #3a3a3a !important;
+                border-color: #777 !important;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+            .character-card.selected:hover {
+                background-color: #2a4a2a !important;
+                border-color: #4CAF50 !important;
+            }
+        `;
+        if (!document.getElementById('characterCardStyles')) {
+            style.id = 'characterCardStyles';
+            document.head.appendChild(style);
+        }
+
+        // Add click handlers
+        gridContainer.querySelectorAll('.character-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const characterId = card.dataset.characterId;
+                this.selectCharacter(characterId);
+            });
+        });
+    }
+
+    selectCharacter(characterId) {
+        this.selectedCharacterId = characterId;
+
+        // Update visual selection
+        document.querySelectorAll('.character-card').forEach(card => {
+            const isSelected = card.dataset.characterId === characterId;
+            card.classList.toggle('selected', isSelected);
+            card.style.backgroundColor = isSelected ? '#2a4a2a' : '#333';
+            card.style.borderColor = isSelected ? '#4CAF50' : '#555';
+
+            // Update text color for character name
+            const nameDiv = card.querySelector('div');
+            if (nameDiv) {
+                nameDiv.style.color = isSelected ? '#4CAF50' : '#fff';
+            }
+
+            // Add or remove checkmark
+            const existingCheck = card.querySelector('.character-check');
+            if (existingCheck) {
+                existingCheck.remove();
+            }
+
+            if (isSelected) {
+                const checkmark = document.createElement('div');
+                checkmark.className = 'character-check';
+                checkmark.style.cssText = 'color: #4CAF50; font-size: 11px; font-weight: bold;';
+                checkmark.textContent = '✓ Selected';
+                card.appendChild(checkmark);
+            }
+        });
+
+        console.log(`Selected character: ${characterId}`);
+    }
+
+    applyCharacterSelection() {
+        if (!this.selectedCharacterId) {
+            console.warn('No character selected');
+            return;
+        }
+
+        if (!this.game.playerSystem || !window.playerCharacters) {
+            console.error('Cannot apply character selection - system not ready');
+            return;
+        }
+
+        const characterConfig = window.playerCharacters.getCharacter(this.selectedCharacterId);
+
+        // Update player data
+        this.game.playerSystem.data.selectedCharacter = this.selectedCharacterId;
+
+        // Switch character sprites and dimensions
+        this.game.playerSystem.animator.switchCharacter(this.selectedCharacterId);
+
+        // Update current character display
+        const currentCharacterName = document.getElementById('currentCharacterName');
+        if (currentCharacterName) {
+            currentCharacterName.textContent = characterConfig.name;
+        }
+
+        // Save to localStorage via gameDataSystem
+        if (this.game.gameDataSystem) {
+            this.game.gameDataSystem.updateCharacterSettings({
+                selectedCharacter: this.selectedCharacterId
+            });
+        }
+
+        console.log(`✅ Character changed to: ${characterConfig.name}`);
+    }
+
+    resetCharacterSelection() {
+        this.selectCharacter('soldier');
+        this.applyCharacterSelection();
+        console.log('🔄 Character reset to Soldier');
+    }
+
     healPlayer() {
         if (!this.game.playerSystem || !this.game.playerSystem.data) return;
 
@@ -1170,6 +1352,8 @@ class UIEventHandler {
                     modal.style.display = 'flex';
                     // Refresh inventory items list when modal opens
                     this.refreshInventoryItemsList();
+                    // Refresh character selection when modal opens
+                    this.loadCharacterValues();
                 }
             });
         }
@@ -1436,6 +1620,7 @@ class UIEventHandler {
         this.setupSceneEditorListeners();
         this.setupPropsEditorListeners();
         this.setupLootablesEditorListeners();
+        this.setupCharacterSelectionListeners();
 
         // Initialize enemy UI
         this.updateEnemyList();

@@ -42,6 +42,9 @@ class GameDataSystem {
                 walkSpeed: 5,
                 runSpeed: 10,
                 jumpForce: 15
+            },
+            characterSettings: {
+                selectedCharacter: 'soldier' // Default character
             }
         };
 
@@ -56,10 +59,11 @@ class GameDataSystem {
         this.importer.initialize();
         this.validator.initialize();
 
-        // Load saved data from localStorage (especially gameSettings, playerSettings, and GUISettings)
+        // Load saved data from localStorage (especially gameSettings, playerSettings, GUISettings, and characterSettings)
         this.loadSavedGameSettings();
         this.loadSavedPlayerSettings();
         this.loadSavedGUISettings();
+        this.loadSavedCharacterSettings();
 
         // Set up event listeners
         this.setupEventListeners();
@@ -327,6 +331,70 @@ class GameDataSystem {
         this.applyGUITheme(guiSettings.theme);
     }
 
+    // Load just the characterSettings from localStorage
+    loadSavedCharacterSettings() {
+        console.log('🔄 loadSavedCharacterSettings() called');
+        try {
+            const savedData = this.storage.loadFromLocalStorage();
+            console.log('🔄 Retrieved saved data from localStorage:', savedData ? 'Found' : 'Not found');
+
+            if (savedData && savedData.characterSettings) {
+                console.log('🔄 Found saved character settings:', savedData.characterSettings);
+
+                // Apply only the characterSettings
+                this.gameData.characterSettings = savedData.characterSettings;
+
+                // Apply character settings immediately if player system exists
+                if (this.game.playerSystem && this.game.playerSystem.data) {
+                    console.log('🔄 Player system available - applying character settings to player');
+                    const player = this.game.playerSystem.data;
+                    const settings = savedData.characterSettings;
+
+                    // Apply saved character to player
+                    const selectedCharacter = settings.selectedCharacter || 'soldier';
+                    player.selectedCharacter = selectedCharacter;
+
+                    // Switch character if animator is ready
+                    if (this.game.playerSystem.animator && window.playerCharacters) {
+                        this.game.playerSystem.animator.switchCharacter(selectedCharacter);
+                        console.log(`✅ Loaded and applied saved character: ${selectedCharacter}`);
+                    } else {
+                        console.warn('⚠️ Animator not ready yet - character will load on next init');
+                    }
+                } else {
+                    console.warn('⚠️ Player system not available yet - settings loaded but not applied');
+                }
+            } else {
+                console.log('ℹ️ No saved character settings found - using defaults');
+            }
+        } catch (error) {
+            console.error('Error loading character settings:', error);
+        }
+    }
+
+    updateCharacterSettings(characterSettings) {
+        if (!characterSettings) {
+            console.warn('⚠️ updateCharacterSettings called with no settings');
+            return;
+        }
+
+        console.log('💾 Updating character settings in gameDataSystem:', characterSettings);
+
+        // Update the in-memory gameData
+        this.gameData.characterSettings = { ...this.gameData.characterSettings, ...characterSettings };
+
+        console.log('💾 Updated in-memory characterSettings:', this.gameData.characterSettings);
+
+        // Update only characterSettings in localStorage
+        const success = this.storage.updateCharacterSettings(this.gameData.characterSettings);
+
+        if (success) {
+            console.log('✅ Character settings successfully saved to localStorage');
+        } else {
+            console.error('❌ Failed to save character settings to localStorage');
+        }
+    }
+
     // Apply GUI theme to the interface
     applyGUITheme(theme) {
         const body = document.body;
@@ -428,7 +496,8 @@ class GameDataSystem {
             },
             playerSettings: this.gameData.playerSettings || this.defaultGameData.playerSettings,
             inventoryItems: this.gameData.inventoryItems || [],
-            GUISettings: this.gameData.GUISettings || this.defaultGameData.GUISettings
+            GUISettings: this.gameData.GUISettings || this.defaultGameData.GUISettings,
+            characterSettings: this.gameData.characterSettings || this.defaultGameData.characterSettings
         };
     }
 

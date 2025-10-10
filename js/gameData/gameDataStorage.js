@@ -142,6 +142,29 @@ class GameDataStorage {
         return false;
     }
 
+    // Update only the characterSettings in localStorage
+    updateCharacterSettings(characterSettings) {
+        try {
+            console.log('🗄️ Storage: Attempting to update character settings in localStorage');
+            const dataStr = localStorage.getItem(this.storageKey);
+            if (dataStr) {
+                console.log('🗄️ Storage: Found existing game data in localStorage');
+                const gameData = JSON.parse(dataStr);
+                console.log('🗄️ Storage: Current characterSettings in localStorage:', gameData.characterSettings);
+                gameData.characterSettings = characterSettings;
+                console.log('🗄️ Storage: New characterSettings to save:', characterSettings);
+                localStorage.setItem(this.storageKey, JSON.stringify(gameData));
+                console.log('✅ Storage: Character settings successfully written to localStorage');
+                return true;
+            } else {
+                console.warn('⚠️ Storage: No existing game data found in localStorage');
+            }
+        } catch (error) {
+            console.error('❌ Storage: Error updating character settings in localStorage:', error);
+        }
+        return false;
+    }
+
     // Load from localStorage
     loadFromLocalStorage() {
         try {

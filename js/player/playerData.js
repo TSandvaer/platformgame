@@ -17,6 +17,7 @@ class PlayerData {
         // Visual properties
         this.color = '#FF6B6B';
         this.facing = 'right';
+        this.selectedCharacter = 'soldier'; // Default character
 
         // Animation state
         this.currentAnimation = 'idle';

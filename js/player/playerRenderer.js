@@ -26,15 +26,25 @@ class PlayerRenderer {
         // Disable image smoothing for crisp pixel art
         ctx.imageSmoothingEnabled = false;
 
-        // Calculate sprite render dimensions with pixel-perfect scaling
-        const baseSpriteSize = 100; // Match actual sprite dimensions (100x100)
-        const playerScale = (this.data.width / 35) * 2.56; // Scale to maintain original size (256/100 = 2.56)
+        // Get actual sprite frame dimensions from the current frame
+        const baseSpriteWidth = frame.frameWidth;
+        const baseSpriteHeight = frame.frameHeight;
+
+        // Get the visual scale from the character config (via animator)
+        // Default to 2.6 if not available (for backward compatibility)
+        const visualScale = this.animator.characterConfig?.visualScale || 2.6;
+
+        // Apply the character-specific visual scale
+        const scale = visualScale;
 
         // Round dimensions to avoid fractional pixels for sharper rendering
-        const spriteRenderWidth = Math.round(baseSpriteSize * playerScale);
-        const spriteRenderHeight = Math.round(baseSpriteSize * playerScale);
+        const spriteRenderWidth = Math.round(baseSpriteWidth * scale);
+        const spriteRenderHeight = Math.round(baseSpriteHeight * scale);
         const spriteOffsetX = Math.round((this.data.width - spriteRenderWidth) / 2);
-        const spriteOffsetY = Math.round(this.data.height - spriteRenderHeight + (43 * playerScale)); // Adjusted for 100px sprite (110/2.56 ≈ 43)
+
+        // Get sprite bottom offset from character config (in sprite pixels, will be scaled)
+        const spriteBottomOffset = this.animator.characterConfig?.spriteBottomOffset || 0;
+        const spriteOffsetY = Math.round(this.data.height - spriteRenderHeight + (spriteBottomOffset * scale));
 
         // Handle kill effects
         let renderY = this.data.y + spriteOffsetY;
@@ -55,8 +65,12 @@ class PlayerRenderer {
 
         // Note: Damage visual effect now handled by hurt animation sprite
 
-        // Flip sprite horizontally if facing left
-        if (this.data.facing === 'left') {
+        // Check if sprite facing should be inverted (for sprite sheets that face left by default)
+        const invertFacing = this.animator.characterConfig?.invertFacing || false;
+        const shouldFlip = invertFacing ? (this.data.facing === 'right') : (this.data.facing === 'left');
+
+        // Flip sprite horizontally based on facing direction
+        if (shouldFlip) {
             ctx.scale(-1, 1);
             ctx.drawImage(
                 frame.image,

@@ -1,6 +1,7 @@
 class PlayerAnimator {
     constructor(data) {
         this.data = data;
+        this.characterConfig = null; // Will be set during initialization
         this.sprites = {
             idle: { image: null, frames: 6, frameWidth: 100, frameHeight: 100 },
             walk: { image: null, frames: 8, frameWidth: 100, frameHeight: 100 },
@@ -9,16 +10,105 @@ class PlayerAnimator {
             death: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 }
         };
         this.spritesLoaded = false;
+
+        // Initialize with default character (will be overridden by saved settings)
+        this.initializeCharacter(this.data.selectedCharacter || 'soldier');
+    }
+
+    // Initialize character sprites based on character ID
+    initializeCharacter(characterId) {
+        // Get character configuration
+        if (!window.playerCharacters) {
+            console.error('PlayerCharacters not loaded! Loading default soldier sprites.');
+            this.loadDefaultSoldierSprites();
+            return;
+        }
+
+        this.characterConfig = window.playerCharacters.getCharacter(characterId);
+        console.log(`Initializing character: ${this.characterConfig.name}`);
+
+        // Load sprites for this character
         this.loadSprites();
     }
 
+    // Switch to a different character
+    switchCharacter(characterId) {
+        console.log(`Switching character to: ${characterId}`);
+        this.spritesLoaded = false;
+        this.initializeCharacter(characterId);
+
+        // Update player data dimensions
+        if (this.characterConfig) {
+            this.data.width = this.characterConfig.playerSize.width;
+            this.data.height = this.characterConfig.playerSize.height;
+            this.data.attackDuration = this.characterConfig.attackDuration;
+        }
+    }
+
     loadSprites() {
+        if (!this.characterConfig) {
+            console.error('No character config available');
+            return;
+        }
+
+        const config = this.characterConfig;
+        const basePath = config.spriteBasePath;
+
+        // Build sprite paths from character configuration
+        const spritePaths = {};
+        const spriteConfigs = {};
+
+        for (const [animKey, animConfig] of Object.entries(config.animations)) {
+            spritePaths[animKey] = `${basePath}/${animConfig.file}`;
+            spriteConfigs[animKey] = {
+                frames: animConfig.frames,
+                frameWidth: config.spriteSize.frameWidth,
+                frameHeight: config.spriteSize.frameHeight,
+                frameRate: animConfig.frameRate
+            };
+        }
+
+        let loadedCount = 0;
+        const totalSprites = Object.keys(spritePaths).length;
+
+        // Update sprite configurations
+        for (const [key, spriteConfig] of Object.entries(spriteConfigs)) {
+            this.sprites[key].frames = spriteConfig.frames;
+            this.sprites[key].frameWidth = spriteConfig.frameWidth;
+            this.sprites[key].frameHeight = spriteConfig.frameHeight;
+        }
+
+        // Load sprite images
+        for (const [key, path] of Object.entries(spritePaths)) {
+            const img = new Image();
+            img.onload = () => {
+                loadedCount++;
+                console.log(`Loaded player sprite: ${key} for ${config.name}`);
+                if (loadedCount === totalSprites) {
+                    this.spritesLoaded = true;
+                    console.log(`All player sprites loaded successfully for ${config.name}`);
+                }
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load player sprite: ${key} from ${path}`);
+                loadedCount++;
+                if (loadedCount === totalSprites) {
+                    console.log('Player sprite loading complete (with some failures)');
+                }
+            };
+            img.src = path;
+            this.sprites[key].image = img;
+        }
+    }
+
+    // Fallback to load default soldier sprites if PlayerCharacters isn't available
+    loadDefaultSoldierSprites() {
         const spritePaths = {
-            idle: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
-            walk: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
-            attack: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
-            hurt: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
-            death: 'sprites/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
+            idle: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
+            walk: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
+            attack: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
+            hurt: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
+            death: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
         };
 
         let loadedCount = 0;
