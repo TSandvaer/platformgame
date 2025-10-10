@@ -360,8 +360,8 @@ class PlayerData {
 
         console.log(`Player took ${amount} damage. Health: ${this.health}/${this.maxHealth}`);
 
-        // Trigger hurt animation if available
-        if (this.health > 0 && this.currentAnimation !== 'hurt') {
+        // Trigger hurt animation if available (but not if currently attacking)
+        if (this.health > 0 && this.currentAnimation !== 'hurt' && !this.isAttacking) {
             this.currentAnimation = 'hurt';
             this.frameIndex = 0;
             this.frameTimer = 0;
