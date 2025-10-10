@@ -218,20 +218,51 @@ class InputKeyboard {
     }
 
     handleDelete() {
-        // Delete selected platforms (if platform multi-selection is supported)
+        // Delete selected platforms (multi-selection)
         if (this.game.platformSystem.getSelectedPlatforms) {
             const selectedPlatforms = this.game.platformSystem.getSelectedPlatforms();
-            if (selectedPlatforms.length > 0) {
-                selectedPlatforms.forEach(platform => {
-                    const index = this.game.platformSystem.platforms.indexOf(platform);
-                    if (index > -1) {
-                        this.game.platformSystem.platforms.splice(index, 1);
-                    }
-                });
-                this.game.platformSystem.clearSelection();
-                this.game.showFeedbackMessage(`Deleted ${selectedPlatforms.length} platform(s)`);
+            if (selectedPlatforms && selectedPlatforms.length > 0) {
+                const count = selectedPlatforms.length;
+                const message = count === 1 ?
+                    'Delete this platform? This cannot be undone.' :
+                    `Delete ${count} platforms? This cannot be undone.`;
+
+                // Show confirmation modal before deleting
+                if (this.game.uiEventHandler) {
+                    this.game.uiEventHandler.showConfirmationModal(
+                        message,
+                        () => {
+                            // On confirm - delete platforms
+                            selectedPlatforms.forEach(platform => {
+                                const index = this.game.platformSystem.platforms.indexOf(platform);
+                                if (index > -1) {
+                                    this.game.platformSystem.platforms.splice(index, 1);
+                                }
+                            });
+                            this.game.platformSystem.clearSelection();
+                            this.game.showFeedbackMessage(`Deleted ${count} platform(s)`);
+                        }
+                    );
+                }
                 return;
             }
+        }
+
+        // Delete single selected platform
+        if (this.game.platformSystem.selectedPlatform) {
+            const selectedPlatform = this.game.platformSystem.selectedPlatform;
+            // Show confirmation modal before deleting
+            if (this.game.uiEventHandler) {
+                this.game.uiEventHandler.showConfirmationModal(
+                    'Delete this platform? This cannot be undone.',
+                    () => {
+                        // On confirm - delete platform
+                        this.game.platformSystem.deleteSelectedPlatform();
+                        this.game.showFeedbackMessage('Deleted 1 platform');
+                    }
+                );
+            }
+            return;
         }
 
         // Delete selected props

@@ -93,7 +93,16 @@ class UIEventHandler {
         });
 
         document.getElementById('deletePlatform').addEventListener('click', () => {
-            this.game.platformSystem.deleteSelectedPlatform();
+            const selectedPlatform = this.game.platformSystem.selectedPlatform;
+            if (selectedPlatform) {
+                this.showConfirmationModal(
+                    'Delete this platform? This cannot be undone.',
+                    () => {
+                        // On confirm
+                        this.game.platformSystem.deleteSelectedPlatform();
+                    }
+                );
+            }
         });
 
         // Draw platform movement zone button

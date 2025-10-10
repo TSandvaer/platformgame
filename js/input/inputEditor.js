@@ -27,12 +27,7 @@ class InputEditor {
             });
         }
 
-        const deletePlatformBtn = document.getElementById('deletePlatform');
-        if (deletePlatformBtn) {
-            deletePlatformBtn.addEventListener('click', () => {
-                this.game.platformSystem.deleteSelectedPlatform();
-            });
-        }
+        // Note: deletePlatform button is now handled by uiEventHandler.js with confirmation modal
 
         const platformPositioning = document.getElementById('platformPositioning');
         if (platformPositioning) {
