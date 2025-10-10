@@ -1303,6 +1303,22 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal no-theme" style="display: none;">
+        <div class="modal-content no-theme" style="width: 400px; max-width: 90%; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <div class="modal-header">
+                <h3 id="confirmationModalTitle">Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationModalMessage" style="margin: 20px 0; font-size: 14px; line-height: 1.5;"></p>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; padding: 15px; border-top: 1px solid #444;">
+                <button class="btn small" id="confirmationModalOK">OK</button>
+                <button class="btn small danger" id="confirmationModalCancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Game Script -->
     <script src="game.js"></script>
 </body>

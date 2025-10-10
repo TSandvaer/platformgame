@@ -265,12 +265,40 @@ class InputKeyboard {
                 const msgY = firstLootable ? firstLootable.y : null;
                 this.game.lootableSystem.deleteSelectedLootables();
                 this.game.showFeedbackMessage(`Deleted ${count} lootable(s)`, msgX, msgY);
+                return; // Early return after handling lootables
             } else if (selectedLootable) {
                 // Get position of selected lootable for feedback message (before deletion)
                 const msgX = selectedLootable.x;
                 const msgY = selectedLootable.y;
                 this.game.lootableSystem.deleteSelectedLootable();
                 this.game.showFeedbackMessage('Deleted 1 lootable', msgX, msgY);
+                return; // Early return after handling lootable
+            }
+        }
+
+        // Delete selected enemy
+        if (this.game.enemySystem && this.game.enemySystem.getSelectedEnemy) {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                // Show confirmation modal before deleting
+                if (this.game.uiEventHandler) {
+                    this.game.uiEventHandler.showConfirmationModal(
+                        'Delete this enemy? This cannot be undone.',
+                        () => {
+                            // On confirm - delete enemy
+                            const msgX = selectedEnemy.x;
+                            const msgY = selectedEnemy.y;
+                            this.game.enemySystem.removeEnemyFromScene(selectedEnemy.id);
+                            this.game.showFeedbackMessage('Deleted 1 enemy', msgX, msgY);
+
+                            // Update UI
+                            if (this.game.uiEventHandler) {
+                                this.game.uiEventHandler.updateEnemyList();
+                                this.game.uiEventHandler.updateEnemyProperties();
+                            }
+                        }
+                    );
+                }
             }
         }
     }
