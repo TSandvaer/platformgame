@@ -17,54 +17,54 @@ class PlatformRenderer {
             transparent: { tileset: 'none', tileX: -2, tileY: -2 }, // Special transparent type
 
             // Stone/Rock textures (examining first few rows for stone-like textures)
-            cobblestone: { tileset: 'tileset', tileX: 6, tileY: 1 }, // Actually cobblestone texture
-            darkStone: { tileset: 'tileset', tileX: 1, tileY: 0 }, // Dark stone variation
-            lightStone: { tileset: 'tileset', tileX: 2, tileY: 0 }, // Light stone variation
-            bricks: { tileset: 'tileset', tileX: 0, tileY: 3 }, // Actually brick pattern
-            roughStone: { tileset: 'tileset', tileX: 3, tileY: 0 }, // Rough stone
+            cobblestone: { tileset: 'tileset', tileX: 1, tileY: 1 }, // Actually cobblestone texture
+            darkStone: { tileset: 'tileset', tileX: 4, tileY: 5 }, // Dark stone variation
+            lightStone: { tileset: 'tileset', tileX: 0, tileY: 5 }, // Light stone variation
+            bricks: { tileset: 'tileset', tileX: 4, tileY: 3 }, // Actually brick pattern
+            roughStone: { tileset: 'tileset', tileX: 22, tileY: 4 }, // Rough stone
 
             // Ground/Dirt textures (looking for brown/earthy textures)
             dirt: { tileset: 'tileset', tileX: 21, tileY: 22 }, // Brown/dirt texture
             grass: { tileset: 'tileset', tileX: 20, tileY: 22 }, // Green grass-like texture
-            sand: { tileset: 'tileset', tileX: 2, tileY: 2 }, // Sandy/tan texture
-            mud: { tileset: 'tileset', tileX: 3, tileY: 2 }, // Darker mud texture
+            sand: { tileset: 'tileset', tileX: 6, tileY: 4 }, // Sandy/tan texture
+            mud: { tileset: 'tileset', tileX: 17, tileY: 4 }, // Darker mud texture
 
             // Wood textures
-            wood: { tileset: 'tileset', tileX: 4, tileY: 1 }, // Wood plank texture
-            darkWood: { tileset: 'tileset', tileX: 5, tileY: 1 }, // Dark wood variation
-            logs: { tileset: 'tileset', tileX: 4, tileY: 0 }, // Log-like texture
+            wood: { tileset: 'tileset', tileX: 1, tileY: 9 }, // Wood plank texture
+            darkWood: { tileset: 'tileset', tileX: 5, tileY: 9 }, // Dark wood variation
+            logs: { tileset: 'tileset', tileX: 4, tileY: 9 }, // Log-like texture
             box: {tileset: 'tileset', tileX: 0, tileY: 11},
 
             // Ice/Crystal textures
-            ice: { tileset: 'tileset', tileX: 7, tileY: 3 }, // Blue ice-like texture
-            crystal: { tileset: 'tileset', tileX: 6, tileY: 3 }, // Crystal/gem texture
+            ice: { tileset: 'tileset', tileX: 8, tileY: 8 }, // Blue ice-like texture
+            crystal: { tileset: 'tileset', tileX: 9, tileY: 6 }, // Crystal/gem texture
 
             // Metal textures
-            metal: { tileset: 'tileset', tileX: 5, tileY: 0 }, // Metal/steel texture
-            rust: { tileset: 'tileset', tileX: 7, tileY: 0 }, // Rusty metal texture
+            metal: { tileset: 'tileset', tileX: 4, tileY: 2 }, // Metal/steel texture
+            rust: { tileset: 'tileset', tileX: 10, tileY: 4 }, // Rusty metal texture
 
             // Mossy/overgrown textures
-            moss: { tileset: 'tileset', tileX: 0, tileY: 2 }, // Mossy stone
-            vines: { tileset: 'tileset', tileX: 7, tileY: 1 }, // Vine-covered texture
+            moss: { tileset: 'tileset', tileX: 2, tileY: 24 }, // Mossy stone
+            vines: { tileset: 'tileset', tileX: 22, tileY: 23 }, // Vine-covered texture
 
             // Fancy/decorative textures
-            gold: { tileset: 'tileset', tileX: 6, tileY: 2 }, // Gold/fancy texture
-            pattern: { tileset: 'tileset', tileX: 5, tileY: 3 }, // Decorative pattern
+            gold: { tileset: 'tileset', tileX: 23, tileY: 13 }, // Gold/fancy texture
+            pattern: { tileset: 'tileset', tileX: 5, tileY: 19 }, // Decorative pattern
 
             // Path/Road textures
-            path: { tileset: 'tileset', tileX: 3, tileY: 1 }, // Path/road texture
-            tiles: { tileset: 'tileset', tileX: 2, tileY: 3 }, // Tile flooring
+            path: { tileset: 'tileset', tileX: 9, tileY: 24 }, // Path/road texture
+            tiles: { tileset: 'tileset', tileX: 6, tileY: 18 }, // Tile flooring
 
             // Natural stone variations
-            granite: { tileset: 'tileset', tileX: 6, tileY: 0 }, // Granite-like texture
-            slate: { tileset: 'tileset', tileX: 1, tileY: 3 }, // Slate/shale texture
-            sandstone: { tileset: 'tileset', tileX: 3, tileY: 3 }, // Sandstone texture
-            limestone: { tileset: 'tileset', tileX: 4, tileY: 3 }, // Limestone texture
+            granite: { tileset: 'tileset', tileX: 19, tileY: 3 }, // Granite-like texture
+            slate: { tileset: 'tileset', tileX: 19, tileY: 7 }, // Slate/shale texture
+            sandstone: { tileset: 'tileset', tileX: 8, tileY: 4 }, // Sandstone texture
+            limestone: { tileset: 'tileset', tileX: 3, tileY: 4 }, // Limestone texture
 
             // Special/Magic textures
             lava: { tileset: 'tileset', tileX: 7, tileY: 13 }, // Lava/hot texture
-            magic: { tileset: 'tileset', tileX: 5, tileY: 2 }, // Magical/glowing texture
-            water: { tileset: 'tileset', tileX: 4, tileY: 2 }, // Water texture
+            magic: { tileset: 'tileset', tileX: 18, tileY: 7 }, // Magical/glowing texture
+            water: { tileset: 'tileset', tileX: 5, tileY: 6 }, // Water texture
 
             // Village Props tileset options
             roof: { tileset: 'villageProps', tileX: 0, tileY: 0 }, // Roof tiles
