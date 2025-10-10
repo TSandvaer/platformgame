@@ -28,6 +28,9 @@ class EnemyMouseHandler {
         this.mouseDownPosition = { x: 0, y: 0 };
         this.potentialDragEnemy = null;
         this.dragThreshold = 5; // pixels to move before starting drag
+
+        // Pending enemy type from modal
+        this.pendingEnemyType = null;
     }
 
     handleMouseDown(worldMouseX, worldMouseY, ctrlPressed = false, shiftPressed = false) {
@@ -163,9 +166,9 @@ class EnemyMouseHandler {
     }
 
     placeEnemy(mouseX, mouseY) {
-        // Get enemy type from UI
+        // Get enemy type from pending type (from modal) or fallback to dropdown (legacy)
         const enemyTypeSelect = document.getElementById('enemyTypeSelect');
-        const enemyType = enemyTypeSelect ? enemyTypeSelect.value : 'orc';
+        const enemyType = this.pendingEnemyType || (enemyTypeSelect ? enemyTypeSelect.value : 'orc');
 
         // Spawn enemy exactly like player start point - at click position and let it fall naturally
         const spawnY = mouseY;
@@ -198,11 +201,17 @@ class EnemyMouseHandler {
             window.uiEventHandler.updateEnemyList();
         }
 
-        // Exit placement mode
+        // Exit placement mode and clear pending type
         this.enemyPlacementMode = false;
+        this.pendingEnemyType = null;
         this.updatePlacementButton();
 
         return enemy;
+    }
+
+    setPendingEnemyType(enemyType) {
+        this.pendingEnemyType = enemyType;
+        console.log('🎯 Pending enemy type set to:', enemyType);
     }
 
     toggleEnemyPlacement() {

@@ -234,11 +234,8 @@ class UIEventHandler {
             });
         }
 
-        // Enemy controls
-        document.getElementById('addEnemyBtn').addEventListener('click', () => {
-            console.log('🎯 Add Enemy button clicked');
-            this.game.enemySystem.toggleEnemyPlacement();
-        });
+        // Enemy controls (Note: 'Add Enemy' button replaced by modal-based 'Open Enemy Editor' button)
+        // The event listener for 'openEnemiesEditorBtn' is in setupEnemiesEditorListeners()
 
         document.getElementById('clearEnemiesBtn').addEventListener('click', () => {
             if (confirm('Clear all enemies? This cannot be undone.')) {
@@ -1620,6 +1617,7 @@ class UIEventHandler {
         this.setupSceneEditorListeners();
         this.setupPropsEditorListeners();
         this.setupLootablesEditorListeners();
+        this.setupEnemiesEditorListeners();
         this.setupCharacterSelectionListeners();
 
         // Initialize enemy UI
@@ -2389,5 +2387,268 @@ class UIEventHandler {
         this.updateLootablePlacementUI();
 
         console.log(`Lootables editor: Selected ${selectedType} for placement`);
+    }
+
+    // Enemies Editor Modal Methods
+    setupEnemiesEditorListeners() {
+        // Open enemies editor button
+        const openBtn = document.getElementById('openEnemiesEditorBtn');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                this.openEnemiesEditorModal();
+            });
+        }
+
+        // Close enemies editor modal
+        const closeBtn = document.getElementById('closeEnemiesEditorModal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.closeEnemiesEditorModal();
+            });
+        }
+
+        // Click outside to close
+        const modal = document.getElementById('enemiesEditorModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeEnemiesEditorModal();
+                }
+            });
+        }
+
+        // Modal "Add Enemy" button
+        const modalAddBtn = document.getElementById('modalAddEnemyBtn');
+        if (modalAddBtn) {
+            modalAddBtn.addEventListener('click', () => {
+                this.addEnemyFromModal();
+            });
+        }
+    }
+
+    openEnemiesEditorModal() {
+        const modal = document.getElementById('enemiesEditorModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            this.renderEnemiesGrid();
+        }
+    }
+
+    closeEnemiesEditorModal() {
+        const modal = document.getElementById('enemiesEditorModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        // Clear selection
+        this.selectedModalEnemyType = null;
+        this.updateModalEnemyConfig();
+    }
+
+    renderEnemiesGrid() {
+        const container = document.querySelector('#enemiesGridContainer .enemies-grid');
+        if (!container) return;
+
+        const enemyData = this.game.enemySystem.data;
+        const enemies = enemyData.getEnemyTypes();
+
+        let html = '';
+
+        enemies.forEach(enemy => {
+            const isSelected = this.selectedModalEnemyType === enemy.id;
+            html += `<div class="enemy-grid-item ${isSelected ? 'selected' : ''}" data-enemy-id="${enemy.id}" style="
+                cursor: pointer;
+                padding: 6px;
+                background-color: ${isSelected ? '#2a4a2a' : '#333'};
+                border: 2px solid ${isSelected ? '#4CAF50' : 'transparent'};
+                border-radius: 4px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+                transition: all 0.2s;
+                min-height: 145px;
+            ">
+                <div style="                    
+                    height: 120px;                  
+                    border-radius: 3px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 4px;
+                    overflow: hidden;
+                ">
+                    <canvas class="enemy-thumbnail" data-enemy-id="${enemy.id}" width="100" height="120" style="image-rendering: pixelated; max-width: 100%; max-height: 100%; background: transparent;"></canvas>
+                </div>
+                <div style="font-size: 11px; color: #ccc; text-align: center; word-wrap: break-word; width: 100%;">${enemy.name}</div>
+            </div>`;
+        });
+
+        container.innerHTML = html;
+
+        // Add hover effects
+        const style = document.createElement('style');
+        style.textContent = `
+            .enemy-grid-item:hover {
+                background-color: #3a3a3a !important;
+                border-color: #666 !important;
+            }
+            .enemy-grid-item.selected:hover {
+                background-color: #2a4a2a !important;
+                border-color: #4CAF50 !important;
+            }
+        `;
+        if (!document.getElementById('enemiesGridStyles')) {
+            style.id = 'enemiesGridStyles';
+            document.head.appendChild(style);
+        }
+
+        // Render thumbnails
+        this.renderEnemyThumbnails();
+
+        // Add click handlers
+        container.querySelectorAll('.enemy-grid-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const enemyId = item.dataset.enemyId;
+                this.selectEnemyType(enemyId);
+            });
+        });
+    }
+
+    renderEnemyThumbnails() {
+        const enemyData = this.game.enemySystem.data;
+        const canvases = document.querySelectorAll('.enemy-thumbnail');
+
+        canvases.forEach(canvas => {
+            const enemyId = canvas.dataset.enemyId;
+            const enemyType = enemyData.enemyTypes[enemyId];
+
+            if (!enemyType) return;
+
+            // Load the idle sprite sheet for this enemy
+            const idleAnim = enemyType.animations.idle;
+            const spritePath = `${enemyType.spriteFolder}/${idleAnim.file}`;
+
+            const img = new Image();
+            img.onload = () => {
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                ctx.webkitImageSmoothingEnabled = false;
+                ctx.mozImageSmoothingEnabled = false;
+                ctx.msImageSmoothingEnabled = false;
+
+                // Calculate middle frame
+                const middleFrame = Math.floor(idleAnim.frames / 2);
+                const frameWidth = idleAnim.frameWidth;
+                const frameHeight = idleAnim.frameHeight;
+                const sourceX = middleFrame * frameWidth;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Calculate scaling to fit in 100x120 canvas, maintaining aspect ratio
+                const maxWidth = 100;
+                const maxHeight = 120;
+                let scale = Math.min(maxWidth / frameWidth, maxHeight / frameHeight, 2.5); // Allow up to 2.5x scale
+
+                // Make orc and skeleton double size
+                if (enemyId === 'orc' || enemyId === 'skeleton') {
+                    scale *= 2.0;
+                }
+
+                const renderWidth = frameWidth * scale;
+                const renderHeight = frameHeight * scale;
+
+                // Center the sprite in the canvas
+                const offsetX = (maxWidth - renderWidth) / 2;
+                const offsetY = (maxHeight - renderHeight) / 2;
+
+                // Handle sprites that face the opposite direction (facingInverted)
+                if (enemyType.facingInverted) {
+                    ctx.save();
+                    ctx.translate(maxWidth, 0);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(
+                        img,
+                        sourceX, 0, frameWidth, frameHeight,
+                        maxWidth - offsetX - renderWidth, offsetY, renderWidth, renderHeight
+                    );
+                    ctx.restore();
+                } else {
+                    // Draw the middle frame
+                    ctx.drawImage(
+                        img,
+                        sourceX, 0, frameWidth, frameHeight,
+                        offsetX, offsetY, renderWidth, renderHeight
+                    );
+                }
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load enemy sprite: ${spritePath}`);
+            };
+            img.src = spritePath;
+        });
+    }
+
+    selectEnemyType(enemyId) {
+        this.selectedModalEnemyType = enemyId;
+
+        // Update visual selection
+        document.querySelectorAll('.enemy-grid-item').forEach(item => {
+            const isSelected = item.dataset.enemyId === enemyId;
+            item.classList.toggle('selected', isSelected);
+            item.style.backgroundColor = isSelected ? '#2a4a2a' : '#333';
+            item.style.borderColor = isSelected ? '#4CAF50' : 'transparent';
+        });
+
+        // Update configuration panel
+        this.updateModalEnemyConfig();
+    }
+
+    updateModalEnemyConfig() {
+        const configDiv = document.getElementById('selectedEnemyConfig');
+        const noSelectionDiv = document.getElementById('noEnemySelected');
+        const enemyNameSpan = document.getElementById('selectedEnemyTypeName');
+        const enemyHealthSpan = document.getElementById('selectedEnemyHealth');
+        const enemyDamageSpan = document.getElementById('selectedEnemyDamage');
+
+        if (this.selectedModalEnemyType) {
+            const enemyType = this.game.enemySystem.data.enemyTypes[this.selectedModalEnemyType];
+            if (enemyType) {
+                configDiv.style.display = 'block';
+                noSelectionDiv.style.display = 'none';
+                enemyNameSpan.textContent = enemyType.name;
+                enemyHealthSpan.textContent = enemyType.defaultHealth;
+                enemyDamageSpan.textContent = enemyType.defaultDamage;
+            }
+        } else {
+            configDiv.style.display = 'none';
+            noSelectionDiv.style.display = 'block';
+        }
+    }
+
+    addEnemyFromModal() {
+        if (!this.selectedModalEnemyType) {
+            alert('Please select an enemy type first');
+            return;
+        }
+
+        // Save the selected type before closing modal (which clears it)
+        const selectedType = this.selectedModalEnemyType;
+
+        // Set pending enemy type in enemyMouseHandler
+        if (this.game.enemySystem && this.game.enemySystem.mouseHandler) {
+            this.game.enemySystem.mouseHandler.setPendingEnemyType(selectedType);
+        }
+
+        // Close modal
+        this.closeEnemiesEditorModal();
+
+        // Activate enemy placement mode
+        if (this.game.enemySystem && this.game.enemySystem.mouseHandler) {
+            this.game.enemySystem.mouseHandler.enemyPlacementMode = true;
+            this.game.enemySystem.mouseHandler.updatePlacementButton();
+        }
+
+        console.log(`Enemies editor: Selected ${selectedType} for placement`);
     }
 }

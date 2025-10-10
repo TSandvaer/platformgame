@@ -313,4 +313,19 @@ class EnemyData {
             y: enemy.y + enemy.height / 2
         };
     }
+
+    // Get all enemy types for UI display (excluding aliases)
+    getEnemyTypes() {
+        return Object.entries(this.enemyTypes)
+            .filter(([key]) => key !== 'dragon') // Exclude dragon alias
+            .map(([key, data]) => ({
+                id: key,
+                name: data.name,
+                spriteFolder: data.spriteFolder,
+                idleAnimation: data.animations.idle,
+                defaultHealth: data.defaultHealth,
+                defaultDamage: data.defaultDamage,
+                facingInverted: data.facingInverted || false
+            }));
+    }
 }

@@ -509,16 +509,7 @@
                 <div class="platform-editor" id="enemyEditor">
                     <h4>Enemy Manager</h4>
                     <div class="property-row">
-                        <span class="property-label">Enemy Type:</span>
-                        <select id="enemyTypeSelect" style="width: 100px;">
-                            <option value="orc">Orc</option>
-                            <option value="skeleton">Skeleton</option>
-                            <option value="babyDragon">Baby Dragon</option>
-                            <option value="adultDragon">Adult Dragon</option>
-                        </select>
-                    </div>
-                    <div class="property-row">
-                        <button class="btn small" id="addEnemyBtn">Add Enemy (Click on map)</button>
+                        <button class="btn small" id="openEnemiesEditorBtn">Open Enemy Editor</button>
                     </div>
                     <div class="property-row">
                         <button class="btn small danger" id="clearEnemiesBtn">Clear All Enemies</button>
@@ -1263,6 +1254,49 @@
                     </div>
                     <div id="noPropSelected" style="color: #888; font-size: 12px; text-align: center; padding: 20px;">
                         Select a prop from the grid above to configure it
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enemies Editor Modal -->
+    <div id="enemiesEditorModal" class="modal no-theme" style="display: none;">
+        <div class="modal-content no-theme" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>Enemies Editor</h3>
+                <button class="modal-close" id="closeEnemiesEditorModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Enemy Selection Grid -->
+                <div class="section">
+                    <h3>Select Enemy Type</h3>
+                    <div id="enemiesGridContainer">
+                        <div class="enemies-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <!-- Enemies will be rendered here as thumbnails -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="section">
+                    <div id="selectedEnemyConfig" style="display: none;">
+                        <div class="property-row">
+                            <span class="property-label">Selected:</span>
+                            <span id="selectedEnemyTypeName" style="font-weight: bold; color: #4CAF50;"></span>
+                        </div>
+                        <div class="property-row">
+                            <span class="property-label">Health:</span>
+                            <span id="selectedEnemyHealth" style="color: #ff6b6b;"></span>
+                            <span class="property-label" style="margin-left: 15px;">Damage:</span>
+                            <span id="selectedEnemyDamage" style="color: #ffaa00;"></span>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn" id="modalAddEnemyBtn">Add Enemy (Click on map)</button>
+                        </div>
+                    </div>
+                    <div id="noEnemySelected" style="color: #888; font-size: 12px; text-align: center; padding: 20px;">
+                        Select an enemy from the grid above to place it
                     </div>
                 </div>
             </div>
