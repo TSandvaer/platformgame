@@ -472,7 +472,8 @@ class PlatformRPG {
             this.platformSystem,
             this.propSystem,
             this.sceneSystem,
-            this.viewport
+            this.viewport,
+            this.enemySystem
         );
 
         // Apply scene boundaries

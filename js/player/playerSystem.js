@@ -23,7 +23,7 @@ class PlayerSystem {
     }
 
     // Main update loop
-    update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport) {
+    update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport, enemySystem) {
         // Reset per-frame flags
         this.data.hasJumpedThisFrame = false;
 
@@ -31,7 +31,7 @@ class PlayerSystem {
         this.controller.update(deltaTime, isDevelopmentMode, propSystem);
 
         // Update physics
-        this.physics.update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport);
+        this.physics.update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport, enemySystem);
 
         // Update animation
         this.animator.update(deltaTime, isDevelopmentMode);

@@ -146,8 +146,9 @@ class EnemyCollisions {
     }
 
     getAttackRange(enemy) {
-        const attackReach = 40; // How far the enemy can attack
-        const attackWidth = 30; // Width of attack area
+        // Use enemy's attackRange property (50 for melee, higher for ranged)
+        const attackReach = enemy.attackRange || 50;
+        const attackWidth = attackReach; // Width matches reach
         const attackHeight = enemy.height * 0.8; // Height of attack area
         const collisionOffsetY = enemy.collisionOffsetY || 0;
 

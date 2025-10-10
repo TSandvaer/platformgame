@@ -203,29 +203,8 @@ class EnemySystem {
             }
         }
 
-        // Check basic collision between enemy and player
-        const collision = this.collisions.checkEnemyPlayerCollision(enemy, player);
-        if (collision) {
-            // Push player away from enemy (enemy stays stationary)
-            const overlap = collision.overlap;
-            if (overlap && overlap.width < overlap.height) {
-                // Horizontal collision - push player back fully
-                if (player.x < enemy.x) {
-                    player.x = enemy.x - player.width - 2; // Push player to left of enemy
-                } else {
-                    player.x = enemy.x + enemy.width + 2; // Push player to right of enemy
-                }
-                player.velocityX = 0; // Stop player movement
-            } else if (overlap) {
-                // Vertical collision
-                if (player.y < enemy.y) {
-                    player.y = enemy.y - player.height - 2; // Push player above enemy
-                } else {
-                    player.y = enemy.y + enemy.height + 2; // Push player below enemy
-                }
-                player.velocityY = 0; // Stop player vertical movement
-            }
-        }
+        // Enemy-player collision is now handled in playerPhysics.js
+        // This prevents enemies from pushing players and allows proper collision resolution
     }
 
     damageEnemy(enemy, damage, animator) {
@@ -473,5 +452,45 @@ class EnemySystem {
 
     get isDraggingEnemy() {
         return this.mouseHandler ? this.mouseHandler.isDraggingEnemy : false;
+    }
+
+    // Check and resolve collisions between player and all enemies
+    checkPlayerEnemyCollisions(player) {
+        for (const enemy of this.data.enemies) {
+            // Skip invisible, dead enemies
+            if (!enemy.isVisible || enemy.isDead) continue;
+
+            const collision = this.collisions.checkEnemyPlayerCollision(enemy, player);
+            if (collision && !enemy.isAttacking) {
+                // Resolve collision by preventing player from walking through enemy
+                // Only block horizontally - never push vertically to avoid platform conflicts
+                this.resolvePlayerEnemyCollision(player, enemy);
+            }
+        }
+    }
+
+    resolvePlayerEnemyCollision(player, enemy) {
+        const collisionOffsetY = enemy.collisionOffsetY || 0;
+
+        // Calculate overlap on each side
+        const overlapLeft = (player.x + player.width) - enemy.x;
+        const overlapRight = (enemy.x + enemy.width) - player.x;
+        const overlapTop = (player.y + player.height) - (enemy.y + collisionOffsetY);
+        const overlapBottom = (enemy.y + collisionOffsetY + enemy.height) - player.y;
+
+        // Find the smallest overlap
+        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+        // Only resolve horizontal collisions - never vertical (to avoid pushing through platforms)
+        if (minOverlap === overlapLeft) {
+            // Player overlapping from left - push player out to the left
+            player.x = enemy.x - player.width - 1;
+            player.velocityX = Math.min(0, player.velocityX); // Stop or allow moving away
+        } else if (minOverlap === overlapRight) {
+            // Player overlapping from right - push player out to the right
+            player.x = enemy.x + enemy.width + 1;
+            player.velocityX = Math.max(0, player.velocityX); // Stop or allow moving away
+        }
+        // Ignore vertical collisions - let player jump over or land on enemies naturally
     }
 }

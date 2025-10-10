@@ -96,11 +96,11 @@ class EnemyData {
                 width: 100,  // Collision box width - covers large dragon body
                 height: 80, // Collision box height - covers large dragon body
                 scale: 1.5, // Visual sprite scale multiplier (make sprites larger)
-                renderOffsetY: 20, // Ground-based dragon (not floating)
+                renderOffsetY: 23, // Ground-based dragon (not floating)
                 collisionOffsetY: 0, // Collision box on ground
                 facingInverted: true, // Sprite faces opposite direction from orcs/skeletons
                 attackType: 'melee', // Uses melee attacks (both bite and fire breath)
-                attackRange: 200, // Medium-range fire breath attack distance
+                attackRange: 80, // Medium-range fire breath attack distance
                 projectileSpeed: 350, // Not used (no projectiles)
                 animations: {
                     idle: { file: 'IDLE.png', frames: 9, frameWidth: 144, frameHeight: 96 },
@@ -178,7 +178,7 @@ class EnemyData {
 
             // Attack type (melee or ranged)
             attackType: typeData.attackType || 'melee', // 'melee' or 'ranged'
-            attackRange: typeData.attackRange || 60, // Attack distance
+            attackRange: typeData.attackRange || 50, // Edge-to-edge attack distance (50px for melee, higher for ranged)
             projectileSpeed: typeData.projectileSpeed || 300, // For ranged attacks
 
             // Combat state

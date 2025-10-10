@@ -14,7 +14,7 @@ class EnemyAI {
         this.updateAIState(enemy, player, physicsMultiplier);
 
         // Apply AI movement
-        this.applyMovement(enemy, physicsMultiplier);
+        this.applyMovement(enemy, player, physicsMultiplier);
 
         // Apply physics
         this.applyPhysics(enemy, physicsMultiplier, platforms);
@@ -125,13 +125,17 @@ class EnemyAI {
                     // Buffer distance prevents disengagement when player is pushed to zone edge
                     enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                     enemy.target = null;
-                } else if (distanceToPlayer < enemy.attackRange) {
-                    // Close enough to attack (uses enemy's attack range - 60 for melee, 250 for ranged)
-                    enemy.aiState = 'attacking';
-                    enemy.target = playerCenter;
                 } else {
-                    // Continue chasing
-                    enemy.target = playerCenter;
+                    // Check edge-to-edge distance for attack range
+                    const edgeDistance = this.getEdgeToEdgeDistance(enemy, player);
+                    if (edgeDistance <= enemy.attackRange) {
+                        // Close enough to attack (uses enemy's attack range - 50 for melee, 250 for ranged)
+                        enemy.aiState = 'attacking';
+                        enemy.target = playerCenter;
+                    } else {
+                        // Continue chasing
+                        enemy.target = playerCenter;
+                    }
                 }
                 break;
 
@@ -159,10 +163,14 @@ class EnemyAI {
                         // Buffer distance prevents disengagement when player is pushed to zone edge during combat
                         enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                         enemy.target = null;
-                    } else if (distanceToPlayer > enemy.attackRange + 30) {
-                        // Player moved out of attack range, resume chasing
-                        enemy.aiState = 'chasing';
-                        enemy.target = playerCenter;
+                    } else {
+                        // Check edge-to-edge distance to see if player moved out of range
+                        const edgeDistance = this.getEdgeToEdgeDistance(enemy, player);
+                        if (edgeDistance > enemy.attackRange + 30) {
+                            // Player moved out of attack range, resume chasing
+                            enemy.aiState = 'chasing';
+                            enemy.target = playerCenter;
+                        }
                     }
                 }
                 // Note: Attack logic is handled by the combat system in enemySystem.js
@@ -274,7 +282,7 @@ class EnemyAI {
         }
     }
 
-    applyMovement(enemy, physicsMultiplier) {
+    applyMovement(enemy, player, physicsMultiplier) {
         let targetVelocityX = 0;
 
         switch (enemy.aiState) {
@@ -290,10 +298,16 @@ class EnemyAI {
                 break;
 
             case 'chasing':
-            case 'attacking':
                 if (enemy.target) {
-                    targetVelocityX = this.calculateChaseMovement(enemy);
+                    targetVelocityX = this.calculateChaseMovement(enemy, player);
                 }
+                break;
+
+            case 'attacking':
+                // Stop moving when attacking - let the attack animation play
+                targetVelocityX = 0;
+                // Instantly stop to prevent pushing into player
+                enemy.velocityX = 0;
                 break;
 
             case 'fleeing':
@@ -361,8 +375,8 @@ class EnemyAI {
         return movement;
     }
 
-    calculateChaseMovement(enemy) {
-        if (!enemy.target) return 0;
+    calculateChaseMovement(enemy, player) {
+        if (!enemy.target || !player) return 0;
 
         const enemyCenter = enemy.x + enemy.width / 2;
         const targetX = enemy.target.x;
@@ -370,14 +384,17 @@ class EnemyAI {
         // Use running speed (2.5x normal speed) when chasing/attracted to player
         const runningSpeed = enemy.speed * 2.5;
 
-        // Simple AI: move towards target at running speed
-        if (targetX > enemyCenter + 10) {
-            return runningSpeed;
-        } else if (targetX < enemyCenter - 10) {
-            return -runningSpeed;
+        // Calculate edge-to-edge distance to determine if we're in attack range
+        const edgeDistance = this.getEdgeToEdgeDistance(enemy, player);
+
+        // Stop moving when within attack range (edge-to-edge)
+        if (edgeDistance <= enemy.attackRange) {
+            return 0; // Stop moving when in attack range
         }
 
-        return 0;
+        // Move towards target at running speed
+        const distanceX = targetX - enemyCenter;
+        return distanceX > 0 ? runningSpeed : -runningSpeed;
     }
 
     calculateFleeMovement(enemy) {
@@ -510,11 +527,23 @@ class EnemyAI {
         const currentTime = Date.now();
         if (currentTime - enemy.lastAttackTime < enemy.attackCooldown) return false;
 
+        // Use edge-to-edge distance instead of center-to-center
+        const edgeDistance = this.getEdgeToEdgeDistance(enemy, player);
+
+        return edgeDistance < enemy.attackRange; // Use enemy's attack range (50 for melee, 250 for ranged)
+    }
+
+    // Calculate edge-to-edge distance between enemy and player
+    getEdgeToEdgeDistance(enemy, player) {
         const playerCenter = this.getPlayerCenter(player);
         const enemyCenter = this.getEnemyCenter(enemy);
-        const distance = this.getDistance(enemyCenter, playerCenter);
+        const centerDistance = this.getDistance(enemyCenter, playerCenter);
 
-        return distance < enemy.attackRange; // Use enemy's attack range (60 for melee, 250 for ranged)
+        // Subtract half widths to get edge-to-edge distance
+        const combinedRadius = (enemy.width / 2) + (player.width / 2);
+        const edgeDistance = Math.max(0, centerDistance - combinedRadius);
+
+        return edgeDistance;
     }
 
     getAttackDirection(enemy, player) {

@@ -4,7 +4,7 @@ class PlayerPhysics {
         this.gravity = 0.8;
     }
 
-    update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport) {
+    update(deltaTime, isDevelopmentMode, platformSystem, propSystem, sceneSystem, viewport, enemySystem) {
         // Always update stamina regardless of mode
         const physicsMultiplier = deltaTime / 16.67;
         this.updateStamina(physicsMultiplier);
@@ -56,13 +56,13 @@ class PlayerPhysics {
         this.data.onGround = false;
 
         // Check collisions
-        this.checkCollisions(platformSystem, propSystem, sceneSystem, viewport);
+        this.checkCollisions(platformSystem, propSystem, sceneSystem, viewport, enemySystem);
 
         // Check if player fell off the world
         this.checkWorldBounds();
     }
 
-    checkCollisions(platformSystem, propSystem, sceneSystem, viewport) {
+    checkCollisions(platformSystem, propSystem, sceneSystem, viewport, enemySystem) {
         // Check platform collisions
         const beforeCollisionX = this.data.x;
         const beforeCollisionY = this.data.y;
@@ -116,6 +116,11 @@ class PlayerPhysics {
                 before: { x: beforePropX, y: beforePropY },
                 after: { x: this.data.x, y: this.data.y }
             });
+        }
+
+        // Check enemy collisions (only blocks horizontal movement, not vertical)
+        if (enemySystem && !this.data.isDead) {
+            enemySystem.checkPlayerEnemyCollisions(this.data);
         }
 
         // Check scene transitions
