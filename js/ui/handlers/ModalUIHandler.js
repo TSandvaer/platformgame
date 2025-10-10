@@ -8,6 +8,55 @@ class ModalUIHandler extends UIHandler {
     }
 
     /**
+     * Initialize modal UI event listeners
+     */
+    initialize() {
+        this.setupGameSettingsModal();
+    }
+
+    /**
+     * Set up Game Settings modal event listeners
+     */
+    setupGameSettingsModal() {
+        // Open Game Settings modal
+        const gameSettingsBtn = this.getElementById('gameSettingsBtn');
+        if (gameSettingsBtn) {
+            gameSettingsBtn.addEventListener('click', () => {
+                const modal = this.getElementById('gameSettingsModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    // Refresh inventory items list when modal opens
+                    if (this.game.uiEventHandler && this.game.uiEventHandler.refreshInventoryItemsList) {
+                        this.game.uiEventHandler.refreshInventoryItemsList();
+                    }
+                    // Refresh character selection when modal opens
+                    if (this.game.uiEventHandler && this.game.uiEventHandler.loadCharacterValues) {
+                        this.game.uiEventHandler.loadCharacterValues();
+                    }
+                }
+            });
+        }
+
+        // Close Game Settings modal
+        const closeBtn = this.getElementById('closeGameSettingsModal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.closeGameSettingsModal();
+            });
+        }
+
+        // Click outside to close
+        const modal = this.getElementById('gameSettingsModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    this.closeGameSettingsModal();
+                }
+            });
+        }
+    }
+
+    /**
      * Show a confirmation modal with OK/Cancel buttons
      * @param {string} message - The message to display
      * @param {Function} onConfirm - Callback when OK is clicked
