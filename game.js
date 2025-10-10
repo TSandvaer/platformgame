@@ -394,6 +394,7 @@ class PlatformRPG {
 
         // Input system sets up all game input event listeners
         this.backgroundSystem.populateDropdown();
+        this.backgroundSystem.initializeBackgroundModal(); // Initialize background selection modal
         this.viewportSystem.updateViewport(); // Ensure viewport is properly initialized
         this.viewportSystem.updateUI(); // Initialize viewport UI
 

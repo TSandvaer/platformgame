@@ -106,25 +106,8 @@
                     </div>
                     <div class="property-row">
                         <span class="property-label">Background:</span>
-                        <select id="backgroundSelect" style="width: 180px;">
-                            <option value="none">None</option>
-                            <option value="DarkForest">Dark Forest</option>
-                            <option value="Dawn2">Dawn 2</option>
-                            <option value="Dynamic_Space_Nebula_Aqua_Pink">Space Nebula Aqua-Pink</option>
-                            <option value="Dynamic_Space_Nebula_Blue">Space Nebula Blue</option>
-                            <option value="Dynamic_Space_Nebula_Red">Space Nebula Red</option>
-                            <option value="Dynamic_Space_Stars_Small_1">Space Stars Small 1</option>
-                            <option value="Dynamic_Space_Stars_Small_2">Space Stars Small 2</option>
-                            <option value="Dynamic_Space_Stars_Big_1_1">Space Stars Big 1.1</option>
-                            <option value="Dynamic_Space_Stars_Big_1_2">Space Stars Big 1.2</option>
-                            <option value="Flay_Night_4_BG">Flay Night 4</option>
-                            <option value="Mountains1">Mountains 1</option>
-                            <option value="Mountains2">Mountains 2</option>
-                            <option value="MountainWaterfall">Mountain Waterfall</option>
-                            <option value="Parallax_Forest_Background_Blue">Parallax Forest Blue</option>
-                            <option value="PixelFantasy_Caves">Pixel Fantasy Caves</option>
-                            <option value="The Dawn">The Dawn</option>
-                        </select>
+                        <span id="currentBackgroundName" style="color: #4CAF50; font-weight: bold;">None</span>
+                        <button class="btn small" id="selectBackgroundBtn" style="margin-left: 10px;">Select Background</button>
                     </div>
                     <div class="property-row">
                         <h4>Transitions (<span id="transitionCount">0</span>)</h4>
@@ -1315,6 +1298,43 @@
             <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; padding: 15px; border-top: 1px solid #444;">
                 <button class="btn small" id="confirmationModalOK">OK</button>
                 <button class="btn small danger" id="confirmationModalCancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Selection Modal -->
+    <div id="backgroundSelectionModal" class="modal no-theme" style="display: none;">
+        <div class="modal-content no-theme" style="width: 900px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>Select Background</h3>
+                <button class="modal-close" id="closeBackgroundSelectionModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Background Selection Grid -->
+                <div class="section">
+                    <h3>Available Backgrounds</h3>
+                    <div id="backgroundsGridContainer">
+                        <div class="backgrounds-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                            <!-- Background thumbnails will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Background Info -->
+                <div class="section">
+                    <div id="selectedBackgroundConfig" style="display: none;">
+                        <div class="property-row">
+                            <span class="property-label">Selected:</span>
+                            <span id="selectedBackgroundName" style="font-weight: bold; color: #4CAF50;"></span>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn" id="applyBackgroundBtn">Apply Background</button>
+                        </div>
+                    </div>
+                    <div id="noBackgroundSelected" style="color: #888; font-size: 12px; text-align: center; padding: 20px;">
+                        Select a background from the grid above to apply it
+                    </div>
+                </div>
             </div>
         </div>
     </div>

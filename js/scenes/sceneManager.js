@@ -936,10 +936,8 @@ class SceneManager {
                 <div class="property-group">
                     <label>Background:</label>
                     <div class="input-row">
-                        <select id="backgroundSelect" style="width: 150px;">
-                            <option value="none">None</option>
-                        </select>
-                        <button class="btn small" id="applyBackground">Apply</button>
+                        <span id="currentSceneBackgroundName" style="color: #4CAF50; font-weight: bold;">${currentScene.settings.backgroundName === 'none' || !currentScene.settings.backgroundName ? 'None' : this.game.backgroundSystem.formatBackgroundName(currentScene.settings.backgroundName)}</span>
+                        <button class="btn small" id="selectSceneBackgroundBtn" style="margin-left: 10px;">Select Background</button>
                     </div>
                 </div>
                 <div class="property-group">
@@ -974,29 +972,17 @@ class SceneManager {
                 </div>
             `;
 
-            // Populate background dropdown and set current value
-            if (this.game.backgroundSystem) {
-                this.game.backgroundSystem.populateDropdown();
-                const backgroundSelect = document.getElementById('backgroundSelect');
-                if (backgroundSelect) {
-                    const backgroundName = currentScene.settings.backgroundName || 'none';
-                    backgroundSelect.value = backgroundName;
-                }
-            }
-
-            // Set up background apply button event listener (since controls are dynamically created)
-            const applyBackgroundBtn = document.getElementById('applyBackground');
-            if (applyBackgroundBtn) {
+            // Set up background select button event listener (since controls are dynamically created)
+            const selectSceneBgBtn = document.getElementById('selectSceneBackgroundBtn');
+            if (selectSceneBgBtn) {
                 // Remove any existing event listener to avoid duplicates
-                applyBackgroundBtn.replaceWith(applyBackgroundBtn.cloneNode(true));
-                const newApplyBtn = document.getElementById('applyBackground');
-                newApplyBtn.addEventListener('click', () => {
-                    const selectedBackground = document.getElementById('backgroundSelect').value;
-                    // Update scene settings and load background
-                    currentScene.settings.backgroundName = selectedBackground;
-                    currentScene.metadata.modified = new Date().toISOString();
-                    this.game.backgroundSystem.loadBackground(selectedBackground);
-                    console.log(`🖼️ Scene background applied: ${selectedBackground}`);
+                selectSceneBgBtn.replaceWith(selectSceneBgBtn.cloneNode(true));
+                const newSelectBtn = document.getElementById('selectSceneBackgroundBtn');
+                newSelectBtn.addEventListener('click', () => {
+                    // Open the background selection modal
+                    if (this.game.backgroundSystem) {
+                        this.game.backgroundSystem.openBackgroundModal();
+                    }
                 });
             }
 
@@ -1076,18 +1062,13 @@ class SceneManager {
     }
 
     updateMainDashboardBackground(scene) {
-        // Update the main dashboard background dropdown to reflect current scene's background
-        const mainBackgroundSelect = document.getElementById('backgroundSelect');
-        if (mainBackgroundSelect && scene && scene.settings) {
-            // Ensure dropdown has all available backgrounds first
-            if (this.game.backgroundSystem) {
-                this.game.backgroundSystem.populateDropdown();
-            }
-
-            // Set the dropdown value to match the scene's background
+        // Update the main dashboard background display to reflect current scene's background
+        const currentBgNameSpan = document.getElementById('currentBackgroundName');
+        if (currentBgNameSpan && scene && scene.settings) {
             const backgroundName = scene.settings.backgroundName || 'none';
-            mainBackgroundSelect.value = backgroundName;
-            console.log(`🔄 Updated main dashboard background dropdown to: ${backgroundName}`);
+            currentBgNameSpan.textContent = backgroundName === 'none' ?
+                'None' : this.game.backgroundSystem.formatBackgroundName(backgroundName);
+            console.log(`🔄 Updated main dashboard background display to: ${backgroundName}`);
         }
     }
 
