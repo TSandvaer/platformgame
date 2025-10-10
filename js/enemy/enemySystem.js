@@ -469,6 +469,36 @@ class EnemySystem {
         }
     }
 
+    // Check if player movement would collide with any enemy (predictive collision)
+    wouldPlayerCollideWithEnemy(player, deltaX) {
+        const testX = player.x + deltaX;
+
+        for (const enemy of this.data.enemies) {
+            // Skip invisible, dead enemies
+            if (!enemy.isVisible || enemy.isDead) continue;
+
+            const collisionOffsetY = enemy.collisionOffsetY || 0;
+
+            // Check if the new position would overlap with enemy
+            if (testX < enemy.x + enemy.width &&
+                testX + player.width > enemy.x &&
+                player.y < enemy.y + collisionOffsetY + enemy.height &&
+                player.y + player.height > enemy.y + collisionOffsetY) {
+
+                // Check for significant vertical overlap (same as in resolve collision)
+                const overlapTop = (player.y + player.height) - (enemy.y + collisionOffsetY);
+                const overlapBottom = (enemy.y + collisionOffsetY + enemy.height) - player.y;
+                const verticalOverlap = Math.min(overlapTop, overlapBottom);
+
+                if (verticalOverlap > 10) {
+                    return true; // Movement would cause collision
+                }
+            }
+        }
+
+        return false; // Movement is safe
+    }
+
     resolvePlayerEnemyCollision(player, enemy) {
         const collisionOffsetY = enemy.collisionOffsetY || 0;
 
@@ -478,19 +508,30 @@ class EnemySystem {
         const overlapTop = (player.y + player.height) - (enemy.y + collisionOffsetY);
         const overlapBottom = (enemy.y + collisionOffsetY + enemy.height) - player.y;
 
-        // Find the smallest overlap
-        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+        // Check if this is primarily a horizontal collision (player mostly beside enemy, not above/below)
+        const horizontalOverlap = Math.min(overlapLeft, overlapRight);
+        const verticalOverlap = Math.min(overlapTop, overlapBottom);
 
-        // Only resolve horizontal collisions - never vertical (to avoid pushing through platforms)
-        if (minOverlap === overlapLeft) {
-            // Player overlapping from left - push player out to the left
-            player.x = enemy.x - player.width - 1;
-            player.velocityX = Math.min(0, player.velocityX); // Stop or allow moving away
-        } else if (minOverlap === overlapRight) {
-            // Player overlapping from right - push player out to the right
-            player.x = enemy.x + enemy.width + 1;
-            player.velocityX = Math.max(0, player.velocityX); // Stop or allow moving away
+        // Only resolve if we have a significant vertical overlap (player is at enemy's height)
+        // This prevents pushing when player is jumping over enemy
+        if (verticalOverlap > 10) { // At least 10 pixels of vertical overlap
+            // Resolve horizontal collision based on which side has less overlap
+            if (overlapLeft < overlapRight) {
+                // Player overlapping from left - push player out to the left
+                player.x = enemy.x - player.width - 1;
+                player.blockedRight = true; // Block rightward movement
+                if (player.velocityX > 0) {
+                    player.velocityX = 0; // Stop moving right
+                }
+            } else {
+                // Player overlapping from right - push player out to the right
+                player.x = enemy.x + enemy.width + 1;
+                player.blockedLeft = true; // Block leftward movement
+                if (player.velocityX < 0) {
+                    player.velocityX = 0; // Stop moving left
+                }
+            }
         }
-        // Ignore vertical collisions - let player jump over or land on enemies naturally
+        // If vertical overlap is small, player is likely jumping over - don't block
     }
 }

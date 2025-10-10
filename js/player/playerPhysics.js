@@ -28,8 +28,22 @@ class PlayerPhysics {
             // Apply gravity
             this.data.velocityY += this.gravity * physicsMultiplier;
 
-            // Update position
-            this.data.x += this.data.velocityX * physicsMultiplier;
+            // Check if horizontal movement would collide with enemy BEFORE applying it
+            const deltaX = this.data.velocityX * physicsMultiplier;
+            if (deltaX !== 0 && enemySystem && enemySystem.wouldPlayerCollideWithEnemy) {
+                if (!enemySystem.wouldPlayerCollideWithEnemy(this.data, deltaX)) {
+                    // Safe to move horizontally
+                    this.data.x += deltaX;
+                } else {
+                    // Movement would cause collision - stop horizontal velocity
+                    this.data.velocityX = 0;
+                }
+            } else {
+                // No enemy system or no horizontal movement - apply normally
+                this.data.x += deltaX;
+            }
+
+            // Always apply vertical movement (jumping/falling)
             this.data.y += this.data.velocityY * physicsMultiplier;
         } else {
             // When dead, stop all velocity
@@ -117,6 +131,10 @@ class PlayerPhysics {
                 after: { x: this.data.x, y: this.data.y }
             });
         }
+
+        // Clear blocking flags from previous frame (before checking new collisions)
+        this.data.blockedLeft = false;
+        this.data.blockedRight = false;
 
         // Check enemy collisions (only blocks horizontal movement, not vertical)
         if (enemySystem && !this.data.isDead) {

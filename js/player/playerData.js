@@ -91,6 +91,10 @@ class PlayerData {
 
         // Belt system - 4 slots for quick access (keys 1-4)
         this.belt = [null, null, null, null]; // 4 belt slots for consumables
+
+        // Collision blocking flags
+        this.blockedLeft = false;
+        this.blockedRight = false;
     }
 
     reset() {
