@@ -3,6 +3,7 @@ class PlatformData {
         // Start with empty platforms - they will be loaded from scene data
         this.platforms = [];
         this.nextPlatformId = 0;
+        this.nextPlatformZOrder = 0;
         this.selectedPlatform = null;
 
         // Platform placement system
@@ -25,6 +26,7 @@ class PlatformData {
             height: 20,
             color: '#4ECDC4',
             spriteType: 'color',
+            zOrder: 0,              // Rendering order (lower values render first/behind)
             positioning: 'absolute', // 'absolute', 'relative', 'screen-relative'
             relativeX: 0.5,         // Relative position (0-1) for screen-relative mode
             relativeY: 0.5,         // Relative position (0-1) for screen-relative mode
@@ -130,5 +132,16 @@ class PlatformData {
         }
         platform.x = newX;
         platform.y = newY;
+    }
+
+    // Z-order management
+    moveToFront(platform) {
+        platform.zOrder = this.nextPlatformZOrder++;
+    }
+
+    moveToBack(platform) {
+        // Find minimum z-order
+        const minZOrder = Math.min(...this.platforms.map(p => p.zOrder || 0));
+        platform.zOrder = minZOrder - 1;
     }
 }

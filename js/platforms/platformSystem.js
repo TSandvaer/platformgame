@@ -55,7 +55,11 @@ class PlatformSystem {
                 this._lastNoplatformsWarning = Date.now();
             }
         }
-        this.data.platforms.forEach(platform => {
+
+        // Sort platforms by z-order before rendering (lowest first = background)
+        const sortedPlatforms = [...this.data.platforms].sort((a, b) => (a.zOrder || 0) - (b.zOrder || 0));
+
+        sortedPlatforms.forEach(platform => {
             const isSelected = this.data.selectedPlatform && this.data.selectedPlatform.id === platform.id;
 
             // Get actual position based on positioning mode
@@ -410,5 +414,14 @@ class PlatformSystem {
         const notAllZeros = !(startX === 0 && startY === 0 && endX === 0 && endY === 0);
 
         return hasLength && notAllZeros;
+    }
+
+    // Z-order management
+    movePlatformToFront() {
+        this.manager.movePlatformToFront();
+    }
+
+    movePlatformToBack() {
+        this.manager.movePlatformToBack();
     }
 }

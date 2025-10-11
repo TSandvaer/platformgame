@@ -244,6 +244,18 @@ class EnemySystem {
             this.triggerEnemyDrops(enemy);
         } else {
             animator.takeDamage();
+
+            // Make enemy aggro and start chasing player when hit
+            // Set aggro flag with timestamp so it persists for a duration
+            enemy.isAggroed = true;
+            enemy.aggroTime = Date.now();
+
+            // Force enemy into chasing state unless it should flee
+            const shouldFlee = healthPercentage <= (enemy.fleeHealthThreshold || 0.4);
+            if (!shouldFlee && enemy.aiState !== 'fleeing' && enemy.aiState !== 'attacking') {
+                enemy.aiState = 'chasing';
+                console.log(`Enemy ${enemy.id} aggroed by attack - entering chasing state`);
+            }
         }
     }
 

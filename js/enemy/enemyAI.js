@@ -31,6 +31,10 @@ class EnemyAI {
         const playerInAttractionZone = enemy.attractionZone.enabled &&
             this.isPointInZone(playerCenter.x, playerCenter.y, enemy.attractionZone);
 
+        // Check if enemy is aggroed (attacked by player)
+        // Aggro lasts for 10 seconds after being hit
+        const isAggroed = enemy.isAggroed && enemy.aggroTime && (Date.now() - enemy.aggroTime < 10000);
+
         // Check if enemy should flee (health below threshold)
         const healthPercentage = enemy.health / enemy.maxHealth;
 
@@ -78,8 +82,8 @@ class EnemyAI {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from idle (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if ((playerInAttractionZone || distanceToPlayer < 150) && !inRecoveryPeriodIdle) {
-                    // Chase if player is in attraction zone OR player is very close (within 150px)
+                } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriodIdle) {
+                    // Chase if player is in attraction zone OR player is very close (within 150px) OR enemy has been aggroed
                     // Only chase if not in recovery period
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
@@ -105,8 +109,8 @@ class EnemyAI {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from patrolling (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if ((playerInAttractionZone || distanceToPlayer < 150) && !inRecoveryPeriod) {
-                    // Chase if player is in attraction zone OR player is very close (within 150px)
+                } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriod) {
+                    // Chase if player is in attraction zone OR player is very close (within 150px) OR enemy has been aggroed
                     // Only chase if not in recovery period
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
@@ -120,9 +124,10 @@ class EnemyAI {
                     console.log(`Enemy ${enemy.id} entering FLEEING state from chasing (health: ${Math.round(healthPercentage * 100)}%)`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if (!playerInAttractionZone && distanceToPlayer > 300) {
-                    // Lost player (left attraction zone AND moved far away), return to previous state
+                } else if (!playerInAttractionZone && !isAggroed && distanceToPlayer > 300) {
+                    // Lost player (left attraction zone, not aggroed, AND moved far away), return to previous state
                     // Buffer distance prevents disengagement when player is pushed to zone edge
+                    // If aggroed, continue chasing even outside attraction zone
                     enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                     enemy.target = null;
                 } else {
@@ -158,9 +163,10 @@ class EnemyAI {
 
                     enemy.target = playerCenter;
 
-                    if (!playerInAttractionZone && distanceToPlayer > 300) {
-                        // Player left attraction zone AND moved far away, return to idle or patrolling
+                    if (!playerInAttractionZone && !isAggroed && distanceToPlayer > 300) {
+                        // Player left attraction zone, not aggroed, AND moved far away, return to idle or patrolling
                         // Buffer distance prevents disengagement when player is pushed to zone edge during combat
+                        // If aggroed, continue fighting even outside attraction zone
                         enemy.aiState = enemy.isMoving ? 'patrolling' : 'idle';
                         enemy.target = null;
                     } else {

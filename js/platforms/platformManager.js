@@ -473,6 +473,9 @@ class PlatformManager {
             const blockPlayerInput = document.getElementById('platformBlockPlayer');
             if (blockPlayerInput) blockPlayerInput.checked = this.platformData.selectedPlatform.blockPlayer || false;
 
+            const isBackgroundInput = document.getElementById('platformIsBackground');
+            if (isBackgroundInput) isBackgroundInput.checked = this.platformData.selectedPlatform.isBackground || false;
+
             // Handle positioning properties
             const positioning = this.platformData.selectedPlatform.positioning || 'absolute';
             if (positioningInput) positioningInput.value = positioning;
@@ -703,6 +706,9 @@ class PlatformManager {
 
         const blockPlayerInput = document.getElementById('platformBlockPlayer');
         if (blockPlayerInput) this.platformData.selectedPlatform.blockPlayer = blockPlayerInput.checked;
+
+        const isBackgroundInput = document.getElementById('platformIsBackground');
+        if (isBackgroundInput) this.platformData.selectedPlatform.isBackground = isBackgroundInput.checked;
 
         // Handle positioning properties
         if (positioningInput) this.platformData.selectedPlatform.positioning = positioningInput.value;
@@ -1127,5 +1133,20 @@ class PlatformManager {
         if (stopStartBtn && platform) {
             stopStartBtn.textContent = platform.isMovementPaused ? 'Start Movement' : 'Stop Movement';
         }
+    }
+
+    // Z-order management
+    movePlatformToFront() {
+        if (!this.platformData.selectedPlatform) return;
+        this.platformData.moveToFront(this.platformData.selectedPlatform);
+        this.updatePlatformProperties();
+        this.updatePlatformList();
+    }
+
+    movePlatformToBack() {
+        if (!this.platformData.selectedPlatform) return;
+        this.platformData.moveToBack(this.platformData.selectedPlatform);
+        this.updatePlatformProperties();
+        this.updatePlatformList();
     }
 }

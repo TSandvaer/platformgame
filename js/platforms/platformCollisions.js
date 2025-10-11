@@ -8,6 +8,11 @@ class PlatformCollisions {
         let highestDamagingPlatformBelow = null;
 
         platforms.forEach(platform => {
+            // Skip background platforms - they are purely decorative
+            if (platform.isBackground) {
+                return;
+            }
+
             if (this.checkCollision(player, platform)) {
                 collidingPlatforms.add(platform);
 

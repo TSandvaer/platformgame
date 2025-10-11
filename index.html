@@ -418,6 +418,12 @@
                         </div>
                         <div class="property-row">
                             <label style="display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="platformIsBackground">
+                                <span>Is Background</span>
+                            </label>
+                        </div>
+                        <div class="property-row">
+                            <label style="display: flex; align-items: center; gap: 5px;">
                                 <input type="checkbox" id="selectedPlatformIsMoving">
                                 <span>Moving Platform</span>
                             </label>
@@ -477,6 +483,10 @@
                         <div class="property-row">
                             <button class="btn small" id="updatePlatform">Update</button>
                             <button class="btn small danger" id="deletePlatform">Delete</button>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn small" id="sendPlatformToBackground">Send to Background</button>
+                            <button class="btn small" id="bringPlatformToFront">Bring to Front</button>
                         </div>
                     </div>
 

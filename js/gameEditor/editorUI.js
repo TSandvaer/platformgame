@@ -72,6 +72,25 @@ class EditorUI {
             });
         }
 
+        // Platform z-order buttons
+        const sendPlatformToBackgroundBtn = document.getElementById('sendPlatformToBackground');
+        if (sendPlatformToBackgroundBtn) {
+            sendPlatformToBackgroundBtn.addEventListener('click', () => {
+                if (this.game.platformSystem.selectedPlatform) {
+                    this.game.platformSystem.movePlatformToBack();
+                }
+            });
+        }
+
+        const bringPlatformToFrontBtn = document.getElementById('bringPlatformToFront');
+        if (bringPlatformToFrontBtn) {
+            bringPlatformToFrontBtn.addEventListener('click', () => {
+                if (this.game.platformSystem.selectedPlatform) {
+                    this.game.platformSystem.movePlatformToFront();
+                }
+            });
+        }
+
         // Editor tab navigation
         this.setupEditorTabs();
     }
