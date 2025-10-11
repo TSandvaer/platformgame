@@ -237,7 +237,17 @@ class PropUIHandler extends UIHandler {
     renderRegularPropThumbnail(ctx, propType, canvas) {
         // Use the already-loaded image from the game's platform sprites
         const platformSprites = this.game.platformSystem.renderer.platformSprites;
-        const img = platformSprites.villageProps.image;
+
+        // Get sprite sheet based on propType's spriteSheet property, default to villageProps for backward compatibility
+        const spriteSheetName = propType.spriteSheet || 'villageProps';
+        const spriteSheet = platformSprites[spriteSheetName];
+
+        if (!spriteSheet) {
+            console.warn(`Sprite sheet '${spriteSheetName}' not found for prop type '${propType.name}'`);
+            return;
+        }
+
+        const img = spriteSheet.image;
 
         if (!img || !img.complete) {
             // If image isn't loaded yet, try again after a short delay

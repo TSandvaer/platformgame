@@ -154,8 +154,13 @@ class PropRenderer {
             return;
         }
 
-        const tileset = this.platformSprites.villageProps;
-        if (!tileset.image) return;
+        // Get sprite sheet based on propType's spriteSheet property, default to villageProps for backward compatibility
+        const spriteSheetName = propType.spriteSheet || 'villageProps';
+        const tileset = this.platformSprites[spriteSheetName];
+        if (!tileset || !tileset.image) {
+            console.warn(`Sprite sheet '${spriteSheetName}' not found or not loaded for prop type '${prop.type}'`);
+            return;
+        }
 
         const sourceX = propType.tileX * tileset.tileWidth;
         const sourceY = propType.tileY * tileset.tileHeight;

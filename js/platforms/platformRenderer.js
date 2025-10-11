@@ -7,6 +7,8 @@ class PlatformRenderer {
         this.platformSprites = {
             tileset: { image: null, tileWidth: 16, tileHeight: 16 },
             villageProps: { image: null, tileWidth: 32, tileHeight: 32 },
+            trees: { image: null, tileWidth: 32, tileHeight: 32 },
+            vegetation: { image: null, tileWidth: 32, tileHeight: 32 },
         };
         this.spritesLoaded = false;
         this.loadSprites();
@@ -78,7 +80,7 @@ class PlatformRenderer {
 
     loadSprites() {
         let loadedCount = 0;
-        const totalImages = 2; // Only tileset and villageProps for platforms
+        const totalImages = 4; // tileset, villageProps, trees, vegetation
 
         const checkAllLoaded = () => {
             if (loadedCount === totalImages) {
@@ -112,6 +114,34 @@ class PlatformRenderer {
         };
         propsImg.src = 'sprites/Pixel Art Platformer/Texture/TX Village Props.png';
         this.platformSprites.villageProps.image = propsImg;
+
+        // Load Fantasy Forest Trees tileset
+        const treesImg = new Image();
+        treesImg.onload = () => {
+            loadedCount++;
+            checkAllLoaded();
+        };
+        treesImg.onerror = () => {
+            console.error('Failed to load trees tileset');
+            loadedCount++;
+            checkAllLoaded();
+        };
+        treesImg.src = 'sprites/PROPS/Full Fantasy Forest/Trees.png';
+        this.platformSprites.trees.image = treesImg;
+
+        // Load Fantasy Forest Vegetation tileset
+        const vegetationImg = new Image();
+        vegetationImg.onload = () => {
+            loadedCount++;
+            checkAllLoaded();
+        };
+        vegetationImg.onerror = () => {
+            console.error('Failed to load vegetation tileset');
+            loadedCount++;
+            checkAllLoaded();
+        };
+        vegetationImg.src = 'sprites/PROPS/Full Fantasy Forest/Vegetation.png';
+        this.platformSprites.vegetation.image = vegetationImg;
     }
 
     renderPlatform(platform, isDevelopmentMode, isSelected) {

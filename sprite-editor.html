@@ -197,7 +197,17 @@
 </head>
 <body>
     <div class="header">
-        <h1>Sprite Editor - TX Village Props</h1>
+        <div>
+            <h1 id="pageTitle">Sprite Editor - TX Village Props</h1>
+            <div style="margin-top: 10px;">
+                <label for="spriteSheetSelect" style="margin-right: 10px; color: #aaa;">Sprite Sheet:</label>
+                <select id="spriteSheetSelect" style="padding: 8px; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 14px;">
+                    <option value="villageProps">TX Village Props</option>
+                    <option value="trees">Fantasy Forest - Trees</option>
+                    <option value="vegetation">Fantasy Forest - Vegetation</option>
+                </select>
+            </div>
+        </div>
         <div>
             <a href="index.html" class="btn secondary">← Back to Game</a>
         </div>
@@ -291,6 +301,23 @@
                 this.originalImageWidth = 0;
                 this.originalImageHeight = 0;
 
+                // Sprite sheet configuration
+                this.spriteSheets = {
+                    villageProps: {
+                        name: 'TX Village Props',
+                        path: 'sprites/Pixel Art Platformer/Texture/TX Village Props.png'
+                    },
+                    trees: {
+                        name: 'Fantasy Forest - Trees',
+                        path: 'sprites/PROPS/Full Fantasy Forest/Trees.png'
+                    },
+                    vegetation: {
+                        name: 'Fantasy Forest - Vegetation',
+                        path: 'sprites/PROPS/Full Fantasy Forest/Vegetation.png'
+                    }
+                };
+                this.currentSpriteSheet = 'villageProps';
+
                 this.init();
             }
 
@@ -346,6 +373,29 @@
                     if (x !== '-') {
                         this.updateSelection(parseInt(x), parseInt(y), parseInt(width), parseInt(height));
                     }
+                });
+
+                // Sprite sheet selection change handler
+                document.getElementById('spriteSheetSelect').addEventListener('change', (e) => {
+                    this.currentSpriteSheet = e.target.value;
+                    const sheetConfig = this.spriteSheets[this.currentSpriteSheet];
+
+                    // Update page title
+                    document.getElementById('pageTitle').textContent = `Sprite Editor - ${sheetConfig.name}`;
+
+                    // Update image source
+                    this.spriteImage.src = sheetConfig.path;
+
+                    // Reset selection overlay
+                    this.selectionOverlay.style.display = 'none';
+
+                    // Clear selection display
+                    document.getElementById('selectionX').textContent = '-';
+                    document.getElementById('selectionY').textContent = '-';
+                    document.getElementById('selectionWidth').textContent = '-';
+                    document.getElementById('selectionHeight').textContent = '-';
+                    document.getElementById('codeOutput').textContent = 'Select an area to generate code...';
+                    document.getElementById('htmlCodeOutput').textContent = 'Select an area to generate HTML code...';
                 });
 
                 // If image is already loaded (cached)
@@ -469,7 +519,7 @@
                 const displayName = rawName ? this.formatDisplayName(rawName) : 'Prop Name';
 
                 // Generate single-line format for propData.js
-                const singleLine = `${propKey}: { tileX: ${tileX.toFixed(2)}, tileY: ${tileY.toFixed(2)}, width: ${width}, height: ${height}, name: '${displayName}' },`;
+                const singleLine = `${propKey}: { tileX: ${tileX.toFixed(2)}, tileY: ${tileY.toFixed(2)}, width: ${width}, height: ${height}, name: '${displayName}', spriteSheet: '${this.currentSpriteSheet}' },`;
 
                 return `// For propData.js propTypes (single line):
 ${singleLine}
@@ -480,11 +530,13 @@ ${propKey}: {
     tileY: ${tileY.toFixed(2)},
     width: ${width},
     height: ${height},
-    name: '${displayName}'
+    name: '${displayName}',
+    spriteSheet: '${this.currentSpriteSheet}'
 },
 
 // Original pixel coordinates:
-// X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}`;
+// X: ${x}, Y: ${y}, Width: ${width}, Height: ${height}
+// Sprite sheet: ${this.spriteSheets[this.currentSpriteSheet].name}`;
             }
 
             sanitizePropName(name) {
