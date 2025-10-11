@@ -44,21 +44,25 @@ class NPCUIHandler extends UIHandler {
             return;
         }
 
-        list.innerHTML = npcs.map(npc => `
-            <div class="list-item npc-item" data-npc-id="${npc.id}">
-                <span class="npc-type">${npc.type}</span>
-                <span class="npc-id">ID: ${npc.id}</span>
-            </div>
-        `).join('');
+        const selectedNPC = this.game.npcSystem.getSelectedNPC();
+
+        list.innerHTML = npcs.map(npc => {
+            const isSelected = selectedNPC && selectedNPC.id === npc.id;
+            return `<div class="item ${isSelected ? 'selected' : ''}" data-npc-id="${npc.id}">
+                <div class="item-name">${npc.type} (${Math.round(npc.x)}, ${Math.round(npc.y)})</div>
+                <div class="item-details">ID: ${npc.id}, Facing: ${npc.facing || 'right'}</div>
+            </div>`;
+        }).join('');
 
         // Add click handlers
-        list.querySelectorAll('.npc-item').forEach(item => {
+        list.querySelectorAll('[data-npc-id]').forEach(item => {
             item.addEventListener('click', () => {
-                const npcId = item.dataset.npcId;
+                const npcId = parseInt(item.dataset.npcId);
                 const npc = this.game.npcSystem.data.getNPCById(npcId);
                 if (npc) {
                     this.game.npcSystem.selectNPC(npc);
                     this.updateNPCProperties();
+                    this.updateNPCList(); // Refresh list to show selection
                 }
             });
         });
