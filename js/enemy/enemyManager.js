@@ -52,6 +52,14 @@ class EnemyManager {
         const enemy = this.data.getEnemyById(enemyId);
         if (!enemy) return false;
 
+        // Update position
+        if (properties.x !== undefined && !isNaN(properties.x)) {
+            enemy.x = properties.x;
+        }
+        if (properties.y !== undefined && !isNaN(properties.y)) {
+            enemy.y = properties.y;
+        }
+
         // Update basic properties
         if (properties.health !== undefined) {
             enemy.health = Math.max(0, Math.min(properties.health, enemy.maxHealth));
@@ -62,6 +70,9 @@ class EnemyManager {
         }
         if (properties.damage !== undefined) {
             enemy.damage = Math.max(0, properties.damage);
+        }
+        if (properties.speed !== undefined && !isNaN(properties.speed)) {
+            enemy.speed = Math.max(0.1, properties.speed);
         }
 
         // Update movement properties

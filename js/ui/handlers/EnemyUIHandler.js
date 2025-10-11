@@ -340,11 +340,13 @@ class EnemyUIHandler extends UIHandler {
         }
 
         // Store pending enemy config in mouseHandler where it will be used
+        // Use correct property names: defaultHealth, defaultDamage (not health, damage)
+        // Speed defaults to 2 if not specified in type definition
         const config = {
             type: this.selectedModalEnemyType,
-            health: enemyTypeData.health,
-            speed: enemyTypeData.speed,
-            damage: enemyTypeData.damage
+            health: enemyTypeData.defaultHealth,
+            speed: 2, // Default speed (not in type definition)
+            damage: enemyTypeData.defaultDamage
         };
 
         if (this.game.enemySystem.mouseHandler) {
@@ -367,9 +369,16 @@ class EnemyUIHandler extends UIHandler {
 
         listElement.innerHTML = this.game.enemySystem.data.enemies.map(enemy => {
             const isSelected = this.game.enemySystem.getSelectedEnemy() === enemy;
+            // Format coordinates safely - show "?" if NaN
+            const xPos = !isNaN(enemy.x) && enemy.x !== undefined ? Math.round(enemy.x) : '?';
+            const yPos = !isNaN(enemy.y) && enemy.y !== undefined ? Math.round(enemy.y) : '?';
+            const hp = !isNaN(enemy.health) && enemy.health !== undefined ? enemy.health : '?';
+            const maxHp = !isNaN(enemy.maxHealth) && enemy.maxHealth !== undefined ? enemy.maxHealth : '?';
+            const dmg = !isNaN(enemy.damage) && enemy.damage !== undefined ? enemy.damage : '?';
+
             return `<div class="item ${isSelected ? 'selected' : ''}" data-enemy-id="${enemy.id}">
-                <div class="item-name">${enemy.type} (${Math.round(enemy.x)}, ${Math.round(enemy.y)})</div>
-                <div class="item-details">HP: ${enemy.health}/${enemy.maxHealth}, DMG: ${enemy.damage}</div>
+                <div class="item-name">${enemy.type} (${xPos}, ${yPos})</div>
+                <div class="item-details">HP: ${hp}/${maxHp}, DMG: ${dmg}</div>
             </div>`;
         }).join('');
 
@@ -406,7 +415,13 @@ class EnemyUIHandler extends UIHandler {
         // Update enemy properties form
         const updateValue = (id, value) => {
             const element = document.getElementById(id);
-            if (element) element.value = value;
+            // Only update if value is valid (not NaN or undefined)
+            if (element && value !== undefined && !isNaN(value)) {
+                element.value = value;
+            } else if (element) {
+                // If value is invalid, clear the field or show 0
+                element.value = '';
+            }
         };
 
         updateValue('enemyX', Math.round(selectedEnemy.x));
@@ -593,12 +608,19 @@ class EnemyUIHandler extends UIHandler {
         const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
         if (!selectedEnemy) return;
 
-        // Get values from inputs
-        const x = parseInt(document.getElementById('enemyX')?.value) || selectedEnemy.x;
-        const y = parseInt(document.getElementById('enemyY')?.value) || selectedEnemy.y;
-        const health = parseInt(document.getElementById('enemyHealth')?.value) || selectedEnemy.health;
-        const damage = parseInt(document.getElementById('enemyDamage')?.value) || selectedEnemy.damage;
-        const speed = parseFloat(document.getElementById('enemySpeed')?.value) || selectedEnemy.speed;
+        // Get values from inputs - fallback to current values if invalid
+        const xInput = parseInt(document.getElementById('enemyX')?.value);
+        const yInput = parseInt(document.getElementById('enemyY')?.value);
+        const healthInput = parseInt(document.getElementById('enemyHealth')?.value);
+        const damageInput = parseInt(document.getElementById('enemyDamage')?.value);
+        const speedInput = parseFloat(document.getElementById('enemySpeed')?.value);
+
+        // Only use input values if they're valid numbers, otherwise keep current values
+        const x = !isNaN(xInput) ? xInput : selectedEnemy.x;
+        const y = !isNaN(yInput) ? yInput : selectedEnemy.y;
+        const health = !isNaN(healthInput) ? healthInput : selectedEnemy.health;
+        const damage = !isNaN(damageInput) ? damageInput : selectedEnemy.damage;
+        const speed = !isNaN(speedInput) ? speedInput : selectedEnemy.speed;
 
         // Update enemy properties
         this.game.enemySystem.updateEnemyProperties(selectedEnemy.id, {
