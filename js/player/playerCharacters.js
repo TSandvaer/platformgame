@@ -232,6 +232,86 @@ class PlayerCharacters {
                         left: { x: -50, y: -9 }   // When facing left
                     }
                 }
+            },
+
+            archer: {
+                id: 'archer',
+                name: 'Archer',
+                description: 'A skilled archer specializing in ranged attacks',
+
+                // Sprite configuration
+                spriteBasePath: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Archer/Archer',
+                spriteSize: {
+                    frameWidth: 100,
+                    frameHeight: 100
+                },
+
+                // Player dimensions (hitbox for collisions)
+                playerSize: {
+                    width: 44,   // Same as soldier
+                    height: 59   // Same as soldier
+                },
+
+                // Visual scale - how much larger the sprite should be than the hitbox
+                visualScale: 3.3,  // Same as soldier
+
+                // Sprite bottom offset - adjusts vertical position (in sprite pixels before scaling)
+                // Positive value moves sprite DOWN, negative moves UP
+                spriteBottomOffset: 43,  // Similar to soldier
+
+                // Animation configurations
+                animations: {
+                    idle: {
+                        file: 'Archer-Idle.png',
+                        frames: 6,
+                        frameRate: 150
+                    },
+                    walk: {
+                        file: 'Archer-Walk.png',
+                        frames: 8,
+                        frameRate: 150
+                    },
+                    attack: {
+                        file: 'Archer-Attack01.png',
+                        frames: 9,
+                        frameRate: 100
+                    },
+                    attack_ranged: {
+                        file: 'Archer-Attack01.png',
+                        frames: 9,
+                        frameRate: 100
+                    },
+                    hurt: {
+                        file: 'Archer-Hurt.png',
+                        frames: 4,
+                        frameRate: 150
+                    },
+                    death: {
+                        file: 'Archer-Death.png',
+                        frames: 4,
+                        frameRate: 150
+                    }
+                },
+
+                // Attack configuration
+                attackDuration: 900,  // milliseconds (9 frames * 100ms)
+                rangedAttackDuration: 900,  // milliseconds (9 frames * 100ms for bow)
+
+                // Projectile configuration (arrow)
+                projectile: {
+                    spriteSheet: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Archer/Arrow(projectile)/Arrow02(32x32).png',
+                    frameWidth: 32,
+                    frameHeight: 32,
+                    frames: 1,  // Static arrow sprite (no animation)
+                    speed: 550,  // pixels per second (faster than soldier)
+                    damage: 30,  // Archer arrows deal more damage
+                    spawnTime: 750,  // Spawn arrow at 750ms (frame 7.5 of 9, near end of bow release)
+                    // Spawn offset relative to visual sprite position
+                    spawnOffset: {
+                        right: { x: 50, y: 20 },  // When facing right (at bow tip)
+                        left: { x: -6, y: 20 }    // When facing left (at bow tip)
+                    }
+                }
             }
         };
     }
