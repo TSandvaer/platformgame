@@ -6,14 +6,17 @@ class PlatformMouseHandler {
         this.canvas = canvas;
     }
 
-    handleMouseDown(e, propSystem, worldMouseX, worldMouseY) {
+    handleMouseDown(e, propSystem, worldMouseX, worldMouseY, allowBackgroundPlatforms = false) {
         // Handle platform placement mode
         if (this.platformSystem.platformPlacementMode) {
             this.platformSystem.manager.placePlatform(worldMouseX, worldMouseY);
             this.platformSystem.updatePlatformProperties();
             this.platformSystem.updatePlatformList();
-            return true;
+            return { handled: true, type: 'placement' };
         }
+
+        // Track if we found a background platform (lower priority)
+        let backgroundPlatformMatch = null;
 
         // Check for platform clicks
         for (let platform of this.platformSystem.platforms) {
@@ -24,6 +27,7 @@ class PlatformMouseHandler {
             const resizeHandle = this.platformSystem.getResizeHandle(renderPlatform, worldMouseX, worldMouseY);
 
             if (resizeHandle) {
+                // Always allow resize handles, even for background platforms
                 this.platformSystem.isResizing = true;
                 this.platformSystem.resizeHandle = resizeHandle;
                 this.platformSystem.selectedPlatform = platform;
@@ -36,10 +40,20 @@ class PlatformMouseHandler {
                     originalPlatform: platform
                 };
                 this.platformSystem.updatePlatformProperties();
-                return true;
+                return { handled: true, type: 'resize' };
             }
 
             if (this.platformSystem.isPointInPlatform(worldMouseX, worldMouseY, renderPlatform)) {
+                // Skip background platforms unless explicitly allowed
+                if (platform.isBackground && !allowBackgroundPlatforms) {
+                    // Store for potential later use, but keep looking
+                    if (!backgroundPlatformMatch) {
+                        backgroundPlatformMatch = { platform, actualPos, renderPlatform };
+                    }
+                    continue;
+                }
+
+                // Found a foreground platform - select it immediately
                 this.platformSystem.isDragging = true;
                 this.platformSystem.selectedPlatform = platform;
                 this.platformSystem.dragOffset = {
@@ -53,15 +67,33 @@ class PlatformMouseHandler {
                 };
                 this.platformSystem.updatePlatformProperties();
                 this.platformSystem.updatePlatformList();
-                return true;
+                return { handled: true, type: 'drag' };
             }
         }
 
-        // No platform was clicked
+        // If we only found background platforms and they're allowed, select the first one
+        if (backgroundPlatformMatch && allowBackgroundPlatforms) {
+            const { platform, actualPos } = backgroundPlatformMatch;
+            this.platformSystem.isDragging = true;
+            this.platformSystem.selectedPlatform = platform;
+            this.platformSystem.dragOffset = {
+                x: worldMouseX - actualPos.x,
+                y: worldMouseY - actualPos.y
+            };
+            this.platformSystem.initialDragPosition = {
+                x: platform.x,
+                y: platform.y
+            };
+            this.platformSystem.updatePlatformProperties();
+            this.platformSystem.updatePlatformList();
+            return { handled: true, type: 'drag', isBackground: true };
+        }
+
+        // No platform was clicked (or only background platforms without permission)
         this.platformSystem.selectedPlatform = null;
         this.platformSystem.updatePlatformProperties();
         this.platformSystem.updatePlatformList();
-        return false;
+        return { handled: false };
     }
 
     handleMouseMove(worldMouseX, worldMouseY) {

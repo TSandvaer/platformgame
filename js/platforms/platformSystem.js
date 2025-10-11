@@ -162,8 +162,8 @@ class PlatformSystem {
     }
 
     // Mouse event handling
-    handleMouseDown(mouseX, mouseY, camera, viewport) {
-        const result = this.manager.handleMouseDown(mouseX, mouseY, camera, viewport);
+    handleMouseDown(mouseX, mouseY, camera, viewport, allowBackgroundPlatforms = false) {
+        const result = this.manager.handleMouseDown(mouseX, mouseY, camera, viewport, allowBackgroundPlatforms);
         if (result.handled) {
             this.manager.updatePlatformProperties();
             this.manager.updatePlatformList();

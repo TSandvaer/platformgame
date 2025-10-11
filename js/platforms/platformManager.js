@@ -14,7 +14,7 @@ class PlatformManager {
         this.draggingHandlePlatform = null;
     }
 
-    handleMouseDown(mouseX, mouseY, camera, viewport) {
+    handleMouseDown(mouseX, mouseY, camera, viewport, allowBackgroundPlatforms = false) {
         // Check if movement zone drawing mode is active
         if (this.isDrawingMovementZone) {
             this.startMovementZoneDrawing(mouseX, mouseY);
@@ -40,6 +40,9 @@ class PlatformManager {
             }
         }
 
+        // Track if we found a background platform (lower priority)
+        let backgroundPlatformMatch = null;
+
         // Second pass: Check for platform selection or resize
         for (let platform of this.platformData.platforms) {
             // Get actual position based on positioning mode
@@ -53,6 +56,7 @@ class PlatformManager {
 
             const resizeHandle = this.getResizeHandle(renderPlatform, mouseX, mouseY);
             if (resizeHandle) {
+                // Always allow resize handles, even for background platforms
                 this.platformData.isResizing = true;
                 this.platformData.resizeHandle = resizeHandle;
                 this.platformData.selectedPlatform = platform;
@@ -72,6 +76,16 @@ class PlatformManager {
             }
 
             if (this.platformData.isPointInPlatform(mouseX, mouseY, renderPlatform)) {
+                // Skip background platforms unless explicitly allowed
+                if (platform.isBackground && !allowBackgroundPlatforms) {
+                    // Store for potential later use, but keep looking
+                    if (!backgroundPlatformMatch) {
+                        backgroundPlatformMatch = { platform, actualPos, renderPlatform };
+                    }
+                    continue;
+                }
+
+                // Found a foreground platform - select it immediately
                 this.platformData.isDragging = true;
                 this.platformData.selectedPlatform = platform;
                 // Store the drag offset using the difference between mouse and actual rendered position
@@ -87,7 +101,21 @@ class PlatformManager {
             }
         }
 
-        // No platform was clicked - deselect current platform
+        // If we only found background platforms and they're allowed, select the first one
+        if (backgroundPlatformMatch && allowBackgroundPlatforms) {
+            const { platform, actualPos, renderPlatform } = backgroundPlatformMatch;
+            this.platformData.isDragging = true;
+            this.platformData.selectedPlatform = platform;
+            this.platformData.dragOffset = {
+                x: mouseX - renderPlatform.x,
+                y: mouseY - renderPlatform.y
+            };
+            this.platformData.dragStartRawPos = { x: platform.x, y: platform.y };
+            this.platformData.dragStartActualPos = { x: renderPlatform.x, y: renderPlatform.y };
+            return { handled: true, type: 'drag', platform, isBackground: true };
+        }
+
+        // No platform was clicked (or only background platforms without permission) - deselect current platform
         if (this.platformData.selectedPlatform) {
             this.platformData.selectedPlatform = null;
             this.updatePlatformProperties();

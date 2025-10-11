@@ -161,9 +161,9 @@ class InputMouse {
             }
         }
 
-        // Handle platform interaction
+        // Handle platform interaction (skip background platforms for now)
         const platformResult = this.game.platformSystem.handleMouseDown(
-            mouseX, mouseY, this.game.cameraSystem.camera, this.game.viewport
+            mouseX, mouseY, this.game.cameraSystem.camera, this.game.viewport, false
         );
 
         if (!platformResult.handled) {
@@ -237,9 +237,30 @@ class InputMouse {
                 }
             }
 
+            // Check for background platforms before other actions (but after foreground objects)
+            // Allow background platform selection even if prop system started drag-select (empty space click)
+            let backgroundPlatformResult = null;
+            if (!platformResult.handled &&
+                !enemyHandled &&
+                !npcHandled &&
+                (!propResult || !propResult.handled || propResult.type === 'drag-select') &&
+                (!lootableResult || !lootableResult.handled)) {
+                // Try selecting background platforms
+                backgroundPlatformResult = this.game.platformSystem.handleMouseDown(
+                    mouseX, mouseY, this.game.cameraSystem.camera, this.game.viewport, true
+                );
+
+                // If background platform was selected, cancel prop drag selection
+                if (backgroundPlatformResult && backgroundPlatformResult.handled && this.game.propSystem) {
+                    this.game.propSystem.data.cancelDragSelection();
+                }
+            }
+
             // Start lootable drag selection if no specific object was clicked and lootables were cleared
             // Allow it even if prop system "handled" the click, but not if props are being dragged or multi-dragged
+            // Don't start if background platform was selected
             if (!platformResult.handled &&
+                (!backgroundPlatformResult || !backgroundPlatformResult.handled) &&
                 !enemyHandled &&
                 lootableResult && lootableResult.type === 'clear' &&
                 this.game.lootableSystem &&
@@ -251,6 +272,7 @@ class InputMouse {
             // Handle player attack in development mode - only if nothing else was handled and not in editor modes
             if (e.button === 0 && this.game.player &&
                 !platformResult.handled &&
+                (!backgroundPlatformResult || !backgroundPlatformResult.handled) &&
                 (!propResult || !propResult.handled) &&
                 (!lootableResult || !lootableResult.handled) &&
                 !enemyHandled &&
