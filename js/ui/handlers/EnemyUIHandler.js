@@ -152,8 +152,78 @@ class EnemyUIHandler extends UIHandler {
      * Render enemy thumbnails
      */
     renderEnemyThumbnails() {
-        // Implement thumbnail rendering for enemies
-        // This would be similar to the original implementation
+        const enemyData = this.game.enemySystem.data;
+        const canvases = document.querySelectorAll('.enemy-thumbnail');
+
+        canvases.forEach(canvas => {
+            const enemyId = canvas.dataset.enemyId;
+            const enemyType = enemyData.enemyTypes[enemyId];
+
+            if (!enemyType) return;
+
+            // Load the idle sprite sheet for this enemy
+            const idleAnim = enemyType.animations.idle;
+            const spritePath = `${enemyType.spriteFolder}/${idleAnim.file}`;
+
+            const img = new Image();
+            img.onload = () => {
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                ctx.webkitImageSmoothingEnabled = false;
+                ctx.mozImageSmoothingEnabled = false;
+                ctx.msImageSmoothingEnabled = false;
+
+                // Calculate middle frame
+                const middleFrame = Math.floor(idleAnim.frames / 2);
+                const frameWidth = idleAnim.frameWidth;
+                const frameHeight = idleAnim.frameHeight;
+                const sourceX = middleFrame * frameWidth;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Calculate scaling to fit in 100x120 canvas, maintaining aspect ratio
+                const maxWidth = 100;
+                const maxHeight = 120;
+                let scale = Math.min(maxWidth / frameWidth, maxHeight / frameHeight, 2.5); // Allow up to 2.5x scale
+
+                // Make orc and skeleton double size
+                if (enemyId === 'orc' || enemyId === 'skeleton') {
+                    scale *= 2.0;
+                }
+
+                const renderWidth = frameWidth * scale;
+                const renderHeight = frameHeight * scale;
+
+                // Center the sprite in the canvas
+                const offsetX = (maxWidth - renderWidth) / 2;
+                const offsetY = (maxHeight - renderHeight) / 2;
+
+                // Handle sprites that face the opposite direction (facingInverted)
+                if (enemyType.facingInverted) {
+                    ctx.save();
+                    ctx.translate(maxWidth, 0);
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(
+                        img,
+                        sourceX, 0, frameWidth, frameHeight,
+                        maxWidth - offsetX - renderWidth, offsetY, renderWidth, renderHeight
+                    );
+                    ctx.restore();
+                } else {
+                    // Draw the middle frame
+                    ctx.drawImage(
+                        img,
+                        sourceX, 0, frameWidth, frameHeight,
+                        offsetX, offsetY, renderWidth, renderHeight
+                    );
+                }
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load enemy sprite: ${spritePath}`);
+            };
+            img.src = spritePath;
+        });
     }
 
     /**
