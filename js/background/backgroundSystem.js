@@ -621,6 +621,7 @@ class BackgroundSystem {
             let loadedCount = 0;
 
             const drawAllLayers = () => {
+                console.log(`🖼️ Drawing thumbnail for ${backgroundName}, ${layers.length} layers loaded`);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // Fill background first (for space backgrounds)
@@ -630,15 +631,23 @@ class BackgroundSystem {
                 }
 
                 // Draw all layers in order
+                let successCount = 0;
                 layers.forEach((img, index) => {
-                    if (!img.complete || !img.naturalWidth) return;
+                    if (!img.complete || !img.naturalWidth) {
+                        console.warn(`🖼️ Layer ${index} skipped: complete=${img.complete}, naturalWidth=${img.naturalWidth}`);
+                        return;
+                    }
 
-                    // Calculate scaling to fit
-                    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-                    const scaledWidth = img.width * scale;
-                    const scaledHeight = img.height * scale;
+                    // IMPORTANT: Use naturalWidth/naturalHeight for Image objects
+                    // img.width and img.height can be 0 if the image hasn't been added to DOM
+                    // naturalWidth/naturalHeight contain the actual loaded image dimensions
+                    const scale = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+                    const scaledWidth = img.naturalWidth * scale;
+                    const scaledHeight = img.naturalHeight * scale;
                     const x = (canvas.width - scaledWidth) / 2;
                     const y = (canvas.height - scaledHeight) / 2;
+
+                    console.log(`🖼️ Drawing layer ${index}: ${img.naturalWidth}x${img.naturalHeight} -> ${scaledWidth.toFixed(1)}x${scaledHeight.toFixed(1)} at (${x.toFixed(1)}, ${y.toFixed(1)})`);
 
                     // For Parallax Forest, render in reverse order (sky first)
                     if (backgroundName === 'Parallax_Forest_Background_Blue') {
@@ -646,24 +655,33 @@ class BackgroundSystem {
                     }
 
                     ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+                    successCount++;
                 });
 
+                console.log(`🖼️ Successfully drew ${successCount}/${layers.length} layers for ${backgroundName}`);
                 ctx.globalAlpha = 1.0;
             };
+
+            console.log(`📦 Starting to load ${layerPaths.length} layers for ${backgroundName}`);
 
             layerPaths.forEach((path, index) => {
                 const img = new Image();
                 img.onload = () => {
                     loadedCount++;
+                    console.log(`✅ Thumbnail layer ${index} loaded: ${path} (${loadedCount}/${layerPaths.length})`);
+                    console.log(`   Checking: loadedCount=${loadedCount}, layerPaths.length=${layerPaths.length}, equal=${loadedCount === layerPaths.length}`);
                     if (loadedCount === layerPaths.length) {
                         // All layers loaded, draw them
-                        drawAllLayers();
+                        console.log(`🎨 All ${layerPaths.length} layers loaded for ${backgroundName}, drawing now...`);
+                        setTimeout(() => drawAllLayers(), 0); // Use setTimeout to ensure all images are fully ready
                     }
                 };
-                img.onerror = () => {
+                img.onerror = (error) => {
                     loadedCount++;
+                    console.error(`❌ Failed to load thumbnail layer ${index}: ${path}`, error);
                     if (loadedCount === layerPaths.length) {
                         // Even with errors, draw what we have
+                        console.log(`⚠️ All layers processed for ${backgroundName} (with errors), drawing...`);
                         drawAllLayers();
                     }
                 };
@@ -683,10 +701,25 @@ class BackgroundSystem {
             ctx.fillRect(0, 0, width, height);
         }
 
+        // Determine layer rendering order
+        // For Parallax Forest, render back to front (sky first)
+        let layersToRender;
+        if (background.name === 'Parallax_Forest_Background_Blue') {
+            // Sky to foreground (back to front)
+            layersToRender = [9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
+        } else {
+            // Normal order for other backgrounds
+            layersToRender = [...Array(background.layers.length).keys()];
+        }
+
         // Render each layer
-        for (let i = 0; i < background.layers.length; i++) {
-            const layer = background.layers[i];
-            if (!layer.complete || !layer.naturalWidth) continue;
+        for (let i = 0; i < layersToRender.length; i++) {
+            const index = layersToRender[i];
+            const layer = background.layers[index];
+
+            if (!layer.complete || !layer.naturalWidth) {
+                continue;
+            }
 
             // Calculate scaling to fit thumbnail
             const scale = Math.min(width / layer.naturalWidth, height / layer.naturalHeight);
