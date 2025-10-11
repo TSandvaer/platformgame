@@ -283,8 +283,8 @@ class EnemySystem {
 
         // Render attraction zone drawing preview
         if (this.mouseHandler) {
-            this.mouseHandler.renderAttractionZonePreview(this.renderer.ctx);
-            this.mouseHandler.renderMovementZonePreview(this.renderer.ctx);
+            this.mouseHandler.renderAttractionZonePreview(this.renderer.ctx, viewport, camera);
+            this.mouseHandler.renderMovementZonePreview(this.renderer.ctx, viewport, camera);
         }
     }
 

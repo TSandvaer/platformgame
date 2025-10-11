@@ -14,6 +14,7 @@ class EnemyUIHandler extends UIHandler {
     initialize() {
         this.setupEnemyControls();
         this.setupEnemiesEditorListeners();
+        this.setupEnemyZoneDrawing();
     }
 
     /**
@@ -25,6 +26,63 @@ class EnemyUIHandler extends UIHandler {
                 this.game.enemySystem.clearAllEnemies();
                 this.updateEnemyList();
                 this.updateEnemyProperties();
+            }
+        });
+    }
+
+    /**
+     * Set up enemy zone drawing controls
+     */
+    setupEnemyZoneDrawing() {
+        // Draw Attraction Zone button
+        this.addListener('drawAttractionZone', 'click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                const success = this.game.enemySystem.startAttractionZoneDrawing(selectedEnemy);
+                if (success) {
+                    // Update button state to show drawing mode is active
+                    const button = this.getElementById('drawAttractionZone');
+                    if (button) {
+                        button.textContent = 'Drawing... (drag on map)';
+                        button.classList.add('danger');
+                        button.disabled = true;
+                    }
+
+                    // Set up a way to reset button state when drawing is finished
+                    this.checkAttractionZoneDrawingComplete();
+
+                    console.log('🎯 Started attraction zone drawing mode for enemy', selectedEnemy.id);
+                } else {
+                    alert('Failed to start attraction zone drawing. Make sure an enemy is selected.');
+                }
+            } else {
+                alert('Please select an enemy first.');
+            }
+        });
+
+        // Draw Movement Zone button
+        this.addListener('drawMovementZone', 'click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                const success = this.game.enemySystem.startMovementZoneDrawing(selectedEnemy);
+                if (success) {
+                    // Update button state to show drawing mode is active
+                    const button = this.getElementById('drawMovementZone');
+                    if (button) {
+                        button.textContent = 'Drawing... (drag on map)';
+                        button.classList.add('danger');
+                        button.disabled = true;
+                    }
+
+                    // Set up a way to reset button state when drawing is finished
+                    this.checkMovementZoneDrawingComplete();
+
+                    console.log('🎯 Started movement zone drawing mode for enemy', selectedEnemy.id);
+                } else {
+                    alert('Failed to start movement zone drawing. Make sure an enemy is selected.');
+                }
+            } else {
+                alert('Please select an enemy first.');
             }
         });
     }

@@ -21,7 +21,7 @@ class PropUIHandler extends UIHandler {
      */
     setupLegacyPropListeners() {
         // Props controls (old UI - optional, kept for backward compatibility)
-        const addPropBtn = this.getElementById('addPropBtn');
+        const addPropBtn = this.getElementById('addPropBtn', true); // Silent - optional element
         if (addPropBtn) {
             addPropBtn.addEventListener('click', () => {
                 this.game.propSystem.togglePropPlacement();
@@ -29,11 +29,11 @@ class PropUIHandler extends UIHandler {
         }
 
         // Auto-update size when prop type changes (old UI - optional)
-        const propTypeSelect = this.getElementById('propTypeSelect');
+        const propTypeSelect = this.getElementById('propTypeSelect', true); // Silent - optional element
         if (propTypeSelect) {
             propTypeSelect.addEventListener('change', (e) => {
                 const propType = e.target.value;
-                const sizeInput = this.getElementById('propSizeInput');
+                const sizeInput = this.getElementById('propSizeInput', true); // Silent - optional element
 
                 if (sizeInput) {
                     // Set default size based on prop type (all default to 1.5 now)

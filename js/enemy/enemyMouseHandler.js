@@ -286,40 +286,28 @@ class EnemyMouseHandler {
     }
 
     // Render preview while drawing
-    renderAttractionZonePreview(ctx) {
+    renderAttractionZonePreview(ctx, viewport, camera) {
         if (!this.isDrawingAttractionZone || !this.attractionZoneStart || !this.attractionZoneEnd) return;
 
         ctx.save();
 
-        // Calculate rectangle bounds
+        // Calculate rectangle bounds in world coordinates
         const x = Math.min(this.attractionZoneStart.x, this.attractionZoneEnd.x);
         const y = Math.min(this.attractionZoneStart.y, this.attractionZoneEnd.y);
         const width = Math.abs(this.attractionZoneEnd.x - this.attractionZoneStart.x);
         const height = Math.abs(this.attractionZoneEnd.y - this.attractionZoneStart.y);
 
-        // Apply camera transformation if available
-        let renderX = x;
-        let renderY = y;
-        let renderWidth = width;
-        let renderHeight = height;
-
-        if (this.viewport && this.camera) {
-            renderX = (x - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
-            renderY = (y - this.camera.y) * this.viewport.scaleY + this.viewport.offsetY;
-            renderWidth = width * this.viewport.scaleX;
-            renderHeight = height * this.viewport.scaleY;
-        }
-
-        // Draw preview rectangle
+        // Draw preview rectangle directly in world coordinates
+        // (camera transform is already applied by caller in game.js)
         ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
         ctx.lineWidth = 2;
         ctx.setLineDash([10, 5]);
-        ctx.strokeRect(renderX, renderY, renderWidth, renderHeight);
+        ctx.strokeRect(x, y, width, height);
         ctx.setLineDash([]);
 
         // Fill with semi-transparent color
         ctx.fillStyle = 'rgba(255, 255, 0, 0.1)';
-        ctx.fillRect(renderX, renderY, renderWidth, renderHeight);
+        ctx.fillRect(x, y, width, height);
 
         ctx.restore();
     }
@@ -390,44 +378,34 @@ class EnemyMouseHandler {
     }
 
     // Render preview while drawing
-    renderMovementZonePreview(ctx) {
+    renderMovementZonePreview(ctx, viewport, camera) {
         if (!this.isDrawingMovementZone || !this.movementZoneStart || !this.movementZoneEnd) return;
 
         ctx.save();
 
-        // Calculate horizontal line bounds
+        // Calculate horizontal line bounds in world coordinates
         const startX = Math.min(this.movementZoneStart.x, this.movementZoneEnd.x);
         const endX = Math.max(this.movementZoneStart.x, this.movementZoneEnd.x);
         const y = this.movementTargetEnemy ? this.movementTargetEnemy.y + this.movementTargetEnemy.height : this.movementZoneStart.y;
 
-        // Apply camera transformation if available
-        let renderStartX = startX;
-        let renderEndX = endX;
-        let renderY = y;
-
-        if (this.viewport && this.camera) {
-            renderStartX = (startX - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
-            renderEndX = (endX - this.camera.x) * this.viewport.scaleX + this.viewport.offsetX;
-            renderY = (y - this.camera.y) * this.viewport.scaleY + this.viewport.offsetY;
-        }
-
-        // Draw preview line (cyan like the existing movement zone)
+        // Draw preview line directly in world coordinates
+        // (camera transform is already applied by caller in game.js)
         ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
         ctx.lineWidth = 3;
         ctx.setLineDash([10, 5]);
         ctx.beginPath();
-        ctx.moveTo(renderStartX, renderY);
-        ctx.lineTo(renderEndX, renderY);
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
         ctx.stroke();
         ctx.setLineDash([]);
 
         // Draw zone markers
         ctx.fillStyle = 'cyan';
         ctx.beginPath();
-        ctx.arc(renderStartX, renderY, 6, 0, Math.PI * 2);
+        ctx.arc(startX, y, 6, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(renderEndX, renderY, 6, 0, Math.PI * 2);
+        ctx.arc(endX, y, 6, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();

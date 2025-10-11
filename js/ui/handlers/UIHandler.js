@@ -46,11 +46,12 @@ class UIHandler {
     /**
      * Get an element by ID with error handling
      * @param {string} id - The element ID
+     * @param {boolean} silent - If true, don't log warning for missing elements
      * @returns {HTMLElement|null} The element or null
      */
-    getElementById(id) {
+    getElementById(id, silent = false) {
         const element = document.getElementById(id);
-        if (!element) {
+        if (!element && !silent) {
             console.warn(`UIHandler: Element with id '${id}' not found`);
         }
         return element;
@@ -61,9 +62,10 @@ class UIHandler {
      * @param {string} elementId - The element ID
      * @param {string} event - The event type
      * @param {Function} handler - The event handler
+     * @param {boolean} silent - If true, don't log warning for missing elements
      */
-    addListener(elementId, event, handler) {
-        const element = this.getElementById(elementId);
+    addListener(elementId, event, handler, silent = false) {
+        const element = this.getElementById(elementId, silent);
         if (element) {
             element.addEventListener(event, handler);
         }

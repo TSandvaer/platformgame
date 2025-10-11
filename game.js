@@ -1013,6 +1013,22 @@ class PlatformRPG {
             this.propSystem.manager.renderMovementZonePreview(this.ctx, this.viewport, this.cameraSystem.camera);
             this.ctx.restore();
         }
+
+        // Render enemy attraction zone drawing preview
+        if (this.enemySystem?.mouseHandler?.isDrawingAttractionZone) {
+            this.ctx.save();
+            this.cameraSystem.applyTransform(this.ctx);
+            this.enemySystem.mouseHandler.renderAttractionZonePreview(this.ctx, this.viewport, this.cameraSystem.camera);
+            this.ctx.restore();
+        }
+
+        // Render enemy movement zone drawing preview
+        if (this.enemySystem?.mouseHandler?.isDrawingMovementZone) {
+            this.ctx.save();
+            this.cameraSystem.applyTransform(this.ctx);
+            this.enemySystem.mouseHandler.renderMovementZonePreview(this.ctx, this.viewport, this.cameraSystem.camera);
+            this.ctx.restore();
+        }
     }
 
     // renderPoliceBarrier method removed

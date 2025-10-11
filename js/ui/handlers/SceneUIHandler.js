@@ -61,19 +61,19 @@ class SceneUIHandler extends UIHandler {
             });
         }
 
-        // Boundary update button
+        // Boundary update button (optional - legacy UI)
         this.addListener('updateBoundariesBtn', 'click', () => {
             this.game.updateSceneBoundaries();
-        });
+        }, true); // Silent - optional element
 
-        // Add transition zone button
+        // Add transition zone button (optional - legacy UI)
         this.addListener('addTransitionBtn', 'click', () => {
             this.game.isAddingTransition = !this.game.isAddingTransition;
-            const btn = this.getElementById('addTransitionBtn');
+            const btn = this.getElementById('addTransitionBtn', true); // Silent - optional element
             if (btn) {
                 btn.textContent = this.game.isAddingTransition ? 'Cancel Adding Transition' : 'Add Transition Zone';
                 btn.classList.toggle('danger', this.game.isAddingTransition);
             }
-        });
+        }, true); // Silent - optional element
     }
 }
