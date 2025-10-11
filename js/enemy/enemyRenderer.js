@@ -16,6 +16,9 @@ class EnemyRenderer {
             }
         }
 
+        // Render health bar if enemy is damaged
+        this.renderHealthBar(enemy, viewport, camera);
+
         // Render selection indicator if this enemy is selected
         if (selectedEnemy && selectedEnemy.id === enemy.id) {
             this.renderSelectionIndicator(enemy, viewport, camera);

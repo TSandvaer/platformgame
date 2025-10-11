@@ -18,6 +18,9 @@ class PlayerRenderer {
         }
 
         this.renderSprite(ctx, frame);
+
+        // Render health bar if player is damaged
+        this.renderHealthBar(ctx);
     }
 
     renderSprite(ctx, frame) {
@@ -198,5 +201,37 @@ class PlayerRenderer {
         }
         ctx.strokeText(stateText, this.data.x, this.data.y - 5);
         ctx.fillText(stateText, this.data.x, this.data.y - 5);
+    }
+
+    renderHealthBar(ctx) {
+        // Only render health bar if player has taken damage
+        if (this.data.isDead || this.data.health >= this.data.maxHealth) return;
+
+        ctx.save();
+
+        // Health bar dimensions
+        const barWidth = this.data.width;
+        const barHeight = 6;
+        const barX = this.data.x;
+        const barY = this.data.y - 15;
+
+        // Background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+
+        // Health bar
+        const healthPercentage = this.data.health / this.data.maxHealth;
+        const healthColor = healthPercentage > 0.5 ? '#4CAF50' :
+                           healthPercentage > 0.25 ? '#FFC107' : '#F44336';
+
+        ctx.fillStyle = healthColor;
+        ctx.fillRect(barX, barY, barWidth * healthPercentage, barHeight);
+
+        // Border
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+        ctx.restore();
     }
 }
