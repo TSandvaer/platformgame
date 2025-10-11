@@ -31,6 +31,9 @@ class EnemyMouseHandler {
 
         // Pending enemy type from modal
         this.pendingEnemyType = null;
+
+        // Pending enemy config from modal (includes type, health, speed, damage)
+        this.pendingEnemyConfig = null;
     }
 
     handleMouseDown(worldMouseX, worldMouseY, ctrlPressed = false, shiftPressed = false) {
@@ -163,24 +166,22 @@ class EnemyMouseHandler {
     }
 
     placeEnemy(mouseX, mouseY) {
-        // Get enemy type from pending type (from modal) or fallback to dropdown (legacy)
+        // Get enemy type from pending config or fallback to dropdown (legacy)
         const enemyTypeSelect = document.getElementById('enemyTypeSelect');
         const enemyType = this.pendingEnemyType || (enemyTypeSelect ? enemyTypeSelect.value : 'orc');
 
         // Spawn enemy exactly like player start point - at click position and let it fall naturally
         const spawnY = mouseY;
 
-        // For debugging, still show platforms at this X position
-        const platforms = this.platformSystem.platforms || [];
-        const overlappingPlatforms = platforms.filter(p =>
-            mouseX + 30 > p.x && mouseX - 30 < p.x + p.width
-        ).sort((a, b) => a.y - b.y);
-
-
         // Add enemy to scene at spawn position
         const enemy = this.enemySystem.addEnemyToScene(mouseX, spawnY, enemyType);
 
-        if (enemy) {
+        // Apply custom properties from modal config if available
+        if (enemy && this.pendingEnemyConfig) {
+            enemy.health = this.pendingEnemyConfig.health;
+            enemy.maxHealth = this.pendingEnemyConfig.health;
+            enemy.speed = this.pendingEnemyConfig.speed;
+            enemy.damage = this.pendingEnemyConfig.damage;
         }
 
         // Enable attraction zone by default for placed enemies
@@ -193,9 +194,10 @@ class EnemyMouseHandler {
             window.uiEventHandler.updateEnemyList();
         }
 
-        // Exit placement mode and clear pending type
+        // Exit placement mode and clear pending config
         this.enemyPlacementMode = false;
         this.pendingEnemyType = null;
+        this.pendingEnemyConfig = null;
         this.updatePlacementButton();
 
         return enemy;
@@ -203,6 +205,11 @@ class EnemyMouseHandler {
 
     setPendingEnemyType(enemyType) {
         this.pendingEnemyType = enemyType;
+    }
+
+    setPendingEnemyConfig(config) {
+        this.pendingEnemyConfig = config;
+        this.pendingEnemyType = config ? config.type : null;
     }
 
     toggleEnemyPlacement() {

@@ -15,6 +15,7 @@ class EnemyUIHandler extends UIHandler {
         this.setupEnemyControls();
         this.setupEnemiesEditorListeners();
         this.setupEnemyZoneDrawing();
+        this.setupEnemyPropertyEditing();
     }
 
     /**
@@ -330,25 +331,31 @@ class EnemyUIHandler extends UIHandler {
             return;
         }
 
-        // Get values from modal inputs
-        const health = parseInt(document.getElementById('modalEnemyHealthInput').value) || 100;
-        const speed = parseFloat(document.getElementById('modalEnemySpeedInput').value) || 1;
-        const damage = parseInt(document.getElementById('modalEnemyDamageInput').value) || 10;
+        // Get default values from enemy type definition
+        const enemyTypeData = this.game.enemySystem.data.enemyTypes[this.selectedModalEnemyType];
 
-        // Store these values so enemySystem can use them when placing
-        this.game.enemySystem.pendingEnemyConfig = {
+        if (!enemyTypeData) {
+            console.error('Enemy type not found:', this.selectedModalEnemyType);
+            return;
+        }
+
+        // Store pending enemy config in mouseHandler where it will be used
+        const config = {
             type: this.selectedModalEnemyType,
-            health: health,
-            speed: speed,
-            damage: damage
+            health: enemyTypeData.health,
+            speed: enemyTypeData.speed,
+            damage: enemyTypeData.damage
         };
+
+        if (this.game.enemySystem.mouseHandler) {
+            this.game.enemySystem.mouseHandler.setPendingEnemyConfig(config);
+        }
 
         // Close modal
         this.closeEnemiesEditorModal();
 
         // Activate enemy placement mode
         this.game.enemySystem.toggleEnemyPlacement();
-
     }
 
     /**
@@ -417,6 +424,52 @@ class EnemyUIHandler extends UIHandler {
         updateCheckbox('enemyIsMoving', selectedEnemy.isMoving);
         updateCheckbox('enemyAttractionEnabled', selectedEnemy.attractionZone?.enabled || false);
         updateCheckbox('enemyMovementEnabled', selectedEnemy.movementZone?.enabled || false);
+
+        // Update death drops display
+        this.updateEnemyDropsList(selectedEnemy);
+    }
+
+    /**
+     * Update enemy drops list display
+     */
+    updateEnemyDropsList(enemy) {
+        const dropsList = document.getElementById('enemyDropsList');
+        if (!dropsList) return;
+
+        if (!enemy.dropItems || enemy.dropItems.length === 0) {
+            dropsList.innerHTML = '<div style="color: #888; font-size: 12px; text-align: center; padding: 10px;">No drops configured</div>';
+            return;
+        }
+
+        const inventoryItems = this.game.inventoryItemsData ? this.game.inventoryItemsData.getAllItems() : {};
+
+        let html = '';
+        enemy.dropItems.forEach((drop, index) => {
+            const item = inventoryItems[drop.itemId];
+            const itemName = item ? item.name : drop.itemId;
+            const chancePercent = Math.round(drop.chance * 100);
+
+            html += `<div style="background-color: #444; padding: 6px; border-radius: 3px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; color: #4CAF50; font-size: 11px;">${itemName}</div>
+                    <div style="color: #aaa; font-size: 10px;">Chance: ${chancePercent}% | Qty: ${drop.quantity}</div>
+                </div>
+                <button class="btn small danger" onclick="window.uiEventHandler.enemyHandler.removeEnemyDrop(${index})" style="padding: 2px 6px; font-size: 10px;">✕</button>
+            </div>`;
+        });
+
+        dropsList.innerHTML = html;
+    }
+
+    /**
+     * Remove an enemy drop by index
+     */
+    removeEnemyDrop(index) {
+        const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+        if (selectedEnemy && selectedEnemy.dropItems) {
+            selectedEnemy.dropItems.splice(index, 1);
+            this.updateEnemyProperties();
+        }
     }
 
     /**
@@ -463,5 +516,221 @@ class EnemyUIHandler extends UIHandler {
                 clearInterval(checkInterval);
             }
         }, 100); // Check every 100ms
+    }
+
+    /**
+     * Set up enemy property editing controls
+     */
+    setupEnemyPropertyEditing() {
+        // Update Enemy button
+        this.addListener('updateEnemy', 'click', () => {
+            this.updateSelectedEnemy();
+        });
+
+        // Delete Enemy button
+        this.addListener('deleteEnemy', 'click', () => {
+            this.deleteSelectedEnemy();
+        });
+
+        // Enemy property input change handlers
+        const propertyInputs = [
+            'enemyX', 'enemyY', 'enemyHealth', 'enemyDamage', 'enemySpeed'
+        ];
+
+        propertyInputs.forEach(inputId => {
+            const input = this.getElementById(inputId, true); // Silent - optional
+            if (input) {
+                input.addEventListener('input', () => {
+                    // Real-time update as user types
+                    this.updateSelectedEnemy();
+                });
+            }
+        });
+
+        // Checkbox handlers
+        this.addListener('enemyIsMoving', 'change', (e) => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                selectedEnemy.isMoving = e.target.checked;
+                this.updateEnemyList();
+            }
+        });
+
+        this.addListener('enemyAttractionEnabled', 'change', (e) => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy && selectedEnemy.attractionZone) {
+                selectedEnemy.attractionZone.enabled = e.target.checked;
+                this.updateEnemyList();
+            }
+        });
+
+        this.addListener('enemyMovementEnabled', 'change', (e) => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy && selectedEnemy.movementZone) {
+                selectedEnemy.movementZone.enabled = e.target.checked;
+                this.updateEnemyList();
+            }
+        });
+
+        // Enemy drop management
+        this.addListener('addEnemyDropBtn', 'click', () => {
+            this.openDropConfigModal('enemy');
+        });
+
+        this.addListener('clearEnemyDropsBtn', 'click', () => {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy && confirm('Clear all drops from this enemy?')) {
+                selectedEnemy.dropItems = [];
+                this.updateEnemyProperties();
+            }
+        });
+    }
+
+    /**
+     * Update the selected enemy with values from input fields
+     */
+    updateSelectedEnemy() {
+        const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+        if (!selectedEnemy) return;
+
+        // Get values from inputs
+        const x = parseInt(document.getElementById('enemyX')?.value) || selectedEnemy.x;
+        const y = parseInt(document.getElementById('enemyY')?.value) || selectedEnemy.y;
+        const health = parseInt(document.getElementById('enemyHealth')?.value) || selectedEnemy.health;
+        const damage = parseInt(document.getElementById('enemyDamage')?.value) || selectedEnemy.damage;
+        const speed = parseFloat(document.getElementById('enemySpeed')?.value) || selectedEnemy.speed;
+
+        // Update enemy properties
+        this.game.enemySystem.updateEnemyProperties(selectedEnemy.id, {
+            x: x,
+            y: y,
+            health: health,
+            damage: damage,
+            speed: speed
+        });
+
+        // Update UI
+        this.updateEnemyList();
+    }
+
+    /**
+     * Delete the selected enemy
+     */
+    deleteSelectedEnemy() {
+        const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+        if (!selectedEnemy) return;
+
+        if (confirm(`Delete enemy at (${Math.round(selectedEnemy.x)}, ${Math.round(selectedEnemy.y)})?`)) {
+            this.game.enemySystem.removeEnemyFromScene(selectedEnemy.id);
+            this.updateEnemyList();
+            this.updateEnemyProperties();
+        }
+    }
+
+    /**
+     * Open drop configuration modal
+     */
+    openDropConfigModal(dropContext) {
+        // Store the context (enemy or prop)
+        this.dropContext = dropContext;
+
+        const modal = document.getElementById('dropConfigModal');
+        if (!modal) return;
+
+        // Update modal title
+        const title = document.getElementById('dropConfigModalTitle');
+        if (title) {
+            title.textContent = dropContext === 'enemy' ? 'Configure Enemy Death Drops' : 'Configure Prop Drops';
+        }
+
+        // Populate item dropdown
+        this.populateDropItemSelect();
+
+        // Show modal
+        modal.style.display = 'flex';
+
+        // Set up modal buttons (one-time setup with event handler replacement)
+        const confirmBtn = document.getElementById('addDropConfirm');
+        const cancelBtn = document.getElementById('cancelDropConfig');
+
+        if (confirmBtn) {
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            newConfirmBtn.addEventListener('click', () => {
+                this.addDropFromModal();
+            });
+        }
+
+        if (cancelBtn) {
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+            newCancelBtn.addEventListener('click', () => {
+                this.closeDropConfigModal();
+            });
+        }
+    }
+
+    /**
+     * Close drop configuration modal
+     */
+    closeDropConfigModal() {
+        const modal = document.getElementById('dropConfigModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    /**
+     * Populate drop item select dropdown
+     */
+    populateDropItemSelect() {
+        const select = document.getElementById('dropItemSelect');
+        if (!select) return;
+
+        // Get all available inventory items
+        const inventoryItems = this.game.inventoryItemsData ? this.game.inventoryItemsData.getAllItems() : {};
+
+        // Clear and populate dropdown
+        select.innerHTML = '<option value="">Choose an item...</option>';
+
+        Object.values(inventoryItems).forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.name;
+            select.appendChild(option);
+        });
+    }
+
+    /**
+     * Add drop from modal configuration
+     */
+    addDropFromModal() {
+        const itemId = document.getElementById('dropItemSelect')?.value;
+        const chance = parseInt(document.getElementById('dropChanceInput')?.value) || 40;
+        const quantity = parseInt(document.getElementById('dropQuantityInput')?.value) || 1;
+
+        if (!itemId) {
+            alert('Please select an item');
+            return;
+        }
+
+        if (this.dropContext === 'enemy') {
+            const selectedEnemy = this.game.enemySystem.getSelectedEnemy();
+            if (selectedEnemy) {
+                if (!selectedEnemy.dropItems) {
+                    selectedEnemy.dropItems = [];
+                }
+
+                selectedEnemy.dropItems.push({
+                    itemId: itemId,
+                    chance: chance / 100, // Convert percentage to 0-1
+                    quantity: quantity
+                });
+
+                this.updateEnemyProperties();
+            }
+        }
+
+        this.closeDropConfigModal();
     }
 }
