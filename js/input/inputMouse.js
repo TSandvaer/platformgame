@@ -56,14 +56,14 @@ class InputMouse {
         // Trigger attack through the player system
         this.game.playerSystem.controller.startAttack(attackType);
 
-        // If ranged attack and player has projectile system, create projectile
+        // If ranged attack, store pending projectile for delayed spawning
         if (isRangedAttack && this.game.playerSystem.projectileSystem && characterConfig) {
-            this.game.playerSystem.projectileSystem.createProjectile(
-                this.game.player,
-                mouseX,
-                mouseY,
-                characterConfig
-            );
+            this.game.player.pendingProjectile = {
+                targetX: mouseX,
+                targetY: mouseY,
+                characterConfig: characterConfig,
+                spawned: false
+            };
         }
 
         const attackTypeLabel = isRangedAttack ? 'ranged (Ctrl+Click)' : 'melee';

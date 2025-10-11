@@ -164,6 +164,25 @@ class PlayerAnimator {
         // Handle attack timing
         if (this.data.isAttacking) {
             this.data.attackTimer += deltaTime;
+
+            // Check if we should spawn a pending projectile
+            if (this.data.pendingProjectile && !this.data.pendingProjectile.spawned) {
+                const projectileConfig = this.data.pendingProjectile.characterConfig?.projectile;
+                if (projectileConfig && this.data.attackTimer >= projectileConfig.spawnTime) {
+                    // Get projectile system from window (since we don't have direct access)
+                    const projectileSystem = window.game?.playerSystem?.projectileSystem;
+                    if (projectileSystem) {
+                        projectileSystem.createProjectile(
+                            this.data,
+                            this.data.pendingProjectile.targetX,
+                            this.data.pendingProjectile.targetY,
+                            this.data.pendingProjectile.characterConfig
+                        );
+                        this.data.pendingProjectile.spawned = true;
+                    }
+                }
+            }
+
             if (this.data.attackTimer >= this.data.attackDuration) {
                 this.endAttack(isDevelopmentMode);
             }
@@ -212,6 +231,8 @@ class PlayerAnimator {
     endAttack(isDevelopmentMode) {
         this.data.isAttacking = false;
         this.data.attackTimer = 0;
+        this.data.currentAttackType = null;
+        this.data.pendingProjectile = null; // Clear pending projectile
 
         // Return to appropriate animation based on current state
         if (!isDevelopmentMode && !this.data.onGround) {

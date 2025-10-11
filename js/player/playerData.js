@@ -29,6 +29,10 @@ class PlayerData {
         this.isAttacking = false;
         this.attackTimer = 0;
         this.attackDuration = 545;
+        this.currentAttackType = null; // Stores current attack type ('attack', 'attack_melee', 'attack_ranged')
+
+        // Pending projectile (for delayed spawning)
+        this.pendingProjectile = null; // { targetX, targetY, characterConfig, spawned: false }
 
         // Input state
         this.spaceKeyPressed = false;

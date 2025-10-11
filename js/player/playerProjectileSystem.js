@@ -128,13 +128,18 @@ class PlayerProjectileSystem {
         return Math.abs(projectile.x) > 3000 || Math.abs(projectile.y) > 3000;
     }
 
-    render(ctx, viewport, camera, projectileAnimator) {
-        if (!projectileAnimator || !projectileAnimator.isReady()) {
+    render(ctx, viewport, camera, projectileAnimator, characterConfig) {
+        if (!projectileAnimator) {
+            return;
+        }
+
+        // Load character projectile if needed
+        if (characterConfig && !projectileAnimator.isReady(characterConfig)) {
             return;
         }
 
         for (const projectile of this.projectiles) {
-            projectileAnimator.render(ctx, projectile, viewport, camera);
+            projectileAnimator.render(ctx, projectile, viewport, camera, characterConfig);
         }
     }
 

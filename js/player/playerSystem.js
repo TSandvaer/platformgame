@@ -61,7 +61,9 @@ class PlayerSystem {
         // Render projectiles
         // Pass null viewport and camera since context already has camera transform applied
         if (this.projectileSystem && this.projectileAnimator) {
-            this.projectileSystem.render(ctx, null, null, this.projectileAnimator);
+            // Get character config for projectile rendering
+            const characterConfig = window.playerCharacters?.getCharacter(this.data.selectedCharacter);
+            this.projectileSystem.render(ctx, null, null, this.projectileAnimator, characterConfig);
         }
     }
 

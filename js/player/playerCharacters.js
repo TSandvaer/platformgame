@@ -44,6 +44,16 @@ class PlayerCharacters {
                         frames: 4,
                         frameRate: 150
                     },
+                    attack_melee: {
+                        file: 'Soldier-Attack01.png',
+                        frames: 4,
+                        frameRate: 150
+                    },
+                    attack_ranged: {
+                        file: 'Soldier-Attack03.png',
+                        frames: 9,
+                        frameRate: 100
+                    },
                     hurt: {
                         file: 'Soldier-Hurt.png',
                         frames: 4,
@@ -57,7 +67,24 @@ class PlayerCharacters {
                 },
 
                 // Attack configuration
-                attackDuration: 545  // milliseconds
+                attackDuration: 545,  // milliseconds (melee attack)
+                rangedAttackDuration: 900,  // milliseconds (9 frames * 100ms for bow)
+
+                // Projectile configuration (arrow)
+                projectile: {
+                    spriteSheet: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Arrow(projectile)/Arrow01(32x32).png',
+                    frameWidth: 32,
+                    frameHeight: 32,
+                    frames: 1,  // Static arrow sprite (no animation)
+                    speed: 500,  // pixels per second (faster than wizard)
+                    damage: 25,  // Base arrow damage
+                    spawnTime: 750,  // Spawn arrow at 750ms (frame 7.5 of 9, near end of bow release)
+                    // Spawn offset relative to visual sprite position
+                    spawnOffset: {
+                        right: { x: 50, y: 20 },  // When facing right (at bow tip)
+                        left: { x: -6, y: 20 }    // When facing left (at bow tip)
+                    }
+                }
             },
 
             dwarfWarrior: {
@@ -197,11 +224,12 @@ class PlayerCharacters {
                     frames: 5,
                     speed: 400,  // pixels per second
                     damage: 30,  // Base projectile damage
+                    spawnTime: 800,  // Spawn fireball at 800ms (frame 8 of 10, near end of staff wave)
                     // Spawn offset relative to visual sprite position (not collision box)
                     // These values are in world pixels and account for the visual sprite rendering
                     spawnOffset: {
                         right: { x: 68, y: -9 },  // When facing right
-                        left: { x: -24, y: -9 }   // When facing left
+                        left: { x: -50, y: -9 }   // When facing left
                     }
                 }
             }
