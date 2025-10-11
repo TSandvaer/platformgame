@@ -38,9 +38,9 @@ class PlayerSystem {
         // Update animation
         this.animator.update(deltaTime, isDevelopmentMode);
 
-        // Update projectile system (pass enemies for collision detection)
+        // Update projectile system (pass enemies and propSystem for collision detection)
         if (this.projectileSystem && enemySystem) {
-            this.projectileSystem.update(deltaTime, enemySystem.data.enemies);
+            this.projectileSystem.update(deltaTime, enemySystem.data.enemies, propSystem);
         }
     }
 

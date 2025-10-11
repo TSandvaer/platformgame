@@ -68,7 +68,7 @@ class PlayerProjectileSystem {
         return projectile;
     }
 
-    update(deltaTime, enemies) {
+    update(deltaTime, enemies, propSystem) {
         for (let i = this.projectiles.length - 1; i >= 0; i--) {
             const projectile = this.projectiles[i];
 
@@ -102,9 +102,26 @@ class PlayerProjectileSystem {
                 }
             }
 
+            // Check if projectile hit any destroyable prop
+            if (!projectile.shouldRemove && propSystem && propSystem.data && propSystem.data.props) {
+                const props = propSystem.data.props;
+                for (const prop of props) {
+                    // Skip non-destroyable, invisible, already destroyed, or destroying props
+                    if (!prop.destroyable || !prop.isVisible || prop.isDestroyed || prop.isDestroying) continue;
+
+                    const hit = this.checkProjectilePropCollision(projectile, prop, propSystem.data);
+                    if (hit) {
+                        // Store hit information for prop system to process
+                        projectile.hitProp = prop;
+                        projectile.shouldRemove = true;
+                        break;
+                    }
+                }
+            }
+
             // Remove if too old or off-screen
-            // Don't remove hit projectiles yet - let enemy system process them first
-            if (!projectile.hitEnemy && (projectile.shouldRemove || projectile.age > projectile.lifetime || this.isOffScreen(projectile))) {
+            // Don't remove hit projectiles yet - let systems process them first
+            if (!projectile.hitEnemy && !projectile.hitProp && (projectile.shouldRemove || projectile.age > projectile.lifetime || this.isOffScreen(projectile))) {
                 this.projectiles.splice(i, 1);
             }
         }
@@ -121,6 +138,25 @@ class PlayerProjectileSystem {
                projectile.x + projectileWidth > enemy.x &&
                projectile.y < enemy.y + collisionOffsetY + enemy.height &&
                projectile.y + projectileHeight > enemy.y + collisionOffsetY;
+    }
+
+    checkProjectilePropCollision(projectile, prop, propData) {
+        const projectileWidth = 32; // Frame width
+        const projectileHeight = 32; // Frame height
+
+        // Get prop type to calculate actual dimensions
+        const propType = propData?.propTypes?.[prop.type];
+        if (!propType) return false;
+
+        // Account for prop's size multiplier
+        const sizeMultiplier = prop.sizeMultiplier || 1.0;
+        const propWidth = propType.width * sizeMultiplier;
+        const propHeight = propType.height * sizeMultiplier;
+
+        return projectile.x < prop.x + propWidth &&
+               projectile.x + projectileWidth > prop.x &&
+               projectile.y < prop.y + propHeight &&
+               projectile.y + projectileHeight > prop.y;
     }
 
     isOffScreen(projectile) {
@@ -157,6 +193,14 @@ class PlayerProjectileSystem {
         const hitProjectiles = this.projectiles.filter(p => p.hitEnemy);
         // Remove hit projectiles from the array
         this.projectiles = this.projectiles.filter(p => !p.hitEnemy);
+        return hitProjectiles;
+    }
+
+    // Get projectiles that hit props and remove them from the list
+    getAndClearPropHitProjectiles() {
+        const hitProjectiles = this.projectiles.filter(p => p.hitProp);
+        // Remove hit projectiles from the array
+        this.projectiles = this.projectiles.filter(p => !p.hitProp);
         return hitProjectiles;
     }
 }

@@ -463,6 +463,21 @@ class PlatformRPG {
             });
         }
 
+        // Handle player projectile collisions with props
+        if (this.playerSystem.projectileSystem) {
+            const hitProjectiles = this.playerSystem.projectileSystem.getAndClearPropHitProjectiles();
+            for (const projectile of hitProjectiles) {
+                const prop = projectile.hitProp;
+                if (prop && !prop.isDamaged && !prop.isDestroyed && !prop.isDestroying) {
+                    this.propSystem.damageProp(prop.id, projectile.damage);
+
+                    // Add brief damage immunity to prevent multiple hits
+                    prop.isDamaged = true;
+                    prop.damageTimer = 200; // 200ms immunity for projectiles
+                }
+            }
+        }
+
         // Update prop damage immunity timers
         this.propSystem.data.props.forEach(prop => {
             if (prop.isDamaged && prop.damageTimer > 0) {
