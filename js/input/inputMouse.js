@@ -15,7 +15,7 @@ class InputMouse {
         this.setupMouseListeners();
     }
 
-    handlePlayerAttack(mouseX, mouseY) {
+    handlePlayerAttack(mouseX, mouseY, event = null) {
         if (!this.game.player || this.game.player.isAttacking) return;
 
         // Calculate direction from player to mouse
@@ -29,9 +29,46 @@ class InputMouse {
             this.game.player.facing = 'left';
         }
 
+        // Get character configuration
+        const characterConfig = window.playerCharacters?.getCharacter(this.game.player.selectedCharacter);
+        const hasMeleeAttack = characterConfig?.animations?.attack_melee;
+        const hasRangedAttack = characterConfig?.animations?.attack_ranged;
+
+        // Determine attack type based on Ctrl key
+        // Ctrl+Click = ranged attack, otherwise = melee attack
+        let attackType = 'attack'; // Default for backward compatibility
+        let isRangedAttack = false;
+
+        if (event && event.ctrlKey && hasRangedAttack) {
+            // Ctrl+Click triggers ranged attack
+            attackType = 'attack_ranged';
+            isRangedAttack = true;
+        } else if (hasMeleeAttack) {
+            // Default: use melee attack
+            attackType = 'attack_melee';
+            isRangedAttack = false;
+        } else if (hasRangedAttack) {
+            // Fallback: if character only has ranged attack
+            attackType = 'attack_ranged';
+            isRangedAttack = true;
+        }
+
         // Trigger attack through the player system
-        this.game.playerSystem.controller.startAttack();
-        console.log('🎯 Player attacking towards mouse, facing:', this.game.player.facing);
+        this.game.playerSystem.controller.startAttack(attackType);
+
+        // If ranged attack and player has projectile system, create projectile
+        if (isRangedAttack && this.game.playerSystem.projectileSystem && characterConfig) {
+            console.log(`🎯 RANGED ATTACK DEBUG: Player position = (${this.game.player.x}, ${this.game.player.y}), size = ${this.game.player.width}x${this.game.player.height}, facing = ${this.game.player.facing}`);
+            this.game.playerSystem.projectileSystem.createProjectile(
+                this.game.player,
+                mouseX,
+                mouseY,
+                characterConfig
+            );
+        }
+
+        const attackTypeLabel = isRangedAttack ? 'ranged (Ctrl+Click)' : 'melee';
+        console.log(`🎯 Player ${attackTypeLabel} attack, facing: ${this.game.player.facing}`);
     }
 
     setupMouseListeners() {
@@ -58,7 +95,7 @@ class InputMouse {
                 const clientMouseX = e.clientX - rect.left;
                 const clientMouseY = e.clientY - rect.top;
                 const worldCoords = this.game.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
-                this.handlePlayerAttack(worldCoords.x, worldCoords.y);
+                this.handlePlayerAttack(worldCoords.x, worldCoords.y, e);
             }
             return;
         }
@@ -232,7 +269,7 @@ class InputMouse {
                 !this.game.isAddingPlatform &&
                 !this.game.sceneSystem.isAddingTransition) {
 
-                this.handlePlayerAttack(mouseX, mouseY);
+                this.handlePlayerAttack(mouseX, mouseY, e);
                 console.log('🎯 Player attack in development mode');
             }
         }

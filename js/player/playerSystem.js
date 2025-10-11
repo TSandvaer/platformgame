@@ -5,6 +5,8 @@ class PlayerSystem {
         this.animator = new PlayerAnimator(this.data);
         this.controller = new PlayerController(this.data, this.physics, this.animator);
         this.renderer = new PlayerRenderer(this.data, this.animator);
+        this.projectileSystem = new PlayerProjectileSystem();
+        this.projectileAnimator = new PlayerProjectileAnimator();
     }
 
     // Initialize the player system
@@ -35,6 +37,11 @@ class PlayerSystem {
 
         // Update animation
         this.animator.update(deltaTime, isDevelopmentMode);
+
+        // Update projectile system (pass enemies for collision detection)
+        if (this.projectileSystem && enemySystem) {
+            this.projectileSystem.update(deltaTime, enemySystem.data.enemies);
+        }
     }
 
     // Check if player should render behind platforms (for sink effect)
@@ -43,12 +50,18 @@ class PlayerSystem {
     }
 
     // Render the player
-    render(ctx, isDevelopmentMode) {
+    render(ctx, isDevelopmentMode, viewport, camera) {
         this.renderer.render(ctx);
 
         // Optionally render debug info
         if (isDevelopmentMode) {
             this.renderer.renderDebug(ctx, isDevelopmentMode);
+        }
+
+        // Render projectiles
+        // Pass null viewport and camera since context already has camera transform applied
+        if (this.projectileSystem && this.projectileAnimator) {
+            this.projectileSystem.render(ctx, null, null, this.projectileAnimator);
         }
     }
 

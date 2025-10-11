@@ -174,8 +174,8 @@ class PlayerController {
         this.animator.updateAnimationBasedOnState(isMoving, false);
     }
 
-    startAttack() {
-        return this.animator.startAttack();
+    startAttack(attackType = 'attack') {
+        return this.animator.startAttack(attackType);
     }
 
     isKeyPressed(key) {

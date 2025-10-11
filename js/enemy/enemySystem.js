@@ -114,6 +114,21 @@ class EnemySystem {
         if (this.projectileSystem) {
             this.projectileSystem.update(deltaTime, player, this.collisions);
         }
+
+        // Handle player projectile collisions with enemies
+        if (player && player.projectileSystem) {
+            const hitProjectiles = player.projectileSystem.getAndClearHitProjectiles();
+            for (const projectile of hitProjectiles) {
+                const enemy = projectile.hitEnemy;
+                if (enemy && !enemy.isDead) {
+                    const animator = this.animators.get(enemy.id);
+                    if (animator) {
+                        this.damageEnemy(enemy, projectile.damage, animator);
+                        console.log(`Player projectile ${projectile.id} dealt ${projectile.damage} damage to enemy ${enemy.id}`);
+                    }
+                }
+            }
+        }
     }
 
     handleCombat(enemy, player, animator) {

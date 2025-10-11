@@ -6,6 +6,8 @@ class PlayerAnimator {
             idle: { image: null, frames: 6, frameWidth: 100, frameHeight: 100 },
             walk: { image: null, frames: 8, frameWidth: 100, frameHeight: 100 },
             attack: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
+            attack_melee: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
+            attack_ranged: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
             hurt: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 },
             death: { image: null, frames: 4, frameWidth: 100, frameHeight: 100 }
         };
@@ -66,6 +68,16 @@ class PlayerAnimator {
                 frameHeight: config.spriteSize.frameHeight,
                 frameRate: animConfig.frameRate
             };
+
+            // Initialize sprite entry if it doesn't exist (for attack_melee, attack_ranged)
+            if (!this.sprites[animKey]) {
+                this.sprites[animKey] = {
+                    image: null,
+                    frames: animConfig.frames,
+                    frameWidth: config.spriteSize.frameWidth,
+                    frameHeight: config.spriteSize.frameHeight
+                };
+            }
         }
 
         let loadedCount = 0;
@@ -167,8 +179,8 @@ class PlayerAnimator {
     }
 
     setAnimation(animationName) {
-        // Don't change animation if currently attacking (unless setting to attack)
-        if (this.data.isAttacking && animationName !== 'attack') {
+        // Don't change animation if currently attacking (unless setting to attack animation)
+        if (this.data.isAttacking && !animationName.startsWith('attack')) {
             return false;
         }
 
@@ -181,11 +193,25 @@ class PlayerAnimator {
         return false;
     }
 
-    startAttack() {
+    startAttack(attackType = 'attack') {
         if (!this.data.isAttacking) {
             this.data.isAttacking = true;
             this.data.attackTimer = 0;
-            this.setAnimation('attack');
+
+            // Set attack duration based on attack type
+            if (attackType === 'attack_ranged' && this.characterConfig?.rangedAttackDuration) {
+                this.data.attackDuration = this.characterConfig.rangedAttackDuration;
+            } else if (attackType === 'attack_melee' && this.characterConfig?.attackDuration) {
+                this.data.attackDuration = this.characterConfig.attackDuration;
+            } else if (this.characterConfig?.attackDuration) {
+                // Default attack duration
+                this.data.attackDuration = this.characterConfig.attackDuration;
+            }
+
+            // Store current attack type
+            this.data.currentAttackType = attackType;
+
+            this.setAnimation(attackType);
             return true;
         }
         return false;

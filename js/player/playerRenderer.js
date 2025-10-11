@@ -125,6 +125,55 @@ class PlayerRenderer {
         ctx.lineWidth = 2;
         ctx.strokeRect(this.data.x, this.data.y, this.data.width, this.data.height);
 
+        // Draw visual sprite bounds
+        const visualScale = this.animator.characterConfig?.visualScale || 2.6;
+        const frame = this.animator.getCurrentFrame();
+        if (frame) {
+            const baseSpriteWidth = frame.frameWidth;
+            const baseSpriteHeight = frame.frameHeight;
+            const spriteRenderWidth = Math.round(baseSpriteWidth * visualScale);
+            const spriteRenderHeight = Math.round(baseSpriteHeight * visualScale);
+            const spriteOffsetX = Math.round((this.data.width - spriteRenderWidth) / 2);
+            const spriteBottomOffset = this.animator.characterConfig?.spriteBottomOffset || 0;
+            const spriteOffsetY = Math.round(this.data.height - spriteRenderHeight + (spriteBottomOffset * visualScale));
+
+            // Draw sprite bounds in blue
+            ctx.strokeStyle = 'rgba(0, 100, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(
+                this.data.x + spriteOffsetX,
+                this.data.y + spriteOffsetY,
+                spriteRenderWidth,
+                spriteRenderHeight
+            );
+        }
+
+        // Draw projectile spawn position if character has projectile config
+        const characterConfig = this.animator.characterConfig;
+        if (characterConfig?.projectile?.spawnOffset) {
+            const spawnOffset = characterConfig.projectile.spawnOffset[this.data.facing];
+            if (spawnOffset) {
+                const spawnX = this.data.x + spawnOffset.x;
+                const spawnY = this.data.y + spawnOffset.y;
+
+                // Draw spawn point as a large green circle
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+                ctx.beginPath();
+                ctx.arc(spawnX, spawnY, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw crosshair
+                ctx.strokeStyle = 'lime';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(spawnX - 12, spawnY);
+                ctx.lineTo(spawnX + 12, spawnY);
+                ctx.moveTo(spawnX, spawnY - 12);
+                ctx.lineTo(spawnX, spawnY + 12);
+                ctx.stroke();
+            }
+        }
+
         // Draw center point
         const center = this.data.getCenter();
         ctx.fillStyle = 'red';

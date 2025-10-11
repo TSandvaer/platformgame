@@ -484,7 +484,10 @@ class PlatformRPG {
         }
 
         // Update enemy system
-        this.enemySystem.update(this.deltaTime, this.playerSystem.data, this.platformSystem.platforms);
+        // Pass player data with projectileSystem reference for projectile-enemy collision
+        const playerWithProjectiles = this.playerSystem.data;
+        playerWithProjectiles.projectileSystem = this.playerSystem.projectileSystem;
+        this.enemySystem.update(this.deltaTime, playerWithProjectiles, this.platformSystem.platforms);
 
         // Update NPC system
         this.npcSystem.update(this.deltaTime);
@@ -744,7 +747,7 @@ class PlatformRPG {
                     this.enemySystem.renderer.renderEnemy(entity.obj, animator, null, null, this.isDevelopmentMode, this.enemySystem.getSelectedEnemy());
                 }
             } else if (entity.type === 'player') {
-                this.playerSystem.render(this.ctx, this.isDevelopmentMode);
+                this.playerSystem.render(this.ctx, this.isDevelopmentMode, this.viewport, this.cameraSystem.camera);
             }
         });
 

@@ -120,6 +120,90 @@ class PlayerCharacters {
 
                 // Attack configuration
                 attackDuration: 800  // milliseconds (8 frames * 100ms)
+            },
+
+            wizard: {
+                id: 'wizard',
+                name: 'Wizard',
+                description: 'A powerful mage with melee and ranged magic attacks',
+
+                // Sprite configuration
+                spriteBasePath: 'sprites/PLAYER/CHARACTER/MATTZ ART/Wizard 2D Pixel Art v2.0/Sprites/without_outline',
+                spriteSize: {
+                    frameWidth: 128,  // 768px / 6 frames = 128px per frame (for idle)
+                    frameHeight: 78   // Actual sprite sheet height
+                },
+
+                // Player dimensions (hitbox for collisions)
+                // Match soldier's collision box size for consistency
+                playerSize: {
+                    width: 44,   // Same as soldier
+                    height: 59   // Same as soldier
+                },
+
+                // Visual scale - how much larger the sprite should be than the hitbox
+                visualScale: 1.8,  // Wizard sprite renders at 1.8x (128*1.8=230, 78*1.8=140)
+
+                // Sprite bottom offset - adjusts vertical position (in sprite pixels before scaling)
+                // Positive value moves sprite DOWN, negative moves UP
+                spriteBottomOffset: 13,  // Wizard sprite adjustment - aligns feet with collision box bottom
+
+                // Sprite facing - set to true if the sprite sheet faces left by default
+                invertFacing: true,  // Wizard sprites face left, so invert the facing logic
+
+                // Animation configurations
+                animations: {
+                    idle: {
+                        file: 'IDLE.png',
+                        frames: 6,
+                        frameRate: 150
+                    },
+                    walk: {
+                        file: 'WALK.png',
+                        frames: 4,
+                        frameRate: 150
+                    },
+                    attack_melee: {
+                        file: 'MELEE ATTACK.png',
+                        frames: 9,
+                        frameRate: 100
+                    },
+                    attack_ranged: {
+                        file: 'RANGED ATTACK.png',
+                        frames: 10,
+                        frameRate: 100
+                    },
+                    hurt: {
+                        file: 'HURT.png',
+                        frames: 4,
+                        frameRate: 150
+                    },
+                    death: {
+                        file: 'DEATH.png',
+                        frames: 6,
+                        frameRate: 150
+                    }
+                },
+
+                // Attack configuration
+                attackDuration: 900,  // milliseconds (9 frames * 100ms for melee)
+                rangedAttackDuration: 1000,  // milliseconds (10 frames * 100ms for ranged)
+
+                // Projectile configuration
+                projectile: {
+                    spriteSheet: 'sprites/PLAYER/CHARACTER/MATTZ ART/Wizard 2D Pixel Art v2.0/Projectile.png',
+                    frameWidth: 32,
+                    frameHeight: 32,
+                    frames: 5,
+                    speed: 400,  // pixels per second
+                    damage: 30,  // Base projectile damage
+                    // Spawn offset relative to visual sprite position (not collision box)
+                    // These values are in world pixels and account for the visual sprite rendering
+                    spawnOffset: {
+                        right: { x: 68, y: -9 },  // When facing right
+                        left: { x: -24, y: -9 }   // When facing left
+                    }
+                }
             }
         };
     }
