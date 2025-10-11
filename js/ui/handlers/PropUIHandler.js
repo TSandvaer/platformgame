@@ -14,6 +14,8 @@ class PropUIHandler extends UIHandler {
     initialize() {
         this.setupPropsEditorListeners();
         this.setupLegacyPropListeners();
+        this.setupPropZOrderListeners();
+        this.setupPropDropListeners();
     }
 
     /**
@@ -89,6 +91,25 @@ class PropUIHandler extends UIHandler {
                 this.addPropFromModal();
             });
         }
+    }
+
+    /**
+     * Set up prop z-order controls (send to back/bring to front)
+     */
+    setupPropZOrderListeners() {
+        // Send to background button
+        this.addListener('sendToBackground', 'click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.movePropToBack();
+            }
+        });
+
+        // Bring to front button
+        this.addListener('bringToFront', 'click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.movePropToFront();
+            }
+        });
     }
 
     /**
@@ -410,5 +431,142 @@ class PropUIHandler extends UIHandler {
         // Activate prop placement mode
         this.game.propSystem.togglePropPlacement();
 
+    }
+
+    /**
+     * Set up prop drop configuration event listeners
+     */
+    setupPropDropListeners() {
+        // Add drop button
+        this.addListener('addPropDropBtn', 'click', () => {
+            this.showDropConfigModal();
+        });
+
+        // Clear all drops button
+        this.addListener('clearPropDropsBtn', 'click', () => {
+            if (this.game.propSystem.selectedProp && confirm('Clear all drops for this prop?')) {
+                delete this.game.propSystem.selectedProp.dropItems;
+                this.game.propSystem.manager.updateDropConfigurationUI();
+                console.log(`🎁 Cleared all drops for prop ${this.game.propSystem.selectedProp.id}`);
+            }
+        });
+
+        // Note: Drop configuration modal buttons (closeDropConfigModal, cancelDropConfig, addDropConfirm)
+        // are handled dynamically in showDropConfigModal() to avoid conflicts with EnemyUIHandler
+    }
+
+    /**
+     * Show the drop configuration modal for props
+     */
+    showDropConfigModal() {
+        if (!this.game.propSystem.selectedProp) return;
+
+        // Populate the item dropdown
+        const itemSelect = this.getElementById('dropItemSelect');
+        if (itemSelect && this.game.inventoryItemsData) {
+            itemSelect.innerHTML = '<option value="">Choose an item...</option>';
+
+            // Add all available inventory items
+            const inventoryItems = this.game.inventoryItemsData.inventoryItems;
+            for (const itemId in inventoryItems) {
+                const item = inventoryItems[itemId];
+                const option = document.createElement('option');
+                option.value = itemId;
+                option.textContent = `${item.name} (${itemId})`;
+                itemSelect.appendChild(option);
+            }
+        }
+
+        // Reset form values
+        const chanceInput = this.getElementById('dropChanceInput');
+        const quantityInput = this.getElementById('dropQuantityInput');
+        if (chanceInput) chanceInput.value = '40';
+        if (quantityInput) quantityInput.value = '1';
+
+        // Update modal title
+        const titleEl = this.getElementById('dropConfigModalTitle');
+        if (titleEl) titleEl.textContent = 'Configure Item Drops';
+
+        // Set up modal button event listeners (dynamically to avoid conflicts with EnemyUIHandler)
+        // Clone and replace buttons to remove any old listeners
+        const confirmBtn = this.getElementById('addDropConfirm');
+        const cancelBtn = this.getElementById('cancelDropConfig');
+        const closeBtn = this.getElementById('closeDropConfigModal');
+
+        if (confirmBtn) {
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            newConfirmBtn.addEventListener('click', () => {
+                this.addDropToSelectedProp();
+            });
+        }
+
+        if (cancelBtn) {
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+            newCancelBtn.addEventListener('click', () => {
+                const modal = this.getElementById('dropConfigModal');
+                if (modal) modal.style.display = 'none';
+            });
+        }
+
+        if (closeBtn) {
+            const newCloseBtn = closeBtn.cloneNode(true);
+            closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+            newCloseBtn.addEventListener('click', () => {
+                const modal = this.getElementById('dropConfigModal');
+                if (modal) modal.style.display = 'none';
+            });
+        }
+
+        // Show modal
+        const modal = this.getElementById('dropConfigModal');
+        if (modal) modal.style.display = 'flex';
+    }
+
+    /**
+     * Add a drop item to the selected prop
+     */
+    addDropToSelectedProp() {
+        if (!this.game.propSystem.selectedProp) return;
+
+        const itemId = this.getElementById('dropItemSelect')?.value;
+        const inputPercent = parseFloat(this.getElementById('dropChanceInput')?.value);
+        const chance = inputPercent / 100; // Convert percentage to decimal
+        const quantity = parseInt(this.getElementById('dropQuantityInput')?.value) || 1;
+
+        if (!itemId) {
+            alert('Please select an item');
+            return;
+        }
+
+        if (inputPercent <= 0 || inputPercent > 100) {
+            alert('Drop chance must be between 1 and 100%');
+            return;
+        }
+
+        // Initialize dropItems array on the prop instance if it doesn't exist
+        if (!this.game.propSystem.selectedProp.dropItems) {
+            this.game.propSystem.selectedProp.dropItems = [];
+        }
+
+        // Check if this item is already configured
+        const existingIndex = this.game.propSystem.selectedProp.dropItems.findIndex(drop => drop.itemId === itemId);
+        if (existingIndex !== -1) {
+            // Update existing drop
+            this.game.propSystem.selectedProp.dropItems[existingIndex] = { itemId, chance, quantity };
+            console.log(`🎁 Updated drop for ${itemId} on prop ${this.game.propSystem.selectedProp.id}: ${(chance * 100).toFixed(1)}% chance, qty ${quantity}`);
+        } else {
+            // Add new drop
+            this.game.propSystem.selectedProp.dropItems.push({ itemId, chance, quantity });
+            console.log(`🎁 Added drop for ${itemId} to prop ${this.game.propSystem.selectedProp.id}: ${(chance * 100).toFixed(1)}% chance, qty ${quantity}`);
+        }
+
+        // Update UI
+        this.game.propSystem.manager.updateDropConfigurationUI();
+
+        // Close modal
+        const modal = this.getElementById('dropConfigModal');
+        if (modal) modal.style.display = 'none';
     }
 }

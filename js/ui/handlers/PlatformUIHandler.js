@@ -12,6 +12,7 @@ class PlatformUIHandler extends UIHandler {
      */
     initialize() {
         this.setupPlatformEditorListeners();
+        this.setupPlatformZOrderListeners();
     }
 
     /**
@@ -94,6 +95,25 @@ class PlatformUIHandler extends UIHandler {
 
         this.addListener('viewportModeSelect', 'change', () => {
             this.game.applyViewportSettings();
+        });
+    }
+
+    /**
+     * Set up platform z-order controls (send to back/bring to front)
+     */
+    setupPlatformZOrderListeners() {
+        // Send platform to background button
+        this.addListener('sendPlatformToBackground', 'click', () => {
+            if (this.game.platformSystem.selectedPlatform) {
+                this.game.platformSystem.data.moveToBack(this.game.platformSystem.selectedPlatform);
+            }
+        });
+
+        // Bring platform to front button
+        this.addListener('bringPlatformToFront', 'click', () => {
+            if (this.game.platformSystem.selectedPlatform) {
+                this.game.platformSystem.data.moveToFront(this.game.platformSystem.selectedPlatform);
+            }
         });
     }
 }

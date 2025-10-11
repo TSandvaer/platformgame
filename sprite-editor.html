@@ -280,11 +280,11 @@
             </div>
 
             <div class="info-section">
-                <h3>Index.html Dropdown Code</h3>
+                <h3>PropData.js Category Code</h3>
                 <div class="code-output" id="htmlCodeOutput" style="background: #0a0a0a; border: 1px solid #333;">
-                    Select an area to generate HTML code...
+                    Select an area to generate category code...
                 </div>
-                <button class="copy-btn" id="copyHtmlCode">Copy HTML Code</button>
+                <button class="copy-btn" id="copyHtmlCode">Copy Category Code</button>
             </div>
         </div>
     </div>
@@ -395,7 +395,7 @@
                     document.getElementById('selectionWidth').textContent = '-';
                     document.getElementById('selectionHeight').textContent = '-';
                     document.getElementById('codeOutput').textContent = 'Select an area to generate code...';
-                    document.getElementById('htmlCodeOutput').textContent = 'Select an area to generate HTML code...';
+                    document.getElementById('htmlCodeOutput').textContent = 'Select an area to generate category code...';
                 });
 
                 // If image is already loaded (cached)
@@ -595,40 +595,71 @@ ${propKey}: {
                 // Determine which category this prop belongs to
                 const category = this.determinePropCategory(propKey);
 
-                return `<!-- Add to index.html in the appropriate <optgroup> section -->
-<!-- Category: ${category} -->
-<option value="${propKey}">${displayName}</option>
+                return `// Add to propData.js in the propCategories object:
+// In the '${category}' category array, add: '${propKey}'
 
-<!-- Full example with optgroup:
-<optgroup label="${category}">
-    <option value="${propKey}">${displayName}</option>
-</optgroup> -->`;
+// Example (find this category in propData.js and add your prop):
+'${category}': ['existingProp1', 'existingProp2', '${propKey}'],
+
+// Full context:
+this.propCategories = {
+    // ... other categories ...
+    '${category}': [
+        // ... existing props ...
+        '${propKey}'  // <-- Add your new prop here
+    ],
+    // ... other categories ...
+};`;
             }
 
             determinePropCategory(propName) {
                 const name = propName.toLowerCase();
 
+                // Buildings
                 if (name.includes('house') || name.includes('tower') || name.includes('windmill') || name.includes('building'))
                     return 'Buildings';
-                if (name.includes('tree') || name.includes('bush') || name.includes('plant') || name.includes('flower'))
-                    return 'Trees & Nature';
-                if (name.includes('barrel') || name.includes('crate') || name.includes('box') || name.includes('chest'))
-                    return 'Containers';
-                if (name.includes('fence') || name.includes('wall') || name.includes('gate'))
-                    return 'Fences & Walls';
-                if (name.includes('sign') || name.includes('post'))
-                    return 'Signs';
-                if (name.includes('lamp') || name.includes('torch') || name.includes('light') || name.includes('lantern'))
-                    return 'Lighting';
-                if (name.includes('pot') || name.includes('vase') || name.includes('jar'))
-                    return 'Pottery';
-                if (name.includes('well') || name.includes('fountain') || name.includes('water'))
-                    return 'Water Features';
-                if (name.includes('bench') || name.includes('chair') || name.includes('table') || name.includes('furniture'))
-                    return 'Furniture';
-                if (name.includes('pole') || name.includes('beam') || name.includes('wood'))
+
+                // Structures (poles, beams, banners)
+                if (name.includes('pole') || name.includes('beam') || name.includes('banner') || name.includes('barrier'))
                     return 'Structures';
 
+                // Fences & Walls
+                if (name.includes('fence') || name.includes('wall') || name.includes('gate') || name.includes('board'))
+                    return 'Fences & Walls';
+
+                // Nature (from villageProps - simpler trees/bushes)
+                if (name.includes('tree') && !name.includes('stump'))
+                    return 'Nature';
+                if (name.includes('bush') && !name.match(/bush\d/)) // Match bush but not bush1, bush2, etc
+                    return 'Nature';
+
+                // Vegetation (from villageProps - grass, flowers, corn, etc.)
+                if (name.includes('grass') || name.includes('flower') || name.includes('corn') ||
+                    name.includes('stone') || name.includes('stump') || name.match(/bush\d/))
+                    return 'Vegetation';
+
+                // Signs
+                if (name.includes('sign') || name.includes('post'))
+                    return 'Signs';
+
+                // Items (containers, tools, lights)
+                if (name.includes('barrel') || name.includes('crate') || name.includes('chest') ||
+                    name.includes('lamp') || name.includes('torch') || name.includes('well') ||
+                    name.includes('bucket') || name.includes('pot'))
+                    return 'Items';
+
+                // Food & Consumables
+                if (name.includes('wine') || name.includes('apple') || name.includes('cake') ||
+                    name.includes('pumpkin') || name.includes('food'))
+                    return 'Food & Consumables';
+
+                // Weapons & Tools
+                if (name.includes('sword') || name.includes('spear') || name.includes('axe') ||
+                    name.includes('hoe') || name.includes('hammer') || name.includes('bow') ||
+                    name.includes('arrow') || name.includes('weapon') || name.includes('tool'))
+                    return 'Weapons & Tools';
+
+                // Default to Decorative
                 return 'Decorative';
             }
 
