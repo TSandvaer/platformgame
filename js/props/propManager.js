@@ -145,7 +145,6 @@ class PropManager {
                         const groupMembers = this.propData.getPropsInSameGroup(topProp);
                         this.propData.selectedProps = groupMembers;
                         this.propData.selectedProp = topProp; // Set clicked prop as primary
-                        console.log('✅ Selected grouped prop:', topProp.id, 'with group:', topProp.groupId);
                         this.updatePropProperties();
                         this.updatePropList();
                     } else {
@@ -785,7 +784,6 @@ class PropManager {
                 this.propData.selectedProp.destructionFrameIndex = 0;
                 this.propData.selectedProp.destructionTimer = 0;
                 this.propData.selectedProp.destructionFrameRate = 150;
-                console.log('Prop made destroyable:', this.propData.selectedProp);
             } else if (wasDestroyable && !destroyableInput.checked) {
                 // If prop is no longer destroyable, reset values
                 this.propData.selectedProp.maxDurability = 0;
@@ -932,7 +930,6 @@ class PropManager {
                 delete this.propData.selectedProp.dropItems;
             }
             this.updateDropConfigurationUI();
-            console.log(`🎁 Removed drop item from prop ${this.propData.selectedProp.id}`);
         }
     }
 
@@ -940,7 +937,6 @@ class PropManager {
     startMovementZoneDrawing(mouseX, mouseY) {
         this.movementZoneStart = { x: mouseX, y: mouseY };
         this.movementZoneEnd = { x: mouseX, y: mouseY };
-        console.log('🟣 Started prop movement zone drawing at', mouseX, mouseY);
     }
 
     finishMovementZoneDrawing() {
@@ -983,9 +979,6 @@ class PropManager {
         // Initialize movement progress to start of line
         this.movementTargetProp.movementProgress = 0;
 
-        console.log(`🟣 Movement zone set for prop ${this.movementTargetProp.id}:`, {
-            startX, startY, endX, endY, angle: angle * 180 / Math.PI + '°'
-        });
 
         // Reset drawing state
         this.cancelMovementZoneDrawing();
@@ -999,7 +992,6 @@ class PropManager {
         this.movementZoneStart = null;
         this.movementZoneEnd = null;
         this.movementTargetProp = null;
-        console.log('🟣 Prop movement zone drawing cancelled');
     }
 
     // Public methods to control movement zone drawing mode
@@ -1011,8 +1003,6 @@ class PropManager {
 
         this.movementTargetProp = prop;
         this.isDrawingMovementZone = true;
-        console.log('🟣 Prop movement zone drawing mode started for prop', prop.id);
-        console.log('🟣 Press Escape to cancel drawing');
     }
 
     clearMovementZone(prop) {
@@ -1038,7 +1028,6 @@ class PropManager {
         prop.movementProgress = 0;
         prop.movingDirection = 1;
 
-        console.log('🟣 Cleared movement zone for prop', prop.id);
 
         // Update UI
         this.updatePropProperties();
@@ -1062,7 +1051,6 @@ class PropManager {
         prop.isDelaying = false;
         prop.delayTimer = 0;
 
-        console.log(`🟣 Prop ${prop.id} reset to original position (${prop.x}, ${prop.y}) and rotation`);
 
         // Update UI
         this.updatePropProperties();
@@ -1156,7 +1144,6 @@ class PropManager {
             this.isDraggingMovementZoneHandle = true;
             this.draggingHandleType = 'start';
             this.draggingHandleProp = prop;
-            console.log('🟣 Started dragging prop movement zone start handle');
             return { handled: true, type: 'movementZoneHandleStart' };
         }
 
@@ -1166,7 +1153,6 @@ class PropManager {
             this.isDraggingMovementZoneHandle = true;
             this.draggingHandleType = 'end';
             this.draggingHandleProp = prop;
-            console.log('🟣 Started dragging prop movement zone end handle');
             return { handled: true, type: 'movementZoneHandleEnd' };
         }
 
@@ -1213,7 +1199,6 @@ class PropManager {
 
     finishMovementZoneHandleDrag() {
         if (this.draggingHandleProp) {
-            console.log(`🟣 Finished dragging prop movement zone ${this.draggingHandleType} handle`);
 
             // Update UI to reflect changes
             this.updatePropProperties();
@@ -1239,8 +1224,6 @@ class PropManager {
 
         this.bindingTargetProp = prop;
         this.isBindingToPlatform = true;
-        console.log('🟣 Platform binding mode started for prop', prop.id);
-        console.log('🟣 Click on a platform to bind the prop to it');
     }
 
     handlePlatformBinding(mouseX, mouseY, platformSystem, viewport) {
@@ -1286,7 +1269,6 @@ class PropManager {
         prop.boundToPlatform = platform.id;
         prop.platformBindOffset = { x: offsetX, y: offsetY };
 
-        console.log(`🟣 Bound prop ${prop.id} to platform ${platform.id} with offset (${offsetX.toFixed(1)}, ${offsetY.toFixed(1)})`);
 
         // Update UI
         this.updatePropProperties();
@@ -1303,7 +1285,6 @@ class PropManager {
             return;
         }
 
-        console.log(`🟣 Unbound prop ${prop.id} from platform ${prop.boundToPlatform}`);
 
         prop.boundToPlatform = null;
         prop.platformBindOffset = { x: 0, y: 0 };
@@ -1315,6 +1296,5 @@ class PropManager {
     cancelPlatformBinding() {
         this.isBindingToPlatform = false;
         this.bindingTargetProp = null;
-        console.log('🟣 Platform binding mode cancelled');
     }
 }

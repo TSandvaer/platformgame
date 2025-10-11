@@ -685,7 +685,6 @@ class PropData {
             this.clipboard.push(copiedProp);
         });
 
-        console.log(`Copied ${this.clipboard.length} prop(s) to clipboard`);
         return true;
     }
 
@@ -766,7 +765,6 @@ class PropData {
             this.selectedProp = pastedProps[0];
         }
 
-        console.log(`Pasted ${pastedProps.length} prop(s)`);
         return pastedProps;
     }
 
@@ -1070,7 +1068,6 @@ class PropData {
         this.ensureDestructionProperties(prop);
 
         prop.currentDurability = Math.max(0, prop.currentDurability - damage);
-        console.log(`Damaged prop ${propId}: ${prop.currentDurability}/${prop.maxDurability} durability remaining`);
 
         if (prop.currentDurability <= 0) {
             this.startDestruction(prop);
@@ -1123,14 +1120,11 @@ class PropData {
                     // Keep the prop at original position while debris animates separately
                     // Don't modify prop.x or prop.y anymore
 
-                    console.log(`Starting falling debris for ${prop.type} prop ${prop.id} - storing original pos (${prop.originalX}, ${prop.originalY})`);
-                    console.log(`Debris will render at (${prop.debrisX}, ${prop.debrisY})`);
                 } else {
                     // For props without destruction sprites, just mark as destroyed
                     prop.isDestroyed = true;
                     prop.isVisible = false;
                     prop.isDestroying = false;
-                    console.log(`Prop ${prop.id} destroyed but preserved for respawn`);
                 }
                 return true; // Prop was destroyed (but not removed)
             }
@@ -1171,10 +1165,8 @@ class PropData {
             if (prop.debrisLandingTimer) {
                         prop.debrisLandingTimer -= deltaTime;
                 if (prop.debrisLandingTimer <= 0) {
-                    console.log(`🎨 Debris timer expired for prop ${prop.id} - stopping debris rendering and destroying`);
                     // Stop falling debris rendering first
                     prop.isFallingDebris = false;
-                    console.log(`🎯 DEBRIS STOPPED for prop ${prop.id} - isFallingDebris set to FALSE`);
                     prop.debrisHasLanded = false;
                     // Clear debris coordinates
                     delete prop.debrisX;
@@ -1184,7 +1176,6 @@ class PropData {
                     prop.y = prop.originalY;
                     prop.isDestroyed = true;
                     prop.isVisible = false;
-                    console.log(`🎨 Prop ${prop.id} destroyed - isFallingDebris: ${prop.isFallingDebris}, isVisible: ${prop.isVisible}`);
                 }
             }
             return;
@@ -1263,7 +1254,6 @@ class PropData {
             prop.isVisible = prop.isVisible !== false; // Default to visible
             prop.isDamaged = prop.isDamaged || false;
             prop.damageTimer = prop.damageTimer || 0;
-            console.log('Initialized destruction properties for prop:', prop);
         }
     }
 
@@ -1315,7 +1305,6 @@ class PropData {
         }
 
         if (respawnedCount > 0 || restoredCount > 0) {
-            console.log(`🔄 Respawned ${respawnedCount} destroyed props, restored ${restoredCount} damaged props to full durability`);
         }
 
         return respawnedCount + restoredCount;
@@ -1328,19 +1317,16 @@ class PropData {
 
         // Check if this specific prop instance has drop items configured
         if (!prop.dropItems) {
-            console.log(`🎁 No dropItems configured for prop ${prop.id} - skipping drops`);
             return;
         }
 
         if (!this.game) {
-            console.log(`🎁 No game instance available - skipping drops`);
             return;
         }
 
         // Get prop type for dimensions
         const propType = this.propTypes[prop.type];
         if (!propType) {
-            console.log(`🎁 No prop type found for ${prop.type} - skipping drops`);
             return;
         }
 
@@ -1358,18 +1344,15 @@ class PropData {
             const roll = Math.random();
             if (roll <= dropItem.chance) {
                 // Item should drop!
-                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - SUCCESS!`);
 
                 // Drop the item using the game's item drop system
                 if (this.game.itemDropSystem) {
                     const platforms = this.game.platformSystem ? this.game.platformSystem.platforms : [];
                     const quantity = dropItem.quantity || 1;
-                    console.log(`🎁 Creating ${quantity} ${dropItem.itemId} drops`);
 
                     for (let i = 0; i < quantity; i++) {
                         const createdItem = this.game.itemDropSystem.dropItem(dropItem.itemId, dropX, dropY, platforms);
                         if (createdItem) {
-                            console.log(`🎁 Successfully created drop ${i + 1}/${quantity}: ${createdItem.id}`);
                         } else {
                             console.warn(`🎁 Failed to create drop ${i + 1}/${quantity}`);
                         }
@@ -1378,7 +1361,6 @@ class PropData {
                     console.warn('ItemDropSystem not available on game instance');
                 }
             } else {
-                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - no drop`);
             }
         });
     }

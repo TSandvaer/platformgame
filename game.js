@@ -27,7 +27,6 @@ class PlatformRPG {
 
         // Initialize player characters (global instance for character selection)
         window.playerCharacters = new PlayerCharacters();
-        console.log('🎮 Player characters initialized:', window.playerCharacters.getCharacterIds());
 
         // Initialize player system
         this.playerSystem = new PlayerSystem();
@@ -85,49 +84,38 @@ class PlatformRPG {
 
             window.checkPropDrops = (propId) => {
                 const prop = this.propSystem.data.props.find(p => p.id === propId);
-                if (prop) {
-                    console.log(`🔍 Prop ${propId} (${prop.type}) drops:`, prop.dropItems || 'No drops configured');
-                    return prop.dropItems || null;
-                } else {
-                    console.log(`🔍 Prop ${propId} not found`);
-                    return null;
-                }
+                return prop ? prop.dropItems || null : null;
             };
 
             window.listAllProps = () => {
-                console.log('🔍 All props in scene:');
-                this.propSystem.data.props.forEach(prop => {
+                return this.propSystem.data.props.map(prop => {
                     const hasDrops = prop.dropItems && prop.dropItems.length > 0;
-                    console.log(`  Prop ${prop.id} (${prop.type}) at (${prop.x}, ${prop.y}) - Drops: ${hasDrops ? prop.dropItems.length : 'None'}`);
+                    return `Prop ${prop.id} (${prop.type}) at (${prop.x}, ${prop.y}) - Drops: ${hasDrops ? prop.dropItems.length : 'None'}`;
                 });
             };
 
             window.checkDroppedItems = () => {
-                console.log('📦 Currently dropped items:');
-                console.log(`📦 Total dropped items: ${this.itemDropSystem.droppedItems.length}`);
-                this.itemDropSystem.droppedItems.forEach((item, index) => {
-                    console.log(`  ${index + 1}. ${item.itemId} (${item.id}) at (${item.x.toFixed(1)}, ${item.y.toFixed(1)}) - onGround: ${item.onGround}, collected: ${item.collected}`);
-                });
-                console.log(`📦 Renderer available: ${!!this.itemDropSystem.renderer}`);
-                console.log(`📦 Sprites loaded: ${!!this.itemDropSystem.renderer?.spritesLoaded}`);
+                return {
+                    total: this.itemDropSystem.droppedItems.length,
+                    items: this.itemDropSystem.droppedItems,
+                    rendererAvailable: !!this.itemDropSystem.renderer,
+                    spritesLoaded: !!this.itemDropSystem.renderer?.spritesLoaded
+                };
             };
 
             window.clearStuckItems = () => {
                 const before = this.itemDropSystem.droppedItems.length;
                 this.itemDropSystem.clearAllDrops();
-                console.log(`🧹 Cleared ${before} dropped items`);
+                return before;
             };
         }
 
         // Initialize lootable system
-        console.log('🍯 Initializing lootable system...');
         this.lootableSystem = new LootableSystem(this.ctx, () => {
-            console.log('🍯 Lootable sprites loaded');
             this.spritesLoaded.lootables = true;
             this.checkAllSpritesLoaded();
         });
         this.lootableSystem.game = this; // Set the game reference
-        console.log('🍯 Lootable system initialized:', !!this.lootableSystem);
 
         // Initialize enemy system (mouse handler will be initialized later)
         this.enemySystem = new EnemySystem();
@@ -181,31 +169,21 @@ class PlatformRPG {
                 if (x === undefined || y === undefined) {
                     if (this.platformSystem.platforms.length > 0) {
                         const platform = this.platformSystem.platforms[0];
-                        x = platform.x + 100; // 100 pixels from left edge
-                        y = platform.y - 59; // Just above the platform (enemy height is 59)
-                        console.log(`Placing enemy on platform at (${x}, ${y}) - platform top is ${platform.y}`);
+                        x = platform.x + 100;
+                        y = platform.y - 59;
                     } else {
                         x = 200;
                         y = 200;
-                        console.log('No platforms found, using default position');
                     }
                 }
 
-                console.log('Platform count:', this.platformSystem.platforms.length);
-                console.log('Platforms:', this.platformSystem.platforms.map(p => ({x: p.x, y: p.y, w: p.width, h: p.height})));
-                const enemy = this.enemySystem.addEnemyToScene(x, y, type);
-                console.log('Added test enemy:', enemy);
-                console.log('Enemy bottom will be at:', enemy.y + enemy.height, 'platform top is:', this.platformSystem.platforms[0]?.y);
-                return enemy;
+                return this.enemySystem.addEnemyToScene(x, y, type);
             };
             window.clearEnemies = () => {
                 this.enemySystem.clearAllEnemies();
-                console.log('Cleared all enemies');
             };
             window.getEnemyStats = () => {
-                const stats = this.enemySystem.getEnemyStats();
-                console.log('Enemy stats:', stats);
-                return stats;
+                return this.enemySystem.getEnemyStats();
             };
             window.movePlayerToEnemies = () => {
                 const enemies = this.enemySystem.data.enemies;
@@ -213,13 +191,10 @@ class PlatformRPG {
                     const enemy = enemies[0];
                     this.playerSystem.data.x = enemy.x - 100;
                     this.playerSystem.data.y = enemy.y;
-                    console.log(`Moved player near enemy at (${this.playerSystem.data.x}, ${this.playerSystem.data.y})`);
-                } else {
-                    console.log('No enemies to move to');
                 }
             };
             window.getEnemyPositions = () => {
-                const enemies = this.enemySystem.data.enemies.map(e => ({
+                return this.enemySystem.data.enemies.map(e => ({
                     id: e.id,
                     x: e.x,
                     y: e.y,
@@ -227,20 +202,21 @@ class PlatformRPG {
                     isDead: e.isDead,
                     currentAnimation: e.currentAnimation
                 }));
-                console.log('Enemy positions:', enemies);
-                return enemies;
             };
             window.checkPositions = () => {
-                console.log('Player position:', this.playerSystem.data.x, this.playerSystem.data.y);
-                console.log('Camera position:', this.cameraSystem.camera.x, this.cameraSystem.camera.y);
-                console.log('Canvas size:', this.canvas.width, this.canvas.height);
-                console.log('Viewport:', this.viewport);
-
                 const enemies = this.enemySystem.data.enemies;
-                if (enemies.length > 0) {
-                    const enemy = enemies[0];
-                    console.log('First enemy at:', enemy.x, enemy.y, 'to', enemy.x + enemy.width, enemy.y + enemy.height);
-                }
+                return {
+                    player: { x: this.playerSystem.data.x, y: this.playerSystem.data.y },
+                    camera: { x: this.cameraSystem.camera.x, y: this.cameraSystem.camera.y },
+                    canvas: { width: this.canvas.width, height: this.canvas.height },
+                    viewport: this.viewport,
+                    firstEnemy: enemies.length > 0 ? {
+                        x: enemies[0].x,
+                        y: enemies[0].y,
+                        right: enemies[0].x + enemies[0].width,
+                        bottom: enemies[0].y + enemies[0].height
+                    } : null
+                };
             };
             window.addEnemyOnPlatform = (x = 1000) => {
                 // Find the platform that contains this x coordinate
@@ -253,34 +229,22 @@ class PlatformRPG {
                 }
 
                 if (!bestPlatform && this.platformSystem.platforms.length > 0) {
-                    // If no platform found at exact x, use the closest one
                     bestPlatform = this.platformSystem.platforms[0];
                     x = bestPlatform.x + 100;
                 }
 
                 if (bestPlatform) {
-                    // Spawn enemy HIGH ABOVE the platform so it falls down and lands properly
-                    const y = bestPlatform.y - 200; // Spawn 200 pixels above platform
-                    console.log(`Platform top at: ${bestPlatform.y}`);
-                    console.log(`Spawning enemy 200px above platform at: ${y} (will fall down)`);
-
+                    const y = bestPlatform.y - 200;
                     const enemy = this.enemySystem.addEnemyToScene(x, y, 'orc');
 
-                    // Let enemy fall naturally - DO NOT force grounded
                     if (enemy) {
-                        enemy.onGround = false; // Allow falling
-                        enemy.velocityY = 0; // Start with no velocity
-
-                        // Enable attraction zone so enemy will chase player
+                        enemy.onGround = false;
+                        enemy.velocityY = 0;
                         enemy.attractionZone.enabled = true;
-
-                        console.log(`Enemy spawned at: ${enemy.y}, will fall to platform at: ${bestPlatform.y}`);
                     }
                     return enemy;
-                } else {
-                    console.log('No platforms found');
-                    return null;
                 }
+                return null;
             };
         }
 
@@ -343,12 +307,8 @@ class PlatformRPG {
 
         // Reload enemies from current scene now that enemy system is ready
         const currentScene = this.sceneSystem.currentScene;
-        console.log('🎯 DEBUG: currentScene:', currentScene);
-        console.log('🎯 DEBUG: currentScene.enemies:', currentScene?.enemies);
-        console.log('🎯 DEBUG: currentScene.enemies.length:', currentScene?.enemies?.length);
 
         if (currentScene && currentScene.enemies && currentScene.enemies.length > 0) {
-            console.log('🎯 Reloading', currentScene.enemies.length, 'enemies from scene after enemy system initialization');
             this.enemySystem.data.enemies = [...currentScene.enemies];
             this.enemySystem.animators.clear(); // Clear animators, they'll be recreated
 
@@ -360,11 +320,6 @@ class PlatformRPG {
                 window.uiEventHandler.updateEnemyList();
                 window.uiEventHandler.updateEnemyProperties();
             }
-        } else {
-            console.log('🎯 DEBUG: Not reloading enemies - condition failed');
-            console.log('🎯 DEBUG: currentScene exists:', !!currentScene);
-            console.log('🎯 DEBUG: currentScene.enemies exists:', !!(currentScene?.enemies));
-            console.log('🎯 DEBUG: currentScene.enemies.length > 0:', !!(currentScene?.enemies?.length > 0));
         }
 
         // Then set development mode (which will call sceneSystem.updateUI())
@@ -499,16 +454,11 @@ class PlatformRPG {
                 const prop = collision.prop;
                 // Ensure prop has damage immunity to prevent multiple hits per attack
                 if (!prop.isDamaged) {
-                    console.log(`Player (facing ${this.playerSystem.data.facing}) attacked prop ${prop.id} for ${collision.damage} damage`);
-                    const wasDestroyed = this.propSystem.damageProp(prop.id, collision.damage);
+                    this.propSystem.damageProp(prop.id, collision.damage);
 
                     // Add brief damage immunity to prevent multiple hits per attack
                     prop.isDamaged = true;
                     prop.damageTimer = 300; // 300ms immunity
-
-                    if (wasDestroyed) {
-                        console.log(`Prop ${prop.id} was destroyed!`);
-                    }
                 }
             });
         }
@@ -558,14 +508,6 @@ class PlatformRPG {
                     if (this.hudSystem) {
                         this.hudSystem.updateCoinCount(this.collectedCoins);
                     }
-
-                    console.log(`💰 Collected ${collectedCoins.length} coins! Total: ${this.collectedCoins}`);
-                }
-
-                // Log heart collections
-                const collectedHearts = collectedLootables.filter(lootable => lootable.type === 'heart');
-                if (collectedHearts.length > 0) {
-                    console.log(`💖 Collected ${collectedHearts.length} hearts!`);
                 }
             }
 
@@ -915,14 +857,6 @@ class PlatformRPG {
                 this.cameraSystem.camera.targetX = this.player.x;
                 this.cameraSystem.camera.targetY = this.player.y;
             }
-
-            console.log('Player centered at scene start point:', {
-                startPoint: [currentScene.settings.playerStartX, currentScene.settings.playerStartY],
-                playerTopLeft: [this.player.x, this.player.y],
-                playerSize: [this.player.width, this.player.height]
-            });
-        } else {
-            console.log('No current scene found, player remains at default position');
         }
     }
 
@@ -1161,7 +1095,6 @@ class PlatformRPG {
                     throw new Error('Could not save to file');
                 }
             } catch (error) {
-                console.log('Could not save directly to file, downloading instead...');
                 // Fallback: trigger download
                 this.exportGameData();
             }
@@ -1285,8 +1218,6 @@ class PlatformRPG {
             enemy.target = null;
             enemy.lastPlayerPosition = null;
         });
-
-        console.log(`🎯 Revived ${this.enemySystem.data.enemies.length} enemies - all health reset to 100 and made visible`);
     }
 
     gameLoop(currentTime = 0) {

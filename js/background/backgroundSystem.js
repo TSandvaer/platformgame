@@ -190,11 +190,9 @@ class BackgroundSystem {
             const img = new Image();
             img.onload = () => {
                 background.layersLoaded++;
-                console.log(`✅ Background layer loaded: ${path} (${background.layersLoaded}/${background.totalLayers})`);
-                console.log(`   Image dimensions: ${img.naturalWidth}x${img.naturalHeight}`);
             };
             img.onerror = (error) => {
-                console.error(`❌ Failed to load background layer: ${path}`, error);
+                console.error(`Failed to load background layer: ${path}`, error);
             };
             img.src = path;
             background.layers.push(img);
@@ -297,7 +295,7 @@ class BackgroundSystem {
                     }
 
                 } catch (error) {
-                    console.error(`🏞️ Error drawing layer ${index}:`, error);
+                    console.error(`Error drawing background layer ${index}:`, error);
                 }
 
                 // Reset alpha and blending for next layer
@@ -621,7 +619,6 @@ class BackgroundSystem {
             let loadedCount = 0;
 
             const drawAllLayers = () => {
-                console.log(`🖼️ Drawing thumbnail for ${backgroundName}, ${layers.length} layers loaded`);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // Fill background first (for space backgrounds)
@@ -631,23 +628,16 @@ class BackgroundSystem {
                 }
 
                 // Draw all layers in order
-                let successCount = 0;
                 layers.forEach((img, index) => {
                     if (!img.complete || !img.naturalWidth) {
-                        console.warn(`🖼️ Layer ${index} skipped: complete=${img.complete}, naturalWidth=${img.naturalWidth}`);
                         return;
                     }
 
-                    // IMPORTANT: Use naturalWidth/naturalHeight for Image objects
-                    // img.width and img.height can be 0 if the image hasn't been added to DOM
-                    // naturalWidth/naturalHeight contain the actual loaded image dimensions
                     const scale = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
                     const scaledWidth = img.naturalWidth * scale;
                     const scaledHeight = img.naturalHeight * scale;
                     const x = (canvas.width - scaledWidth) / 2;
                     const y = (canvas.height - scaledHeight) / 2;
-
-                    console.log(`🖼️ Drawing layer ${index}: ${img.naturalWidth}x${img.naturalHeight} -> ${scaledWidth.toFixed(1)}x${scaledHeight.toFixed(1)} at (${x.toFixed(1)}, ${y.toFixed(1)})`);
 
                     // For Parallax Forest, render in reverse order (sky first)
                     if (backgroundName === 'Parallax_Forest_Background_Blue') {
@@ -655,33 +645,23 @@ class BackgroundSystem {
                     }
 
                     ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
-                    successCount++;
                 });
 
-                console.log(`🖼️ Successfully drew ${successCount}/${layers.length} layers for ${backgroundName}`);
                 ctx.globalAlpha = 1.0;
             };
-
-            console.log(`📦 Starting to load ${layerPaths.length} layers for ${backgroundName}`);
 
             layerPaths.forEach((path, index) => {
                 const img = new Image();
                 img.onload = () => {
                     loadedCount++;
-                    console.log(`✅ Thumbnail layer ${index} loaded: ${path} (${loadedCount}/${layerPaths.length})`);
-                    console.log(`   Checking: loadedCount=${loadedCount}, layerPaths.length=${layerPaths.length}, equal=${loadedCount === layerPaths.length}`);
                     if (loadedCount === layerPaths.length) {
-                        // All layers loaded, draw them
-                        console.log(`🎨 All ${layerPaths.length} layers loaded for ${backgroundName}, drawing now...`);
-                        setTimeout(() => drawAllLayers(), 0); // Use setTimeout to ensure all images are fully ready
+                        setTimeout(() => drawAllLayers(), 0);
                     }
                 };
                 img.onerror = (error) => {
                     loadedCount++;
-                    console.error(`❌ Failed to load thumbnail layer ${index}: ${path}`, error);
+                    console.error(`Failed to load thumbnail layer ${index}: ${path}`, error);
                     if (loadedCount === layerPaths.length) {
-                        // Even with errors, draw what we have
-                        console.log(`⚠️ All layers processed for ${backgroundName} (with errors), drawing...`);
                         drawAllLayers();
                     }
                 };
@@ -789,7 +769,6 @@ class BackgroundSystem {
                 'None' : this.formatBackgroundName(this.selectedBackgroundForModal);
         }
 
-        console.log(`🖼️ Applied background: ${this.selectedBackgroundForModal}`);
 
         // Close the modal
         this.closeBackgroundModal();

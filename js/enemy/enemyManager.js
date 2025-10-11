@@ -7,7 +7,6 @@ class EnemyManager {
     addEnemy(x, y, enemyType = 'orc') {
         const enemy = this.data.createEnemy(x, y, enemyType);
         if (enemy) {
-            console.log(`Created ${enemyType} enemy with ID ${enemy.id} at (${x}, ${y})`);
         }
         return enemy;
     }
@@ -16,7 +15,6 @@ class EnemyManager {
     removeEnemy(id) {
         const removed = this.data.removeEnemy(id);
         if (removed) {
-            console.log(`Removed ${removed.type} enemy with ID ${id}`);
         }
         return removed;
     }
@@ -42,7 +40,6 @@ class EnemyManager {
     // Select an enemy
     selectEnemy(enemy) {
         this.data.selectedEnemy = enemy;
-        console.log(`Selected ${enemy ? enemy.type + ' enemy ID ' + enemy.id : 'none'}`);
     }
 
     // Get currently selected enemy
@@ -82,7 +79,6 @@ class EnemyManager {
             enemy.attractionZone = { ...enemy.attractionZone, ...properties.attractionZone };
         }
 
-        console.log(`Updated enemy ${enemyId} properties`);
         return true;
     }
 
@@ -102,7 +98,6 @@ class EnemyManager {
             enemy.movementZone.y = y;
         }
 
-        console.log(`Moved enemy ${enemyId} to (${x}, ${y})`);
         return true;
     }
 
@@ -139,7 +134,6 @@ class EnemyManager {
     clearAllEnemies() {
         const count = this.data.enemies.length;
         this.data.clearAllEnemies();
-        console.log(`Cleared ${count} enemies`);
     }
 
     // Get enemy statistics
@@ -221,6 +215,5 @@ class EnemyManager {
             enemy.velocityY = 0;
             enemy.target = null;
         }
-        console.log('Reset all enemies to default state');
     }
 }

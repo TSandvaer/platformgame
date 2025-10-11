@@ -48,7 +48,6 @@ class LootableRenderer {
         // Load heart sprite (animated)
         const heartImg = new Image();
         heartImg.onload = () => {
-            console.log('💖 Heart sprite loaded successfully');
             this.sprites.heart = {
                 image: heartImg,
                 width: 20, // 60px ÷ 3 = 20px per frame
@@ -65,7 +64,6 @@ class LootableRenderer {
         // Load pickup effect sprite (sprite sheet with 8 frames, 256x32, 1 row)
         const pickupImg = new Image();
         pickupImg.onload = () => {
-            console.log('✨ Pickup effect sprite loaded successfully');
             this.pickupEffectSprite = {
                 image: pickupImg,
                 frameWidth: 32, // 256px ÷ 8 frames = 32px per frame
@@ -85,7 +83,6 @@ class LootableRenderer {
         this.loadedSprites++;
         if (this.loadedSprites >= this.totalSprites) {
             this.spritesLoaded = true;
-            console.log('All lootable sprites loaded successfully');
             if (this.onSpritesLoadedCallback) {
                 this.onSpritesLoadedCallback();
             }

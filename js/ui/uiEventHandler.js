@@ -299,7 +299,6 @@ class UIEventHandler {
             healBtn.addEventListener('click', () => {
                 if (this.game.playerSystem && this.game.playerSystem.data) {
                     this.game.playerSystem.data.health = this.game.playerSystem.data.maxHealth;
-                    console.log('💚 Player healed to full health');
                 }
             });
         }
@@ -310,7 +309,6 @@ class UIEventHandler {
             staminaBtn.addEventListener('click', () => {
                 if (this.game.playerSystem && this.game.playerSystem.data) {
                     this.game.playerSystem.data.stamina = this.game.playerSystem.data.maxStamina;
-                    console.log('⚡ Player stamina restored to full');
                 }
             });
         }
@@ -334,31 +332,18 @@ class UIEventHandler {
     }
 
     loadPlayerValues() {
-        console.log('🔄 loadPlayerValues() called');
         if (!this.game.playerSystem || !this.game.playerSystem.data) {
             console.warn('⚠️ Player system not available for loading values');
             return;
         }
 
         const player = this.game.playerSystem.data;
-        console.log('🔄 Current player data:', {
-            maxHealth: player.maxHealth,
-            healthRegenRate: player.healthRegenRate,
-            maxStamina: player.maxStamina,
-            staminaRegenRate: player.staminaRegenRate,
-            attackDamage: player.attackDamage,
-            speed: player.speed,
-            runSpeed: player.runSpeed,
-            jumpPower: player.jumpPower
-        });
 
         // Try to load saved settings first, then fall back to current player values
         let settings = null;
         if (this.game.gameDataSystem && this.game.gameDataSystem.gameData.playerSettings) {
             settings = this.game.gameDataSystem.gameData.playerSettings;
-            console.log('🔄 Found saved settings in gameData:', settings);
         } else {
-            console.log('🔄 No saved settings found in gameData - using player values');
         }
 
         // Load values into inputs (use saved settings if available, otherwise current player values)
@@ -375,7 +360,6 @@ class UIEventHandler {
             jumpForce: settings?.jumpForce || Math.abs(player.jumpPower) || 15
         };
 
-        console.log('🔄 Values being loaded into UI inputs:', valuesToLoad);
 
         // Update input fields
         const updateInput = (id, value) => {
@@ -394,7 +378,6 @@ class UIEventHandler {
         updateInput('playerRunSpeed', valuesToLoad.runSpeed);
         updateInput('playerJumpForce', valuesToLoad.jumpForce);
 
-        console.log('✅ Player values loaded into UI inputs');
     }
 
     applyPlayerSettings() {
@@ -453,7 +436,6 @@ class UIEventHandler {
             this.game.gameDataSystem.updatePlayerSettings(playerSettings);
         }
 
-        console.log('🎮 Player settings applied and saved');
     }
 
     resetPlayerSettings() {
@@ -477,7 +459,6 @@ class UIEventHandler {
         // Apply the reset values
         this.applyPlayerSettings();
 
-        console.log('🔄 Player settings reset to defaults');
     }
 
     setupGUISettingsListeners() {
@@ -530,7 +511,6 @@ class UIEventHandler {
 
         if (this.game.gameDataSystem) {
             this.game.gameDataSystem.updateGUISettings(guiSettings);
-            console.log('🎨 GUI settings applied:', guiSettings);
         }
     }
 
@@ -542,7 +522,6 @@ class UIEventHandler {
         // Apply the reset values
         this.applyGUISettings();
 
-        console.log('🔄 GUI settings reset to defaults');
     }
 
     setupCharacterSelectionListeners() {
@@ -683,7 +662,6 @@ class UIEventHandler {
             }
         });
 
-        console.log(`Selected character: ${characterId}`);
     }
 
     applyCharacterSelection() {
@@ -718,13 +696,11 @@ class UIEventHandler {
             });
         }
 
-        console.log(`✅ Character changed to: ${characterConfig.name}`);
     }
 
     resetCharacterSelection() {
         this.selectCharacter('soldier');
         this.applyCharacterSelection();
-        console.log('🔄 Character reset to Soldier');
     }
 
     refreshInventoryItemsList() {
@@ -753,7 +729,6 @@ class UIEventHandler {
         });
 
         listElement.innerHTML = html;
-        console.log(`📦 Inventory items list refreshed: ${inventoryItems.length} items`);
     }
 
     /**

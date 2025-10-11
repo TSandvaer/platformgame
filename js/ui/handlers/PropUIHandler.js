@@ -400,6 +400,5 @@ class PropUIHandler extends UIHandler {
         // Activate prop placement mode
         this.game.propSystem.togglePropPlacement();
 
-        console.log(`Props editor: Selected ${this.selectedModalPropType} for placement`);
     }
 }

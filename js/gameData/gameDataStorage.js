@@ -90,16 +90,11 @@ class GameDataStorage {
     // Update only the playerSettings in localStorage
     updatePlayerSettings(playerSettings) {
         try {
-            console.log('🗄️ Storage: Attempting to update player settings in localStorage');
             const dataStr = localStorage.getItem(this.storageKey);
             if (dataStr) {
-                console.log('🗄️ Storage: Found existing game data in localStorage');
                 const gameData = JSON.parse(dataStr);
-                console.log('🗄️ Storage: Current playerSettings in localStorage:', gameData.playerSettings);
                 gameData.playerSettings = playerSettings;
-                console.log('🗄️ Storage: New playerSettings to save:', playerSettings);
                 localStorage.setItem(this.storageKey, JSON.stringify(gameData));
-                console.log('✅ Storage: Player settings successfully written to localStorage');
                 return true;
             } else {
                 console.warn('⚠️ Storage: No existing game data found in localStorage');
@@ -145,16 +140,11 @@ class GameDataStorage {
     // Update only the characterSettings in localStorage
     updateCharacterSettings(characterSettings) {
         try {
-            console.log('🗄️ Storage: Attempting to update character settings in localStorage');
             const dataStr = localStorage.getItem(this.storageKey);
             if (dataStr) {
-                console.log('🗄️ Storage: Found existing game data in localStorage');
                 const gameData = JSON.parse(dataStr);
-                console.log('🗄️ Storage: Current characterSettings in localStorage:', gameData.characterSettings);
                 gameData.characterSettings = characterSettings;
-                console.log('🗄️ Storage: New characterSettings to save:', characterSettings);
                 localStorage.setItem(this.storageKey, JSON.stringify(gameData));
-                console.log('✅ Storage: Character settings successfully written to localStorage');
                 return true;
             } else {
                 console.warn('⚠️ Storage: No existing game data found in localStorage');
@@ -172,12 +162,6 @@ class GameDataStorage {
             const dataStr = localStorage.getItem(this.storageKey);
             if (dataStr) {
                 const gameData = JSON.parse(dataStr);
-                console.log('📂 Data structure:', {
-                    hasScenes: !!gameData.scenes,
-                    sceneCount: gameData.scenes?.length || 0,
-                    currentSceneId: gameData.currentSceneId,
-                    startSceneId: gameData.startSceneId
-                });
                 return gameData;
             }
             return null;
@@ -192,7 +176,6 @@ class GameDataStorage {
         try {
             const response = await fetch(filePath);
             if (!response.ok) {
-                console.log(`File ${filePath} not found or not accessible`);
                 return null;
             }
 

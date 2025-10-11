@@ -64,7 +64,6 @@ class EnemyProjectileSystem {
         };
 
         this.projectiles.push(projectile);
-        console.log(`🔥 Created fire projectile ${projectile.id} from enemy ${enemy.id}`);
         return projectile;
     }
 
@@ -92,7 +91,6 @@ class EnemyProjectileSystem {
                 if (hit && !player.isDamaged) {
                     // Damage player
                     player.takeDamage(projectile.damage);
-                    console.log(`🔥 Fire projectile ${projectile.id} hit player for ${projectile.damage} damage`);
 
                     // Remove projectile
                     this.projectiles.splice(i, 1);
@@ -135,7 +133,6 @@ class EnemyProjectileSystem {
         }
 
         if (this.projectiles.length > 0) {
-            console.log('🔥 Rendering', this.projectiles.length, 'projectiles');
         }
 
         for (const projectile of this.projectiles) {

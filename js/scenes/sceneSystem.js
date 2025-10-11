@@ -137,9 +137,7 @@ class SceneSystem {
 
     // Save/Load
     saveScenes() {
-        console.log('💾 saveScenes() called');
         const stackTrace = new Error().stack;
-        console.log('💾 Call stack:', stackTrace.split('\n').slice(1, 4).join('\n'));
 
         this.manager.saveCurrentSceneData();
 

@@ -95,20 +95,16 @@ class GameDataSystem {
 
     // Load just the playerSettings from localStorage (not full game data)
     loadSavedPlayerSettings() {
-        console.log('🔄 loadSavedPlayerSettings() called');
         try {
             const savedData = this.storage.loadFromLocalStorage();
-            console.log('🔄 Retrieved saved data from localStorage:', savedData ? 'Found' : 'Not found');
 
             if (savedData && savedData.playerSettings) {
-                console.log('🔄 Found saved player settings:', savedData.playerSettings);
 
                 // Apply only the playerSettings
                 this.gameData.playerSettings = savedData.playerSettings;
 
                 // Apply player settings immediately if player system exists
                 if (this.game.playerSystem && this.game.playerSystem.data) {
-                    console.log('🔄 Player system available - applying settings to player');
                     const player = this.game.playerSystem.data;
                     const settings = savedData.playerSettings;
 
@@ -128,12 +124,10 @@ class GameDataSystem {
                     if (player.health > player.maxHealth) player.health = player.maxHealth;
                     if (player.stamina > player.maxStamina) player.stamina = player.maxStamina;
 
-                    console.log('✅ Loaded and applied saved player settings:', settings);
                 } else {
                     console.warn('⚠️ Player system not available yet - settings loaded but not applied');
                 }
             } else {
-                console.log('ℹ️ No saved player settings found - using defaults');
             }
         } catch (error) {
             console.error('Error loading player settings:', error);
@@ -165,11 +159,6 @@ class GameDataSystem {
         const savedData = this.storage.loadFromLocalStorage();
         if (savedData && savedData.scenes && savedData.scenes.length > 0) {
             // Log what we found
-            console.log('📂 Found saved data with scenes:', savedData.scenes.map(s => ({
-                id: s.id,
-                name: s.name,
-                platforms: s.platforms ? s.platforms.length : 0
-            })));
 
             // Check if at least the tutorial scene has platforms (other scenes might legitimately be empty)
             const tutorialScene = savedData.scenes.find(s => s.name === 'Tutorial' || s.id === 0);
@@ -284,18 +273,15 @@ class GameDataSystem {
             return;
         }
 
-        console.log('💾 Updating player settings in gameDataSystem:', playerSettings);
 
         // Update the in-memory gameData
         this.gameData.playerSettings = { ...this.gameData.playerSettings, ...playerSettings };
 
-        console.log('💾 Updated in-memory playerSettings:', this.gameData.playerSettings);
 
         // Update only playerSettings in localStorage
         const success = this.storage.updatePlayerSettings(this.gameData.playerSettings);
 
         if (success) {
-            console.log('✅ Player settings successfully saved to localStorage');
         } else {
             console.error('❌ Failed to save player settings to localStorage');
         }
@@ -311,7 +297,6 @@ class GameDataSystem {
 
                 // Apply GUI theme immediately
                 this.applyGUITheme(savedData.GUISettings.theme);
-                console.log('🎨 Loaded saved GUI settings:', savedData.GUISettings);
             }
         } catch (error) {
             console.error('Error loading GUI settings:', error);
@@ -333,20 +318,16 @@ class GameDataSystem {
 
     // Load just the characterSettings from localStorage
     loadSavedCharacterSettings() {
-        console.log('🔄 loadSavedCharacterSettings() called');
         try {
             const savedData = this.storage.loadFromLocalStorage();
-            console.log('🔄 Retrieved saved data from localStorage:', savedData ? 'Found' : 'Not found');
 
             if (savedData && savedData.characterSettings) {
-                console.log('🔄 Found saved character settings:', savedData.characterSettings);
 
                 // Apply only the characterSettings
                 this.gameData.characterSettings = savedData.characterSettings;
 
                 // Apply character settings immediately if player system exists
                 if (this.game.playerSystem && this.game.playerSystem.data) {
-                    console.log('🔄 Player system available - applying character settings to player');
                     const player = this.game.playerSystem.data;
                     const settings = savedData.characterSettings;
 
@@ -357,7 +338,6 @@ class GameDataSystem {
                     // Switch character if animator is ready
                     if (this.game.playerSystem.animator && window.playerCharacters) {
                         this.game.playerSystem.animator.switchCharacter(selectedCharacter);
-                        console.log(`✅ Loaded and applied saved character: ${selectedCharacter}`);
                     } else {
                         console.warn('⚠️ Animator not ready yet - character will load on next init');
                     }
@@ -365,7 +345,6 @@ class GameDataSystem {
                     console.warn('⚠️ Player system not available yet - settings loaded but not applied');
                 }
             } else {
-                console.log('ℹ️ No saved character settings found - using defaults');
             }
         } catch (error) {
             console.error('Error loading character settings:', error);
@@ -378,18 +357,15 @@ class GameDataSystem {
             return;
         }
 
-        console.log('💾 Updating character settings in gameDataSystem:', characterSettings);
 
         // Update the in-memory gameData
         this.gameData.characterSettings = { ...this.gameData.characterSettings, ...characterSettings };
 
-        console.log('💾 Updated in-memory characterSettings:', this.gameData.characterSettings);
 
         // Update only characterSettings in localStorage
         const success = this.storage.updateCharacterSettings(this.gameData.characterSettings);
 
         if (success) {
-            console.log('✅ Character settings successfully saved to localStorage');
         } else {
             console.error('❌ Failed to save character settings to localStorage');
         }
@@ -405,10 +381,8 @@ class GameDataSystem {
         // Apply new theme class
         if (theme === 'fantasy-wooden') {
             body.classList.add('gui-theme-fantasy-wooden');
-            console.log('🎨 Applied Fantasy Wooden GUI theme');
         } else {
             body.classList.add('gui-theme-none');
-            console.log('🎨 Applied default (none) GUI theme');
         }
     }
 

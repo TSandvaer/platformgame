@@ -34,7 +34,6 @@ class EnemyMouseHandler {
     }
 
     handleMouseDown(worldMouseX, worldMouseY, ctrlPressed = false, shiftPressed = false) {
-        console.log('🎯 EnemyMouseHandler.handleMouseDown called, placement mode:', this.enemyPlacementMode);
 
         // Check if attraction zone drawing mode is active
         if (this.isDrawingAttractionZone) {
@@ -50,7 +49,6 @@ class EnemyMouseHandler {
 
         // Check if enemy placement mode is active
         if (this.enemyPlacementMode) {
-            console.log('🎯 Placing enemy at', worldMouseX, worldMouseY);
             this.placeEnemy(worldMouseX, worldMouseY);
             return { handled: true, type: 'placement' };
         }
@@ -84,7 +82,6 @@ class EnemyMouseHandler {
                 this.isDraggingEnemy = true;
                 this.draggedEnemy = this.potentialDragEnemy;
                 this.potentialDragEnemy = null;
-                console.log('🎯 Started dragging enemy', this.draggedEnemy.id);
             }
         }
 
@@ -172,7 +169,6 @@ class EnemyMouseHandler {
 
         // Spawn enemy exactly like player start point - at click position and let it fall naturally
         const spawnY = mouseY;
-        console.log(`🎯 Spawning enemy at click position like player start point`);
 
         // For debugging, still show platforms at this X position
         const platforms = this.platformSystem.platforms || [];
@@ -180,15 +176,11 @@ class EnemyMouseHandler {
             mouseX + 30 > p.x && mouseX - 30 < p.x + p.width
         ).sort((a, b) => a.y - b.y);
 
-        console.log(`🎯 CLICK POSITION: (${Math.round(mouseX)}, ${Math.round(mouseY)})`);
-        console.log(`🎯 SPAWN POSITION: (${Math.round(mouseX)}, ${Math.round(spawnY)})`);
-        console.log(`🎯 Platforms at click X:`, overlappingPlatforms.map(p => `Platform at (${Math.round(p.x)}-${Math.round(p.x + p.width)}, y=${Math.round(p.y)})`));
 
         // Add enemy to scene at spawn position
         const enemy = this.enemySystem.addEnemyToScene(mouseX, spawnY, enemyType);
 
         if (enemy) {
-            console.log(`🎯 ENEMY CREATED: ID=${enemy.id} at (${Math.round(enemy.x)}, ${Math.round(enemy.y)})`);
         }
 
         // Enable attraction zone by default for placed enemies
@@ -211,12 +203,10 @@ class EnemyMouseHandler {
 
     setPendingEnemyType(enemyType) {
         this.pendingEnemyType = enemyType;
-        console.log('🎯 Pending enemy type set to:', enemyType);
     }
 
     toggleEnemyPlacement() {
         this.enemyPlacementMode = !this.enemyPlacementMode;
-        console.log('🎯 Enemy placement mode toggled to:', this.enemyPlacementMode);
         this.updatePlacementButton();
     }
 
@@ -232,7 +222,6 @@ class EnemyMouseHandler {
     startAttractionZoneDrawing(mouseX, mouseY) {
         this.attractionZoneStart = { x: mouseX, y: mouseY };
         this.attractionZoneEnd = { x: mouseX, y: mouseY };
-        console.log('🎯 Started attraction zone drawing at', mouseX, mouseY);
     }
 
     finishAttractionZoneDrawing() {
@@ -254,7 +243,6 @@ class EnemyMouseHandler {
         this.targetEnemy.attractionZone.height = height;
         this.targetEnemy.attractionZone.enabled = true;
 
-        console.log(`🎯 Attraction zone set for enemy ${this.targetEnemy.id}:`, { x, y, width, height });
 
         // Reset drawing state
         this.cancelAttractionZoneDrawing();
@@ -270,7 +258,6 @@ class EnemyMouseHandler {
         this.attractionZoneStart = null;
         this.attractionZoneEnd = null;
         this.targetEnemy = null;
-        console.log('🎯 Attraction zone drawing cancelled');
     }
 
     // Public methods to control attraction zone drawing mode
@@ -282,7 +269,6 @@ class EnemyMouseHandler {
 
         this.targetEnemy = enemy;
         this.isDrawingAttractionZone = true;
-        console.log('🎯 Attraction zone drawing mode started for enemy', enemy.id);
     }
 
     // Render preview while drawing
@@ -316,7 +302,6 @@ class EnemyMouseHandler {
     startMovementZoneDrawing(mouseX, mouseY) {
         this.movementZoneStart = { x: mouseX, y: mouseY };
         this.movementZoneEnd = { x: mouseX, y: mouseY };
-        console.log('🎯 Started movement zone drawing at', mouseX, mouseY);
     }
 
     finishMovementZoneDrawing() {
@@ -336,7 +321,6 @@ class EnemyMouseHandler {
         this.movementTargetEnemy.movementZone.y = y;
         this.movementTargetEnemy.movementZone.enabled = true;
 
-        console.log(`🎯 Movement zone set for enemy ${this.movementTargetEnemy.id}:`, { startX, endX, y });
 
         // Reset drawing state
         this.cancelMovementZoneDrawing();
@@ -352,7 +336,6 @@ class EnemyMouseHandler {
         this.movementZoneStart = null;
         this.movementZoneEnd = null;
         this.movementTargetEnemy = null;
-        console.log('🎯 Movement zone drawing cancelled');
     }
 
     // Cancel any ongoing enemy interaction
@@ -362,7 +345,6 @@ class EnemyMouseHandler {
         this.isDraggingEnemy = false;
         this.draggedEnemy = null;
         this.dragOffset = { x: 0, y: 0 };
-        console.log('🎯 Enemy interaction cancelled');
     }
 
     // Public methods to control movement zone drawing mode
@@ -374,7 +356,6 @@ class EnemyMouseHandler {
 
         this.movementTargetEnemy = enemy;
         this.isDrawingMovementZone = true;
-        console.log('🎯 Movement zone drawing mode started for enemy', enemy.id);
     }
 
     // Render preview while drawing

@@ -43,17 +43,14 @@ class EnemyAnimator {
             const img = new Image();
             img.onload = () => {
                 loadedCount++;
-                console.log(`Loaded enemy sprite: ${this.enemy.type}-${animName}`);
                 if (loadedCount === totalSprites) {
                     this.spritesLoaded = true;
-                    console.log(`All ${this.enemy.type} sprites loaded successfully`);
                 }
             };
             img.onerror = () => {
                 console.warn(`Failed to load enemy sprite: ${this.enemy.type}-${animName} from ${baseFolder}/${animData.file}`);
                 loadedCount++;
                 if (loadedCount === totalSprites) {
-                    console.log(`${this.enemy.type} sprite loading complete (with some failures)`);
                 }
             };
             img.src = `${baseFolder}/${animData.file}`;

@@ -62,7 +62,6 @@ class PlayerInventorySystem {
         // Also clear any existing player data from localStorage
         this.playerDataStorage.clear();
 
-        console.log('🗑️ Player inventory and localStorage data cleared on game load (no save feature yet)');
     }
 
     // Open chest modal and display contents
@@ -101,7 +100,6 @@ class PlayerInventorySystem {
             modal.style.display = 'flex';
         }
 
-        console.log(`📦 Opened chest #${chest.id} with ${chest.chestInventory?.length || 0} items`);
     }
 
     // Close chest modal
@@ -109,7 +107,6 @@ class PlayerInventorySystem {
         // Trigger chest closing animation if chest is still open
         if (this.currentChest && this.currentChest.chestState === 'open') {
             this.game.propSystem.toggleChest(this.currentChest);
-            console.log('📦 Closing chest animation started');
         }
 
         this.isModalOpen = false;
@@ -124,7 +121,6 @@ class PlayerInventorySystem {
         // Hide tooltip
         this.hideTooltip();
 
-        console.log('📦 Closed chest modal');
     }
 
     // Render chest items in the grid
@@ -277,7 +273,6 @@ class PlayerInventorySystem {
             }
         }
 
-        console.log(`✅ Collected ${item.name} from chest #${this.currentChest.id}`);
     }
 
     // Show tooltip for item
@@ -334,7 +329,6 @@ class PlayerInventorySystem {
             // Restore player inventory
             if (savedData.playerInventory) {
                 this.game.playerSystem.data.playerInventory = savedData.playerInventory;
-                console.log(`📂 Loaded ${savedData.playerInventory.length} items into player inventory`);
             }
         }
     }
@@ -440,7 +434,6 @@ class PlayerInventorySystem {
             modal.style.display = 'flex';
         }
 
-        console.log('🎒 Opened player inventory modal');
     }
 
     // Close player inventory modal
@@ -458,7 +451,6 @@ class PlayerInventorySystem {
         this.hideContextMenu();
         this.hideTooltip();
 
-        console.log('🎒 Closed player inventory modal');
     }
 
     // Render player inventory items
@@ -566,7 +558,6 @@ class PlayerInventorySystem {
     // Select inventory item
     selectInventoryItem(itemIndex) {
         this.selectedInventoryItem = itemIndex;
-        console.log(`📦 Selected inventory item: ${this.getPlayerInventory()[itemIndex]?.name}`);
     }
 
     // Show context menu for consumable items
@@ -590,7 +581,6 @@ class PlayerInventorySystem {
             }
         }
 
-        console.log(`📋 Showing context menu for ${item.name}`);
     }
 
     // Hide context menu
@@ -628,7 +618,6 @@ class PlayerInventorySystem {
         // Update description
         this.updatePlayerInventoryDescription();
 
-        console.log(`✅ Consumed ${item.name}`);
     }
 
     // Discard selected item
@@ -652,7 +641,6 @@ class PlayerInventorySystem {
         // Update description
         this.updatePlayerInventoryDescription();
 
-        console.log(`🗑️ Discarded ${item.name}`);
     }
 
     // Apply consumable item effects
@@ -668,7 +656,6 @@ class PlayerInventorySystem {
             player.health = Math.min(player.maxHealth, player.health + effects.health);
             const actualHealing = player.health - oldHealth;
             if (actualHealing > 0) {
-                console.log(`❤️ Healed ${actualHealing} HP (${oldHealth} → ${player.health})`);
                 this.showEffectMessage(`+${actualHealing} Health`, player.x, player.y - 30, '#4CAF50');
             }
         }
@@ -679,7 +666,6 @@ class PlayerInventorySystem {
             player.stamina = Math.min(player.maxStamina, player.stamina + effects.stamina);
             const actualRestore = player.stamina - oldStamina;
             if (actualRestore > 0) {
-                console.log(`⚡ Restored ${actualRestore} Stamina (${oldStamina} → ${player.stamina})`);
                 this.showEffectMessage(`+${actualRestore} Stamina`, player.x, player.y - 50, '#2196F3');
             }
         }
@@ -687,7 +673,6 @@ class PlayerInventorySystem {
         // Add more effects as needed (attack damage, speed boosts, etc.)
         if (effects.attackDamage) {
             // Temporary boost (could be implemented with timers)
-            console.log(`⚔️ Attack damage boost: +${effects.attackDamage}`);
         }
     }
 
@@ -718,14 +703,12 @@ class PlayerInventorySystem {
     renderBeltItems() {
         const beltGrid = document.getElementById('playerBeltGrid');
         if (!beltGrid) {
-            console.log('❌ Belt grid not found');
             return;
         }
 
         const playerBelt = this.game.playerSystem?.data?.belt || [null, null, null, null];
         const beltSlots = beltGrid.querySelectorAll('.belt-slot');
 
-        console.log('🔄 Rendering belt items:', playerBelt);
 
         beltSlots.forEach((slot, index) => {
             const item = playerBelt[index];
@@ -786,19 +769,16 @@ class PlayerInventorySystem {
                             );
                             slot.appendChild(canvas);
                             spriteAdded = true;
-                            console.log(`✅ Drew sprite for ${item.name} in belt slot`);
                         } catch (e) {
                             console.warn('Failed to draw belt sprite:', e);
                             spriteAdded = false;
                         }
                     } else {
-                        console.log('Spritesheet not yet loaded for belt');
                     }
                 }
 
                 // Only add fallback if sprite wasn't successfully added
                 if (!spriteAdded) {
-                    console.log(`⚠️ Using colored fallback for ${item.name || item.id}`);
                     // Fallback colored div if no sprite
                     const itemDiv = document.createElement('div');
                     const color = item.id === 'healthPotion' ? '#FF4444' :
@@ -883,8 +863,6 @@ class PlayerInventorySystem {
                             // Remove from inventory since it's now in the belt
                             this.game.playerSystem.data.removeItemFromInventory(item.id, 1);
 
-                            console.log(`⚔️ Moved ${item.name} from inventory to belt slot ${slotIndex + 1}`);
-                            console.log('🔍 Belt after move:', this.game.playerSystem.data.belt);
 
                             // Re-render to update both inventory and belt display
                             this.renderPlayerInventory();
@@ -911,7 +889,6 @@ class PlayerInventorySystem {
                     // Re-render
                     this.renderPlayerInventory();
 
-                    console.log(`⚔️ Moved ${item.name} from belt slot ${slotIndex + 1} back to inventory`);
                 }
             });
         });

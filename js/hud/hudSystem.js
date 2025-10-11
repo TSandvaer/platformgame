@@ -70,7 +70,6 @@ class HUDSystem {
         const coinImg = new Image();
         coinImg.onload = () => {
             this.coinIcon = coinImg;
-            console.log('💰 Coin icon loaded for HUD');
         };
         coinImg.onerror = () => {
             console.error('💰 Failed to load coin icon for HUD');
@@ -83,7 +82,6 @@ class HUDSystem {
         const stoneImg = new Image();
         stoneImg.onload = () => {
             this.stoneBackground = stoneImg;
-            console.log('🏰 Stone background loaded for HUD');
         };
         stoneImg.onerror = () => {
             console.error('🏰 Failed to load stone background for HUD');
@@ -94,7 +92,6 @@ class HUDSystem {
         const parchmentImg = new Image();
         parchmentImg.onload = () => {
             this.parchmentBackground = parchmentImg;
-            console.log('📜 Parchment background loaded for HUD');
         };
         parchmentImg.onerror = () => {
             console.error('📜 Failed to load parchment background for HUD');
@@ -137,7 +134,6 @@ class HUDSystem {
     openGameSettings() {
         // For now, just show an alert - can be replaced with actual settings panel
         alert('Game Settings\n\n(Settings panel to be implemented)');
-        console.log('🎮 Game settings requested');
     }
 
     setupDragAndResize() {

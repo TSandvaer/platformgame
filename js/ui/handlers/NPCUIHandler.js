@@ -18,7 +18,6 @@ class NPCUIHandler extends UIHandler {
      */
     setupNPCControls() {
         this.addListener('addNPCBtn', 'click', () => {
-            console.log('🎯 Add NPC button clicked');
             this.game.npcSystem.toggleNPCPlacement();
         });
 

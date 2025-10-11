@@ -13,7 +13,6 @@ class PlayerDataStorage {
 
             const dataStr = JSON.stringify(dataToSave);
             localStorage.setItem(this.storageKey, dataStr);
-            console.log('💾 Player data saved to localStorage');
             return true;
         } catch (error) {
             console.error('❌ Error saving player data:', error);
@@ -33,7 +32,6 @@ class PlayerDataStorage {
             const dataStr = localStorage.getItem(this.storageKey);
             if (dataStr) {
                 const playerData = JSON.parse(dataStr);
-                console.log('📂 Player data loaded from localStorage');
                 return playerData;
             }
             return null;
@@ -47,7 +45,6 @@ class PlayerDataStorage {
     clear() {
         try {
             localStorage.removeItem(this.storageKey);
-            console.log('🗑️ Player data cleared from localStorage');
             return true;
         } catch (error) {
             console.error('❌ Error clearing player data:', error);

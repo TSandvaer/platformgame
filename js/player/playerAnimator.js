@@ -27,7 +27,6 @@ class PlayerAnimator {
         }
 
         this.characterConfig = window.playerCharacters.getCharacter(characterId);
-        console.log(`Initializing character: ${this.characterConfig.name}`);
 
         // Load sprites for this character
         this.loadSprites();
@@ -35,7 +34,6 @@ class PlayerAnimator {
 
     // Switch to a different character
     switchCharacter(characterId) {
-        console.log(`Switching character to: ${characterId}`);
         this.spritesLoaded = false;
         this.initializeCharacter(characterId);
 
@@ -95,17 +93,14 @@ class PlayerAnimator {
             const img = new Image();
             img.onload = () => {
                 loadedCount++;
-                console.log(`Loaded player sprite: ${key} for ${config.name}`);
                 if (loadedCount === totalSprites) {
                     this.spritesLoaded = true;
-                    console.log(`All player sprites loaded successfully for ${config.name}`);
                 }
             };
             img.onerror = () => {
                 console.warn(`Failed to load player sprite: ${key} from ${path}`);
                 loadedCount++;
                 if (loadedCount === totalSprites) {
-                    console.log('Player sprite loading complete (with some failures)');
                 }
             };
             img.src = path;
@@ -130,17 +125,14 @@ class PlayerAnimator {
             const img = new Image();
             img.onload = () => {
                 loadedCount++;
-                console.log(`Loaded player sprite: ${key}`);
                 if (loadedCount === totalSprites) {
                     this.spritesLoaded = true;
-                    console.log('All player sprites loaded successfully');
                 }
             };
             img.onerror = () => {
                 console.warn(`Failed to load player sprite: ${key} from ${path}`);
                 loadedCount++;
                 if (loadedCount === totalSprites) {
-                    console.log('Player sprite loading complete (with some failures)');
                 }
             };
             img.src = path;

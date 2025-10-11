@@ -23,7 +23,6 @@ class EditorMode {
 
     enterDevelopmentMode() {
         // Enable development features
-        console.log('Entering Development Mode');
 
         // Show player start position
         if (this.game.sceneSystem && this.game.sceneSystem.renderer) {
@@ -42,7 +41,6 @@ class EditorMode {
 
     enterProductionMode() {
         // Disable development features
-        console.log('Entering Production Mode');
 
         // Hide player start position
         if (this.game.sceneSystem && this.game.sceneSystem.renderer) {
@@ -63,7 +61,6 @@ class EditorMode {
         // Position player at current scene start position for production gameplay
         if (this.game.sceneSystem) {
             this.game.positionPlayerAtSceneStart();
-            console.log('🎯 Production mode: Player positioned at current scene start position');
         }
     }
 

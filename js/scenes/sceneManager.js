@@ -54,9 +54,7 @@ class SceneManager {
                 } else if (action === 'remove-transition') {
                     e.stopPropagation();
                     const zoneId = e.target.dataset.zoneId;
-                    console.log('🗑️ Removing transition zone:', zoneId);
                     const result = this.game.sceneSystem.removeTransitionZone(zoneId);
-                    console.log('🗑️ Remove result:', result);
                     this.game.sceneSystem.updateUI();
                 }
             });
@@ -101,15 +99,11 @@ class SceneManager {
 
         // If loading the same scene without a specific player position AND platforms are already loaded, skip the reload
         if (currentScene && currentScene.id === sceneId && playerStartX === null && playerStartY === null && !isInitialLoad) {
-            console.log('Skipping reload of same scene without position change:', scene.name);
             return true;
         }
 
         // If loading the same scene with a specific player position AND platforms are already loaded, just update player position
         if (currentScene && currentScene.id === sceneId && (playerStartX !== null || playerStartY !== null) && !isInitialLoad) {
-            console.log('Same scene transition - just updating player position:', scene.name, {
-                newPosition: [playerStartX, playerStartY]
-            });
 
             // Only update player position
             if (this.game.player) {
@@ -171,13 +165,6 @@ class SceneManager {
         this.cleanupInvalidTransitions(scene);
 
         // Load platforms
-        // Removed corruption detection messages
-        console.log('🔧 Platforms being loaded:', scene.platforms.map(p => ({
-            id: p.id,
-            spriteType: p.spriteType,
-            x: p.x,
-            y: p.y
-        })));
         // Create a deep copy of platforms
         const platformsCopy = JSON.parse(JSON.stringify(scene.platforms || []));
         this.game.platformSystem.platforms = platformsCopy;
@@ -201,7 +188,7 @@ class SceneManager {
         let nextPropId = 1;
         propsToLoad.forEach(prop => {
             if (prop.id === undefined || prop.id === null || isNaN(prop.id)) {
-                console.warn(`⚠️ Prop missing or has invalid ID, assigning new ID ${nextPropId}:`, prop);
+                console.warn(`Prop missing or has invalid ID, assigning new ID ${nextPropId}:`, prop);
                 prop.id = nextPropId++;
             } else {
                 nextPropId = Math.max(nextPropId, prop.id + 1);
@@ -214,8 +201,6 @@ class SceneManager {
 
         // Load lootables
         if (this.game.lootableSystem) {
-            console.log('🔄 Loading lootables from scene:', scene.lootables ? scene.lootables.length : 0);
-            console.log('🔄 Scene lootables data:', scene.lootables);
             this.game.lootableSystem.lootables = [...(scene.lootables || [])];
 
             // Update next lootable ID to avoid conflicts
@@ -223,34 +208,20 @@ class SceneManager {
                 const maxId = Math.max(...scene.lootables.map(l => l.id || 0));
                 this.game.lootableSystem.data.nextLootableId = maxId + 1;
             }
-
-            console.log('🔄 Lootables loaded:', this.game.lootableSystem.lootables.length);
-            console.log('🔄 LootableSystem.lootables after loading:', this.game.lootableSystem.lootables);
-        } else {
-            console.log('🔄 LootableSystem not available during scene loading');
         }
 
         // Load enemies
         if (this.game.enemySystem && this.game.enemySystem.data) {
-            console.log('🔄 CRITICAL: Loading enemies from scene');
-            console.log('🔄 Current enemies in memory:', this.game.enemySystem.data.enemies.length);
-            console.log('🔄 Scene enemies to load:', scene.enemies ? scene.enemies.length : 'NULL/UNDEFINED');
-            console.log('🔄 Scene enemy data:', scene.enemies ? scene.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible !== false ? 'visible' : 'hidden'})`) : 'NONE');
-
             this.game.enemySystem.data.enemies = [...(scene.enemies || [])];
             this.game.enemySystem.animators.clear(); // Clear animators, they'll be recreated
 
             // Migrate enemy properties from type definitions (ensures enemies use current type data)
             this.migrateEnemyProperties(this.game.enemySystem.data.enemies, this.game.enemySystem.data.enemyTypes);
 
-            console.log('🔄 After loading - enemies in memory:', this.game.enemySystem.data.enemies.length);
-
             // Update nextEnemyId to prevent ID conflicts
             if (scene.enemies && scene.enemies.length > 0) {
                 this.game.enemySystem.data.nextEnemyId = Math.max(...scene.enemies.map(e => e.id || 0)) + 1;
             }
-
-            console.log('🎯 Loaded', scene.enemies?.length || 0, 'enemies for scene', scene.name);
 
             // Update enemy UI to reflect loaded enemies
             if (window.uiEventHandler) {
@@ -279,8 +250,6 @@ class SceneManager {
                     this.game.enemySystem.data.nextEnemyId = Math.max(...scene.enemies.map(e => e.id || 0)) + 1;
                 }
 
-                console.log('🔧 Emergency reload completed, enemies:', this.game.enemySystem.data.enemies.length);
-
                 // Update enemy UI after emergency reload
                 if (window.uiEventHandler) {
                     window.uiEventHandler.updateEnemyList();
@@ -291,24 +260,13 @@ class SceneManager {
 
         // Load NPCs
         if (this.game.npcSystem && this.game.npcSystem.data) {
-            console.log('🔄 Loading NPCs from scene');
-            console.log('🔄 Current NPCs in memory:', this.game.npcSystem.data.npcs.length);
-            console.log('🔄 Scene NPCs to load:', scene.npcs ? scene.npcs.length : 'NULL/UNDEFINED');
-            console.log('🔄 Scene NPCs data:', scene.npcs);
-
             this.game.npcSystem.data.npcs = [...(scene.npcs || [])];
             this.game.npcSystem.animators.clear(); // Clear animators, they'll be recreated
-
-            console.log('🔄 After loading - NPCs in memory:', this.game.npcSystem.data.npcs.length);
-            console.log('🔄 NPC objects in memory:', this.game.npcSystem.data.npcs);
 
             // Update nextNPCId to prevent ID conflicts
             if (scene.npcs && scene.npcs.length > 0) {
                 this.game.npcSystem.data.nextNPCId = Math.max(...scene.npcs.map(n => n.id || 0)) + 1;
             }
-
-            console.log('🎯 Loaded', scene.npcs?.length || 0, 'NPCs for scene', scene.name);
-            console.log('🎯 NPC system has', this.game.npcSystem.data.npcs.length, 'NPCs after load');
 
             // Update NPC UI to reflect loaded NPCs
             if (window.uiEventHandler) {
@@ -347,7 +305,6 @@ class SceneManager {
         // Load scene background if specified
         if (this.game.backgroundSystem && scene.settings.backgroundName) {
             this.game.backgroundSystem.loadBackground(scene.settings.backgroundName);
-            console.log(`🖼️ Loading scene background: ${scene.settings.backgroundName}`);
         }
 
         // Update main dashboard background dropdown
@@ -422,33 +379,16 @@ class SceneManager {
                     this.game.propSystem.data.initializeGroupsFromProps();
                 } else {
                     // During normal operation, this is likely intentional (user deleted all props)
-                    console.log('💾 All props have been deleted - saving empty props array');
                 }
             }
 
             // Check if enemy system is initialized
             if (this.game.enemySystem && this.game.enemySystem.isInitialized) {
-                console.log('💾 Enemies being saved:', this.game.enemySystem.data.enemies.length, 'enemies');
-                console.log('💾 Enemy IDs being saved:', this.game.enemySystem.data.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible ? 'visible' : 'hidden'})`));
             } else {
                 // Don't save enemy data if enemy system isn't initialized - preserve existing enemy data
-                console.log(`💾 Enemy system not initialized - preserving existing enemy data in scene`);
-                console.log('💾 Enemy system state:', {
-                    exists: !!this.game.enemySystem,
-                    initialized: this.game.enemySystem?.isInitialized,
-                    enemyCount: this.game.enemySystem?.data?.enemies?.length || 0
-                });
                 if (currentScene.enemies && currentScene.enemies.length > 0) {
-                    console.log('💾 Preserving', currentScene.enemies.length, 'enemies from scene data');
-                    console.log('💾 Scene enemy IDs:', currentScene.enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible !== false ? 'visible' : 'hidden'})`));
                 }
             }
-            console.log('💾 Platforms being saved:', this.game.platformSystem.platforms.map(p => ({
-                id: p.id,
-                spriteType: p.spriteType,
-                x: p.x,
-                y: p.y
-            })));
 
             // Use current enemy data if enemy system is initialized, otherwise preserve existing enemy data
             let enemyDataToSave;
@@ -472,7 +412,6 @@ class SceneManager {
                     // Safe to use current enemy data (including empty array from intentional deletions)
                     enemyDataToSave = currentEnemyData;
                     if (currentEnemyData && currentEnemyData.length === 0 && currentScene.enemies && currentScene.enemies.length > 0) {
-                        console.log('💾 All enemies deleted - saving empty enemy array');
                     }
                 }
             } else {
@@ -480,7 +419,6 @@ class SceneManager {
                 enemyDataToSave = currentScene.enemies;
             }
 
-            console.log('💾 Final enemy data to save:', enemyDataToSave ? enemyDataToSave.length : 'null', 'enemies');
 
             // Check if we're about to wipe out existing lootables
             if (currentScene.lootables && currentScene.lootables.length > 0 &&
@@ -505,7 +443,6 @@ class SceneManager {
                     }
                 } else {
                     // In dev mode with no lootables, user deleted them all - allow it
-                    console.log('💾 All lootables deleted in development mode - allowing save of empty array');
                 }
             }
 
@@ -530,14 +467,10 @@ class SceneManager {
                     lootableDataToSave = currentScene.lootables;
                 } else if (currentCount < originalCount && this.game.isDevelopmentMode) {
                     // Lootables were deleted in development mode - save current state
-                    console.log('💾 Lootables deleted in editor - saving current state');
-                    console.log('💾 Original:', originalCount, 'lootables, Current:', currentCount, 'lootables');
 
                     lootableDataToSave = currentLootableData;
                 } else if (currentCount > originalCount) {
                     // New lootables have been added in the editor - save current state
-                    console.log('💾 New lootables detected - saving current state');
-                    console.log('💾 Original:', originalCount, 'lootables, Current:', currentCount, 'lootables');
 
                     lootableDataToSave = currentLootableData;
                 } else {
@@ -545,7 +478,6 @@ class SceneManager {
                     lootableDataToSave = currentLootableData;
                 }
 
-                console.log('💾 Final lootable data to save:', lootableDataToSave.length, 'lootables');
             }
 
             // Handle chest inventory protection (similar to lootable protection)
@@ -585,15 +517,11 @@ class SceneManager {
             let npcDataToSave = [];
             if (this.game.npcSystem && this.game.npcSystem.isInitialized) {
                 npcDataToSave = this.game.npcSystem.data.npcs;
-                console.log('💾 Saving NPCs:', npcDataToSave.length, 'NPCs');
                 if (npcDataToSave.length > 0) {
-                    console.log('💾 NPC IDs:', npcDataToSave.map(n => `${n.id}(${n.type})`));
                 }
             } else {
                 // Don't save NPC data if NPC system isn't initialized - preserve existing NPC data
-                console.log(`💾 NPC system not initialized - preserving existing NPC data in scene`);
                 if (currentScene.npcs && currentScene.npcs.length > 0) {
-                    console.log('💾 Preserving', currentScene.npcs.length, 'NPCs from scene data');
                     npcDataToSave = currentScene.npcs; // Preserve existing NPCs
                 }
             }
@@ -632,12 +560,6 @@ class SceneManager {
 
         // Debug: Log all transition zones in current scene
         if (transitionZones.length > 0 && Math.random() < 0.001) { // Log occasionally to avoid spam
-            console.log('📍 Current scene has transition zones:', transitionZones.map(z => ({
-                id: z.id,
-                bounds: `(${z.x},${z.y}) ${z.width}x${z.height}`,
-                targetSceneId: z.targetSceneId,
-                targetScene: this.sceneData.getSceneById(z.targetSceneId)?.name || 'INVALID'
-            })));
         }
 
         for (const zone of transitionZones) {
@@ -674,25 +596,9 @@ class SceneManager {
             );
 
             if (distance < 100 && Math.random() < 0.02) { // Log when near
-                console.log('📏 Player near transition zone:', {
-                    distance: Math.round(distance),
-                    playerPos: [Math.round(playerX), Math.round(playerY)],
-                    zoneCenter: [Math.round(zone.x + zone.width/2), Math.round(zone.y + zone.height/2)],
-                    zoneBounds: `(${zone.x},${zone.y}) ${zone.width}x${zone.height}`
-                });
             }
 
             if (this.isPlayerInZone(playerX, playerY, zone)) {
-                console.log('✅ Player entered transition zone:', {
-                    zoneId: zone.id,
-                    currentSceneName: currentScene.name,
-                    currentSceneId: currentScene.id,
-                    playerPos: [Math.round(playerX), Math.round(playerY)],
-                    zonePos: [zone.x, zone.y],
-                    zoneSize: [zone.width, zone.height],
-                    targetSceneId: zone.targetSceneId,
-                    targetSceneName: this.sceneData.getSceneById(zone.targetSceneId)?.name || 'INVALID'
-                });
                 this.triggerTransition(zone);
                 break;
             }
@@ -735,10 +641,6 @@ class SceneManager {
         this.isTransitioning = true;
 
         // Optional: Add transition effects here (fade, slide, etc.)
-        console.log('Transitioning from', currentScene?.name, 'to scene:', targetScene.name, {
-            zoneId: zone.id,
-            playerWillMoveTo: [zone.playerStartX, zone.playerStartY]
-        });
 
         // Load the target scene with specified player position
         this.loadScene(zone.targetSceneId, zone.playerStartX, zone.playerStartY);
@@ -764,7 +666,6 @@ class SceneManager {
         // Load the newly created scene to display it in the dashboard
         this.loadScene(newScene.id);
 
-        console.log(`🎯 Created and loaded new scene: "${newScene.name}"`);
         return newScene;
     }
 
@@ -806,7 +707,6 @@ class SceneManager {
             }
 
             this.updateSceneUI();
-            console.log(`🎯 Scene "${scene.name}" deleted successfully`);
             return true;
         }
         return false;
@@ -827,7 +727,6 @@ class SceneManager {
             }
 
             this.updateSceneUI();
-            console.log(`🎯 Set "${scene.name}" as the start scene`);
         }
         return success;
     }
@@ -1068,7 +967,6 @@ class SceneManager {
             const backgroundName = scene.settings.backgroundName || 'none';
             currentBgNameSpan.textContent = backgroundName === 'none' ?
                 'None' : this.game.backgroundSystem.formatBackgroundName(backgroundName);
-            console.log(`🔄 Updated main dashboard background display to: ${backgroundName}`);
         }
     }
 
@@ -1093,7 +991,6 @@ class SceneManager {
         if (this.game.editorSystem) {
             this.game.editorSystem.startAddingTransition();
         }
-        console.log('Click and drag to create a transition zone');
     }
 
     handleTransitionCreation(startX, startY, endX, endY) {
@@ -1169,7 +1066,6 @@ class SceneManager {
                     }
                 } else {
                     // Invalid choice, do nothing
-                    console.log('Invalid choice for destination type');
                 }
             }
         }
@@ -1220,17 +1116,7 @@ class SceneManager {
 
         const zones = currentScene.transitions.zones;
         if (zones.length > 0) {
-            console.log(`Current scene "${currentScene.name}" has ${zones.length} transition zones:`,
-                zones.map(zone => ({
-                    id: zone.id,
-                    position: [zone.x, zone.y],
-                    size: [zone.width, zone.height],
-                    targetSceneId: zone.targetSceneId,
-                    targetSceneName: this.sceneData.getSceneById(zone.targetSceneId)?.name || 'Unknown'
-                }))
-            );
         } else {
-            console.log(`Current scene "${currentScene.name}" has no transition zones`);
         }
     }
 
@@ -1252,12 +1138,10 @@ class SceneManager {
 
             // Update collision box dimensions
             if (enemy.width !== typeData.width) {
-                console.log(`🔄 Migrating enemy ${enemy.id} width: ${enemy.width} → ${typeData.width}`);
                 enemy.width = typeData.width;
                 wasUpdated = true;
             }
             if (enemy.height !== typeData.height) {
-                console.log(`🔄 Migrating enemy ${enemy.id} height: ${enemy.height} → ${typeData.height}`);
                 enemy.height = typeData.height;
                 wasUpdated = true;
             }
@@ -1265,7 +1149,6 @@ class SceneManager {
             // Update collision offset for floating enemies
             const expectedOffsetY = typeData.collisionOffsetY || 0;
             if ((enemy.collisionOffsetY || 0) !== expectedOffsetY) {
-                console.log(`🔄 Migrating enemy ${enemy.id} collisionOffsetY: ${enemy.collisionOffsetY || 0} → ${expectedOffsetY}`);
                 enemy.collisionOffsetY = expectedOffsetY;
                 wasUpdated = true;
             }
@@ -1273,7 +1156,6 @@ class SceneManager {
             // Update render offset for floating enemies
             const expectedRenderOffsetY = typeData.renderOffsetY || 0;
             if ((enemy.renderOffsetY || 0) !== expectedRenderOffsetY) {
-                console.log(`🔄 Migrating enemy ${enemy.id} renderOffsetY: ${enemy.renderOffsetY || 0} → ${expectedRenderOffsetY}`);
                 enemy.renderOffsetY = expectedRenderOffsetY;
                 wasUpdated = true;
             }
@@ -1281,14 +1163,12 @@ class SceneManager {
             // Update attack properties
             const expectedAttackType = typeData.attackType || 'melee';
             if ((enemy.attackType || 'melee') !== expectedAttackType) {
-                console.log(`🔄 Migrating enemy ${enemy.id} attackType: ${enemy.attackType || 'melee'} → ${expectedAttackType}`);
                 enemy.attackType = expectedAttackType;
                 wasUpdated = true;
             }
 
             const expectedAttackRange = typeData.attackRange || 60;
             if ((enemy.attackRange || 60) !== expectedAttackRange) {
-                console.log(`🔄 Migrating enemy ${enemy.id} attackRange: ${enemy.attackRange || 60} → ${expectedAttackRange}`);
                 enemy.attackRange = expectedAttackRange;
                 wasUpdated = true;
             }
@@ -1296,7 +1176,6 @@ class SceneManager {
             // Update facingInverted flag
             const expectedFacingInverted = typeData.facingInverted || false;
             if ((enemy.facingInverted || false) !== expectedFacingInverted) {
-                console.log(`🔄 Migrating enemy ${enemy.id} facingInverted: ${enemy.facingInverted || false} → ${expectedFacingInverted}`);
                 enemy.facingInverted = expectedFacingInverted;
                 wasUpdated = true;
             }
@@ -1305,7 +1184,6 @@ class SceneManager {
             if (enemy.attackType === 'ranged') {
                 const expectedProjectileSpeed = typeData.projectileSpeed || 300;
                 if ((enemy.projectileSpeed || 300) !== expectedProjectileSpeed) {
-                    console.log(`🔄 Migrating enemy ${enemy.id} projectileSpeed: ${enemy.projectileSpeed || 300} → ${expectedProjectileSpeed}`);
                     enemy.projectileSpeed = expectedProjectileSpeed;
                     wasUpdated = true;
                 }
@@ -1317,7 +1195,6 @@ class SceneManager {
         }
 
         if (migratedCount > 0) {
-            console.log(`✅ Migrated ${migratedCount} enemies to current type definitions`);
         }
     }
 }

@@ -155,7 +155,6 @@ class EditorContextMenu {
             screenY: e.clientY
         };
 
-        console.log('📋 Context menu showing at world coords:', this.contextCoords.x, this.contextCoords.y);
 
         // Store in editor system for backward compatibility
         this.editor.contextMenuCoords = this.contextCoords;

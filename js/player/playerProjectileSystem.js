@@ -22,7 +22,6 @@ class PlayerProjectileSystem {
             const offset = spawnOffset[player.facing];
             startX = player.x + offset.x;
             startY = player.y + offset.y;
-            console.log(`✨ PROJECTILE SPAWN DEBUG: Using configured offset for ${player.facing}: offset=(${offset.x}, ${offset.y}), spawn position=(${startX}, ${startY})`);
         } else {
             // Fallback to simple center-based calculation
             const playerCenter = player.x + player.width / 2;
@@ -31,7 +30,6 @@ class PlayerProjectileSystem {
             const offsetY = -5;
             startX = playerCenter + offsetX;
             startY = playerMiddleY + offsetY;
-            console.log(`✨ PROJECTILE SPAWN DEBUG: Using fallback center-based calculation, spawn position=(${startX}, ${startY})`);
         }
 
         // Calculate direction to target
@@ -67,7 +65,6 @@ class PlayerProjectileSystem {
         };
 
         this.projectiles.push(projectile);
-        console.log(`Created player projectile ${projectile.id} towards (${Math.round(targetX)}, ${Math.round(targetY)})`);
         return projectile;
     }
 
@@ -100,7 +97,6 @@ class PlayerProjectileSystem {
                         // Store hit information for enemy system to process
                         projectile.hitEnemy = enemy;
                         projectile.shouldRemove = true;
-                        console.log(`Player projectile ${projectile.id} hit enemy ${enemy.id}`);
                         break;
                     }
                 }

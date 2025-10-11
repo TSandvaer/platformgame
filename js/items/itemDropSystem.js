@@ -47,7 +47,6 @@ class ItemDropSystem {
             visible: !isEnemyDrop // Enemy drops start invisible
         };
 
-        console.log(`📦 Created item at (${droppedItem.x.toFixed(1)}, ${droppedItem.y.toFixed(1)}) with velocity (${droppedItem.velocityX.toFixed(2)}, ${droppedItem.velocityY.toFixed(2)})`);
 
         this.droppedItems.push(droppedItem);
         return droppedItem;
@@ -92,7 +91,6 @@ class ItemDropSystem {
         if (!item.onGround) {
             // Safety check: if item has fallen too far or is stuck, force it to settle
             if (item.y > 2000 || (Math.abs(item.velocityY) < 0.01 && item.pickupTimer > 1000)) {
-                console.log(`⚠️ Item ${item.id} stuck or fell too far (y: ${item.y}, vy: ${item.velocityY}), forcing to ground`);
                 // Force item to nearest platform below
                 const platformBelow = this.findNearestPlatformBelow(item, platforms);
                 if (platformBelow) {
@@ -243,7 +241,6 @@ class ItemDropSystem {
             if (success) {
                 // Show pickup effect
                 this.showPickupEffect(item, inventoryItem);
-                console.log(`✅ Player picked up: ${inventoryItem.name}`);
             } else {
                 console.warn(`❌ Failed to add ${inventoryItem.name} to player inventory (inventory full?)`);
             }
@@ -296,7 +293,6 @@ class ItemDropSystem {
         let bestPlatform = null;
         let bestScore = Infinity;
 
-        console.log(`🎯 Finding platform for drop at (${x.toFixed(1)}, ${y.toFixed(1)}), checking ${platforms.length} platforms`);
 
         for (const platform of platforms) {
             // Calculate distance to platform center
@@ -320,7 +316,6 @@ class ItemDropSystem {
             if (onThisPlatform) {
                 // Drop point is ON this platform - heavily favor this platform
                 score = horizontalDistance * 0.1; // Minimal penalty for same platform
-                console.log(`🎯 DROP IS ON THIS PLATFORM - heavily favoring it`);
             } else {
                 // Vertical scoring for other platforms:
                 if (platformCenterY < y - 100) {
@@ -338,7 +333,6 @@ class ItemDropSystem {
                 }
             }
 
-            console.log(`🎯 Platform at (${platformCenterX.toFixed(1)}, ${platformCenterY.toFixed(1)}): hDist=${horizontalDistance.toFixed(1)}, vDist=${verticalDistance.toFixed(1)}, score=${score.toFixed(1)}`);
 
             if (score < bestScore) {
                 bestScore = score;
@@ -349,7 +343,6 @@ class ItemDropSystem {
         if (bestPlatform) {
             const platformCenterX = bestPlatform.x + bestPlatform.width / 2;
             const platformCenterY = bestPlatform.y;
-            console.log(`🎯 Selected platform at (${platformCenterX.toFixed(1)}, ${platformCenterY.toFixed(1)}), score: ${bestScore.toFixed(1)}`);
         } else {
             console.warn('🎯 No suitable platform found');
         }
@@ -364,7 +357,6 @@ class ItemDropSystem {
     // Debug method to test dropping items manually
     testDrop(x, y, itemId = 'healthPotion') {
         if (this.game.platformSystem) {
-            console.log(`🧪 Testing manual drop at (${x}, ${y})`);
             return this.dropItem(itemId, x, y, this.game.platformSystem.platforms);
         } else {
             console.warn('Platform system not available');
@@ -378,7 +370,6 @@ class ItemDropSystem {
             // console.log(`📦 ItemDropSystem: Rendering ${this.droppedItems.length} items with renderer`);
             this.renderer.render(ctx, this.droppedItems, camera, viewport);
         } else {
-            console.log(`📦 ItemDropSystem: No renderer available`);
         }
     }
 

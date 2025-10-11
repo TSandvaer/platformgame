@@ -23,7 +23,6 @@ class EnemyRenderer {
 
         // Render fleeing text if enemy is fleeing
         if (enemy.aiState === 'fleeing') {
-            console.log(`Rendering FLEEING text for enemy ${enemy.id}`);
             this.renderFleeingText(enemy, viewport, camera);
         }
 
@@ -346,7 +345,6 @@ class EnemyRenderer {
     }
 
     renderFleeingText(enemy, viewport, camera) {
-        console.log(`DEBUG: renderFleeingText called for enemy ${enemy.id}, viewport exists: ${!!viewport}, camera exists: ${!!camera}`);
         this.ctx.save();
 
         // Apply camera and viewport transformation
@@ -391,7 +389,6 @@ class EnemyRenderer {
         this.ctx.strokeText('FLEEING', textX, textY);
         this.ctx.fillText('FLEEING', textX, textY);
 
-        console.log(`DEBUG: Drew FLEEING text at position (${textX}, ${textY}) for enemy ${enemy.id}`);
 
         this.ctx.restore();
     }

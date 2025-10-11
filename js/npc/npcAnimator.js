@@ -20,17 +20,14 @@ class NPCAnimator {
             const img = new Image();
             img.onload = () => {
                 loadedCount++;
-                console.log(`Loaded NPC sprite: ${this.npc.type}-${animName}`);
                 if (loadedCount === totalSprites) {
                     this.spritesLoaded = true;
-                    console.log(`All ${this.npc.type} NPC sprites loaded successfully`);
                 }
             };
             img.onerror = () => {
                 console.warn(`Failed to load NPC sprite: ${this.npc.type}-${animName} from ${baseFolder}/${animData.file}`);
                 loadedCount++;
                 if (loadedCount === totalSprites) {
-                    console.log(`${this.npc.type} NPC sprite loading complete (with some failures)`);
                 }
             };
             img.src = `${baseFolder}/${animData.file}`;

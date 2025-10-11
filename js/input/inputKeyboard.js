@@ -50,7 +50,6 @@ class InputKeyboard {
 
         // Handle development mode keyboard shortcuts
         if (this.game.isDevelopmentMode) {
-            console.log('🔧 Development mode - handling key:', e.key);
             this.handleDevelopmentKeys(e);
         }
     }
@@ -100,7 +99,6 @@ class InputKeyboard {
 
         // Handle 'X' key to damage/destroy selected props
         if (e.key.toLowerCase() === 'x') {
-            console.log('🎯 X key detected in development mode');
             e.preventDefault();
             this.handlePropDamage();
         }
@@ -383,7 +381,6 @@ class InputKeyboard {
     }
 
     handlePropDamage() {
-        console.log('🔨 X key pressed - attempting to damage props');
 
         // Get current mouse position for feedback message
         const mousePos = this.game.inputSystem.mouse.getMousePosition();
@@ -393,14 +390,10 @@ class InputKeyboard {
         let destroyedCount = 0;
 
         // Debug: Check what props are selected
-        console.log('Selected prop:', this.game.propSystem.selectedProp);
-        console.log('Selected props array:', this.game.propSystem.selectedProps);
 
         // Damage selected props
         if (this.game.propSystem.selectedProps && this.game.propSystem.selectedProps.length > 0) {
-            console.log('Processing selected props array with', this.game.propSystem.selectedProps.length, 'props');
             for (const prop of this.game.propSystem.selectedProps) {
-                console.log('Checking prop:', prop.id, 'destroyable:', prop.destroyable);
                 if (prop.destroyable) {
                     const wasDestroyed = this.game.propSystem.damageProp(prop.id, 25); // 25 durability damage per press
                     if (wasDestroyed) {
@@ -409,11 +402,9 @@ class InputKeyboard {
                         damagedCount++;
                     }
                 } else {
-                    console.log('Prop', prop.id, 'is not destroyable');
                 }
             }
         } else if (this.game.propSystem.selectedProp) {
-            console.log('Processing single selected prop:', this.game.propSystem.selectedProp.id, 'destroyable:', this.game.propSystem.selectedProp.destroyable);
             if (this.game.propSystem.selectedProp.destroyable) {
                 const wasDestroyed = this.game.propSystem.damageProp(this.game.propSystem.selectedProp.id, 25);
                 if (wasDestroyed) {
@@ -422,10 +413,8 @@ class InputKeyboard {
                     damagedCount++;
                 }
             } else {
-                console.log('Selected prop is not destroyable');
             }
         } else {
-            console.log('No props selected');
         }
 
         // Show feedback message

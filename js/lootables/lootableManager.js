@@ -113,7 +113,6 @@ class LootableManager {
         if (button) {
             button.textContent = this.data.lootablePlacementMode ? 'Exit Placement' : 'Place Lootable';
         }
-        console.log('Lootable placement mode:', this.data.lootablePlacementMode);
     }
 
     placeLootable(mouseX, mouseY) {

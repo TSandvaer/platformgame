@@ -29,7 +29,6 @@ class GameDataExporter {
             // Clean up
             URL.revokeObjectURL(url);
 
-            console.log(`📥 Exported game data to ${link.download}`);
             return true;
         } catch (error) {
             console.error('Error exporting game data:', error);
@@ -124,7 +123,6 @@ class GameDataExporter {
         const gameData = ${JSON.stringify(gameData, null, 2)};
 
         // Game initialization would go here
-        console.log('Game data loaded:', gameData);
         alert('HTML export feature coming soon!');
     </script>
 </body>
@@ -141,7 +139,6 @@ class GameDataExporter {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
 
-        console.log('📦 Exported as HTML (template only for now)');
     }
 
     // Export for version control (minimal format)

@@ -61,7 +61,6 @@ class LootableData {
         };
 
         this.lootables.push(lootable);
-        console.log(`Added lootable: ${type} at (${x}, ${y})`);
         return lootable;
     }
 
@@ -78,7 +77,6 @@ class LootableData {
             // Remove from multi-selection
             this.removeFromSelection(lootable);
 
-            console.log(`Deleted lootable ${lootable.id}`);
         }
     }
 
@@ -157,7 +155,6 @@ class LootableData {
                 offsetX: lootable.x - this.selectedLootables[0].x,
                 offsetY: lootable.y - this.selectedLootables[0].y
             }));
-            console.log(`Copied ${this.clipboard.length} lootables to clipboard`);
         }
         return this.clipboard;
     }
@@ -179,7 +176,6 @@ class LootableData {
         if (pastedLootables.length > 0) {
             this.selectedLootables = pastedLootables;
             this.selectedLootable = pastedLootables[0];
-            console.log(`Pasted ${pastedLootables.length} lootables`);
         }
 
         return pastedLootables;

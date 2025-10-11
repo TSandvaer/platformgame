@@ -17,7 +17,6 @@ class EnemySystem {
         this.mouseHandler = new EnemyMouseHandler(this, platformSystem, viewport, camera);
         this.projectileAnimator = new EnemyProjectileAnimator();
         this.isInitialized = true;
-        console.log('Enemy system initialized');
     }
 
     update(deltaTime, player, platforms) {
@@ -30,7 +29,6 @@ class EnemySystem {
             // Backward compatibility: ensure fleeHealthThreshold is set for existing enemies
             if (enemy.fleeHealthThreshold === undefined || enemy.fleeHealthThreshold === null) {
                 enemy.fleeHealthThreshold = 0.4;
-                console.log(`Fixed missing fleeHealthThreshold for enemy ${enemy.id}`);
             }
 
             // Handle death timer countdown
@@ -60,8 +58,6 @@ class EnemySystem {
 
                 if (enemy.deathTimer <= 0) {
                     // Hide the corpse instead of removing from data (only once)
-                    console.log(`👻 Enemy ${enemy.id} corpse hidden after 2 seconds - preserved in data for revival`);
-
                     enemy.isVisible = false;
                     this.animators.delete(enemy.id); // Clean up animator for performance
 
@@ -124,7 +120,6 @@ class EnemySystem {
                     const animator = this.animators.get(enemy.id);
                     if (animator) {
                         this.damageEnemy(enemy, projectile.damage, animator);
-                        console.log(`Player projectile ${projectile.id} dealt ${projectile.damage} damage to enemy ${enemy.id}`);
                     }
                 }
             }
@@ -190,8 +185,6 @@ class EnemySystem {
 
                     if (playerInFront) {
                         this.projectileSystem.createProjectile(enemy, playerCenter.x, playerCenter.y);
-                    } else {
-                        console.log(`🔥 Dragon ${enemy.id} cannot attack - player is behind (facing: ${enemy.facing})`);
                     }
                 }
 
@@ -206,7 +199,6 @@ class EnemySystem {
             if (attackCollision && !player.isDamaged) {
                 // Damage player using player's takeDamage method
                 player.takeDamage(attackCollision.damage);
-                console.log(`Enemy ${enemy.id} attacked player for ${attackCollision.damage} damage`);
             }
         }
 
@@ -225,8 +217,6 @@ class EnemySystem {
     damageEnemy(enemy, damage, animator) {
         enemy.health -= damage;
         const healthPercentage = enemy.health / enemy.maxHealth;
-        console.log(`Enemy ${enemy.id} took ${damage} damage, health: ${enemy.health}/${enemy.maxHealth} (${Math.round(healthPercentage * 100)}%)`);
-        console.log(`Enemy ${enemy.id} flee threshold: ${Math.round((enemy.fleeHealthThreshold || 0.4) * 100)}%, should flee: ${healthPercentage <= (enemy.fleeHealthThreshold || 0.4)}`);
 
         if (enemy.health <= 0) {
             enemy.health = 0;
@@ -238,7 +228,6 @@ class EnemySystem {
             enemy.deathFallOffset = enemy.renderOffsetY || 0;
 
             animator.startDeath();
-            console.log(`Enemy ${enemy.id} died - corpse will disappear in 2 seconds`);
 
             // Trigger item drops if configured
             this.triggerEnemyDrops(enemy);
@@ -254,7 +243,6 @@ class EnemySystem {
             const shouldFlee = healthPercentage <= (enemy.fleeHealthThreshold || 0.4);
             if (!shouldFlee && enemy.aiState !== 'fleeing' && enemy.aiState !== 'attacking') {
                 enemy.aiState = 'chasing';
-                console.log(`Enemy ${enemy.id} aggroed by attack - entering chasing state`);
             }
         }
     }
@@ -354,50 +342,34 @@ class EnemySystem {
     }
 
     triggerEnemyDrops(enemy) {
-        console.log(`🎁 triggerEnemyDrops called for enemy ${enemy.id} (${enemy.type})`);
-
         // Check if this enemy has drop items configured
         if (!enemy.dropItems || enemy.dropItems.length === 0) {
-            console.log(`🎁 No dropItems configured for enemy ${enemy.id} - skipping drops`);
             return;
         }
 
         if (!this.game || !this.game.itemDropSystem) {
-            console.log(`🎁 No game or itemDropSystem available - skipping drops`);
             return;
         }
 
         // Calculate drop position (center of enemy for better animation)
         const dropX = enemy.x + (enemy.width / 2);
-        const dropY = enemy.y + (enemy.height / 2); // Center of enemy
-
-        console.log(`🎁 Processing ${enemy.dropItems.length} possible drops for enemy ${enemy.id} at (${dropX}, ${dropY})`);
+        const dropY = enemy.y + (enemy.height / 2);
 
         // Process each possible drop
         enemy.dropItems.forEach((dropItem, index) => {
-            console.log(`🎁 Drop ${index + 1}: ${dropItem.itemId}, chance: ${dropItem.chance} (${(dropItem.chance * 100).toFixed(1)}%), quantity: ${dropItem.quantity || 1}`);
-
             // Roll for drop chance
             const roll = Math.random();
             if (roll <= dropItem.chance) {
-                // Item should drop!
-                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - SUCCESS!`);
-
                 // Drop the item using the game's item drop system
                 const platforms = this.game.platformSystem ? this.game.platformSystem.platforms : [];
                 const quantity = dropItem.quantity || 1;
-                console.log(`🎁 Creating ${quantity} ${dropItem.itemId} drops`);
 
                 for (let i = 0; i < quantity; i++) {
-                    const createdItem = this.game.itemDropSystem.dropItem(dropItem.itemId, dropX, dropY, platforms, true); // true = isEnemyDrop
-                    if (createdItem) {
-                        console.log(`🎁 Successfully created enemy drop ${i + 1}/${quantity}: ${createdItem.id}`);
-                    } else {
-                        console.warn(`🎁 Failed to create enemy drop ${i + 1}/${quantity}`);
+                    const createdItem = this.game.itemDropSystem.dropItem(dropItem.itemId, dropX, dropY, platforms, true);
+                    if (!createdItem) {
+                        console.warn(`Failed to create enemy drop ${i + 1}/${quantity}`);
                     }
                 }
-            } else {
-                console.log(`🎁 Rolling item drop: ${dropItem.itemId} (${(dropItem.chance * 100).toFixed(1)}% chance, rolled ${(roll * 100).toFixed(1)}%) - no drop`);
             }
         });
     }

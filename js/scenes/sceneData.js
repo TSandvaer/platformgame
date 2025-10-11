@@ -114,30 +114,23 @@ class SceneData {
     }
 
     deleteScene(sceneId) {
-        console.log(`🎯 Attempting to delete scene with ID: ${sceneId} (type: ${typeof sceneId})`);
-        console.log(`🎯 Available scenes:`, this.scenes.map(s => ({ id: s.id, name: s.name, idType: typeof s.id })));
 
         const index = this.scenes.findIndex(scene => scene.id == sceneId || scene.id === String(sceneId) || String(scene.id) === String(sceneId));
-        console.log(`🎯 Found scene at index: ${index}, total scenes: ${this.scenes.length}`);
 
         if (index !== -1 && this.scenes.length > 1) { // Don't delete the last scene
             const deletedScene = this.scenes[index];
             this.scenes.splice(index, 1);
-            console.log(`🎯 Deleted scene: ${deletedScene.name}, remaining scenes: ${this.scenes.length}`);
 
             // Update current/start scene if deleted
             if (this.currentSceneId == sceneId || String(this.currentSceneId) === String(sceneId)) {
                 this.currentSceneId = this.scenes[0].id;
-                console.log(`🎯 Updated currentSceneId to: ${this.currentSceneId}`);
             }
             if (this.startSceneId == sceneId || String(this.startSceneId) === String(sceneId)) {
                 this.startSceneId = this.scenes[0].id;
-                console.log(`🎯 Updated startSceneId to: ${this.startSceneId}`);
             }
             return true;
         }
 
-        console.log(`🎯 Scene deletion failed - index: ${index}, scenes length: ${this.scenes.length}`);
         return false;
     }
 
@@ -189,31 +182,23 @@ class SceneData {
 
     removeTransitionZone(sceneId, zoneId) {
         const scene = this.getSceneById(sceneId);
-        console.log('🗑️ removeTransitionZone: sceneId=', sceneId, 'zoneId=', zoneId, 'type=', typeof zoneId);
         if (scene) {
-            console.log('🗑️ Scene found, zones:', scene.transitions.zones.map(z => ({id: z.id, type: typeof z.id})));
             const index = scene.transitions.zones.findIndex(zone => zone.id === zoneId);
-            console.log('🗑️ Index found:', index);
             if (index !== -1) {
                 scene.transitions.zones.splice(index, 1);
                 scene.metadata.modified = new Date().toISOString();
-                console.log('🗑️ Zone removed successfully');
                 return true;
             } else {
-                console.log('🗑️ Zone not found - trying type conversion');
                 // Try converting zoneId to number if it's a string
                 const numericZoneId = parseInt(zoneId);
                 const indexNumeric = scene.transitions.zones.findIndex(zone => zone.id === numericZoneId);
-                console.log('🗑️ Numeric index found:', indexNumeric);
                 if (indexNumeric !== -1) {
                     scene.transitions.zones.splice(indexNumeric, 1);
                     scene.metadata.modified = new Date().toISOString();
-                    console.log('🗑️ Zone removed successfully with numeric conversion');
                     return true;
                 }
             }
         } else {
-            console.log('🗑️ Scene not found');
         }
         return false;
     }
@@ -226,16 +211,6 @@ class SceneData {
     updateSceneData(sceneId, platforms, props, enemies = [], npcs = [], lootables = []) {
         const scene = this.getSceneById(sceneId);
         if (scene) {
-            console.log(`📝 updateSceneData called for scene ${sceneId}:`, {
-                platforms: platforms.length,
-                props: props.length,
-                enemies: enemies.length,
-                npcs: npcs.length,
-                lootables: lootables.length,
-                existingEnemies: scene.enemies?.length || 0,
-                existingNPCs: scene.npcs?.length || 0,
-                existingLootables: scene.lootables?.length || 0
-            });
 
             // CRITICAL: Log if we're about to clear enemies
             if (scene.enemies && scene.enemies.length > 0 && (!enemies || enemies.length === 0)) {
@@ -253,9 +228,6 @@ class SceneData {
             scene.enemies = JSON.parse(JSON.stringify(enemies));
             scene.npcs = JSON.parse(JSON.stringify(npcs));
             scene.lootables = JSON.parse(JSON.stringify(lootables));
-            console.log(`📝 Scene data updated successfully: enemies = ${enemies.length}, npcs = ${npcs.length}, lootables = ${lootables.length}`);
-            console.log(`📝 Enemy IDs:`, enemies.map(e => `${e.id}(${e.isDead ? 'dead' : 'alive'}:${e.isVisible ? 'visible' : 'hidden'})`));
-            console.log(`📝 Lootable IDs:`, lootables.map(l => `${l.id}(${l.type})`));
 
             scene.metadata.modified = new Date().toISOString();
 
@@ -276,19 +248,13 @@ class SceneData {
 
     importSceneData(data) {
         if (data.scenes && Array.isArray(data.scenes)) {
-            console.log('🔍 IMPORT DEBUG: Raw scene data from localStorage:');
             data.scenes.forEach((scene, i) => {
-                console.log(`🔍 Scene ${i} "${scene.name}" enemies:`, scene.enemies);
-                console.log(`🔍 Scene ${i} "${scene.name}" npcs:`, scene.npcs);
             });
 
             // Migrate/validate each scene to ensure it has all required properties
             this.scenes = data.scenes.map(scene => this.migrateScene(scene));
 
-            console.log('🔍 IMPORT DEBUG: After migration:');
             this.scenes.forEach((scene, i) => {
-                console.log(`🔍 Scene ${i} "${scene.name}" enemies:`, scene.enemies);
-                console.log(`🔍 Scene ${i} "${scene.name}" npcs:`, scene.npcs);
             });
 
             // Debug: check what we have after migration
@@ -308,7 +274,6 @@ class SceneData {
 
     // Ensure a scene has all required properties with defaults
     migrateScene(scene) {
-        console.log(`🔍 MIGRATE DEBUG: Before migrating scene "${scene.name}":`, { enemies: scene.enemies });
 
         const defaults = {
             platforms: [],
@@ -358,7 +323,6 @@ class SceneData {
             metadata: { ...defaults.metadata, ...(scene.metadata || {}) }
         };
 
-        console.log(`🔍 MIGRATE DEBUG: After migrating scene "${scene.name}":`, { enemies: migratedScene.enemies });
         return migratedScene;
     }
 }

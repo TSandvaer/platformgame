@@ -40,7 +40,6 @@ class EnemyAI {
 
         // Debug: Check if fleeHealthThreshold is properly set
         if (enemy.id === 5 && enemy.health < enemy.maxHealth) {
-            console.log(`DEBUG Enemy 5: fleeHealthThreshold = ${enemy.fleeHealthThreshold}, type = ${typeof enemy.fleeHealthThreshold}`);
         }
 
         const shouldFlee = healthPercentage <= (enemy.fleeHealthThreshold || 0.4) && !enemy.isDead;
@@ -49,7 +48,6 @@ class EnemyAI {
         if (!shouldFlee && enemy.fleeRecoveryTime) {
             enemy.fleeRecoveryTime = null;
             if (enemy.id === 5) {
-                console.log(`Enemy 5 health recovered, clearing recovery period`);
             }
         }
 
@@ -61,7 +59,6 @@ class EnemyAI {
         // Debug logging for flee behavior
         if (enemy.health < enemy.maxHealth && (enemy.id === 1 || enemy.id === 5)) { // Log for enemies 1 and 5 to match user's issue
             const thresholdToUse = enemy.fleeHealthThreshold || 0.4;
-            console.log(`Enemy ${enemy.id} health: ${enemy.health}/${enemy.maxHealth} (${Math.round(healthPercentage * 100)}%), threshold: ${Math.round(thresholdToUse * 100)}%, shouldFlee: ${shouldFlee}, state: ${enemy.aiState}`);
         }
 
         // State machine logic
@@ -76,10 +73,8 @@ class EnemyAI {
                 const inRecoveryPeriodIdle = enemy.fleeRecoveryTime && currentTimeIdle < enemy.fleeRecoveryTime;
 
                 if (enemy.id === 5 && shouldFlee) {
-                    console.log(`DEBUG: Enemy 5 in IDLE state, should flee: ${shouldFlee}, close enough: ${closeEnoughToFleeFromIdle}, distance: ${Math.round(distanceToPlayer)}, in recovery: ${inRecoveryPeriodIdle}`);
                 }
                 if (shouldFlee && closeEnoughToFleeFromIdle) {
-                    console.log(`Enemy ${enemy.id} entering FLEEING state from idle (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
                 } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriodIdle) {
@@ -102,11 +97,9 @@ class EnemyAI {
                 const inRecoveryPeriod = enemy.fleeRecoveryTime && currentTime < enemy.fleeRecoveryTime;
 
                 if (enemy.id === 5 && inRecoveryPeriod) {
-                    console.log(`Enemy 5 in recovery period, ignoring player for ${Math.round((enemy.fleeRecoveryTime - currentTime) / 1000)} more seconds`);
                 }
 
                 if (shouldFlee && closeEnoughToFlee) {
-                    console.log(`Enemy ${enemy.id} entering FLEEING state from patrolling (health: ${Math.round(healthPercentage * 100)}%, player distance: ${Math.round(distanceToPlayer)})`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
                 } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriod) {
@@ -121,7 +114,6 @@ class EnemyAI {
 
             case 'chasing':
                 if (shouldFlee) {
-                    console.log(`Enemy ${enemy.id} entering FLEEING state from chasing (health: ${Math.round(healthPercentage * 100)}%)`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
                 } else if (!playerInAttractionZone && !isAggroed && distanceToPlayer > 300) {
@@ -146,7 +138,6 @@ class EnemyAI {
 
             case 'attacking':
                 if (shouldFlee) {
-                    console.log(`Enemy ${enemy.id} entering FLEEING state from attacking (health: ${Math.round(healthPercentage * 100)}%)`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
                 } else {
@@ -190,20 +181,16 @@ class EnemyAI {
 
                 // Debug logging for enemy 5
                 if (enemy.id === 5) {
-                    console.log(`Enemy 5 FLEEING: distance=${Math.round(distanceToPlayer)}, fleeDistance=${fleeDistance}, shouldFlee=${shouldFlee}, shouldStopFleeing=${shouldStopFleeing}`);
                 }
 
                 if (shouldStopFleeing) {
-                    console.log(`Enemy ${enemy.id} stopping flee: health recovered=${!shouldFlee}, far away=${distanceToPlayer > fleeDistance}`);
                     // Health recovered or player is far away, return to original behavior
                     if (enemy.isMoving && enemy.movementZone.enabled) {
-                        console.log(`Enemy ${enemy.id} returning to movement zone`);
                         enemy.aiState = 'returning_to_zone';
                         // Set target to movement zone center
                         const zoneCenterX = (enemy.movementZone.startX + enemy.movementZone.endX) / 2;
                         enemy.target = { x: zoneCenterX, y: enemy.movementZone.y };
                     } else {
-                        console.log(`Enemy ${enemy.id} returning to original position`);
                         enemy.aiState = 'returning_to_position';
                         enemy.target = enemy.originalPosition;
                     }
@@ -216,7 +203,6 @@ class EnemyAI {
             case 'returning_to_zone':
                 // Return to movement zone after fleeing
                 if (!enemy.target) {
-                    console.log(`Enemy ${enemy.id} no target in returning_to_zone, switching to patrolling`);
                     enemy.aiState = 'patrolling';
                     break;
                 }
@@ -226,12 +212,10 @@ class EnemyAI {
                 const playerTooCloseForZone = distanceToPlayer < 200; // Player needs to be closer than 200 pixels to interrupt return
 
                 if (enemy.id === 5) {
-                    console.log(`Enemy 5 RETURNING_TO_ZONE: distanceToZone=${Math.round(distanceToZone)}, playerDistance=${Math.round(distanceToPlayer)}, playerTooClose=${playerTooCloseForZone}, shouldFlee=${shouldFlee}`);
                 }
 
                 if (distanceToZone < 20) {
                     // Reached zone, resume patrolling
-                    console.log(`Enemy ${enemy.id} reached zone, resuming patrolling`);
                     enemy.aiState = 'patrolling';
                     enemy.target = null;
                     enemy.originalPosition = null;
@@ -239,7 +223,6 @@ class EnemyAI {
                     // Set recovery period to prevent immediate re-engagement with player if health is still low
                     if (shouldFlee) {
                         enemy.fleeRecoveryTime = Date.now() + 3000; // 3 second recovery period
-                        console.log(`Enemy ${enemy.id} entering recovery period (3s) due to low health`);
                     }
 
                     // Reset patrol direction based on current position in zone
@@ -247,10 +230,8 @@ class EnemyAI {
                     const zoneCenterX = (enemy.movementZone.startX + enemy.movementZone.endX) / 2;
                     // If enemy is at center or left of center, start moving right, otherwise left
                     enemy.patrolDirection = enemyCenter <= zoneCenterX ? 1 : -1;
-                    console.log(`Enemy ${enemy.id} patrol direction set to ${enemy.patrolDirection} (center: ${enemyCenter}, zone center: ${zoneCenterX})`);
                 } else if (shouldFlee && playerTooCloseForZone) {
                     // Player got close again AND health is still low, resume fleeing
-                    console.log(`Enemy ${enemy.id} player got close while returning (distance: ${Math.round(distanceToPlayer)}), resuming fleeing`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
                 }
@@ -259,7 +240,6 @@ class EnemyAI {
             case 'returning_to_position':
                 // Return to original position after fleeing
                 if (!enemy.target) {
-                    console.log(`Enemy ${enemy.id} no target in returning_to_position, switching to idle`);
                     enemy.aiState = 'idle';
                     break;
                 }
@@ -269,18 +249,15 @@ class EnemyAI {
                 const playerTooCloseForPosition = distanceToPlayer < 200; // Player needs to be closer than 200 pixels to interrupt return
 
                 if (enemy.id === 5) {
-                    console.log(`Enemy 5 RETURNING_TO_POSITION: distanceToPosition=${Math.round(distanceToPosition)}, playerDistance=${Math.round(distanceToPlayer)}, playerTooClose=${playerTooCloseForPosition}, shouldFlee=${shouldFlee}`);
                 }
 
                 if (distanceToPosition < 20) {
                     // Reached original position, resume idle
-                    console.log(`Enemy ${enemy.id} reached original position, resuming idle`);
                     enemy.aiState = 'idle';
                     enemy.target = null;
                     enemy.originalPosition = null;
                 } else if (shouldFlee && playerTooCloseForPosition) {
                     // Player got close again AND health is still low, resume fleeing
-                    console.log(`Enemy ${enemy.id} player got close while returning (distance: ${Math.round(distanceToPlayer)}), resuming fleeing`);
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
                 }

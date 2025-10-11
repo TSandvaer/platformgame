@@ -58,7 +58,6 @@ class InputMouse {
 
         // If ranged attack and player has projectile system, create projectile
         if (isRangedAttack && this.game.playerSystem.projectileSystem && characterConfig) {
-            console.log(`🎯 RANGED ATTACK DEBUG: Player position = (${this.game.player.x}, ${this.game.player.y}), size = ${this.game.player.width}x${this.game.player.height}, facing = ${this.game.player.facing}`);
             this.game.playerSystem.projectileSystem.createProjectile(
                 this.game.player,
                 mouseX,
@@ -68,7 +67,6 @@ class InputMouse {
         }
 
         const attackTypeLabel = isRangedAttack ? 'ranged (Ctrl+Click)' : 'melee';
-        console.log(`🎯 Player ${attackTypeLabel} attack, facing: ${this.game.player.facing}`);
     }
 
     setupMouseListeners() {
@@ -86,7 +84,6 @@ class InputMouse {
     }
 
     handleCanvasMouseDown(e) {
-        console.log('🎯 Canvas mouse down, development mode:', this.game.isDevelopmentMode);
 
         // In production mode, handle player attack first (no other interactions)
         if (!this.game.isDevelopmentMode) {
@@ -133,14 +130,12 @@ class InputMouse {
 
         // Handle transition zone creation
         if (this.game.sceneSystem.isAddingTransition) {
-            console.log('🎯 Handling transition zone creation, stopping');
             this.game.sceneSystem.setTransitionStart(mouseX, mouseY);
             return;
         }
 
         // Handle platform addition
         if (this.game.isAddingPlatform) {
-            console.log('🎯 Handling platform addition, stopping');
             this.handlePlatformCreation(mouseX, mouseY);
             return;
         }
@@ -167,11 +162,9 @@ class InputMouse {
         }
 
         // Handle platform interaction
-        console.log('🎯 About to handle platform interaction at', mouseX, mouseY);
         const platformResult = this.game.platformSystem.handleMouseDown(
             mouseX, mouseY, this.game.cameraSystem.camera, this.game.viewport
         );
-        console.log('🎯 Platform result:', platformResult);
 
         if (!platformResult.handled) {
             // Check if lootable system is in placement mode first (highest priority)
@@ -190,7 +183,6 @@ class InputMouse {
             }
 
             // Handle enemy interaction first
-            console.log('🎯 Handling enemy mouse down at', mouseX, mouseY, 'placement mode:', this.game.enemySystem.enemyPlacementMode);
             const enemyResult = this.game.enemySystem.handleMouseDown(
                 mouseX, mouseY,
                 e.ctrlKey || e.metaKey,
@@ -270,7 +262,6 @@ class InputMouse {
                 !this.game.sceneSystem.isAddingTransition) {
 
                 this.handlePlayerAttack(mouseX, mouseY, e);
-                console.log('🎯 Player attack in development mode');
             }
         }
     }

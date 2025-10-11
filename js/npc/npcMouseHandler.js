@@ -23,7 +23,6 @@ class NPCMouseHandler {
             // Create new NPC at click position
             const npc = this.npcSystem.addNPCToScene(worldMouseX, worldMouseY, npcType);
             if (npc) {
-                console.log(`Placed ${npcType} NPC at (${worldMouseX}, ${worldMouseY})`);
 
                 // Select the newly created NPC
                 this.npcSystem.selectNPC(npc);
@@ -49,7 +48,6 @@ class NPCMouseHandler {
                 const duplicate = this.npcSystem.duplicateNPC(clickedNPC.id);
                 if (duplicate) {
                     this.npcSystem.selectNPC(duplicate);
-                    console.log(`Duplicated NPC ${clickedNPC.id} as ${duplicate.id}`);
 
                     // Update UI
                     if (window.uiEventHandler) {
@@ -103,7 +101,6 @@ class NPCMouseHandler {
 
     handleMouseUp(ctrlPressed = false) {
         if (this.isDraggingNPC) {
-            console.log(`Finished dragging NPC ${this.draggedNPC.id} to (${this.draggedNPC.x}, ${this.draggedNPC.y})`);
             this.isDraggingNPC = false;
             this.draggedNPC = null;
             this.dragOffsetX = 0;
@@ -122,7 +119,6 @@ class NPCMouseHandler {
 
     toggleNPCPlacement() {
         this.npcPlacementMode = !this.npcPlacementMode;
-        console.log(`NPC placement mode: ${this.npcPlacementMode ? 'ON' : 'OFF'}`);
 
         // Update button appearance
         const addButton = document.getElementById('addNPCBtn');

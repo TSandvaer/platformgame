@@ -12,7 +12,6 @@ class ItemDropRenderer {
         spriteImage.onload = () => {
             this.inventorySprites.image = spriteImage;
             this.spritesLoaded = true;
-            console.log('Item drop sprites loaded successfully');
         };
         spriteImage.onerror = () => {
             console.error('Failed to load item drop sprites');
@@ -22,7 +21,6 @@ class ItemDropRenderer {
 
     render(ctx, droppedItems, camera, viewport) {
         if (!this.spritesLoaded || !this.inventorySprites.image) {
-            console.log(`📦 ItemDropRenderer: Cannot render - spritesLoaded: ${this.spritesLoaded}, image: ${!!this.inventorySprites.image}`);
             return;
         }
 
@@ -37,7 +35,6 @@ class ItemDropRenderer {
             // Get item definition from inventory data
             const itemData = this.game.inventoryItemsData?.inventoryItems[item.itemId];
             if (!itemData || !itemData.sprite) {
-                console.log(`📦 ItemDropRenderer: No item data or sprite for ${item.itemId}`);
                 continue;
             }
 

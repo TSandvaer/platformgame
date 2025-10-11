@@ -14,7 +14,6 @@ class DevelopmentInputHandler {
                 if (this.game.propSystem.data.copySelectedProps()) {
                     // Show visual feedback
                     this.game.showCopyPasteFeedback('Copied!', this.game.propSystem.selectedProp);
-                    console.log('Props copied to clipboard');
                 }
             }
         }
@@ -30,7 +29,6 @@ class DevelopmentInputHandler {
                     this.game.propSystem.updatePropProperties();
                     // Show visual feedback at paste location
                     this.game.showCopyPasteFeedback('Pasted!', pastedProps[0]);
-                    console.log(`Pasted ${pastedProps.length} prop(s)`);
                 }
             }
         }
@@ -42,19 +40,16 @@ class DevelopmentInputHandler {
             // Cancel platform movement zone drawing
             if (this.game.platformSystem.manager.isDrawingMovementZone) {
                 this.game.platformSystem.manager.cancelMovementZoneDrawing();
-                console.log('🔵 Platform movement zone drawing cancelled by Escape key');
             }
 
             // Cancel prop movement zone drawing
             if (this.game.propSystem.manager.isDrawingMovementZone) {
                 this.game.propSystem.manager.cancelMovementZoneDrawing();
-                console.log('🟣 Prop movement zone drawing cancelled by Escape key');
             }
 
             // Cancel platform binding mode
             if (this.game.propSystem.manager.isBindingToPlatform) {
                 this.game.propSystem.manager.cancelPlatformBinding();
-                console.log('🟣 Platform binding mode cancelled by Escape key');
             }
         }
 
@@ -153,28 +148,24 @@ class DevelopmentInputHandler {
             // Decrease health by 10
             const player = this.game.playerSystem.data;
             player.health = Math.max(0, player.health - 10);
-            console.log(`Health decreased to ${player.health}/${player.maxHealth}`);
         }
 
         if (e.key === 'H' && e.shiftKey) {
             // Increase health by 10
             const player = this.game.playerSystem.data;
             player.health = Math.min(player.maxHealth, player.health + 10);
-            console.log(`Health increased to ${player.health}/${player.maxHealth}`);
         }
 
         if (e.key === 's' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
             // Decrease stamina by 20
             const player = this.game.playerSystem.data;
             player.stamina = Math.max(0, player.stamina - 20);
-            console.log(`Stamina decreased to ${player.stamina}/${player.maxStamina}`);
         }
 
         if (e.key === 'S' && e.shiftKey) {
             // Increase stamina by 20
             const player = this.game.playerSystem.data;
             player.stamina = Math.min(player.maxStamina, player.stamina + 20);
-            console.log(`Stamina increased to ${player.stamina}/${player.maxStamina}`);
         }
 
         if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
@@ -182,7 +173,6 @@ class DevelopmentInputHandler {
             const player = this.game.playerSystem.data;
             player.health = player.maxHealth;
             player.stamina = player.maxStamina;
-            console.log('Player health and stamina restored to full');
         }
     }
 }

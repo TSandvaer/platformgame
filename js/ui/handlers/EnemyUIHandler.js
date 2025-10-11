@@ -51,7 +51,6 @@ class EnemyUIHandler extends UIHandler {
                     // Set up a way to reset button state when drawing is finished
                     this.checkAttractionZoneDrawingComplete();
 
-                    console.log('🎯 Started attraction zone drawing mode for enemy', selectedEnemy.id);
                 } else {
                     alert('Failed to start attraction zone drawing. Make sure an enemy is selected.');
                 }
@@ -77,7 +76,6 @@ class EnemyUIHandler extends UIHandler {
                     // Set up a way to reset button state when drawing is finished
                     this.checkMovementZoneDrawingComplete();
 
-                    console.log('🎯 Started movement zone drawing mode for enemy', selectedEnemy.id);
                 } else {
                     alert('Failed to start movement zone drawing. Make sure an enemy is selected.');
                 }
@@ -351,7 +349,6 @@ class EnemyUIHandler extends UIHandler {
         // Activate enemy placement mode
         this.game.enemySystem.toggleEnemyPlacement();
 
-        console.log(`Enemies editor: Selected ${this.selectedModalEnemyType} for placement`);
     }
 
     /**
@@ -441,7 +438,6 @@ class EnemyUIHandler extends UIHandler {
                 this.updateEnemyProperties();
 
                 clearInterval(checkInterval);
-                console.log('🎯 Attraction zone drawing completed, button reset');
             }
         }, 100); // Check every 100ms
     }
@@ -465,7 +461,6 @@ class EnemyUIHandler extends UIHandler {
                 this.updateEnemyProperties();
 
                 clearInterval(checkInterval);
-                console.log('🎯 Movement zone drawing completed, button reset');
             }
         }, 100); // Check every 100ms
     }

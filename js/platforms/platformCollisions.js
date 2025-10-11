@@ -98,13 +98,6 @@ class PlatformCollisions {
                     player.velocityX = 0;
                     player.velocityY = 0;
 
-                    console.log('💀 Player killed by reaching lava surface!', {
-                        platform: highestDamagingPlatformBelow,
-                        damage: highestDamagingPlatformBelow.damagePerSecond,
-                        killEffect: highestDamagingPlatformBelow.killEffect,
-                        playerBottom: playerBottom,
-                        platformTop: platformTop
-                    });
                 }
             }
         }

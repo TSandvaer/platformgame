@@ -15,7 +15,6 @@ class EnemyProjectileAnimator {
         const img = new Image();
         img.onload = () => {
             this.spriteLoaded = true;
-            console.log('🔥 Fire projectile sprite loaded successfully');
         };
         img.onerror = () => {
             console.error('❌ Failed to load fire projectile sprite');

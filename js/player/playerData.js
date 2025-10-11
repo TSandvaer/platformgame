@@ -152,7 +152,6 @@ class PlayerData {
             const existingItem = this.playerInventory.find(invItem => invItem.id === item.id);
             if (existingItem) {
                 existingItem.quantity = (existingItem.quantity || 1) + quantity;
-                console.log(`📦 Added ${quantity}x ${item.name} to player inventory (now ${existingItem.quantity})`);
                 return true;
             }
         }
@@ -164,7 +163,6 @@ class PlayerData {
         };
 
         this.playerInventory.push(inventoryItem);
-        console.log(`📦 Added ${quantity}x ${item.name} to player inventory`);
         return true;
     }
 
@@ -178,11 +176,9 @@ class PlayerData {
         if (item.stackable && item.quantity > quantity) {
             // Reduce quantity
             item.quantity -= quantity;
-            console.log(`📦 Removed ${quantity}x ${item.name} from player inventory (${item.quantity} remaining)`);
         } else {
             // Remove entire item
             this.playerInventory.splice(itemIndex, 1);
-            console.log(`📦 Removed ${item.name} from player inventory`);
         }
 
         return true;
@@ -203,7 +199,6 @@ class PlayerData {
 
     clearInventory() {
         this.playerInventory = [];
-        console.log('🗑️ Player inventory cleared');
     }
 
     // Belt management methods
@@ -224,7 +219,6 @@ class PlayerData {
         // If slot is empty, just place the item
         if (!existingItem) {
             this.belt[slotIndex] = { ...item };
-            console.log(`⚔️ Added ${item.name} to belt slot ${slotIndex + 1}`);
             return true;
         }
 
@@ -232,7 +226,6 @@ class PlayerData {
         if (existingItem.id === item.id) {
             const itemQuantity = item.quantity || 1;
             existingItem.quantity = (existingItem.quantity || 1) + itemQuantity;
-            console.log(`⚔️ Stacked ${item.name} in belt slot ${slotIndex + 1} (quantity: ${existingItem.quantity})`);
             return true;
         }
 
@@ -240,7 +233,6 @@ class PlayerData {
         // Return the displaced item to inventory
         this.addItemToInventory(existingItem);
         this.belt[slotIndex] = { ...item };
-        console.log(`⚔️ Replaced ${existingItem.name} with ${item.name} in belt slot ${slotIndex + 1} (returned ${existingItem.name} to inventory)`);
         return true;
     }
 
@@ -263,7 +255,6 @@ class PlayerData {
 
         const beltItem = this.belt[slotIndex];
         if (!beltItem) {
-            console.log(`⚔️ No item in belt slot ${slotIndex + 1}`);
             return false;
         }
 
@@ -271,13 +262,11 @@ class PlayerData {
         if (beltItem.healAmount) {
             const healAmount = beltItem.healAmount;
             this.health = Math.min(this.health + healAmount, this.maxHealth);
-            console.log(`💊 Used ${beltItem.name} - Healed ${healAmount} HP`);
         }
 
         if (beltItem.staminaAmount) {
             const staminaAmount = beltItem.staminaAmount;
             this.stamina = Math.min(this.stamina + staminaAmount, this.maxStamina);
-            console.log(`⚡ Used ${beltItem.name} - Restored ${staminaAmount} stamina`);
         }
 
         // Apply any other effects
@@ -293,11 +282,9 @@ class PlayerData {
         // Handle quantity - reduce by 1 or remove completely
         if (beltItem.quantity && beltItem.quantity > 1) {
             beltItem.quantity -= 1;
-            console.log(`⚔️ ${beltItem.name} quantity reduced to ${beltItem.quantity} in belt slot ${slotIndex + 1}`);
         } else {
             // Remove from belt when used up
             this.belt[slotIndex] = null;
-            console.log(`⚔️ Belt slot ${slotIndex + 1} is now empty`);
         }
 
         return true;
@@ -305,7 +292,6 @@ class PlayerData {
 
     clearBelt() {
         this.belt = [null, null, null, null];
-        console.log('🗑️ Belt cleared');
     }
 
     setPosition(x, y) {
@@ -362,7 +348,6 @@ class PlayerData {
         this.isDamaged = true;
         this.damageTimer = 600; // Duration to match hurt animation cycle (4 frames × 150ms)
 
-        console.log(`Player took ${amount} damage. Health: ${this.health}/${this.maxHealth}`);
 
         // Trigger hurt animation if available (but not if currently attacking)
         if (this.health > 0 && this.currentAnimation !== 'hurt' && !this.isAttacking) {
@@ -416,7 +401,6 @@ class PlayerData {
             this.lastHealthRegenTime = currentTime;
 
             if (this.health >= this.maxHealth) {
-                console.log('Health fully regenerated!');
             }
         }
 
@@ -457,7 +441,6 @@ class PlayerData {
             this.frameIndex = 0;
             this.frameTimer = 0;
 
-            console.log(`💀 Player died with ${this.killEffect} effect! Respawning in 3 seconds...`);
         }
 
         // Handle death timer and kill effects
@@ -489,7 +472,6 @@ class PlayerData {
                 this.velocityX = 0;
                 this.velocityY = 0;
                 this.onGround = false;
-                console.log('✨ Player respawned!');
             }
         }
 

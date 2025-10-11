@@ -12,7 +12,6 @@ class GameDataImporter {
     importFromFile(event, callback) {
         const file = event.target.files[0];
         if (!file) {
-            console.log('No file selected');
             return;
         }
 

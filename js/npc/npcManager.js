@@ -7,7 +7,6 @@ class NPCManager {
     addNPC(x, y, npcType = 'blacksmith') {
         const npc = this.data.createNPC(x, y, npcType);
         if (npc) {
-            console.log(`Created ${npcType} NPC with ID ${npc.id} at (${x}, ${y})`);
         }
         return npc;
     }
@@ -16,7 +15,6 @@ class NPCManager {
     removeNPC(id) {
         const removed = this.data.removeNPC(id);
         if (removed) {
-            console.log(`Removed ${removed.type} NPC with ID ${id}`);
         }
         return removed;
     }
@@ -38,7 +36,6 @@ class NPCManager {
     // Select an NPC
     selectNPC(npc) {
         this.data.selectedNPC = npc;
-        console.log(`Selected ${npc ? npc.type + ' NPC ID ' + npc.id : 'none'}`);
     }
 
     // Get currently selected NPC
@@ -65,7 +62,6 @@ class NPCManager {
             npc.dialogueId = properties.dialogueId;
         }
 
-        console.log(`Updated NPC ${npcId} properties`);
         return true;
     }
 
@@ -77,7 +73,6 @@ class NPCManager {
         npc.x = x;
         npc.y = y;
 
-        console.log(`Moved NPC ${npcId} to (${x}, ${y})`);
         return true;
     }
 
@@ -107,7 +102,6 @@ class NPCManager {
     clearAllNPCs() {
         const count = this.data.npcs.length;
         this.data.clearAllNPCs();
-        console.log(`Cleared ${count} NPCs`);
     }
 
     // Get NPC statistics

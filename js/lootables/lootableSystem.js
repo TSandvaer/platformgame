@@ -1,19 +1,13 @@
 class LootableSystem {
     constructor(ctx, onSpritesLoadedCallback) {
-        console.log('🍯 LootableSystem constructor called');
         this.data = new LootableData();
         this.renderer = new LootableRenderer(ctx);
         this.manager = new LootableManager(this.data);
         this.game = null; // Will be set after construction
 
-        console.log('🍯 LootableSystem components created');
-        console.log('🍯 Data:', !!this.data);
-        console.log('🍯 Renderer:', !!this.renderer);
-        console.log('🍯 Manager:', !!this.manager);
 
         // Load sprites
         this.renderer.loadSprites(onSpritesLoadedCallback);
-        console.log('🍯 Started loading lootable sprites');
     }
 
     // Game reference setter - pass it down to LootableData
@@ -33,12 +27,6 @@ class LootableSystem {
 
     set lootables(value) {
         if (value && value.length > 0) {
-            console.log('🍯 Lootables being set:', value.map(l => ({
-                id: l.id,
-                type: l.type,
-                x: l.x,
-                y: l.y
-            })));
         }
         this.data.lootables = value;
     }
@@ -217,7 +205,6 @@ class LootableSystem {
                         // Heal player for 20 HP
                         const healAmount = 20;
                         player.health = Math.min(player.maxHealth, player.health + healAmount);
-                        console.log(`💖 Heart collected! Healed for ${healAmount} HP. Health: ${player.health}/${player.maxHealth}`);
                     }
 
                     // Remove lootable from array

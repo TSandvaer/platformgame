@@ -12,7 +12,6 @@ class NPCSystem {
         this.renderer = new NPCRenderer(ctx);
         this.mouseHandler = new NPCMouseHandler(this, platformSystem, viewport, camera);
         this.isInitialized = true;
-        console.log('NPC system initialized');
     }
 
     update(deltaTime) {

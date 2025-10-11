@@ -15,7 +15,6 @@ class PlayerProjectileAnimator {
         const img = new Image();
         img.onload = () => {
             this.spriteLoaded = true;
-            console.log('Wizard projectile sprite loaded successfully');
         };
         img.onerror = () => {
             console.error('Failed to load wizard projectile sprite');

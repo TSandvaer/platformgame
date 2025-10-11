@@ -356,7 +356,6 @@ class PlatformManager {
             this.platformData.selectedPlatform.y = newY;
             this.platformData.selectedPlatform.width = Math.max(32, newWidth);
             this.platformData.selectedPlatform.height = Math.max(32, newHeight);
-            console.log('🔧 Resize - Platform after (direct):', this.platformData.selectedPlatform);
         }
     }
 
@@ -795,7 +794,6 @@ class PlatformManager {
     startMovementZoneDrawing(mouseX, mouseY) {
         this.movementZoneStart = { x: mouseX, y: mouseY };
         this.movementZoneEnd = { x: mouseX, y: mouseY };
-        console.log('🔵 Started platform movement zone drawing at', mouseX, mouseY);
     }
 
     finishMovementZoneDrawing() {
@@ -848,10 +846,6 @@ class PlatformManager {
             y: this.movementTargetPlatform.y
         };
 
-        console.log(`🔵 Movement zone set for platform ${this.movementTargetPlatform.id}:`, {
-            startX, startY, endX, endY, angle: angle * 180 / Math.PI + '°',
-            platformRepositioned: `(${this.movementTargetPlatform.x}, ${this.movementTargetPlatform.y})`
-        });
 
         // Reset drawing state
         this.cancelMovementZoneDrawing();
@@ -865,7 +859,6 @@ class PlatformManager {
         this.movementZoneStart = null;
         this.movementZoneEnd = null;
         this.movementTargetPlatform = null;
-        console.log('🔵 Platform movement zone drawing cancelled');
     }
 
     // Public methods to control movement zone drawing mode
@@ -877,8 +870,6 @@ class PlatformManager {
 
         this.movementTargetPlatform = platform;
         this.isDrawingMovementZone = true;
-        console.log('🔵 Platform movement zone drawing mode started for platform', platform.id);
-        console.log('🔵 Press Escape to cancel drawing');
     }
 
     clearMovementZone(platform) {
@@ -904,7 +895,6 @@ class PlatformManager {
         platform.movementProgress = 0;
         platform.movingDirection = 1;
 
-        console.log('🔵 Cleared movement zone for platform', platform.id);
 
         // Update UI
         this.updatePlatformProperties();
@@ -994,9 +984,6 @@ class PlatformManager {
             this.isDraggingMovementZoneHandle = true;
             this.draggingHandleType = 'end';
             this.draggingHandlePlatform = platform;
-            console.log('🔵 Started dragging platform movement zone end handle', {
-                mouseX, mouseY, zoneX: zone.endX, zoneY: zone.endY, distance: endDist
-            });
             return { handled: true, type: 'movementZoneHandleEnd' };
         }
 
@@ -1006,10 +993,6 @@ class PlatformManager {
             this.isDraggingMovementZoneHandle = true;
             this.draggingHandleType = 'start';
             this.draggingHandlePlatform = platform;
-            console.log('🔵 Started dragging platform movement zone start handle', {
-                mouseX, mouseY, zoneX: zone.startX, zoneY: zone.startY, distance: startDist,
-                platformX: platform.x, platformY: platform.y
-            });
             return { handled: true, type: 'movementZoneHandleStart' };
         }
 
@@ -1077,7 +1060,6 @@ class PlatformManager {
 
     finishMovementZoneHandleDrag() {
         if (this.draggingHandlePlatform) {
-            console.log(`🔵 Finished dragging platform movement zone ${this.draggingHandleType} handle`);
 
             // Update UI to reflect changes
             this.updatePlatformProperties();
@@ -1096,7 +1078,6 @@ class PlatformManager {
         }
 
         platform.isMovementPaused = !platform.isMovementPaused;
-        console.log(`🔵 Platform ${platform.id} movement ${platform.isMovementPaused ? 'paused' : 'resumed'}`);
 
         // Update button text
         this.updateMovementControlButtons(platform);
@@ -1121,7 +1102,6 @@ class PlatformManager {
         platform.isDelaying = false;
         platform.delayTimer = 0;
 
-        console.log(`🔵 Platform ${platform.id} reset to original position (${platform.x}, ${platform.y}), rotation, and stopped`);
 
         // Update UI
         this.updatePlatformProperties();

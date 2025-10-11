@@ -13,12 +13,6 @@ class PlatformSystem {
     }
 
     set platforms(value) {
-        console.log('🔧 Setting platformSystem.platforms:', value.map(p => ({
-            id: p.id,
-            spriteType: p.spriteType,
-            x: p.x,
-            y: p.y
-        })));
         this.data.platforms = value;
     }
 
