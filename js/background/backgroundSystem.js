@@ -18,6 +18,7 @@ class BackgroundSystem {
             'none',
             'DarkForest',
             'Dawn2',
+            'FantasyForest',
             'Dynamic_Space_Nebula_Aqua_Pink',
             'Dynamic_Space_Nebula_Blue',
             'Dynamic_Space_Nebula_Red',
@@ -68,6 +69,14 @@ class BackgroundSystem {
                     'backgrounds/DarkForest/layers/ground_2.png',
                     'backgrounds/DarkForest/layers/ground_1.png',
                     'backgrounds/DarkForest/layers/plant.png'
+                ];
+                break;
+            case 'FantasyForest':
+                layerPaths = [
+                    'backgrounds/Fantasy Forest/Sky (1).png',
+                    'backgrounds/Fantasy Forest/Clouds (2).png',
+                    'backgrounds/Fantasy Forest/Rock Mountains (3).png',
+                    'backgrounds/Fantasy Forest/Grass Mountains (4).png'
                 ];
                 break;
             case 'Dawn2':
@@ -519,6 +528,14 @@ class BackgroundSystem {
                     'backgrounds/DarkForest/layers/ground_2.png',
                     'backgrounds/DarkForest/layers/ground_1.png',
                     'backgrounds/DarkForest/layers/plant.png'
+                ];
+                break;
+            case 'FantasyForest':
+                layerPaths = [
+                    'backgrounds/Fantasy Forest/Sky (1).png',
+                    'backgrounds/Fantasy Forest/Clouds (2).png',
+                    'backgrounds/Fantasy Forest/Rock Mountains (3).png',
+                    'backgrounds/Fantasy Forest/Grass Mountains (4).png'
                 ];
                 break;
             case 'Dawn2':
