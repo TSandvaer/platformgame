@@ -51,7 +51,7 @@ class PropData {
             mossyBrickWall: { tileX: 22.84, tileY: 19.69, width: 138, height: 43, name: 'Mossy Brick Wall' },
             // Trees & Nature
             tree1: { tileX: 15, tileY: 8, width: 32, height: 32, name: 'Tree 1' },
-            tree2: { tileX: 16, tileY: 8, width: 32, height: 32, name: 'Tree 2' },
+            tree2: { tileX: 25.88, tileY: 13.88, width: 159, height: 166, name: 'Tree 2' },
             bush: { tileX: 6, tileY: 2, width: 32, height: 16, name: 'Bush' },
 
             // Decorative Items
