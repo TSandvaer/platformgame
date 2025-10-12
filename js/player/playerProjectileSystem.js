@@ -32,6 +32,16 @@ class PlayerProjectileSystem {
             startY = playerMiddleY + offsetY;
         }
 
+        // Adjust target Y for horizontal shots (when target is at player center height)
+        const playerCenterY = player.y + player.height / 2;
+        const verticalDistanceFromCenter = Math.abs(targetY - playerCenterY);
+
+        // If shooting horizontally (target at player center height), adjust target Y to match spawn Y
+        // This keeps the arrow spawning from the bow while flying horizontally
+        if (verticalDistanceFromCenter < 5) {
+            targetY = startY;
+        }
+
         // Calculate direction to target
         const dx = targetX - startX;
         const dy = targetY - startY;

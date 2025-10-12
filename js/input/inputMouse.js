@@ -22,12 +22,24 @@ class InputMouse {
         const playerCenterX = this.game.player.x + this.game.player.width / 2;
         const playerCenterY = this.game.player.y + this.game.player.height / 2;
 
+        // Vertical snap zone - snap clicks near player center height to exact center
+        const verticalSnapThreshold = 20; // pixels
+        const verticalDistance = Math.abs(mouseY - playerCenterY);
+
+        if (verticalDistance <= verticalSnapThreshold) {
+            mouseY = playerCenterY; // Snap to player center height
+        }
+
         // Determine facing direction based on mouse position
-        if (mouseX > playerCenterX) {
+        // Add a small dead zone to prevent direction flipping when clicking very close to the player
+        const deadZone = 10; // pixels
+
+        if (mouseX > playerCenterX + deadZone) {
             this.game.player.facing = 'right';
-        } else {
+        } else if (mouseX < playerCenterX - deadZone) {
             this.game.player.facing = 'left';
         }
+        // If clicking within the dead zone (10 pixels around center), maintain current facing direction
 
         // Get character configuration
         const characterConfig = window.playerCharacters?.getCharacter(this.game.player.selectedCharacter);
@@ -65,8 +77,6 @@ class InputMouse {
                 spawned: false
             };
         }
-
-        const attackTypeLabel = isRangedAttack ? 'ranged (Ctrl+Click)' : 'melee';
     }
 
     setupMouseListeners() {
@@ -89,8 +99,15 @@ class InputMouse {
         if (!this.game.isDevelopmentMode) {
             if (e.button === 0 && this.game.player) {
                 const rect = this.game.canvas.getBoundingClientRect();
-                const clientMouseX = e.clientX - rect.left;
-                const clientMouseY = e.clientY - rect.top;
+
+                // Account for CSS scaling: canvas display size vs internal resolution
+                const scaleX = this.game.canvas.width / rect.width;
+                const scaleY = this.game.canvas.height / rect.height;
+
+                // Convert click position to canvas coordinates
+                const clientMouseX = (e.clientX - rect.left) * scaleX;
+                const clientMouseY = (e.clientY - rect.top) * scaleY;
+
                 const worldCoords = this.game.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
                 this.handlePlayerAttack(worldCoords.x, worldCoords.y, e);
             }
@@ -103,8 +120,14 @@ class InputMouse {
         }
 
         const rect = this.game.canvas.getBoundingClientRect();
-        const clientMouseX = e.clientX - rect.left;
-        const clientMouseY = e.clientY - rect.top;
+
+        // Account for CSS scaling: canvas display size vs internal resolution
+        const scaleX = this.game.canvas.width / rect.width;
+        const scaleY = this.game.canvas.height / rect.height;
+
+        // Convert click position to canvas coordinates
+        const clientMouseX = (e.clientX - rect.left) * scaleX;
+        const clientMouseY = (e.clientY - rect.top) * scaleY;
 
         // Check if clicking on HUD first (before world coordinate conversion)
         // HUD uses screen coordinates, so check with clientMouseX/Y
@@ -325,8 +348,14 @@ class InputMouse {
 
     handleCanvasMouseMove(e) {
         const rect = this.game.canvas.getBoundingClientRect();
-        const clientMouseX = e.clientX - rect.left;
-        const clientMouseY = e.clientY - rect.top;
+
+        // Account for CSS scaling: canvas display size vs internal resolution
+        const scaleX = this.game.canvas.width / rect.width;
+        const scaleY = this.game.canvas.height / rect.height;
+
+        // Convert mouse position to canvas coordinates
+        const clientMouseX = (e.clientX - rect.left) * scaleX;
+        const clientMouseY = (e.clientY - rect.top) * scaleY;
 
         // Handle drag scrolling
         if (this.dragScrolling) {
@@ -447,8 +476,14 @@ class InputMouse {
 
     startDragScrolling(e) {
         this.dragScrolling = true;
-        this.dragScrollStartX = e.clientX;
-        this.dragScrollStartY = e.clientY;
+
+        // Account for CSS scaling
+        const rect = this.game.canvas.getBoundingClientRect();
+        const scaleX = this.game.canvas.width / rect.width;
+        const scaleY = this.game.canvas.height / rect.height;
+
+        this.dragScrollStartX = (e.clientX - rect.left) * scaleX;
+        this.dragScrollStartY = (e.clientY - rect.top) * scaleY;
         this.dragScrollCameraStartX = this.game.cameraSystem.x;
         this.dragScrollCameraStartY = this.game.cameraSystem.y;
         this.game.canvas.className = '';
@@ -458,8 +493,16 @@ class InputMouse {
     updateDragScrolling(e) {
         if (!this.dragScrolling) return;
 
-        const deltaX = e.clientX - this.dragScrollStartX;
-        const deltaY = e.clientY - this.dragScrollStartY;
+        // Account for CSS scaling
+        const rect = this.game.canvas.getBoundingClientRect();
+        const scaleX = this.game.canvas.width / rect.width;
+        const scaleY = this.game.canvas.height / rect.height;
+
+        const currentX = (e.clientX - rect.left) * scaleX;
+        const currentY = (e.clientY - rect.top) * scaleY;
+
+        const deltaX = currentX - this.dragScrollStartX;
+        const deltaY = currentY - this.dragScrollStartY;
 
         // Move camera in opposite direction of mouse drag
         this.game.cameraSystem.x = this.dragScrollCameraStartX - deltaX;
@@ -499,8 +542,14 @@ class InputMouse {
 
     completeTransitionZone(e) {
         const rect = this.game.canvas.getBoundingClientRect();
-        const clientMouseX = e.clientX - rect.left;
-        const clientMouseY = e.clientY - rect.top;
+
+        // Account for CSS scaling: canvas display size vs internal resolution
+        const scaleX = this.game.canvas.width / rect.width;
+        const scaleY = this.game.canvas.height / rect.height;
+
+        // Convert click position to canvas coordinates
+        const clientMouseX = (e.clientX - rect.left) * scaleX;
+        const clientMouseY = (e.clientY - rect.top) * scaleY;
 
         const worldCoords = this.game.cameraSystem.screenToWorld(clientMouseX, clientMouseY);
         this.game.sceneSystem.setTransitionEnd(worldCoords.x, worldCoords.y);
