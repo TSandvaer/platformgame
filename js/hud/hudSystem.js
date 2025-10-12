@@ -7,8 +7,8 @@ class HUDSystem {
         // Base HUD dimensions (at 1080p design resolution)
         // Position HUD below buttons in production mode, or with offset in dev mode
         this.basePosition = { x: 20, y: 60 };  // Moved down from y:20 to y:60 to avoid buttons
-        this.baseWidth = 240;  // Increased from 220 to 240 to accommodate extra padding
-        this.baseHeight = 80;
+        this.baseWidth = 280;  // Increased to accommodate belt slots
+        this.baseHeight = 160;  // Increased to accommodate belt (was 80)
         this.baseCornerRadius = 8;
 
         // Manual overrides (for drag/resize) - stored in unscaled values
@@ -58,6 +58,19 @@ class HUDSystem {
         this.coinIconSize = this.baseCoinIconSize;
         this.coinIcon = null;
         this.loadCoinIcon();
+
+        // Base belt display settings
+        this.baseBeltSlotSize = 32;  // Smaller slots
+        this.baseBeltSlotSpacing = 8;
+        this.baseBeltOffsetX = 85;  // Align with health/stamina bars
+        this.baseBeltOffsetY = 100;  // Position below coin counter
+
+        // Actual scaled belt settings
+        this.beltSlotSize = this.baseBeltSlotSize;
+        this.beltSlotSpacing = this.baseBeltSlotSpacing;
+        this.beltOffsetX = this.baseBeltOffsetX;
+        this.beltOffsetY = this.baseBeltOffsetY;
+        this.beltSpriteCache = {};  // Cache for belt item sprites
 
         // Fantasy Wooden GUI theme assets
         this.stoneBackground = null;
@@ -177,6 +190,12 @@ class HUDSystem {
 
         // Scale coin icon
         this.coinIconSize = this.baseCoinIconSize * this.uiScale;
+
+        // Scale belt dimensions
+        this.beltSlotSize = this.baseBeltSlotSize * this.uiScale;
+        this.beltSlotSpacing = this.baseBeltSlotSpacing * this.uiScale;
+        this.beltOffsetX = this.baseBeltOffsetX * this.uiScale;
+        this.beltOffsetY = this.baseBeltOffsetY * this.uiScale;
 
         // Update resize handle size
         if (this.resizeHandle) {
@@ -384,10 +403,8 @@ class HUDSystem {
         // Draw coin counter
         this.drawCoinCounter();
 
-        // Draw belt in production mode
-        if (!this.game.isDevelopmentMode) {
-            this.drawBelt();
-        }
+        // Draw belt (integrated into HUD) - always visible for HUD sizing
+        this.drawBeltInHUD();
 
         // Development mode visual feedback
         if (this.game.isDevelopmentMode) {
@@ -477,6 +494,124 @@ class HUDSystem {
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'middle';
         this.ctx.fillText(`${this.playerStats.coins}`, textX, coinY + this.coinIconSize / 2);
+    }
+
+    drawBeltInHUD() {
+        // Get player belt data
+        const playerBelt = this.game.playerSystem?.data?.belt || [null, null, null, null];
+
+        // Get theme-appropriate colors
+        const currentTheme = this.getCurrentTheme();
+        const labelColor = currentTheme === 'fantasy-wooden' ? '#8B6914' : '#FFD700';
+
+        // Draw each belt slot
+        for (let i = 0; i < 4; i++) {
+            const slotX = this.position.x + this.beltOffsetX + (i * (this.beltSlotSize + this.beltSlotSpacing));
+            const slotY = this.position.y + this.beltOffsetY;
+            const item = playerBelt[i];
+
+            // Draw slot background (only if empty)
+            if (!item) {
+                this.ctx.fillStyle = 'rgba(68, 68, 68, 0.6)';
+                this.ctx.fillRect(slotX, slotY, this.beltSlotSize, this.beltSlotSize);
+            }
+
+            // Draw slot border
+            this.ctx.strokeStyle = '#666';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(slotX, slotY, this.beltSlotSize, this.beltSlotSize);
+
+            // Draw slot number
+            this.ctx.fillStyle = labelColor;
+            this.ctx.font = `bold ${Math.round(9 * this.uiScale)}px Arial`;  // Smaller font for smaller slots
+            this.ctx.textAlign = 'left';
+            this.ctx.textBaseline = 'top';
+            this.ctx.fillText(String(i + 1), slotX + (3 * this.uiScale), slotY + (2 * this.uiScale));
+
+            // Draw item if present
+            if (item) {
+                let spriteDrawn = false;
+
+                // Try to draw sprite from multiple sources
+                if (item.sprite) {
+                    // Calculate aspect ratio preserving dimensions
+                    const maxSize = 22 * this.uiScale;  // Adjusted for smaller slots
+                    const aspectRatio = item.sprite.width / item.sprite.height;
+                    let drawWidth = maxSize;
+                    let drawHeight = maxSize;
+
+                    if (aspectRatio > 1) {
+                        drawHeight = maxSize / aspectRatio;
+                    } else {
+                        drawWidth = maxSize * aspectRatio;
+                    }
+
+                    // Center the sprite in the slot
+                    const drawX = slotX + (this.beltSlotSize - drawWidth) / 2;
+                    const drawY = slotY + (this.beltSlotSize - drawHeight) / 2;
+
+                    // Try the inventory system's loaded spritesheet
+                    if (this.game.inventoryItemsData?.spritesheet?.complete) {
+                        const spritesheet = this.game.inventoryItemsData.spritesheet;
+                        this.ctx.imageSmoothingEnabled = false;
+                        try {
+                            this.ctx.drawImage(
+                                spritesheet,
+                                item.sprite.x, item.sprite.y,
+                                item.sprite.width, item.sprite.height,
+                                drawX, drawY, drawWidth, drawHeight
+                            );
+                            spriteDrawn = true;
+                        } catch (e) {
+                            console.warn('Failed to draw belt item sprite:', e);
+                        }
+                        this.ctx.imageSmoothingEnabled = true;
+                    }
+                }
+
+                if (!spriteDrawn) {
+                    // Fallback colored icon based on item type
+                    const color = item.id === 'healthPotion' ? '#FF4444' :
+                                 item.id === 'staminaPotion' ? '#FFD700' :
+                                 item.id === 'manaPotion' ? '#4444FF' : '#4CAF50';
+                    this.ctx.fillStyle = color;
+                    const iconPadding = 6 * this.uiScale;  // Adjusted for smaller slots
+                    const iconSize = 20 * this.uiScale;  // Adjusted for smaller slots
+                    this.ctx.fillRect(slotX + iconPadding, slotY + iconPadding, iconSize, iconSize);
+
+                    // Add potion bottle shape
+                    this.ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    const bottleNeckX = slotX + (13 * this.uiScale);  // Adjusted for smaller slots
+                    const bottleNeckY = slotY + (5 * this.uiScale);  // Adjusted for smaller slots
+                    const bottleNeckWidth = 6 * this.uiScale;  // Adjusted for smaller slots
+                    const bottleNeckHeight = 4 * this.uiScale;  // Adjusted for smaller slots
+                    this.ctx.fillRect(bottleNeckX, bottleNeckY, bottleNeckWidth, bottleNeckHeight);
+                }
+
+                // Draw item quantity if > 1
+                if (item.quantity > 1) {
+                    // Background for better readability
+                    this.ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                    const qtyText = String(item.quantity);
+                    this.ctx.font = `bold ${Math.round(8 * this.uiScale)}px Arial`;  // Smaller font for smaller slots
+                    const textWidth = this.ctx.measureText(qtyText).width;
+                    const padding = 2 * this.uiScale;
+                    const boxHeight = 10 * this.uiScale;
+                    this.ctx.fillRect(
+                        slotX + this.beltSlotSize - textWidth - (padding * 1.5),
+                        slotY + this.beltSlotSize - (boxHeight + padding/2),
+                        textWidth + padding,
+                        boxHeight
+                    );
+
+                    // Quantity text
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.textAlign = 'right';
+                    this.ctx.textBaseline = 'bottom';
+                    this.ctx.fillText(qtyText, slotX + this.beltSlotSize - (2 * this.uiScale), slotY + this.beltSlotSize - (2 * this.uiScale));
+                }
+            }
+        }
     }
 
     drawGearIcon() {
@@ -719,184 +854,5 @@ class HUDSystem {
 
     get isVisible() {
         return this.visible !== false; // Default to true
-    }
-
-    drawBelt() {
-        // Belt position - bottom left corner, scaled based on UI scale
-        const baseBeltX = 20;
-        const baseBeltY = 100;  // Distance from bottom
-        const baseSlotSize = 50;
-        const baseSlotSpacing = 8;
-
-        const beltX = baseBeltX * this.uiScale;
-        const beltY = this.canvas.height - (baseBeltY * this.uiScale);
-        const slotSize = baseSlotSize * this.uiScale;
-        const slotSpacing = baseSlotSpacing * this.uiScale;
-        const slotBorderWidth = 2;
-
-        // Draw belt background
-        this.ctx.fillStyle = 'rgba(30, 30, 30, 0.8)';
-        this.ctx.strokeStyle = '#FFD700';
-        this.ctx.lineWidth = 2;
-
-        const padding = 10 * this.uiScale;
-        const totalWidth = (slotSize * 4) + (slotSpacing * 3) + (padding * 2);
-        const totalHeight = slotSize + (padding * 2);
-        const borderRadius = 8 * this.uiScale;
-
-        this.drawRoundedRect(beltX - padding, beltY - padding, totalWidth, totalHeight, borderRadius,
-                           'rgba(30, 30, 30, 0.8)', '#FFD700');
-
-        // Get player belt data
-        const playerBelt = this.game.playerSystem?.data?.belt || [null, null, null, null];
-
-        // Draw each belt slot
-        for (let i = 0; i < 4; i++) {
-            const slotX = beltX + (i * (slotSize + slotSpacing));
-            const item = playerBelt[i];
-
-            // Draw slot background (only if empty)
-            if (!item) {
-                this.ctx.fillStyle = '#444';
-                this.ctx.fillRect(slotX, beltY, slotSize, slotSize);
-            }
-
-            // Draw slot border
-            this.ctx.strokeStyle = '#666';
-            this.ctx.lineWidth = slotBorderWidth;
-            this.ctx.strokeRect(slotX, beltY, slotSize, slotSize);
-
-            // Draw slot number
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
-            this.ctx.textAlign = 'left';
-            this.ctx.textBaseline = 'top';
-            this.ctx.fillText(String(i + 1), slotX + (4 * this.uiScale), beltY + (2 * this.uiScale));
-
-            // Draw item if present
-            if (item) {
-                let spriteDrawn = false;
-
-                // Try to draw sprite from multiple sources
-                if (item.sprite) {
-                    // Calculate aspect ratio preserving dimensions, scaled based on UI scale
-                    const maxSize = 32 * this.uiScale;
-                    const aspectRatio = item.sprite.width / item.sprite.height;
-                    let drawWidth = maxSize;
-                    let drawHeight = maxSize;
-
-                    if (aspectRatio > 1) {
-                        // Wider than tall
-                        drawHeight = maxSize / aspectRatio;
-                    } else {
-                        // Taller than wide
-                        drawWidth = maxSize * aspectRatio;
-                    }
-
-                    // Center the sprite in the slot
-                    const drawX = slotX + (slotSize - drawWidth) / 2;
-                    const drawY = beltY + (slotSize - drawHeight) / 2;
-
-                    // First try the inventory system's loaded spritesheet
-                    if (this.game.inventoryItemsData?.spritesheet?.complete) {
-                        const spritesheet = this.game.inventoryItemsData.spritesheet;
-                        this.ctx.imageSmoothingEnabled = false;
-                        try {
-                            this.ctx.drawImage(
-                                spritesheet,
-                                item.sprite.x, item.sprite.y,
-                                item.sprite.width, item.sprite.height,
-                                drawX, drawY, drawWidth, drawHeight
-                            );
-                            spriteDrawn = true;
-                        } catch (e) {
-                            console.warn('Failed to draw belt item sprite:', e);
-                        }
-                        this.ctx.imageSmoothingEnabled = true;
-                    }
-                    // If that fails, try to load the sprite directly
-                    else if (item.sprite.src) {
-                        const img = new Image();
-                        img.onload = () => {
-                            // Store for future use
-                            if (!this.beltSpriteCache) this.beltSpriteCache = {};
-                            this.beltSpriteCache[item.id] = img;
-                        };
-                        img.src = item.sprite.src;
-
-                        // Check if we have it cached
-                        if (this.beltSpriteCache && this.beltSpriteCache[item.id]) {
-                            const cachedImg = this.beltSpriteCache[item.id];
-                            this.ctx.imageSmoothingEnabled = false;
-                            this.ctx.drawImage(
-                                cachedImg,
-                                item.sprite.x, item.sprite.y,
-                                item.sprite.width, item.sprite.height,
-                                drawX, drawY, drawWidth, drawHeight
-                            );
-                            this.ctx.imageSmoothingEnabled = true;
-                            spriteDrawn = true;
-                        }
-                    }
-                }
-
-                if (!spriteDrawn) {
-                    // Fallback colored icon based on item type
-                    const color = item.id === 'healthPotion' ? '#FF4444' :
-                                 item.id === 'staminaPotion' ? '#FFD700' :
-                                 item.id === 'manaPotion' ? '#4444FF' : '#4CAF50';
-                    this.ctx.fillStyle = color;
-                    const iconPadding = 10 * this.uiScale;
-                    const iconSize = 30 * this.uiScale;
-                    this.ctx.fillRect(slotX + iconPadding, beltY + iconPadding, iconSize, iconSize);
-
-                    // Add potion bottle shape
-                    this.ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                    const bottleNeckX = slotX + (20 * this.uiScale);
-                    const bottleNeckY = beltY + (8 * this.uiScale);
-                    const bottleNeckWidth = 10 * this.uiScale;
-                    const bottleNeckHeight = 6 * this.uiScale;
-                    this.ctx.fillRect(bottleNeckX, bottleNeckY, bottleNeckWidth, bottleNeckHeight);
-                    this.ctx.fillRect(bottleNeckX + (2 * this.uiScale), bottleNeckY - (2 * this.uiScale), bottleNeckWidth - (4 * this.uiScale), 4 * this.uiScale);
-                }
-
-                // Draw item quantity if > 1
-                if (item.quantity > 1) {
-                    // Background for better readability
-                    this.ctx.fillStyle = 'rgba(0,0,0,0.7)';
-                    const qtyText = String(item.quantity);
-                    this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
-                    const textWidth = this.ctx.measureText(qtyText).width;
-                    const padding = 4 * this.uiScale;
-                    const boxHeight = 14 * this.uiScale;
-                    this.ctx.fillRect(slotX + slotSize - textWidth - (padding * 1.5), beltY + slotSize - (boxHeight + padding/2), textWidth + padding, boxHeight);
-
-                    // Quantity text
-                    this.ctx.fillStyle = 'white';
-                    this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
-                    this.ctx.textAlign = 'right';
-                    this.ctx.textBaseline = 'bottom';
-                    this.ctx.fillText(qtyText, slotX + slotSize - (4 * this.uiScale), beltY + slotSize - (4 * this.uiScale));
-                }
-
-                // Draw item name below (smaller)
-                this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                this.ctx.font = `${Math.round(9 * this.uiScale)}px Arial`;
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'bottom';
-                const name = item.name || item.id;
-                if (name) {
-                    const displayName = name.length > 8 ? name.substring(0, 7) + '..' : name;
-                    this.ctx.fillText(displayName, slotX + slotSize/2, beltY + slotSize - (2 * this.uiScale));
-                }
-            }
-        }
-
-        // Draw belt label
-        this.ctx.fillStyle = '#FFD700';
-        this.ctx.font = `bold ${Math.round(11 * this.uiScale)}px Arial`;
-        this.ctx.textAlign = 'left';
-        this.ctx.textBaseline = 'bottom';
-        this.ctx.fillText('QUICK BELT', beltX, beltY - (15 * this.uiScale));
     }
 }
