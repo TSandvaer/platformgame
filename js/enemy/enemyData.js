@@ -129,6 +129,25 @@ class EnemyData {
                     hurt: { file: 'slime-hurt.png', frames: 4, frameWidth: 100, frameHeight: 100 },
                     death: { file: 'slime-death.png', frames: 4, frameWidth: 100, frameHeight: 100 }
                 }
+            },
+            goblin: {
+                name: 'Goblin',
+                spriteFolder: 'sprites/Mattz Art/Goblin 2D Pixel Art v1.1/Sprites/without_outline',
+                defaultHealth: 80,
+                defaultDamage: 15,
+                fleeHealthThreshold: 0.4, // Flee when health drops below 40%
+                width: 44,
+                height: 80,
+                scale: 2, // Visual sprite scale multiplier (adjusted for 115x78 sprites vs 100x100)
+                renderOffsetY: 20, // Adjust sprite position to align feet with collision box bottom
+                renderOffsetX: -20, // Shift sprite right so collision box covers body instead of club
+                animations: {
+                    idle: { file: 'IDLE.png', frames: 6, frameWidth: 115, frameHeight: 78 },
+                    walk: { file: 'RUN.png', frames: 6, frameWidth: 115, frameHeight: 78 },
+                    attack: { file: 'ATTACK1.png', frames: 6, frameWidth: 115, frameHeight: 78 },
+                    hurt: { file: 'HURT.png', frames: 3, frameWidth: 115, frameHeight: 78 },
+                    death: { file: 'DEATH.png', frames: 10, frameWidth: 115, frameHeight: 78 }
+                }
             }
         };
     }

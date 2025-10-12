@@ -54,8 +54,10 @@ class EnemyRenderer {
         const totalScale = typeScale * sizeMultiplier; // Combine type scale and instance size multiplier
         // Check enemy instance first (for dynamic changes like death fall), then type data
         const baseRenderOffsetY = (enemy.renderOffsetY !== undefined) ? enemy.renderOffsetY : (enemyTypeData?.renderOffsetY || 0);
-        // Scale the render offset proportionally with enemy size
+        const baseRenderOffsetX = (enemy.renderOffsetX !== undefined) ? enemy.renderOffsetX : (enemyTypeData?.renderOffsetX || 0);
+        // Scale the render offsets proportionally with enemy size
         const renderOffsetY = baseRenderOffsetY * sizeMultiplier;
+        const renderOffsetX = baseRenderOffsetX * sizeMultiplier;
 
         // Calculate Y offset to keep bottom of collision box at same position
         const scaleYOffset = enemy.height * (1 - sizeMultiplier);
@@ -86,8 +88,8 @@ class EnemyRenderer {
         const enemyScaledWidth = enemy.width * sizeMultiplier;
         const enemyScaledHeight = enemy.height * sizeMultiplier;
 
-        // Center sprite horizontally on enemy collision box, align bottom (with optional offset)
-        const spriteOffsetX = Math.round((enemyScaledWidth - spriteRenderWidth) / 2);
+        // Center sprite horizontally on enemy collision box, align bottom (with optional offsets)
+        const spriteOffsetX = Math.round((enemyScaledWidth - spriteRenderWidth) / 2) + renderOffsetX;
         const spriteOffsetY = Math.round(enemyScaledHeight - spriteRenderHeight) + renderOffsetY - heightCompensation;
 
         // Apply viewport scaling to offsets with pixel-perfect rounding

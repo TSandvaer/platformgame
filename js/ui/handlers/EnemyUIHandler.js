@@ -244,8 +244,8 @@ class EnemyUIHandler extends UIHandler {
                 const maxHeight = 120;
                 let scale = Math.min(maxWidth / frameWidth, maxHeight / frameHeight, 2.5); // Allow up to 2.5x scale
 
-                // Make orc, skeleton, and slime double size
-                if (enemyId === 'orc' || enemyId === 'skeleton' || enemyId === 'slime') {
+                // Make orc, skeleton, slime, and goblin double size
+                if (enemyId === 'orc' || enemyId === 'skeleton' || enemyId === 'slime' || enemyId === 'goblin') {
                     scale *= 2.0;
                 }
 
