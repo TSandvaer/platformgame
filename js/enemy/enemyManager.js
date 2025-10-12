@@ -55,9 +55,11 @@ class EnemyManager {
         // Update position
         if (properties.x !== undefined && !isNaN(properties.x)) {
             enemy.x = properties.x;
+            enemy.initialX = properties.x; // Update design-time position
         }
         if (properties.y !== undefined && !isNaN(properties.y)) {
             enemy.y = properties.y;
+            enemy.initialY = properties.y; // Update design-time position
         }
 
         // Update basic properties
@@ -100,6 +102,9 @@ class EnemyManager {
 
         enemy.x = x;
         enemy.y = y;
+        // Update initial position (design-time position)
+        enemy.initialX = x;
+        enemy.initialY = y;
 
         // Update movement zone relative to new position
         if (enemy.movementZone.enabled) {
@@ -212,6 +217,13 @@ class EnemyManager {
     // Reset all enemies to default state
     resetAllEnemies() {
         for (const enemy of this.data.enemies) {
+            // Reset position to initial/design-time position
+            if (enemy.initialX !== undefined) {
+                enemy.x = enemy.initialX;
+            }
+            if (enemy.initialY !== undefined) {
+                enemy.y = enemy.initialY;
+            }
             enemy.health = enemy.maxHealth;
             enemy.isDead = false;
             enemy.isDamaged = false;

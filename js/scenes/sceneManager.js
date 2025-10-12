@@ -218,6 +218,17 @@ class SceneManager {
             // Migrate enemy properties from type definitions (ensures enemies use current type data)
             this.migrateEnemyProperties(this.game.enemySystem.data.enemies, this.game.enemySystem.data.enemyTypes);
 
+            // Reset enemy positions to initial/design-time positions after loading
+            // This ensures enemies always start at their designed positions, not runtime positions
+            for (const enemy of this.game.enemySystem.data.enemies) {
+                if (enemy.initialX !== undefined) {
+                    enemy.x = enemy.initialX;
+                }
+                if (enemy.initialY !== undefined) {
+                    enemy.y = enemy.initialY;
+                }
+            }
+
             // Update nextEnemyId to prevent ID conflicts
             if (scene.enemies && scene.enemies.length > 0) {
                 this.game.enemySystem.data.nextEnemyId = Math.max(...scene.enemies.map(e => e.id || 0)) + 1;
@@ -244,6 +255,16 @@ class SceneManager {
 
                 // Migrate enemy properties from type definitions
                 this.migrateEnemyProperties(this.game.enemySystem.data.enemies, this.game.enemySystem.data.enemyTypes);
+
+                // Reset enemy positions to initial/design-time positions after emergency reload
+                for (const enemy of this.game.enemySystem.data.enemies) {
+                    if (enemy.initialX !== undefined) {
+                        enemy.x = enemy.initialX;
+                    }
+                    if (enemy.initialY !== undefined) {
+                        enemy.y = enemy.initialY;
+                    }
+                }
 
                 // Update nextEnemyId to prevent ID conflicts
                 if (scene.enemies && scene.enemies.length > 0) {

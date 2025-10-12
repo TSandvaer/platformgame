@@ -127,6 +127,8 @@ class EnemyData {
             type: enemyType,
             x: x,
             y: y,
+            initialX: x, // Design-time position (preserved across reloads)
+            initialY: y, // Design-time position (preserved across reloads)
             width: typeData.width,
             height: typeData.height,
 
@@ -242,8 +244,9 @@ class EnemyData {
             enemies: this.enemies.map(enemy => ({
                 id: enemy.id,
                 type: enemy.type,
-                x: enemy.x,
-                y: enemy.y,
+                // Always save initial positions (design-time), not runtime positions
+                x: enemy.initialX !== undefined ? enemy.initialX : enemy.x,
+                y: enemy.initialY !== undefined ? enemy.initialY : enemy.y,
                 health: enemy.health,
                 maxHealth: enemy.maxHealth,
                 damage: enemy.damage,
@@ -266,6 +269,11 @@ class EnemyData {
             if (enemy) {
                 // Restore saved properties
                 enemy.id = enemyData.id;
+                // Set both initial and current positions from saved data
+                enemy.initialX = enemyData.x;
+                enemy.initialY = enemyData.y;
+                enemy.x = enemyData.x;
+                enemy.y = enemyData.y;
                 enemy.health = enemyData.health || enemy.health;
                 enemy.maxHealth = enemyData.maxHealth || enemy.maxHealth;
                 enemy.damage = enemyData.damage || enemy.damage;
