@@ -111,6 +111,24 @@ class EnemyData {
                     hurt: { file: 'HURT.png', frames: 3, frameWidth: 144, frameHeight: 96 },
                     death: { file: 'DEATH.png', frames: 7, frameWidth: 144, frameHeight: 96 }
                 }
+            },
+            slime: {
+                name: 'Slime',
+                spriteFolder: 'sprites/Tiny RPG assets/Characters(100x100)/Slime/Slime',
+                defaultHealth: 60,
+                defaultDamage: 10,
+                fleeHealthThreshold: 0.5, // Slimes flee easily when health drops below 50%
+                width: 44,
+                height: 59,
+                scale: 3.2, // Visual sprite scale multiplier (100px sprite → 320px render)
+                renderOffsetY: 137, // Adjust sprite position to align feet with collision box bottom
+                animations: {
+                    idle: { file: 'Slime-Idle.png', frames: 6, frameWidth: 100, frameHeight: 100 },
+                    walk: { file: 'Slime-walk.png', frames: 6, frameWidth: 100, frameHeight: 100 },
+                    attack: { file: 'Slime-Attack01.png', frames: 6, frameWidth: 100, frameHeight: 100 },
+                    hurt: { file: 'slime-hurt.png', frames: 4, frameWidth: 100, frameHeight: 100 },
+                    death: { file: 'slime-death.png', frames: 4, frameWidth: 100, frameHeight: 100 }
+                }
             }
         };
     }
