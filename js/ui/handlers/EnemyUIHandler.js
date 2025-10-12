@@ -429,6 +429,7 @@ class EnemyUIHandler extends UIHandler {
         updateValue('enemyHealth', selectedEnemy.health);
         updateValue('enemyDamage', selectedEnemy.damage);
         updateValue('enemySpeed', selectedEnemy.speed);
+        updateValue('enemySize', selectedEnemy.sizeMultiplier || 1.0);
 
         // Update checkboxes
         const updateCheckbox = (id, checked) => {
@@ -549,7 +550,7 @@ class EnemyUIHandler extends UIHandler {
 
         // Enemy property input change handlers
         const propertyInputs = [
-            'enemyX', 'enemyY', 'enemyHealth', 'enemyDamage', 'enemySpeed'
+            'enemyX', 'enemyY', 'enemyHealth', 'enemyDamage', 'enemySpeed', 'enemySize'
         ];
 
         propertyInputs.forEach(inputId => {
@@ -614,6 +615,7 @@ class EnemyUIHandler extends UIHandler {
         const healthInput = parseInt(document.getElementById('enemyHealth')?.value);
         const damageInput = parseInt(document.getElementById('enemyDamage')?.value);
         const speedInput = parseFloat(document.getElementById('enemySpeed')?.value);
+        const sizeInput = parseFloat(document.getElementById('enemySize')?.value);
 
         // Only use input values if they're valid numbers, otherwise keep current values
         const x = !isNaN(xInput) ? xInput : selectedEnemy.x;
@@ -621,6 +623,7 @@ class EnemyUIHandler extends UIHandler {
         const health = !isNaN(healthInput) ? healthInput : selectedEnemy.health;
         const damage = !isNaN(damageInput) ? damageInput : selectedEnemy.damage;
         const speed = !isNaN(speedInput) ? speedInput : selectedEnemy.speed;
+        const sizeMultiplier = !isNaN(sizeInput) ? sizeInput : (selectedEnemy.sizeMultiplier || 1.0);
 
         // Update enemy properties
         this.game.enemySystem.updateEnemyProperties(selectedEnemy.id, {
@@ -628,7 +631,8 @@ class EnemyUIHandler extends UIHandler {
             y: y,
             health: health,
             damage: damage,
-            speed: speed
+            speed: speed,
+            sizeMultiplier: sizeMultiplier
         });
 
         // Update UI

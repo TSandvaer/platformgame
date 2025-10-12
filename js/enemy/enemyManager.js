@@ -26,10 +26,17 @@ class EnemyManager {
             if (!enemy.isVisible) continue;
 
             const collisionOffsetY = enemy.collisionOffsetY || 0;
-            const enemyTop = enemy.y + collisionOffsetY;
-            const enemyBottom = enemyTop + enemy.height;
+            const sizeMultiplier = enemy.sizeMultiplier || 1.0;
+            const actualWidth = enemy.width * sizeMultiplier;
+            const actualHeight = enemy.height * sizeMultiplier;
 
-            if (x >= enemy.x - tolerance && x <= enemy.x + enemy.width + tolerance &&
+            // Calculate Y offset to keep bottom of collision box at same position
+            const scaleYOffset = enemy.height * (1 - sizeMultiplier);
+
+            const enemyTop = enemy.y + collisionOffsetY + scaleYOffset;
+            const enemyBottom = enemyTop + actualHeight;
+
+            if (x >= enemy.x - tolerance && x <= enemy.x + actualWidth + tolerance &&
                 y >= enemyTop - tolerance && y <= enemyBottom + tolerance) {
                 return enemy;
             }
@@ -75,6 +82,9 @@ class EnemyManager {
         }
         if (properties.speed !== undefined && !isNaN(properties.speed)) {
             enemy.speed = Math.max(0.1, properties.speed);
+        }
+        if (properties.sizeMultiplier !== undefined && !isNaN(properties.sizeMultiplier)) {
+            enemy.sizeMultiplier = Math.max(0.5, Math.min(3.0, properties.sizeMultiplier));
         }
 
         // Update movement properties
@@ -129,6 +139,7 @@ class EnemyManager {
             duplicate.maxHealth = original.maxHealth;
             duplicate.damage = original.damage;
             duplicate.isMoving = original.isMoving;
+            duplicate.sizeMultiplier = original.sizeMultiplier || 1.0;
             duplicate.movementZone = { ...original.movementZone };
             duplicate.attractionZone = { ...original.attractionZone };
 

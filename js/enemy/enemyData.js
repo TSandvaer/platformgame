@@ -218,7 +218,10 @@ class EnemyData {
 
             // Patrol state
             patrolDirection: 1, // 1 for right, -1 for left
-            patrolSpeed: 1
+            patrolSpeed: 1,
+
+            // Size multiplier for scaling enemy (both visually and collision box)
+            sizeMultiplier: 1.0 // 1.0 = normal size, 0.5 = half size, 2.0 = double size
         };
 
         this.enemies.push(enemy);
@@ -270,7 +273,8 @@ class EnemyData {
                 damage: enemy.damage,
                 isMoving: enemy.isMoving,
                 movementZone: enemy.movementZone,
-                attractionZone: enemy.attractionZone
+                attractionZone: enemy.attractionZone,
+                sizeMultiplier: enemy.sizeMultiplier
             })),
             nextEnemyId: this.nextEnemyId
         };
@@ -302,6 +306,9 @@ class EnemyData {
 
                 // Backward compatibility: ensure fleeHealthThreshold is set for existing enemies
                 enemy.fleeHealthThreshold = enemyData.fleeHealthThreshold || typeData.fleeHealthThreshold || 0.4;
+
+                // Backward compatibility: default sizeMultiplier to 1.0 if not present
+                enemy.sizeMultiplier = enemyData.sizeMultiplier !== undefined ? enemyData.sizeMultiplier : 1.0;
 
                 if (enemyData.movementZone) {
                     enemy.movementZone = { ...enemy.movementZone, ...enemyData.movementZone };

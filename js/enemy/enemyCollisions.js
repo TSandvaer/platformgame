@@ -110,11 +110,19 @@ class EnemyCollisions {
     // Utility methods for getting bounds
     getEnemyBounds(enemy) {
         const collisionOffsetY = enemy.collisionOffsetY || 0;
+        const sizeMultiplier = enemy.sizeMultiplier || 1.0;
+        const actualWidth = enemy.width * sizeMultiplier;
+        const actualHeight = enemy.height * sizeMultiplier;
+
+        // Calculate Y offset to keep bottom of collision box at same position
+        // When scaling smaller, shift down; when scaling larger, shift up
+        const scaleYOffset = enemy.height * (1 - sizeMultiplier);
+
         return {
             left: enemy.x,
-            right: enemy.x + enemy.width,
-            top: enemy.y + collisionOffsetY,
-            bottom: enemy.y + collisionOffsetY + enemy.height
+            right: enemy.x + actualWidth,
+            top: enemy.y + collisionOffsetY + scaleYOffset,
+            bottom: enemy.y + collisionOffsetY + scaleYOffset + actualHeight
         };
     }
 
@@ -147,20 +155,26 @@ class EnemyCollisions {
 
     getAttackRange(enemy) {
         // Use enemy's attackRange property (50 for melee, higher for ranged)
+        const sizeMultiplier = enemy.sizeMultiplier || 1.0;
+        const actualWidth = enemy.width * sizeMultiplier;
+        const actualHeight = enemy.height * sizeMultiplier;
         const attackReach = enemy.attackRange || 50;
         const attackWidth = attackReach; // Width matches reach
-        const attackHeight = enemy.height * 0.8; // Height of attack area
+        const attackHeight = actualHeight * 0.8; // Height of attack area (scaled)
         const collisionOffsetY = enemy.collisionOffsetY || 0;
+
+        // Calculate Y offset to keep bottom of collision box at same position
+        const scaleYOffset = enemy.height * (1 - sizeMultiplier);
 
         let attackX, attackY;
 
         if (enemy.facing === 'right') {
-            attackX = enemy.x + enemy.width;
+            attackX = enemy.x + actualWidth;
         } else {
             attackX = enemy.x - attackReach;
         }
 
-        attackY = (enemy.y + collisionOffsetY) + (enemy.height - attackHeight) / 2;
+        attackY = (enemy.y + collisionOffsetY + scaleYOffset) + (actualHeight - attackHeight) / 2;
 
         return {
             left: attackX,
