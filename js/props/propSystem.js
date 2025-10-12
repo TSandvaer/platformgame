@@ -465,6 +465,18 @@ class PropSystem {
         this.data.updateAllDestruction(deltaTime, platformSystem);
     }
 
+    // Trigger particle explosions for props that just started destroying
+    // Call this after updateDestruction in the game loop
+    triggerDestructionExplosions(viewport) {
+        for (const prop of this.data.props) {
+            if (prop.justStartedDestroying) {
+                const propType = this.data.propTypes[prop.type];
+                this.renderer.createDestructionExplosion(prop, propType, viewport);
+                prop.justStartedDestroying = false; // Clear the flag
+            }
+        }
+    }
+
     // Update chest animations
     updateChestAnimations(deltaTime) {
         for (const prop of this.data.props) {

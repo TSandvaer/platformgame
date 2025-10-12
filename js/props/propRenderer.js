@@ -3,12 +3,12 @@ class PropRenderer {
         this.ctx = ctx;
         this.platformSprites = platformSprites; // Keep reference to platform sprites for villageProps
         this.torchParticles = torchParticles;
+        this.destructionParticles = []; // Particles for prop destruction explosions
         this.onSpritesLoadedCallback = onSpritesLoadedCallback;
 
         // Initialize prop-specific sprites
         this.propSprites = {
             torchFlame: { image: null, frameWidth: 21, frameHeight: 21, totalFrames: 6 },
-            barrelDestruction: { image: null, frameWidth: 0, frameHeight: 0, totalFrames: 5 },
             chestAnimation: { image: null, frameWidth: 73, frameHeight: 73, totalFrames: 7, rows: 4 }
         };
         this.spritesLoaded = false;
@@ -17,7 +17,7 @@ class PropRenderer {
 
     loadSprites() {
         let loadedCount = 0;
-        const totalImages = 3; // Torch flame, barrel destruction, and chest animation
+        const totalImages = 2; // Torch flame and chest animation
 
         const checkAllLoaded = () => {
             if (loadedCount === totalImages) {
@@ -41,24 +41,6 @@ class PropRenderer {
         };
         torchFlameImg.src = 'sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
         this.propSprites.torchFlame.image = torchFlameImg;
-
-        // Load barrel destruction animation
-        const barrelDestructionImg = new Image();
-        barrelDestructionImg.onload = () => {
-            // Calculate frame dimensions from the loaded image
-            // The image shows 5 frames horizontally
-            this.propSprites.barrelDestruction.frameWidth = barrelDestructionImg.width / 5;
-            this.propSprites.barrelDestruction.frameHeight = barrelDestructionImg.height;
-            loadedCount++;
-            checkAllLoaded();
-        };
-        barrelDestructionImg.onerror = () => {
-            console.error('Failed to load barrel destruction sprite');
-            loadedCount++;
-            checkAllLoaded();
-        };
-        barrelDestructionImg.src = 'sprites/prop destruction animations/barrel_destruction.png';
-        this.propSprites.barrelDestruction.image = barrelDestructionImg;
 
         // Load chest animation sprite sheet
         const chestImg = new Image();
@@ -205,56 +187,9 @@ class PropRenderer {
             }
         }
 
-        // Check if prop is being destroyed and has a destruction animation
-        if (prop.isDestroying && prop.type === 'barrel' && this.propSprites.barrelDestruction.image) {
-            // Render barrel destruction animation
-            const destructionSprite = this.propSprites.barrelDestruction;
-            const frameIndex = Math.min(prop.destructionFrameIndex, destructionSprite.totalFrames - 1);
-            const frameX = frameIndex * destructionSprite.frameWidth;
-
-            this.ctx.drawImage(
-                destructionSprite.image,
-                frameX, 0,
-                destructionSprite.frameWidth, destructionSprite.frameHeight,
-                prop.x, prop.y,
-                renderWidth, renderHeight
-            );
-        } else if (prop.isFallingDebris && prop.type === 'barrel' && prop.debrisX !== undefined && prop.debrisY !== undefined && this.propSprites.barrelDestruction.image) {
-            // Render falling debris (last frame of destruction animation)
-            const destructionSprite = this.propSprites.barrelDestruction;
-            const lastFrameIndex = destructionSprite.totalFrames - 1; // Last frame (debris)
-            const frameX = Math.floor(lastFrameIndex * destructionSprite.frameWidth);
-
-            // For falling debris, use the already-transformed coordinates from the prop
-            // The camera transforms are handled by the caller (renderProps method)
-            let renderX = prop.x;
-            let renderY = prop.y;
-
-
-            this.ctx.drawImage(
-                destructionSprite.image,
-                frameX, 0,
-                Math.floor(destructionSprite.frameWidth), Math.floor(destructionSprite.frameHeight),
-                Math.floor(renderX), Math.floor(renderY),
-                renderWidth, renderHeight
-            );
-        } else if (prop.isDestroying) {
-            // Generic blink effect for props without destruction sprites
-            const blinkFrame = prop.destructionFrameIndex;
-            const isVisible = blinkFrame % 2 === 0; // Blink on/off every frame
-
-            if (isVisible) {
-                // Draw normal sprite with reduced opacity
-                this.ctx.globalAlpha = 0.3;
-                this.ctx.drawImage(
-                    tileset.image,
-                    sourceX, sourceY,
-                    propType.width, propType.height,
-                    prop.x, prop.y,
-                    renderWidth, renderHeight
-                );
-                this.ctx.globalAlpha = 1.0;
-            }
+        // Check if prop is being destroyed - don't render during destruction (particles handle the effect)
+        if (prop.isDestroying) {
+            // Skip rendering the prop sprite during destruction - only particles will show
         } else if (prop.isChest && this.propSprites.chestAnimation.image) {
             // Render chest with current animation frame
             this.renderChest(prop, propType, renderWidth, renderHeight, viewportScale);
@@ -571,6 +506,82 @@ class PropRenderer {
         }
     }
 
+    createDestructionExplosion(prop, propType, viewport) {
+        if (!propType) return;
+
+        // Get particle intensity from prop (default 1.0, range 0.5-2.0)
+        const intensity = prop.destructionParticleIntensity !== undefined ?
+            prop.destructionParticleIntensity : 1.0;
+
+        // Calculate prop center
+        const sizeMultiplier = prop.sizeMultiplier !== undefined ? prop.sizeMultiplier : 1.0;
+        const propWidth = propType.width * sizeMultiplier;
+        const propHeight = propType.height * sizeMultiplier;
+        const centerX = prop.x + propWidth / 2;
+        const centerY = prop.y + propHeight / 2;
+
+        // Base particle count scales with intensity and prop size
+        const baseCount = 15;
+        const sizeScale = Math.sqrt((propWidth * propHeight) / (32 * 32)); // Relative to 32x32 prop
+        const particleCount = Math.floor(baseCount * intensity * sizeScale);
+
+        // Generate color palette based on prop type
+        let colors;
+        if (prop.type.includes('barrel') || prop.type.includes('crate')) {
+            // Wood colors: browns, tans
+            colors = [
+                { h: 30, s: 50, l: 40 },  // Dark brown
+                { h: 35, s: 45, l: 50 },  // Medium brown
+                { h: 40, s: 40, l: 60 }   // Light tan
+            ];
+        } else if (prop.type.includes('stone') || prop.type.includes('rock')) {
+            // Stone colors: grays
+            colors = [
+                { h: 0, s: 0, l: 30 },    // Dark gray
+                { h: 0, s: 0, l: 50 },    // Medium gray
+                { h: 0, s: 0, l: 70 }     // Light gray
+            ];
+        } else {
+            // Generic debris colors: browns and grays
+            colors = [
+                { h: 30, s: 30, l: 40 },
+                { h: 0, s: 0, l: 50 },
+                { h: 35, s: 35, l: 55 }
+            ];
+        }
+
+        // Create explosion particles
+        for (let i = 0; i < particleCount; i++) {
+            // Random angle for explosion
+            const angle = Math.random() * Math.PI * 2;
+
+            // Velocity scales with intensity, with some randomness
+            const speedBase = 2.0 + Math.random() * 3.0;
+            const speed = speedBase * intensity;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed - 1.5; // Slight upward bias
+
+            // Random color from palette
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // Particle size scales with intensity
+            const size = (2 + Math.random() * 3) * Math.min(intensity, 1.5);
+
+            this.destructionParticles.push({
+                x: centerX + (Math.random() - 0.5) * propWidth * 0.3, // Start near center
+                y: centerY + (Math.random() - 0.5) * propHeight * 0.3,
+                vx: vx,
+                vy: vy,
+                life: 1.0,
+                maxLife: 1.0,
+                size: size,
+                color: color,
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.15
+            });
+        }
+    }
+
     updateAndRenderParticles(viewport, camera, platforms) {
         // Update and render particles
         for (let i = this.torchParticles.length - 1; i >= 0; i--) {
@@ -679,6 +690,60 @@ class PropRenderer {
                 this.ctx.arc(renderX, renderY, size / 4, 0, Math.PI * 2);
                 this.ctx.fill();
             }
+
+            // Restore context
+            this.ctx.restore();
+        }
+
+        // Update and render destruction particles
+        for (let i = this.destructionParticles.length - 1; i >= 0; i--) {
+            const particle = this.destructionParticles[i];
+
+            // Update particle physics
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.vx *= 0.98; // Air resistance
+            particle.vy += 0.25; // Gravity
+
+            // Update rotation
+            particle.rotation += particle.rotationSpeed;
+
+            // Fade out over time
+            particle.life -= 0.015;
+
+            // Remove dead particles
+            if (particle.life <= 0 || particle.y > window.innerHeight + 100) {
+                this.destructionParticles.splice(i, 1);
+                continue;
+            }
+
+            // Calculate opacity based on life
+            const opacity = Math.max(0, Math.min(1, particle.life));
+
+            // Save context
+            this.ctx.save();
+
+            // Apply camera and viewport transformation to particle position
+            let renderX = particle.x;
+            let renderY = particle.y;
+            if (viewport && camera) {
+                renderX = (particle.x - camera.x) * viewport.scaleX + viewport.offsetX;
+                renderY = (particle.y - camera.y) * viewport.scaleY + viewport.offsetY;
+            }
+
+            // Move to particle position and rotate
+            this.ctx.translate(renderX, renderY);
+            this.ctx.rotate(particle.rotation);
+
+            // Draw particle as a small rectangle (debris chunk)
+            const size = particle.size * (viewport ? viewport.scaleX : 1);
+            this.ctx.fillStyle = `hsla(${particle.color.h}, ${particle.color.s}%, ${particle.color.l}%, ${opacity})`;
+            this.ctx.fillRect(-size / 2, -size / 2, size, size);
+
+            // Add darker edge for depth
+            this.ctx.strokeStyle = `hsla(${particle.color.h}, ${particle.color.s}%, ${Math.max(0, particle.color.l - 20)}%, ${opacity * 0.5})`;
+            this.ctx.lineWidth = 0.5;
+            this.ctx.strokeRect(-size / 2, -size / 2, size, size);
 
             // Restore context
             this.ctx.restore();

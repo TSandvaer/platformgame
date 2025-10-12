@@ -490,6 +490,7 @@ class PlatformRPG {
 
         // Update prop destruction animations
         this.propSystem.updateDestruction(this.deltaTime, this.platformSystem);
+        this.propSystem.triggerDestructionExplosions(this.viewport);
         this.propSystem.updateChestAnimations(this.deltaTime);
         this.propSystem.updateMovement(this.deltaTime);
 

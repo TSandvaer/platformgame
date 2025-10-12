@@ -447,6 +447,13 @@ class PropManager {
                 maxDurabilityInput.value = maxDurability !== undefined ? maxDurability : 100;
             }
 
+            // Update particle intensity
+            const particleIntensityInput = document.getElementById('selectedPropParticleIntensity');
+            if (particleIntensityInput) {
+                const particleIntensity = this.propData.selectedProp.destructionParticleIntensity;
+                particleIntensityInput.value = particleIntensity !== undefined ? particleIntensity : 1.0;
+            }
+
             // Show/hide Item Drops section based on destroyable flag
             const itemDropsSection = document.getElementById('itemDropsSection');
             const itemDropsButtons = document.getElementById('itemDropsButtons');
@@ -457,6 +464,12 @@ class PropManager {
             }
             if (itemDropsButtons) {
                 itemDropsButtons.style.display = isDestroyable ? 'block' : 'none';
+            }
+
+            // Show/hide Particle Intensity section based on destroyable flag
+            const particleIntensitySection = document.getElementById('propParticleIntensitySection');
+            if (particleIntensitySection) {
+                particleIntensitySection.style.display = isDestroyable ? 'block' : 'none';
             }
 
             // Update movement properties
@@ -711,6 +724,12 @@ class PropManager {
                 itemDropsButtons.style.display = 'none';
             }
 
+            // Hide Particle Intensity section when no prop is selected
+            const particleIntensitySection = document.getElementById('propParticleIntensitySection');
+            if (particleIntensitySection) {
+                particleIntensitySection.style.display = 'none';
+            }
+
             // Hide movement sections when no prop is selected
             const propMovementSection = document.getElementById('propMovementSection');
             const propMovementZoneSection = document.getElementById('propMovementZoneSection');
@@ -803,6 +822,12 @@ class PropManager {
             if (itemDropsButtons) {
                 itemDropsButtons.style.display = destroyableInput.checked ? 'block' : 'none';
             }
+
+            // Update Particle Intensity section visibility immediately
+            const particleIntensitySection = document.getElementById('propParticleIntensitySection');
+            if (particleIntensitySection) {
+                particleIntensitySection.style.display = destroyableInput.checked ? 'block' : 'none';
+            }
         }
 
         // Event listeners are now handled inside the selected prop block above
@@ -819,6 +844,14 @@ class PropManager {
                 parseFloat(durabilityInput.value) || 0,
                 this.propData.selectedProp.maxDurability
             );
+        }
+
+        // Handle particle intensity
+        const particleIntensityInput = document.getElementById('selectedPropParticleIntensity');
+        if (particleIntensityInput && this.propData.selectedProp.destroyable) {
+            const intensity = parseFloat(particleIntensityInput.value);
+            // Clamp to valid range 0.5-2.0
+            this.propData.selectedProp.destructionParticleIntensity = Math.max(0.5, Math.min(2.0, intensity || 1.0));
         }
 
         // Handle movement properties

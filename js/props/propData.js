@@ -298,6 +298,7 @@ class PropData {
             destroyable: destroyable,
             maxDurability: destroyable ? maxDurability : 0,
             currentDurability: destroyable ? maxDurability : 0,
+            destructionParticleIntensity: 1.0,  // Particle explosion intensity (0.5 - 2.0)
             isDestroying: false,
             destructionFrameIndex: 0,
             destructionTimer: 0,
@@ -1100,6 +1101,7 @@ class PropData {
         prop.destructionFrameIndex = 0;
         prop.destructionTimer = 0;
         prop.currentDurability = 0;
+        prop.justStartedDestroying = true; // Flag for particle explosion trigger
 
         // Trigger item drops if this prop has drop items configured
         this.triggerItemDrops(prop);
@@ -1151,9 +1153,8 @@ class PropData {
     }
 
     hasDestructionSprite(propType) {
-        // For now, only barrel has a destruction sprite
-        // This can be expanded later for other prop types
-        return propType === 'barrel';
+        // No props use destruction sprites anymore - all use particle explosions
+        return false;
     }
 
     // Update all props with destruction animations
