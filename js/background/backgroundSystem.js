@@ -27,6 +27,7 @@ class BackgroundSystem {
             'Dynamic_Space_Stars_Big_1_1',
             'Dynamic_Space_Stars_Big_1_2',
             'Flay_Night_4_BG',
+            'Grassy_Mountains',
             'Mountains1',
             'Mountains2',
             'MountainWaterfall',
@@ -123,6 +124,18 @@ class BackgroundSystem {
             case 'Flay_Night_4_BG':
                 layerPaths = [
                     'backgrounds/Flay Night 4 BG/Flat Night 4 BG.png'
+                ];
+                break;
+            case 'Grassy_Mountains':
+                layerPaths = [
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/sky.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/far_mountains.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/grassy_mountains.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_mid.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_mid_t.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/hill.png',                    
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_front.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_front_t.png'
                 ];
                 break;
             case 'Mountains1':
@@ -566,6 +579,18 @@ class BackgroundSystem {
                 break;
             case 'Flay_Night_4_BG':
                 layerPaths = ['backgrounds/Flay Night 4 BG/Flat Night 4 BG.png'];
+                break;
+            case 'Grassy_Mountains':
+                layerPaths = [
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/sky.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/far_mountains.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/grassy_mountains.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/hill.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_mid.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_mid_t.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_front.png',
+                    'backgrounds/Grassy_Mountains_Parallax_Background-vnitti/layers/clouds_front_t.png'
+                ];
                 break;
             case 'Mountains1':
                 layerPaths = [
