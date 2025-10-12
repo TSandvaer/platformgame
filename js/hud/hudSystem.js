@@ -4,22 +4,47 @@ class HUDSystem {
         this.ctx = game.ctx;
         this.canvas = game.canvas;
 
-        // HUD positioning and sizing
-        this.position = { x: 20, y: 20 };
-        this.width = 240;  // Increased from 220 to 240 to accommodate extra padding
-        this.height = 80;
-        this.cornerRadius = 8;
+        // Base HUD dimensions (at 1080p design resolution)
+        // Position HUD below buttons in production mode, or with offset in dev mode
+        this.basePosition = { x: 20, y: 60 };  // Moved down from y:20 to y:60 to avoid buttons
+        this.baseWidth = 240;  // Increased from 220 to 240 to accommodate extra padding
+        this.baseHeight = 80;
+        this.baseCornerRadius = 8;
 
-        // Bar settings
-        this.barWidth = 140;
-        this.barHeight = 16;
-        this.barSpacing = 25;
-        this.barOffsetX = 85;  // Increased from 65 to 85 for more left padding
-        this.barOffsetY = 35;
+        // Manual overrides (for drag/resize) - stored in unscaled values
+        this.manualPosition = null;  // Will be set when user drags
+        this.manualSize = null;      // Will be set when user resizes
 
-        // Gear icon settings
-        this.gearSize = 16;
-        this.gearPosition = { x: 15, y: 8 };  // Increased from x: 8 to x: 15
+        // Base bar settings
+        this.baseBarWidth = 140;
+        this.baseBarHeight = 16;
+        this.baseBarSpacing = 25;
+        this.baseBarOffsetX = 85;  // Increased from 65 to 85 for more left padding
+        this.baseBarOffsetY = 35;
+
+        // Actual scaled dimensions (will be calculated)
+        this.position = { x: this.basePosition.x, y: this.basePosition.y };
+        this.width = this.baseWidth;
+        this.height = this.baseHeight;
+        this.cornerRadius = this.baseCornerRadius;
+        this.barWidth = this.baseBarWidth;
+        this.barHeight = this.baseBarHeight;
+        this.barSpacing = this.baseBarSpacing;
+        this.barOffsetX = this.baseBarOffsetX;
+        this.barOffsetY = this.baseBarOffsetY;
+
+        // Base gear icon settings
+        this.baseGearSize = 16;
+        this.baseGearPosition = { x: 15, y: 8 };  // Increased from x: 8 to x: 15
+
+        // Actual scaled gear settings
+        this.gearSize = this.baseGearSize;
+        this.gearPosition = { x: this.baseGearPosition.x, y: this.baseGearPosition.y };
+
+        // UI Scale factor (will be calculated based on viewport)
+        this.uiScale = 1.0;
+        this.minScale = 0.5;  // Minimum UI scale
+        this.maxScale = 1.5;  // Maximum UI scale
 
         // Player stats (will be connected to player system later)
         this.playerStats = {
@@ -28,8 +53,9 @@ class HUDSystem {
             coins: 0
         };
 
-        // Coin display settings
-        this.coinIconSize = 16;
+        // Base coin display settings
+        this.baseCoinIconSize = 16;
+        this.coinIconSize = this.baseCoinIconSize;
         this.coinIcon = null;
         this.loadCoinIcon();
 
@@ -59,7 +85,8 @@ class HUDSystem {
         this.isResizing = false;
         this.dragOffset = { x: 0, y: 0 };
         this.isHovered = false;
-        this.resizeHandle = { x: 0, y: 0, size: 12 }; // Size of resize handle
+        this.baseResizeHandleSize = 12;
+        this.resizeHandle = { x: 0, y: 0, size: this.baseResizeHandleSize }; // Size of resize handle
         this.setupDragAndResize();
 
         // Load saved settings from gameData
@@ -97,6 +124,64 @@ class HUDSystem {
             console.error('📜 Failed to load parchment background for HUD');
         };
         parchmentImg.src = 'GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png';
+    }
+
+    calculateUIScale() {
+        // Get the current viewport scale from the game's viewport system
+        let baseScale = 1.0;
+
+        if (this.game.viewportSystem && this.game.viewportSystem.viewport) {
+            // Use the viewport's uniform scale factor
+            baseScale = this.game.viewportSystem.viewport.scale;
+        } else {
+            // Fallback: calculate based on canvas size vs design resolution
+            const designHeight = 1080;  // Design resolution height
+            baseScale = this.canvas.height / designHeight;
+        }
+
+        // Apply min/max limits to the UI scale
+        this.uiScale = Math.max(this.minScale, Math.min(this.maxScale, baseScale));
+
+        // Update all scaled dimensions
+        // Use manual position if set, otherwise use base position
+        if (this.manualPosition) {
+            this.position.x = this.manualPosition.x * this.uiScale;
+            this.position.y = this.manualPosition.y * this.uiScale;
+        } else {
+            this.position.x = this.basePosition.x * this.uiScale;
+            this.position.y = this.basePosition.y * this.uiScale;
+        }
+
+        // Use manual size if set, otherwise use base size
+        if (this.manualSize) {
+            this.width = this.manualSize.width * this.uiScale;
+            this.height = this.manualSize.height * this.uiScale;
+        } else {
+            this.width = this.baseWidth * this.uiScale;
+            this.height = this.baseHeight * this.uiScale;
+        }
+
+        this.cornerRadius = this.baseCornerRadius * this.uiScale;
+
+        // Scale bar dimensions
+        this.barWidth = this.baseBarWidth * this.uiScale;
+        this.barHeight = this.baseBarHeight * this.uiScale;
+        this.barSpacing = this.baseBarSpacing * this.uiScale;
+        this.barOffsetX = this.baseBarOffsetX * this.uiScale;
+        this.barOffsetY = this.baseBarOffsetY * this.uiScale;
+
+        // Scale gear icon
+        this.gearSize = this.baseGearSize * this.uiScale;
+        this.gearPosition.x = this.baseGearPosition.x * this.uiScale;
+        this.gearPosition.y = this.baseGearPosition.y * this.uiScale;
+
+        // Scale coin icon
+        this.coinIconSize = this.baseCoinIconSize * this.uiScale;
+
+        // Update resize handle size
+        if (this.resizeHandle) {
+            this.resizeHandle.size = this.baseResizeHandleSize * this.uiScale;
+        }
     }
 
     setupGearClickHandler() {
@@ -177,6 +262,12 @@ class HUDSystem {
                 // Keep HUD within canvas bounds
                 this.position.x = Math.max(0, Math.min(this.position.x, this.game.canvas.width - this.width));
                 this.position.y = Math.max(0, Math.min(this.position.y, this.game.canvas.height - this.height));
+
+                // Store the unscaled manual position
+                this.manualPosition = {
+                    x: this.position.x / this.uiScale,
+                    y: this.position.y / this.uiScale
+                };
             }
 
             // Handle resizing
@@ -185,8 +276,14 @@ class HUDSystem {
                 const newHeight = mouseY - this.position.y;
 
                 // Set minimum and maximum sizes
-                this.width = Math.max(150, Math.min(400, newWidth));
-                this.height = Math.max(60, Math.min(200, newHeight));
+                this.width = Math.max(150 * this.uiScale, Math.min(400 * this.uiScale, newWidth));
+                this.height = Math.max(60 * this.uiScale, Math.min(200 * this.uiScale, newHeight));
+
+                // Store the unscaled manual size
+                this.manualSize = {
+                    width: this.width / this.uiScale,
+                    height: this.height / this.uiScale
+                };
             }
         });
 
@@ -251,6 +348,9 @@ class HUDSystem {
     }
 
     render() {
+        // Recalculate UI scale based on current viewport
+        this.calculateUIScale();
+
         this.ctx.save();
 
         // Draw HUD background based on current theme
@@ -325,10 +425,10 @@ class HUDSystem {
         const currentTheme = this.getCurrentTheme();
         const textColor = currentTheme === 'fantasy-wooden' ? '#4A2C17' : this.colors.text;
         this.ctx.fillStyle = textColor;
-        this.ctx.font = 'bold 12px Arial';
+        this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(label, x - 55, y + this.barHeight / 2);
+        this.ctx.fillText(label, x - (55 * this.uiScale), y + this.barHeight / 2);
 
         // Draw background bar
         this.ctx.fillStyle = bgColor;
@@ -348,15 +448,15 @@ class HUDSystem {
 
         // Draw value text
         this.ctx.fillStyle = this.colors.text;
-        this.ctx.font = '10px Arial';
+        this.ctx.font = `${Math.round(10 * this.uiScale)}px Arial`;
         this.ctx.textAlign = 'center';
         this.ctx.fillText(`${Math.round(current)}/${max}`, x + this.barWidth / 2, y + this.barHeight / 2);
     }
 
     drawCoinCounter() {
         const coinY = this.position.y + this.barOffsetY + (this.barSpacing * 2);
-        const iconX = this.position.x + this.barOffsetX - 55;
-        const textX = iconX + this.coinIconSize + 5;
+        const iconX = this.position.x + this.barOffsetX - (55 * this.uiScale);
+        const textX = iconX + this.coinIconSize + (5 * this.uiScale);
 
         // Draw coin icon if loaded
         if (this.coinIcon) {
@@ -373,7 +473,7 @@ class HUDSystem {
         const currentTheme = this.getCurrentTheme();
         const textColor = currentTheme === 'fantasy-wooden' ? '#4A2C17' : this.colors.text;
         this.ctx.fillStyle = textColor;
-        this.ctx.font = 'bold 12px Arial';
+        this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'middle';
         this.ctx.fillText(`${this.playerStats.coins}`, textX, coinY + this.coinIconSize / 2);
@@ -538,14 +638,14 @@ class HUDSystem {
     // Save current HUD settings to gameData
     saveSettings() {
         if (this.game.gameDataSystem) {
-            // Create the HUD settings object
+            // Create the HUD settings object - save unscaled values
             const hudSettings = {
-                position: {
-                    x: this.position.x,
-                    y: this.position.y
+                position: this.manualPosition || {
+                    x: this.position.x / this.uiScale,
+                    y: this.position.y / this.uiScale
                 },
-                width: this.width,
-                height: this.height
+                width: this.manualSize ? this.manualSize.width : (this.width / this.uiScale),
+                height: this.manualSize ? this.manualSize.height : (this.height / this.uiScale)
             };
 
             // Use targeted update that only saves gameSettings, not full game data
@@ -577,14 +677,22 @@ class HUDSystem {
             }
         }
 
-        // Apply the settings if found
+        // Apply the settings if found - these are unscaled values
         if (hudSettings) {
             if (hudSettings.position) {
-                this.position.x = hudSettings.position.x;
-                this.position.y = hudSettings.position.y;
+                // Store as manual position (unscaled values)
+                this.manualPosition = {
+                    x: hudSettings.position.x,
+                    y: hudSettings.position.y
+                };
             }
-            if (hudSettings.width) this.width = hudSettings.width;
-            if (hudSettings.height) this.height = hudSettings.height;
+            if (hudSettings.width && hudSettings.height) {
+                // Store as manual size (unscaled values)
+                this.manualSize = {
+                    width: hudSettings.width,
+                    height: hudSettings.height
+                };
+            }
         }
     }
 
@@ -614,11 +722,16 @@ class HUDSystem {
     }
 
     drawBelt() {
-        // Belt position - bottom left corner
-        const beltX = 20;
-        const beltY = this.canvas.height - 100;
-        const slotSize = 50;
-        const slotSpacing = 8;
+        // Belt position - bottom left corner, scaled based on UI scale
+        const baseBeltX = 20;
+        const baseBeltY = 100;  // Distance from bottom
+        const baseSlotSize = 50;
+        const baseSlotSpacing = 8;
+
+        const beltX = baseBeltX * this.uiScale;
+        const beltY = this.canvas.height - (baseBeltY * this.uiScale);
+        const slotSize = baseSlotSize * this.uiScale;
+        const slotSpacing = baseSlotSpacing * this.uiScale;
         const slotBorderWidth = 2;
 
         // Draw belt background
@@ -626,8 +739,12 @@ class HUDSystem {
         this.ctx.strokeStyle = '#FFD700';
         this.ctx.lineWidth = 2;
 
-        const totalWidth = (slotSize * 4) + (slotSpacing * 3) + 20;
-        this.drawRoundedRect(beltX - 10, beltY - 10, totalWidth, slotSize + 20, 8,
+        const padding = 10 * this.uiScale;
+        const totalWidth = (slotSize * 4) + (slotSpacing * 3) + (padding * 2);
+        const totalHeight = slotSize + (padding * 2);
+        const borderRadius = 8 * this.uiScale;
+
+        this.drawRoundedRect(beltX - padding, beltY - padding, totalWidth, totalHeight, borderRadius,
                            'rgba(30, 30, 30, 0.8)', '#FFD700');
 
         // Get player belt data
@@ -651,10 +768,10 @@ class HUDSystem {
 
             // Draw slot number
             this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = 'bold 12px Arial';
+            this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
             this.ctx.textAlign = 'left';
             this.ctx.textBaseline = 'top';
-            this.ctx.fillText(String(i + 1), slotX + 4, beltY + 2);
+            this.ctx.fillText(String(i + 1), slotX + (4 * this.uiScale), beltY + (2 * this.uiScale));
 
             // Draw item if present
             if (item) {
@@ -662,8 +779,8 @@ class HUDSystem {
 
                 // Try to draw sprite from multiple sources
                 if (item.sprite) {
-                    // Calculate aspect ratio preserving dimensions
-                    const maxSize = 32;
+                    // Calculate aspect ratio preserving dimensions, scaled based on UI scale
+                    const maxSize = 32 * this.uiScale;
                     const aspectRatio = item.sprite.width / item.sprite.height;
                     let drawWidth = maxSize;
                     let drawHeight = maxSize;
@@ -729,12 +846,18 @@ class HUDSystem {
                                  item.id === 'staminaPotion' ? '#FFD700' :
                                  item.id === 'manaPotion' ? '#4444FF' : '#4CAF50';
                     this.ctx.fillStyle = color;
-                    this.ctx.fillRect(slotX + 10, beltY + 10, 30, 30);
+                    const iconPadding = 10 * this.uiScale;
+                    const iconSize = 30 * this.uiScale;
+                    this.ctx.fillRect(slotX + iconPadding, beltY + iconPadding, iconSize, iconSize);
 
                     // Add potion bottle shape
                     this.ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                    this.ctx.fillRect(slotX + 20, beltY + 8, 10, 6);
-                    this.ctx.fillRect(slotX + 22, beltY + 6, 6, 4);
+                    const bottleNeckX = slotX + (20 * this.uiScale);
+                    const bottleNeckY = beltY + (8 * this.uiScale);
+                    const bottleNeckWidth = 10 * this.uiScale;
+                    const bottleNeckHeight = 6 * this.uiScale;
+                    this.ctx.fillRect(bottleNeckX, bottleNeckY, bottleNeckWidth, bottleNeckHeight);
+                    this.ctx.fillRect(bottleNeckX + (2 * this.uiScale), bottleNeckY - (2 * this.uiScale), bottleNeckWidth - (4 * this.uiScale), 4 * this.uiScale);
                 }
 
                 // Draw item quantity if > 1
@@ -742,36 +865,38 @@ class HUDSystem {
                     // Background for better readability
                     this.ctx.fillStyle = 'rgba(0,0,0,0.7)';
                     const qtyText = String(item.quantity);
-                    this.ctx.font = 'bold 12px Arial';
+                    this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
                     const textWidth = this.ctx.measureText(qtyText).width;
-                    this.ctx.fillRect(slotX + slotSize - textWidth - 6, beltY + slotSize - 16, textWidth + 4, 14);
+                    const padding = 4 * this.uiScale;
+                    const boxHeight = 14 * this.uiScale;
+                    this.ctx.fillRect(slotX + slotSize - textWidth - (padding * 1.5), beltY + slotSize - (boxHeight + padding/2), textWidth + padding, boxHeight);
 
                     // Quantity text
                     this.ctx.fillStyle = 'white';
-                    this.ctx.font = 'bold 12px Arial';
+                    this.ctx.font = `bold ${Math.round(12 * this.uiScale)}px Arial`;
                     this.ctx.textAlign = 'right';
                     this.ctx.textBaseline = 'bottom';
-                    this.ctx.fillText(qtyText, slotX + slotSize - 4, beltY + slotSize - 4);
+                    this.ctx.fillText(qtyText, slotX + slotSize - (4 * this.uiScale), beltY + slotSize - (4 * this.uiScale));
                 }
 
                 // Draw item name below (smaller)
                 this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                this.ctx.font = '9px Arial';
+                this.ctx.font = `${Math.round(9 * this.uiScale)}px Arial`;
                 this.ctx.textAlign = 'center';
                 this.ctx.textBaseline = 'bottom';
                 const name = item.name || item.id;
                 if (name) {
                     const displayName = name.length > 8 ? name.substring(0, 7) + '..' : name;
-                    this.ctx.fillText(displayName, slotX + slotSize/2, beltY + slotSize - 2);
+                    this.ctx.fillText(displayName, slotX + slotSize/2, beltY + slotSize - (2 * this.uiScale));
                 }
             }
         }
 
         // Draw belt label
         this.ctx.fillStyle = '#FFD700';
-        this.ctx.font = 'bold 11px Arial';
+        this.ctx.font = `bold ${Math.round(11 * this.uiScale)}px Arial`;
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'bottom';
-        this.ctx.fillText('QUICK BELT', beltX, beltY - 15);
+        this.ctx.fillText('QUICK BELT', beltX, beltY - (15 * this.uiScale));
     }
 }

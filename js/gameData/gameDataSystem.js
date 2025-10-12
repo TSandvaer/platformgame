@@ -77,16 +77,8 @@ class GameDataSystem {
                 // Apply only the gameSettings, not scenes or other data
                 this.gameData.gameSettings = savedData.gameSettings;
 
-                // Apply HUD settings immediately if HUD system exists
-                if (savedData.gameSettings.hud && this.game.hudSystem) {
-                    const hudSettings = savedData.gameSettings.hud;
-                    if (hudSettings.position) {
-                        this.game.hudSystem.position.x = hudSettings.position.x;
-                        this.game.hudSystem.position.y = hudSettings.position.y;
-                    }
-                    if (hudSettings.width) this.game.hudSystem.width = hudSettings.width;
-                    if (hudSettings.height) this.game.hudSystem.height = hudSettings.height;
-                }
+                // HUD settings will be loaded by the HUD system itself via loadSettings()
+                // Don't apply them here as it would bypass the manual position/size system
             }
         } catch (error) {
             console.error('Error loading game settings:', error);
@@ -228,16 +220,8 @@ class GameDataSystem {
         if (gameData.gameSettings) {
             this.gameData.gameSettings = gameData.gameSettings;
 
-            // Apply HUD settings to the HUD system
-            if (gameData.gameSettings.hud && this.game.hudSystem) {
-                const hudSettings = gameData.gameSettings.hud;
-                if (hudSettings.position) {
-                    this.game.hudSystem.position.x = hudSettings.position.x;
-                    this.game.hudSystem.position.y = hudSettings.position.y;
-                }
-                if (hudSettings.width) this.game.hudSystem.width = hudSettings.width;
-                if (hudSettings.height) this.game.hudSystem.height = hudSettings.height;
-            }
+            // HUD settings will be handled by the HUD system itself
+            // The HUD system will read from gameSettings during its loadSettings() call
         }
 
         // Save the imported data to localStorage
@@ -442,14 +426,18 @@ class GameDataSystem {
             this.game.sceneSystem.exportSceneData() :
             { scenes: [], currentSceneId: null, startSceneId: null };
 
-        // Collect current HUD settings
+        // Collect current HUD settings (use unscaled manual values)
         const hudSettings = this.game.hudSystem ? {
-            position: {
-                x: this.game.hudSystem.position.x,
-                y: this.game.hudSystem.position.y
+            position: this.game.hudSystem.manualPosition || {
+                x: this.game.hudSystem.position.x / this.game.hudSystem.uiScale,
+                y: this.game.hudSystem.position.y / this.game.hudSystem.uiScale
             },
-            width: this.game.hudSystem.width,
-            height: this.game.hudSystem.height
+            width: this.game.hudSystem.manualSize ?
+                this.game.hudSystem.manualSize.width :
+                (this.game.hudSystem.width / this.game.hudSystem.uiScale),
+            height: this.game.hudSystem.manualSize ?
+                this.game.hudSystem.manualSize.height :
+                (this.game.hudSystem.height / this.game.hudSystem.uiScale)
         } : this.defaultGameData.gameSettings.hud;
 
         return {
