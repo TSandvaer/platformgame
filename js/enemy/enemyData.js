@@ -141,6 +141,7 @@ class EnemyData {
                 scale: 2, // Visual sprite scale multiplier (adjusted for 115x78 sprites vs 100x100)
                 renderOffsetY: 20, // Adjust sprite position to align feet with collision box bottom
                 renderOffsetX: -20, // Shift sprite right so collision box covers body instead of club
+                facingInverted: true, // Sprite faces opposite direction from orcs/skeletons
                 animations: {
                     idle: { file: 'IDLE.png', frames: 6, frameWidth: 115, frameHeight: 78 },
                     walk: { file: 'RUN.png', frames: 6, frameWidth: 115, frameHeight: 78 },
