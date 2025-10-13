@@ -55,9 +55,15 @@ class EnemyRenderer {
         // Check enemy instance first (for dynamic changes like death fall), then type data
         const baseRenderOffsetY = (enemy.renderOffsetY !== undefined) ? enemy.renderOffsetY : (enemyTypeData?.renderOffsetY || 0);
         const baseRenderOffsetX = (enemy.renderOffsetX !== undefined) ? enemy.renderOffsetX : (enemyTypeData?.renderOffsetX || 0);
+
+        // Determine if sprite should be flipped (needed to adjust horizontal offset)
+        // If facingInverted is true, flip the logic (for sprites oriented opposite way)
+        const shouldFlip = enemy.facingInverted ? (enemy.facing === 'right') : (enemy.facing === 'left');
+
         // Scale the render offsets proportionally with enemy size
         const renderOffsetY = baseRenderOffsetY * sizeMultiplier;
-        const renderOffsetX = baseRenderOffsetX * sizeMultiplier;
+        // Flip renderOffsetX horizontally when sprite is flipped (for asymmetric sprites)
+        const renderOffsetX = (shouldFlip ? -baseRenderOffsetX : baseRenderOffsetX) * sizeMultiplier;
 
         // Calculate Y offset to keep bottom of collision box at same position
         const scaleYOffset = enemy.height * (1 - sizeMultiplier);
@@ -98,10 +104,7 @@ class EnemyRenderer {
         const scaledWidth = Math.round(spriteRenderWidth * (viewport ? viewport.scaleX : 1));
         const scaledHeight = Math.round(spriteRenderHeight * (viewport ? viewport.scaleY : 1));
 
-        // Flip sprite horizontally based on facing direction
-        // If facingInverted is true, flip the logic (for sprites oriented opposite way)
-        const shouldFlip = enemy.facingInverted ? (enemy.facing === 'right') : (enemy.facing === 'left');
-
+        // Flip sprite horizontally based on facing direction (shouldFlip calculated earlier)
         if (shouldFlip) {
             this.ctx.scale(-1, 1);
             this.ctx.drawImage(

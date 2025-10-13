@@ -77,9 +77,9 @@ class EnemyAI {
                 if (shouldFlee && closeEnoughToFleeFromIdle) {
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriodIdle) {
+                } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriodIdle && !shouldFlee) {
                     // Chase if player is in attraction zone OR player is very close (within 150px) OR enemy has been aggroed
-                    // Only chase if not in recovery period
+                    // Only chase if not in recovery period AND health is not below flee threshold
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
                 } else if (enemy.isMoving && enemy.movementZone.enabled) {
@@ -102,9 +102,9 @@ class EnemyAI {
                 if (shouldFlee && closeEnoughToFlee) {
                     enemy.aiState = 'fleeing';
                     enemy.target = playerCenter;
-                } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriod) {
+                } else if ((playerInAttractionZone || distanceToPlayer < 150 || isAggroed) && !inRecoveryPeriod && !shouldFlee) {
                     // Chase if player is in attraction zone OR player is very close (within 150px) OR enemy has been aggroed
-                    // Only chase if not in recovery period
+                    // Only chase if not in recovery period AND health is not below flee threshold
                     enemy.aiState = 'chasing';
                     enemy.target = playerCenter;
                 } else if (!enemy.isMoving || !enemy.movementZone.enabled) {
@@ -163,8 +163,8 @@ class EnemyAI {
                     } else {
                         // Check edge-to-edge distance to see if player moved out of range
                         const edgeDistance = this.getEdgeToEdgeDistance(enemy, player);
-                        if (edgeDistance > enemy.attackRange + 30) {
-                            // Player moved out of attack range, resume chasing
+                        if (edgeDistance > enemy.attackRange + 30 && !shouldFlee) {
+                            // Player moved out of attack range, resume chasing (only if health is not low)
                             enemy.aiState = 'chasing';
                             enemy.target = playerCenter;
                         }
@@ -192,7 +192,7 @@ class EnemyAI {
                         enemy.target = { x: zoneCenterX, y: enemy.movementZone.y };
                     } else {
                         enemy.aiState = 'returning_to_position';
-                        enemy.target = enemy.originalPosition;
+                        enemy.target = { x: enemy.initialX, y: enemy.initialY };
                     }
                 } else {
                     // Continue fleeing away from player, ignoring zones
@@ -256,6 +256,11 @@ class EnemyAI {
                     enemy.aiState = 'idle';
                     enemy.target = null;
                     enemy.originalPosition = null;
+
+                    // Set recovery period to prevent immediate re-engagement with player if health is still low
+                    if (shouldFlee) {
+                        enemy.fleeRecoveryTime = Date.now() + 3000; // 3 second recovery period
+                    }
                 } else if (shouldFlee && playerTooCloseForPosition) {
                     // Player got close again AND health is still low, resume fleeing
                     enemy.aiState = 'fleeing';
