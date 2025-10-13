@@ -86,6 +86,9 @@ class EnemyManager {
         if (properties.sizeMultiplier !== undefined && !isNaN(properties.sizeMultiplier)) {
             enemy.sizeMultiplier = Math.max(0.5, Math.min(3.0, properties.sizeMultiplier));
         }
+        if (properties.fleeHealthThreshold !== undefined) {
+            enemy.fleeHealthThreshold = Math.max(0, Math.min(1, properties.fleeHealthThreshold));
+        }
 
         // Update movement properties
         if (properties.isMoving !== undefined) {

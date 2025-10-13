@@ -210,7 +210,7 @@ class EnemyData {
             aiState: 'idle', // idle, patrolling, chasing, attacking, fleeing, returning_to_zone, returning_to_position
             target: null,
             lastPlayerPosition: null,
-            fleeHealthThreshold: typeData.fleeHealthThreshold || 0.4,
+            fleeHealthThreshold: typeData.fleeHealthThreshold ?? 0.4,
             facingInverted: typeData.facingInverted || false, // Some sprites face opposite direction
             collisionOffsetY: typeData.collisionOffsetY || 0, // Y offset for collision box (for floating enemies)
             renderOffsetY: typeData.renderOffsetY || 0, // Y offset for visual sprite rendering (for floating enemies)
@@ -294,7 +294,8 @@ class EnemyData {
                 isMoving: enemy.isMoving,
                 movementZone: enemy.movementZone,
                 attractionZone: enemy.attractionZone,
-                sizeMultiplier: enemy.sizeMultiplier
+                sizeMultiplier: enemy.sizeMultiplier,
+                fleeHealthThreshold: enemy.fleeHealthThreshold
             })),
             nextEnemyId: this.nextEnemyId
         };
@@ -309,6 +310,9 @@ class EnemyData {
         for (const enemyData of data.enemies) {
             const enemy = this.createEnemy(enemyData.x, enemyData.y, enemyData.type);
             if (enemy) {
+                // Get type data for backward compatibility checks
+                const typeData = this.enemyTypes[enemyData.type];
+
                 // Restore saved properties
                 enemy.id = enemyData.id;
                 // Set both initial and current positions from saved data
@@ -325,7 +329,7 @@ class EnemyData {
                 enemy.isVisible = enemyData.isVisible !== undefined ? enemyData.isVisible : true;
 
                 // Backward compatibility: ensure fleeHealthThreshold is set for existing enemies
-                enemy.fleeHealthThreshold = enemyData.fleeHealthThreshold || typeData.fleeHealthThreshold || 0.4;
+                enemy.fleeHealthThreshold = enemyData.fleeHealthThreshold !== undefined ? enemyData.fleeHealthThreshold : (typeData?.fleeHealthThreshold ?? 0.4);
 
                 // Backward compatibility: default sizeMultiplier to 1.0 if not present
                 enemy.sizeMultiplier = enemyData.sizeMultiplier !== undefined ? enemyData.sizeMultiplier : 1.0;

@@ -430,6 +430,7 @@ class EnemyUIHandler extends UIHandler {
         updateValue('enemyDamage', selectedEnemy.damage);
         updateValue('enemySpeed', selectedEnemy.speed);
         updateValue('enemySize', selectedEnemy.sizeMultiplier || 1.0);
+        updateValue('enemyFleeThreshold', selectedEnemy.fleeHealthThreshold ?? 0.4);
 
         // Update checkboxes
         const updateCheckbox = (id, checked) => {
@@ -550,7 +551,7 @@ class EnemyUIHandler extends UIHandler {
 
         // Enemy property input change handlers
         const propertyInputs = [
-            'enemyX', 'enemyY', 'enemyHealth', 'enemyDamage', 'enemySpeed', 'enemySize'
+            'enemyX', 'enemyY', 'enemyHealth', 'enemyDamage', 'enemySpeed', 'enemySize', 'enemyFleeThreshold'
         ];
 
         propertyInputs.forEach(inputId => {
@@ -616,6 +617,7 @@ class EnemyUIHandler extends UIHandler {
         const damageInput = parseInt(document.getElementById('enemyDamage')?.value);
         const speedInput = parseFloat(document.getElementById('enemySpeed')?.value);
         const sizeInput = parseFloat(document.getElementById('enemySize')?.value);
+        const fleeThresholdInput = parseFloat(document.getElementById('enemyFleeThreshold')?.value);
 
         // Only use input values if they're valid numbers, otherwise keep current values
         const x = !isNaN(xInput) ? xInput : selectedEnemy.x;
@@ -624,6 +626,7 @@ class EnemyUIHandler extends UIHandler {
         const damage = !isNaN(damageInput) ? damageInput : selectedEnemy.damage;
         const speed = !isNaN(speedInput) ? speedInput : selectedEnemy.speed;
         const sizeMultiplier = !isNaN(sizeInput) ? sizeInput : (selectedEnemy.sizeMultiplier || 1.0);
+        const fleeHealthThreshold = !isNaN(fleeThresholdInput) ? fleeThresholdInput : (selectedEnemy.fleeHealthThreshold ?? 0.4);
 
         // Update enemy properties
         this.game.enemySystem.updateEnemyProperties(selectedEnemy.id, {
@@ -632,7 +635,8 @@ class EnemyUIHandler extends UIHandler {
             health: health,
             damage: damage,
             speed: speed,
-            sizeMultiplier: sizeMultiplier
+            sizeMultiplier: sizeMultiplier,
+            fleeHealthThreshold: fleeHealthThreshold
         });
 
         // Update UI

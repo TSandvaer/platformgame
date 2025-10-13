@@ -42,7 +42,7 @@ class EnemyAI {
         if (enemy.id === 5 && enemy.health < enemy.maxHealth) {
         }
 
-        const shouldFlee = healthPercentage <= (enemy.fleeHealthThreshold || 0.4) && !enemy.isDead;
+        const shouldFlee = healthPercentage <= (enemy.fleeHealthThreshold ?? 0.4) && !enemy.isDead;
 
         // Clear recovery time if health has recovered above flee threshold
         if (!shouldFlee && enemy.fleeRecoveryTime) {
