@@ -199,6 +199,7 @@ class EnemyData {
             frameTimer: 0,
             frameRate: 150,
             facing: 'right',
+            initialFacing: 'right', // Design-time facing direction (preserved across reloads)
 
             // Physics
             velocityX: 0,
@@ -295,7 +296,8 @@ class EnemyData {
                 movementZone: enemy.movementZone,
                 attractionZone: enemy.attractionZone,
                 sizeMultiplier: enemy.sizeMultiplier,
-                fleeHealthThreshold: enemy.fleeHealthThreshold
+                fleeHealthThreshold: enemy.fleeHealthThreshold,
+                initialFacing: enemy.initialFacing || 'right'
             })),
             nextEnemyId: this.nextEnemyId
         };
@@ -333,6 +335,10 @@ class EnemyData {
 
                 // Backward compatibility: default sizeMultiplier to 1.0 if not present
                 enemy.sizeMultiplier = enemyData.sizeMultiplier !== undefined ? enemyData.sizeMultiplier : 1.0;
+
+                // Backward compatibility: default initialFacing to 'right' if not present
+                enemy.initialFacing = enemyData.initialFacing || 'right';
+                enemy.facing = enemy.initialFacing; // Set current facing to initial facing on load
 
                 if (enemyData.movementZone) {
                     enemy.movementZone = { ...enemy.movementZone, ...enemyData.movementZone };

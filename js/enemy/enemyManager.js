@@ -89,6 +89,10 @@ class EnemyManager {
         if (properties.fleeHealthThreshold !== undefined) {
             enemy.fleeHealthThreshold = Math.max(0, Math.min(1, properties.fleeHealthThreshold));
         }
+        if (properties.initialFacing !== undefined) {
+            enemy.initialFacing = properties.initialFacing;
+            enemy.facing = properties.initialFacing; // Also update current facing
+        }
 
         // Update movement properties
         if (properties.isMoving !== undefined) {
@@ -143,6 +147,8 @@ class EnemyManager {
             duplicate.damage = original.damage;
             duplicate.isMoving = original.isMoving;
             duplicate.sizeMultiplier = original.sizeMultiplier || 1.0;
+            duplicate.initialFacing = original.initialFacing || 'right';
+            duplicate.facing = duplicate.initialFacing;
             duplicate.movementZone = { ...original.movementZone };
             duplicate.attractionZone = { ...original.attractionZone };
 
@@ -237,6 +243,10 @@ class EnemyManager {
             }
             if (enemy.initialY !== undefined) {
                 enemy.y = enemy.initialY;
+            }
+            // Reset facing to initial facing direction
+            if (enemy.initialFacing !== undefined) {
+                enemy.facing = enemy.initialFacing;
             }
             enemy.health = enemy.maxHealth;
             enemy.isDead = false;
