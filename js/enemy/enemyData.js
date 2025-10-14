@@ -240,6 +240,9 @@ class EnemyData {
             // Patrol state
             patrolDirection: 1, // 1 for right, -1 for left
             patrolSpeed: 1,
+            movementDelay: 0, // Delay in milliseconds at patrol zone ends
+            delayTimer: 0, // Current delay timer
+            isDelaying: false, // Whether enemy is currently paused at patrol end
 
             // Size multiplier for scaling enemy (both visually and collision box)
             sizeMultiplier: 1.0 // 1.0 = normal size, 0.5 = half size, 2.0 = double size
@@ -297,7 +300,8 @@ class EnemyData {
                 attractionZone: enemy.attractionZone,
                 sizeMultiplier: enemy.sizeMultiplier,
                 fleeHealthThreshold: enemy.fleeHealthThreshold,
-                initialFacing: enemy.initialFacing || 'right'
+                initialFacing: enemy.initialFacing || 'right',
+                movementDelay: enemy.movementDelay || 0
             })),
             nextEnemyId: this.nextEnemyId
         };
@@ -339,6 +343,9 @@ class EnemyData {
                 // Backward compatibility: default initialFacing to 'right' if not present
                 enemy.initialFacing = enemyData.initialFacing || 'right';
                 enemy.facing = enemy.initialFacing; // Set current facing to initial facing on load
+
+                // Backward compatibility: default movementDelay to 0 if not present
+                enemy.movementDelay = enemyData.movementDelay !== undefined ? enemyData.movementDelay : 0;
 
                 if (enemyData.movementZone) {
                     enemy.movementZone = { ...enemy.movementZone, ...enemyData.movementZone };

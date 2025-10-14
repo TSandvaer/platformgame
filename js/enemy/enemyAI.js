@@ -281,7 +281,19 @@ class EnemyAI {
 
             case 'patrolling':
                 if (enemy.movementZone.enabled) {
-                    targetVelocityX = this.calculatePatrolMovement(enemy);
+                    // Handle delay at patrol boundaries
+                    if (enemy.isDelaying) {
+                        enemy.delayTimer -= 16.67 * physicsMultiplier; // Decrement delay timer
+                        if (enemy.delayTimer <= 0) {
+                            enemy.isDelaying = false; // Delay complete
+                            // Reverse direction after delay
+                            enemy.patrolDirection = -enemy.patrolDirection;
+                        }
+                        targetVelocityX = 0; // Don't move while delaying
+                        enemy.velocityX = 0; // Instantly stop to prevent overshooting
+                    } else {
+                        targetVelocityX = this.calculatePatrolMovement(enemy);
+                    }
                 }
                 break;
 
@@ -353,9 +365,29 @@ class EnemyAI {
 
         // Check if we've reached the patrol boundaries
         if (enemy.patrolDirection > 0 && enemyCenter >= zone.endX) {
-            enemy.patrolDirection = -1;
+            // Reached right boundary
+            if (enemy.movementDelay > 0 && !enemy.isDelaying) {
+                // Clamp position and start delay at boundary
+                enemy.x = zone.endX - enemy.width / 2;
+                enemy.isDelaying = true;
+                enemy.delayTimer = enemy.movementDelay;
+                return 0; // Stop movement while starting delay
+            } else if (enemy.movementDelay === 0) {
+                // No delay configured, reverse immediately without clamping
+                enemy.patrolDirection = -1;
+            }
         } else if (enemy.patrolDirection < 0 && enemyCenter <= zone.startX) {
-            enemy.patrolDirection = 1;
+            // Reached left boundary
+            if (enemy.movementDelay > 0 && !enemy.isDelaying) {
+                // Clamp position and start delay at boundary
+                enemy.x = zone.startX - enemy.width / 2;
+                enemy.isDelaying = true;
+                enemy.delayTimer = enemy.movementDelay;
+                return 0; // Stop movement while starting delay
+            } else if (enemy.movementDelay === 0) {
+                // No delay configured, reverse immediately without clamping
+                enemy.patrolDirection = 1;
+            }
         }
 
         const movement = enemy.patrolDirection * enemy.speed;

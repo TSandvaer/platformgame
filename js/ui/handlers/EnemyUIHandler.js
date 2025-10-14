@@ -438,6 +438,9 @@ class EnemyUIHandler extends UIHandler {
             facingSelect.value = selectedEnemy.initialFacing || 'right';
         }
 
+        // Update movement delay
+        updateValue('enemyMovementDelay', selectedEnemy.movementDelay || 0);
+
         // Update checkboxes
         const updateCheckbox = (id, checked) => {
             const element = document.getElementById(id);
@@ -557,7 +560,7 @@ class EnemyUIHandler extends UIHandler {
 
         // Enemy property input change handlers
         const propertyInputs = [
-            'enemyX', 'enemyY', 'enemyHealth', 'enemyDamage', 'enemySpeed', 'enemySize', 'enemyFleeThreshold', 'enemyFacing'
+            'enemyX', 'enemyY', 'enemyHealth', 'enemyDamage', 'enemySpeed', 'enemySize', 'enemyFleeThreshold', 'enemyFacing', 'enemyMovementDelay'
         ];
 
         propertyInputs.forEach(inputId => {
@@ -625,6 +628,7 @@ class EnemyUIHandler extends UIHandler {
         const sizeInput = parseFloat(document.getElementById('enemySize')?.value);
         const fleeThresholdInput = parseFloat(document.getElementById('enemyFleeThreshold')?.value);
         const facingInput = document.getElementById('enemyFacing')?.value;
+        const movementDelayInput = parseFloat(document.getElementById('enemyMovementDelay')?.value);
 
         // Only use input values if they're valid numbers, otherwise keep current values
         const x = !isNaN(xInput) ? xInput : selectedEnemy.x;
@@ -635,6 +639,7 @@ class EnemyUIHandler extends UIHandler {
         const sizeMultiplier = !isNaN(sizeInput) ? sizeInput : (selectedEnemy.sizeMultiplier || 1.0);
         const fleeHealthThreshold = !isNaN(fleeThresholdInput) ? fleeThresholdInput : (selectedEnemy.fleeHealthThreshold ?? 0.4);
         const initialFacing = facingInput || selectedEnemy.initialFacing || 'right';
+        const movementDelay = !isNaN(movementDelayInput) ? movementDelayInput : (selectedEnemy.movementDelay || 0);
 
         // Update enemy properties
         this.game.enemySystem.updateEnemyProperties(selectedEnemy.id, {
@@ -645,7 +650,8 @@ class EnemyUIHandler extends UIHandler {
             speed: speed,
             sizeMultiplier: sizeMultiplier,
             fleeHealthThreshold: fleeHealthThreshold,
-            initialFacing: initialFacing
+            initialFacing: initialFacing,
+            movementDelay: movementDelay
         });
 
         // Update UI

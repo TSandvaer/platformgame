@@ -89,6 +89,9 @@ class EnemyManager {
         if (properties.fleeHealthThreshold !== undefined) {
             enemy.fleeHealthThreshold = Math.max(0, Math.min(1, properties.fleeHealthThreshold));
         }
+        if (properties.movementDelay !== undefined) {
+            enemy.movementDelay = Math.max(0, properties.movementDelay);
+        }
         if (properties.initialFacing !== undefined) {
             enemy.initialFacing = properties.initialFacing;
             enemy.facing = properties.initialFacing; // Also update current facing
