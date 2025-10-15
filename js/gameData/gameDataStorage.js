@@ -9,6 +9,7 @@ class GameDataStorage {
         // Check for auto-save settings
         this.autoSaveEnabled = localStorage.getItem('platformGame_autoSave') !== 'false';
         this.autoSaveInterval = 60000; // Auto-save every minute
+        this.initialAutoSaveDelay = 10000; // Wait 10 seconds before first auto-save (allow initialization)
 
         // Clean up any inconsistent legacy data
         this.cleanupLegacyData();
@@ -24,9 +25,24 @@ class GameDataStorage {
             clearInterval(this.autoSaveTimer);
         }
 
-        this.autoSaveTimer = setInterval(() => {
-            this.dataSystem.saveCurrentData();
-        }, this.autoSaveInterval);
+        // Wait before starting auto-save to allow game initialization
+        console.log('⏱️ Auto-save: Waiting', this.initialAutoSaveDelay / 1000, 'seconds before first auto-save...');
+
+        setTimeout(() => {
+            console.log('✅ Auto-save: Starting auto-save timer (saves every', this.autoSaveInterval / 1000, 'seconds)');
+
+            this.autoSaveTimer = setInterval(() => {
+                // CRITICAL: Check if game is ready before auto-saving
+                if (!this.dataSystem.isReadyForAutoSave()) {
+                    console.warn('⚠️ Auto-save: Skipping save - game not fully initialized');
+                    return;
+                }
+
+                console.log('💾 Auto-save: Saving game data...');
+                this.dataSystem.saveCurrentData();
+                console.log('✅ Auto-save: Save complete');
+            }, this.autoSaveInterval);
+        }, this.initialAutoSaveDelay);
     }
 
     // Stop auto-save timer

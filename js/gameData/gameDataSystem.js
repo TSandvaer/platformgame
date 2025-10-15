@@ -419,6 +419,31 @@ class GameDataSystem {
         this.storage.updateInventoryItems(this.gameData.inventoryItems);
     }
 
+    // Check if game is ready for auto-save (all systems initialized)
+    isReadyForAutoSave() {
+        // Check if all sprites are loaded
+        if (!this.game.allSpritesLoaded) {
+            return false;
+        }
+
+        // Check if scene system is initialized
+        if (!this.game.sceneSystem || !this.game.sceneSystem.currentScene) {
+            return false;
+        }
+
+        // Check if enemy system is initialized (if it exists)
+        if (this.game.enemySystem && !this.game.enemySystem.isInitialized) {
+            return false;
+        }
+
+        // Check if NPC system is initialized (if it exists)
+        if (this.game.npcSystem && !this.game.npcSystem.isInitialized) {
+            return false;
+        }
+
+        return true;
+    }
+
     // Collect current game state
     collectCurrentGameData() {
         // Get scene data from scene system
