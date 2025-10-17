@@ -90,7 +90,7 @@
     margin-bottom: 20px;
 }
 
-.btn-primary, .btn-secondary, .btn-select, .btn-duplicate, .btn-delete {
+.btn-primary, .btn-secondary, .btn-select, .btn-rename, .btn-duplicate, .btn-delete {
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
@@ -131,6 +131,16 @@
     background-color: #666;
     cursor: not-allowed;
     opacity: 0.6;
+}
+
+.btn-rename {
+    background-color: #9C27B0;
+    color: white;
+    padding: 8px 12px;
+}
+
+.btn-rename:hover {
+    background-color: #7B1FA2;
 }
 
 .btn-duplicate {

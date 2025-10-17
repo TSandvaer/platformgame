@@ -8,6 +8,7 @@ class GameSelector {
         this.games = [];
         this.selectedGameId = null;
         this.modal = null;
+        this.renamingGameId = null; // Track which game is being renamed
     }
 
     /**
@@ -71,6 +72,22 @@ class GameSelector {
                                 <button class="btn-secondary" onclick="gameSelector.hideCreateGameForm()">Cancel</button>
                             </div>
                         </div>
+
+                        <div id="rename-game-form" class="create-game-form" style="display: none;">
+                            <h3>Rename Game</h3>
+                            <div class="form-group">
+                                <label for="rename-game-name">Game Name:</label>
+                                <input type="text" id="rename-game-name" placeholder="Enter new game name..." />
+                            </div>
+                            <div class="form-group">
+                                <label for="rename-game-description">Description (optional):</label>
+                                <textarea id="rename-game-description" placeholder="Enter game description..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button class="btn-primary" onclick="gameSelector.submitRenameGame()">Rename</button>
+                                <button class="btn-secondary" onclick="gameSelector.hideRenameGameForm()">Cancel</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,6 +131,7 @@ class GameSelector {
     close() {
         this.modal.style.display = 'none';
         this.hideCreateGameForm();
+        this.hideRenameGameForm();
     }
 
     /**
@@ -188,6 +206,10 @@ class GameSelector {
                                 ${isSelected ? 'disabled' : ''}>
                             ${isSelected ? 'Current' : 'Select'}
                         </button>
+                        <button class="btn-rename" onclick="gameSelector.showRenameGameForm('${game.id}')"
+                                title="Rename game">
+                            Rename
+                        </button>
                         <button class="btn-duplicate" onclick="gameSelector.duplicateGame('${game.id}')"
                                 title="Duplicate game">
                             Copy
@@ -208,6 +230,7 @@ class GameSelector {
      * Show create game form
      */
     showCreateGameForm() {
+        this.hideRenameGameForm(); // Hide rename form if open
         document.getElementById('create-game-form').style.display = 'block';
         document.getElementById('game-list-container').style.display = 'none';
         document.getElementById('new-game-name').focus();
@@ -369,6 +392,85 @@ class GameSelector {
                 console.error('Error deleting game:', error);
                 alert('Error deleting game: ' + error.message);
             }
+        }
+    }
+
+    /**
+     * Show rename game form
+     */
+    async showRenameGameForm(gameId) {
+        this.hideCreateGameForm(); // Hide create form if open
+
+        // Find the game in the list
+        const game = this.games.find(g => g.id === gameId);
+        if (!game) {
+            alert('Game not found');
+            return;
+        }
+
+        // Store the game ID being renamed
+        this.renamingGameId = gameId;
+
+        // Populate the form with current values
+        document.getElementById('rename-game-name').value = game.name;
+        document.getElementById('rename-game-description').value = game.description || '';
+
+        // Show the rename form
+        document.getElementById('rename-game-form').style.display = 'block';
+        document.getElementById('game-list-container').style.display = 'none';
+        document.getElementById('rename-game-name').focus();
+        document.getElementById('rename-game-name').select();
+    }
+
+    /**
+     * Hide rename game form
+     */
+    hideRenameGameForm() {
+        document.getElementById('rename-game-form').style.display = 'none';
+        document.getElementById('game-list-container').style.display = 'block';
+
+        // Clear form
+        document.getElementById('rename-game-name').value = '';
+        document.getElementById('rename-game-description').value = '';
+        this.renamingGameId = null;
+    }
+
+    /**
+     * Submit rename game
+     */
+    async submitRenameGame() {
+        if (!this.renamingGameId) {
+            alert('No game selected for renaming');
+            return;
+        }
+
+        const name = document.getElementById('rename-game-name').value.trim();
+        const description = document.getElementById('rename-game-description').value.trim();
+
+        if (!name) {
+            alert('Please enter a game name');
+            return;
+        }
+
+        try {
+            const response = await this.apiClient.updateGameMetadata(this.renamingGameId, name, description);
+
+            if (response.success) {
+                alert('Game renamed successfully!');
+                this.hideRenameGameForm();
+                await this.loadGames();
+
+                // Update the current game indicator if we renamed the active game
+                const currentGameId = this.apiClient.getCurrentGameId();
+                if (this.renamingGameId === currentGameId) {
+                    this.updateCurrentGameIndicator(currentGameId);
+                }
+            } else {
+                alert('Failed to rename game: ' + response.error);
+            }
+        } catch (error) {
+            console.error('Error renaming game:', error);
+            alert('Error renaming game: ' + error.message);
         }
     }
 
