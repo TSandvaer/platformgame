@@ -30,6 +30,8 @@ class PlatformRenderer {
             darkDirt: { tileset: 'tileset', tileX: 16, tileY: 22 }, // Brown/dirt texture
             grass: { tileset: 'tileset', tileX: 20, tileY: 22 }, // Green grass-like texture
             sand: { tileset: 'tileset', tileX: 6, tileY: 4 }, // Sandy/tan texture
+            darkSand: { tileset: 'tileset', tileX: 4, tileY: 24 }, // Sandy/tan texture
+            sandGrass: { tileset: 'tileset', tileX: 3, tileY: 24 }, // Sandy/tan texture
             mud: { tileset: 'tileset', tileX: 17, tileY: 4 }, // Darker mud texture
 
             // Wood textures

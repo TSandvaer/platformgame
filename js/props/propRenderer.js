@@ -96,9 +96,9 @@ class PropRenderer {
 
             this.drawProp(renderProp, propTypes, isDevelopmentMode, selectedProp, selectedProps, renderObstacles ? viewport : null);
 
-            // Render durability bar after the prop (but only for obstacle props - foreground rendering)
+            // Render durability bar after the prop for all destroyable props
             // Don't render durability bar for falling debris or destroyed props
-            if (renderObstacles && prop.destroyable && !prop.isFallingDebris && !prop.isDestroyed) {
+            if (prop.destroyable && !prop.isFallingDebris && !prop.isDestroyed) {
                 this.renderDurabilityBar(prop, propTypes, viewport, camera);
             }
         });
