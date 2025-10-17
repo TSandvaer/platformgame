@@ -147,8 +147,8 @@ class GameDataSystem {
 
     // Load game data on startup
     async loadGameData() {
-        // Try to load from localStorage first
-        const savedData = this.storage.loadFromLocalStorage();
+        // Try to load from MongoDB/storage first
+        const savedData = await this.storage.loadGameData();
         if (savedData && savedData.scenes && savedData.scenes.length > 0) {
             // Log what we found
 
@@ -224,15 +224,15 @@ class GameDataSystem {
             // The HUD system will read from gameSettings during its loadSettings() call
         }
 
-        // Save the imported data to localStorage
-        this.storage.saveToLocalStorage(gameData);
+        // Note: We don't save here because this is called during load/import
+        // Saves should only happen explicitly via saveCurrentData() or auto-save
         return true;
     }
 
     // Save current game state
-    saveCurrentData() {
+    async saveCurrentData() {
         const gameData = this.collectCurrentGameData();
-        this.storage.saveToLocalStorage(gameData);
+        await this.storage.saveGameData(gameData);
     }
 
     // Update just the current scene ID in localStorage

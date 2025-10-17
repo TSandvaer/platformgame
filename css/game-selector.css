@@ -1,0 +1,326 @@
+/* Game Selector Modal Styles */
+
+.game-selector-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.game-selector-content {
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.game-selector-header {
+    background-color: #333;
+    padding: 20px;
+    border-bottom: 2px solid #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-selector-header h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 24px;
+}
+
+.game-selector-header .close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 32px;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.game-selector-header .close-btn:hover {
+    background-color: #444;
+}
+
+.game-selector-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.game-selector-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-primary, .btn-secondary, .btn-select, .btn-duplicate, .btn-delete {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #45a049;
+}
+
+.btn-secondary {
+    background-color: #666;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #777;
+}
+
+.btn-select {
+    background-color: #2196F3;
+    color: white;
+}
+
+.btn-select:hover:not(:disabled) {
+    background-color: #0b7dda;
+}
+
+.btn-select.selected, .btn-select:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-duplicate {
+    background-color: #FF9800;
+    color: white;
+    padding: 8px 12px;
+}
+
+.btn-duplicate:hover {
+    background-color: #e68900;
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: white;
+    padding: 8px 12px;
+}
+
+.btn-delete:hover {
+    background-color: #da190b;
+}
+
+/* Game List */
+.game-list-container {
+    min-height: 300px;
+}
+
+.game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.game-item {
+    background-color: #333;
+    border: 2px solid #444;
+    border-radius: 6px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.game-item:hover {
+    border-color: #555;
+    background-color: #383838;
+}
+
+.game-item.selected {
+    border-color: #4CAF50;
+    background-color: #2d3d2d;
+}
+
+.game-info {
+    flex: 1;
+}
+
+.game-info h3 {
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-size: 18px;
+}
+
+.game-description {
+    margin: 0 0 8px 0;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.game-meta {
+    display: flex;
+    gap: 16px;
+    color: #888;
+    font-size: 12px;
+}
+
+.game-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Messages */
+.loading-message, .error-message, .empty-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #aaa;
+}
+
+.error-message {
+    color: #f44336;
+}
+
+.error-message p {
+    margin: 8px 0;
+}
+
+.error-details {
+    font-size: 12px;
+    color: #999;
+}
+
+.error-hint {
+    font-size: 14px;
+    color: #FF9800;
+    font-weight: 500;
+    margin-top: 16px;
+}
+
+.empty-message p {
+    margin: 8px 0;
+}
+
+/* Create Game Form */
+.create-game-form {
+    background-color: #333;
+    border-radius: 6px;
+    padding: 20px;
+}
+
+.create-game-form h3 {
+    margin: 0 0 20px 0;
+    color: #fff;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ddd;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    background-color: #444;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-group input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .game-selector-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .game-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .game-actions {
+        margin-top: 12px;
+        width: 100%;
+    }
+
+    .game-actions button {
+        flex: 1;
+    }
+}

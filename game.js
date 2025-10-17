@@ -1255,7 +1255,18 @@ class PlatformRPG {
 }
 
 // Wait for DOM to be ready before creating the game
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+    // Initialize game selector
+    if (window.gameSelector) {
+        window.gameSelector.initialize();
+
+        // Check if a game is selected
+        const hasGameSelected = await window.gameSelector.checkAndPromptGameSelection();
+
+        // If no game selected, the selector modal will show
+        // User must select a game before proceeding
+    }
+
     const game = new PlatformRPG();
     window.game = game; // Make it available globally for debugging
 });

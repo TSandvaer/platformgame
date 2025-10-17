@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/inventory.css">
     <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/game-selector.css">
 </head>
 <body>
     <!-- Scene Saved Overlay -->
@@ -49,6 +50,8 @@
                 <button class="btn" id="cameraModeBtn">Camera: Character Mode</button>
                 <button class="btn" id="focusPlayerBtn">Focus Player</button>
                 <button class="btn" id="gameSettingsBtn">⚙️ Game Settings</button>
+                <button class="btn" id="selectGameBtn" onclick="gameSelector.open()">🎮 Select Game</button>
+                <span id="currentGameIndicator" style="margin-left: 10px; padding: 5px 10px; background: #4CAF50; color: white; border-radius: 4px; font-size: 12px; display: none;"></span>
                 <button class="btn" id="backToDevBtn" style="display: none;">Back to Dev</button>
                 <select id="productionSceneSelect" style="display: none; margin-left: 10px; padding: 5px; width: auto;">
                     <option value="">Select Scene...</option>
@@ -810,6 +813,10 @@
 
     <!-- HUD System Scripts -->
     <script src="js/hud/hudSystem.js"></script>
+
+    <!-- API and Game Selector Scripts (load before game.js) -->
+    <script src="js/api/apiClient.js"></script>
+    <script src="js/ui/gameSelector.js"></script>
 
     <!-- Chest Inventory Editor Modal -->
     <div id="chestInventoryModal" class="modal" style="display: none;">
