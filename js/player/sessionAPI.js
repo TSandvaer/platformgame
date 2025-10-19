@@ -6,7 +6,23 @@
 
 class SessionAPI {
   constructor() {
-    this.baseURL = 'http://localhost:3000/api/sessions';
+    this.baseURL = this.getBaseURL();
+  }
+
+  /**
+   * Get base URL for API calls based on environment
+   */
+  getBaseURL() {
+    const isDevelopment = window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '';
+
+    if (isDevelopment) {
+      return 'http://localhost:3000/api/sessions';
+    }
+
+    // For production, use the same host as the frontend
+    return `${window.location.protocol}//${window.location.host}/api/sessions`;
   }
 
   /**

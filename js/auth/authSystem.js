@@ -9,6 +9,23 @@ class AuthSystem {
     this.authToken = null;
     this.listeners = [];
     this.isInitialized = false;
+    this.baseURL = this.getBaseURL();
+  }
+
+  /**
+   * Get base URL for API calls based on environment
+   */
+  getBaseURL() {
+    const isDevelopment = window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '';
+
+    if (isDevelopment) {
+      return 'http://localhost:3000/api';
+    }
+
+    // For production, use the same host as the frontend
+    return `${window.location.protocol}//${window.location.host}/api`;
   }
 
   /**
@@ -70,7 +87,7 @@ class AuthSystem {
    * Fetch user data from backend
    */
   async fetchUserData() {
-    const response = await fetch('http://localhost:3000/api/users/me', {
+    const response = await fetch(`${this.baseURL}/users/me`, {
       headers: {
         'Authorization': `Bearer ${this.authToken}`
       }
@@ -101,7 +118,7 @@ class AuthSystem {
       const token = await firebaseUser.getIdToken();
 
       // Register user in our backend
-      const response = await fetch('http://localhost:3000/api/users/register', {
+      const response = await fetch(`${this.baseURL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -164,7 +181,7 @@ class AuthSystem {
    */
   async checkUsernameAvailability(username) {
     try {
-      const response = await fetch(`http://localhost:3000/api/users/check-username/${username}`);
+      const response = await fetch(`${this.baseURL}/users/check-username/${username}`);
       const data = await response.json();
       return data.available;
     } catch (error) {
