@@ -289,13 +289,19 @@ class PlatformRPG {
 
             this.pendingGameDataImport = null; // Clear pending data
         } else {
-            // Initialize scene system first (creates default if needed)
-            this.sceneSystem.initialize();
-
-            // Load game data from MongoDB (this will override the defaults with real data)
+            // Load game data from MongoDB FIRST
             console.log('📥 Loading game data from MongoDB...');
             await this.gameDataSystem.loadGameData();
             console.log('✅ Game data loaded');
+
+            // Initialize scene system ONLY if no data was loaded from MongoDB
+            // (applyGameData already loads the scene, so we only need to initialize if there was no data)
+            if (this.sceneSystem.data.scenes.length === 0) {
+                this.sceneSystem.initialize();
+            } else {
+                // Just update the UI since the scene is already loaded
+                this.sceneSystem.updateUI();
+            }
         }
 
         // Position player at the current scene's start position
