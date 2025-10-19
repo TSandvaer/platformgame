@@ -11,8 +11,8 @@
         body {
             margin: 0;
             padding: 0;
-            background: #1a1a1a;
-            color: white;
+            background: #0d1921;
+            color: #e8e8e8;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             display: flex;
             flex-direction: column;
@@ -20,12 +20,12 @@
         }
 
         .player-header {
-            background: #2a2a2a;
+            background: #2d3f5f;
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #444;
+            border-bottom: 2px solid #2d3f5f;
             position: relative;
         }
 
@@ -53,7 +53,7 @@
 
         .btn {
             padding: 8px 16px;
-            background: #667eea;
+            background: #4a90e2;
             color: white;
             border: none;
             border-radius: 6px;
@@ -63,15 +63,15 @@
         }
 
         .btn:hover {
-            background: #5568d3;
+            background: #5da3f5;
         }
 
         .btn-secondary {
-            background: #3a3a3a;
+            background: #232f3e;
         }
 
         .btn-secondary:hover {
-            background: #4a4a4a;
+            background: #2a3a4a;
         }
 
         .game-container {
@@ -83,9 +83,9 @@
         }
 
         canvas {
-            border: 2px solid #444;
+            border: 2px solid #2d3f5f;
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
         }
 
         .loading-container {
@@ -96,8 +96,8 @@
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid #3a3a3a;
-            border-top: 4px solid #667eea;
+            border: 4px solid #232f3e;
+            border-top: 4px solid #4a90e2;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
@@ -145,14 +145,14 @@
             align-items: center;
             gap: 10px;
             padding: 6px 12px;
-            background: #3a3a3a;
+            background: #232f3e;
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.2s;
         }
 
         .user-menu:hover {
-            background: #4a4a4a;
+            background: #2a3a4a;
         }
 
         .user-menu.active {
@@ -163,7 +163,7 @@
             width: 28px;
             height: 28px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4a90e2 0%, #5da3f5 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -189,12 +189,12 @@
             position: absolute;
             top: 60px;
             right: 20px;
-            background: #2a2a2a;
-            border: 1px solid #444;
+            background: #15202b;
+            border: 1px solid #2d3f5f;
             border-radius: 6px;
             padding: 8px 0;
             min-width: 180px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             display: none;
             z-index: 1000;
         }
@@ -205,19 +205,19 @@
 
         .dropdown-item {
             padding: 10px 16px;
-            color: #ddd;
+            color: #e8e8e8;
             cursor: pointer;
             transition: background 0.2s;
             font-size: 14px;
         }
 
         .dropdown-item:hover {
-            background: #3a3a3a;
+            background: #232f3e;
         }
 
         .dropdown-divider {
             height: 1px;
-            background: #444;
+            background: #2d3f5f;
             margin: 4px 0;
         }
 
@@ -235,7 +235,7 @@
         .burger-icon {
             width: 40px;
             height: 40px;
-            background: #3a3a3a;
+            background: #232f3e;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -243,21 +243,21 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            color: #ddd;
+            color: #e8e8e8;
             transition: background 0.2s;
         }
 
         .burger-icon:hover {
-            background: #4a4a4a;
+            background: #2a3a4a;
         }
 
         .current-session-label {
             font-size: 13px;
-            color: #aaa;
+            color: #a8b8c8;
         }
 
         .current-session-name {
-            color: #667eea;
+            color: #4a90e2;
             font-weight: 600;
         }
 
@@ -265,12 +265,12 @@
             position: absolute;
             top: 60px;
             left: 20px;
-            background: #2a2a2a;
-            border: 1px solid #444;
+            background: #15202b;
+            border: 1px solid #2d3f5f;
             border-radius: 6px;
             padding: 8px 0;
             min-width: 180px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             display: none;
             z-index: 1000;
         }
