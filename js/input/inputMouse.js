@@ -46,13 +46,24 @@ class InputMouse {
         const hasMeleeAttack = characterConfig?.animations?.attack_melee;
         const hasRangedAttack = characterConfig?.animations?.attack_ranged;
 
-        // Determine attack type based on Ctrl key
-        // Ctrl+Click = ranged attack, otherwise = melee attack
+        // Determine attack type
+        // In production mode (published games): prefer ranged attack if available for better UX
+        // In development mode: Shift+Click = melee attack, otherwise = ranged attack (if available)
         let attackType = 'attack'; // Default for backward compatibility
         let isRangedAttack = false;
 
-        if (event && event.ctrlKey && hasRangedAttack) {
-            // Ctrl+Click triggers ranged attack
+        if (!this.game.isDevelopmentMode && hasRangedAttack) {
+            // Production/Published game: default to ranged attack for better player experience
+            // Shift+Click to force melee if both available
+            if (event && event.shiftKey && hasMeleeAttack) {
+                attackType = 'attack_melee';
+                isRangedAttack = false;
+            } else {
+                attackType = 'attack_ranged';
+                isRangedAttack = true;
+            }
+        } else if (event && event.ctrlKey && hasRangedAttack) {
+            // Development mode: Ctrl+Click triggers ranged attack
             attackType = 'attack_ranged';
             isRangedAttack = true;
         } else if (hasMeleeAttack) {

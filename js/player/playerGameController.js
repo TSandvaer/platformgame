@@ -171,6 +171,9 @@ class PlayerGameController {
             // Create the game instance
             this.game = new PlatformRPG();
 
+            // Make game globally accessible for projectile system and other subsystems
+            window.game = this.game;
+
             // CRITICAL FIX: Override the gameData that was set by GameDataSystem constructor
             // The real GameDataSystem constructor sets this.gameData = {...this.defaultGameData}
             // which contains hardcoded HUD settings {width: 220, height: 80}
