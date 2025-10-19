@@ -270,14 +270,14 @@ class PlatformRPG {
         this.init();
     }
 
-    checkAllSpritesLoaded() {
+    async checkAllSpritesLoaded() {
         if (this.spritesLoaded.platforms && this.spritesLoaded.props) {
             this.allSpritesLoaded = true;
-            this.onAllSpritesLoaded();
+            await this.onAllSpritesLoaded();
         }
     }
 
-    onAllSpritesLoaded() {
+    async onAllSpritesLoaded() {
         // Check if we have pending gameData.json import
         if (this.pendingGameDataImport) {
             // Initialize scene system with imported data
@@ -289,8 +289,13 @@ class PlatformRPG {
 
             this.pendingGameDataImport = null; // Clear pending data
         } else {
-            // Initialize scene system normally
+            // Initialize scene system first (creates default if needed)
             this.sceneSystem.initialize();
+
+            // Load game data from MongoDB (this will override the defaults with real data)
+            console.log('📥 Loading game data from MongoDB...');
+            await this.gameDataSystem.loadGameData();
+            console.log('✅ Game data loaded');
         }
 
         // Position player at the current scene's start position
