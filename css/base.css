@@ -26,7 +26,7 @@ body {
     box-sizing: border-box;
     position: relative;
     transition: height 0.3s ease, padding 0.3s ease;
-    overflow: hidden;
+    overflow: visible;
     z-index: 100;
 }
 
@@ -49,23 +49,31 @@ body {
 }
 
 .toolbar-toggle {
-    background-color: #4a90e2;
+    background-color: transparent;
     border: none;
-    color: white;
+    color: #1a2832;
     padding: 4px 12px;
     cursor: pointer;
     border-radius: 4px;
     font-size: 14px;
     font-weight: bold;
-    transition: transform 0.3s ease, background-color 0.2s ease;
+    transition: transform 0.3s ease, color 0.2s ease;
 }
 
 .toolbar-toggle:hover {
-    background-color: #5da3f5;
+    color: #4a90e2;
 }
 
 .toolbar.collapsed .toolbar-toggle {
     transform: rotate(180deg);
+}
+
+.toolbar-separator {
+    width: 1px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0 8px;
+    align-self: center;
 }
 
 /* Main Content Area */
