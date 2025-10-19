@@ -1,7 +1,7 @@
 /* Scene Management Styles */
 .scene-item {
-    background-color: #444;
-    border: 1px solid #666;
+    background-color: #232f3e;
+    border: 1px solid #2d3f5f;
     border-radius: 4px;
     margin: 5px 0;
     padding: 8px;
@@ -9,12 +9,12 @@
 }
 
 .scene-item:hover {
-    background-color: #555;
+    background-color: #2a3a4a;
 }
 
 .scene-item.current {
-    border-color: #4CAF50;
-    background-color: #2a4a2a;
+    border-color: #4a90e2;
+    background-color: #2a3f5a;
 }
 
 .scene-item.start {
@@ -29,11 +29,11 @@
 
 .scene-name {
     font-weight: bold;
-    color: #fff;
+    color: #e8e8e8;
 }
 
 .scene-name:hover {
-    color: #4CAF50;
+    color: #4a90e2;
     text-decoration: underline;
 }
 
@@ -55,19 +55,19 @@
 }
 
 .current-badge {
-    background-color: #4CAF50;
+    background-color: #4a90e2;
     color: white;
 }
 
 .scene-description {
     font-size: 12px;
-    color: #ccc;
+    color: #a8b8c8;
     margin: 4px 0;
 }
 
 .scene-stats {
     font-size: 11px;
-    color: #999;
+    color: #6b7b8c;
     margin: 4px 0;
 }
 
@@ -78,8 +78,8 @@
 }
 
 .transition-item {
-    background-color: #333;
-    border: 1px solid #555;
+    background-color: #232f3e;
+    border: 1px solid #2d3f5f;
     border-radius: 3px;
     padding: 6px;
     margin: 3px 0;
@@ -87,6 +87,6 @@
 }
 
 .transition-info {
-    color: #ccc;
+    color: #a8b8c8;
     margin-bottom: 4px;
 }
