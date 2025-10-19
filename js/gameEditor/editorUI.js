@@ -83,6 +83,9 @@ class EditorUI {
             });
         }
 
+        // Toolbar toggle functionality
+        this.setupToolbarToggle();
+
         // Editor tab navigation
         this.setupEditorTabs();
     }
@@ -98,6 +101,42 @@ class EditorUI {
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
             });
+        });
+    }
+
+    setupToolbarToggle() {
+        const toolbar = document.getElementById('toolbar');
+        const toolbarToggle = document.getElementById('toolbarToggle');
+
+        if (!toolbar || !toolbarToggle) {
+            return;
+        }
+
+        // Load saved state from localStorage
+        const savedState = localStorage.getItem('toolbarCollapsed');
+        if (savedState === 'true') {
+            toolbar.classList.add('collapsed');
+        }
+
+        // Toggle button click handler
+        toolbarToggle.addEventListener('click', () => {
+            toolbar.classList.toggle('collapsed');
+
+            // Save state to localStorage
+            const isCollapsed = toolbar.classList.contains('collapsed');
+            localStorage.setItem('toolbarCollapsed', isCollapsed);
+        });
+
+        // Optional: Add keyboard shortcut (Ctrl+T)
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 't') {
+                e.preventDefault();
+                toolbar.classList.toggle('collapsed');
+
+                // Save state to localStorage
+                const isCollapsed = toolbar.classList.contains('collapsed');
+                localStorage.setItem('toolbarCollapsed', isCollapsed);
+            }
         });
     }
 

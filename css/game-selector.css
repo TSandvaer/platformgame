@@ -20,7 +20,7 @@
 }
 
 .game-selector-content {
-    background-color: #2a2a2a;
+    background-color: #1e2d3d;
     border-radius: 8px;
     width: 90%;
     max-width: 800px;
@@ -44,9 +44,9 @@
 }
 
 .game-selector-header {
-    background-color: #333;
+    background-color: #15202b;
     padding: 20px;
-    border-bottom: 2px solid #444;
+    border-bottom: 2px solid #2d3f5f;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -75,7 +75,7 @@
 }
 
 .game-selector-header .close-btn:hover {
-    background-color: #444;
+    background-color: #2a3a4a;
 }
 
 .game-selector-body {
@@ -101,12 +101,12 @@
 }
 
 .btn-primary {
-    background-color: #4CAF50;
+    background-color: #4a90e2;
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #45a049;
+    background-color: #5da3f5;
 }
 
 .btn-secondary {
@@ -175,8 +175,8 @@
 }
 
 .game-item {
-    background-color: #333;
-    border: 2px solid #444;
+    background-color: #232f3e;
+    border: 2px solid #2d3f5f;
     border-radius: 6px;
     padding: 16px;
     display: flex;
@@ -186,13 +186,13 @@
 }
 
 .game-item:hover {
-    border-color: #555;
-    background-color: #383838;
+    border-color: #3a4a5f;
+    background-color: #2a3a4a;
 }
 
 .game-item.selected {
-    border-color: #4CAF50;
-    background-color: #2d3d2d;
+    border-color: #4a90e2;
+    background-color: #2a3f5a;
 }
 
 .game-info {
@@ -201,20 +201,20 @@
 
 .game-info h3 {
     margin: 0 0 8px 0;
-    color: #fff;
+    color: #e8e8e8;
     font-size: 18px;
 }
 
 .game-description {
     margin: 0 0 8px 0;
-    color: #aaa;
+    color: #a8b8c8;
     font-size: 14px;
 }
 
 .game-meta {
     display: flex;
     gap: 16px;
-    color: #888;
+    color: #6b7b8c;
     font-size: 12px;
 }
 
@@ -228,7 +228,7 @@
 .loading-message, .error-message, .empty-message {
     text-align: center;
     padding: 40px 20px;
-    color: #aaa;
+    color: #a8b8c8;
 }
 
 .error-message {
@@ -257,14 +257,14 @@
 
 /* Create Game Form */
 .create-game-form {
-    background-color: #333;
+    background-color: #232f3e;
     border-radius: 6px;
     padding: 20px;
 }
 
 .create-game-form h3 {
     margin: 0 0 20px 0;
-    color: #fff;
+    color: #e8e8e8;
 }
 
 .form-group {
@@ -274,7 +274,7 @@
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    color: #ddd;
+    color: #a8b8c8;
     font-size: 14px;
     font-weight: 500;
 }
@@ -283,10 +283,10 @@
 .form-group textarea {
     width: 100%;
     padding: 10px;
-    background-color: #444;
-    border: 1px solid #555;
+    background-color: #1a2832;
+    border: 1px solid #3a4a5f;
     border-radius: 4px;
-    color: #fff;
+    color: #e8e8e8;
     font-size: 14px;
     font-family: inherit;
     box-sizing: border-box;
@@ -295,7 +295,7 @@
 .form-group input[type="text"]:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: #4a90e2;
 }
 
 .form-group textarea {

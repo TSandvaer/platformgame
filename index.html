@@ -127,9 +127,9 @@
     </div>
 
     <div class="container" style="display: none;">
-        <div class="game-area">
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
-            <div class="controls">
+        <!-- Toolbar -->
+        <div class="toolbar" id="toolbar">
+            <div class="toolbar-content">
                 <button class="btn" id="devModeBtn">Development Mode</button>
                 <button class="btn" id="productionBtn">Production Mode</button>
                 <button class="btn" id="cameraModeBtn">Camera: Character Mode</button>
@@ -141,8 +141,13 @@
                     <option value="">Select Scene...</option>
                 </select>
 
+                <!-- Coordinates Display -->
+                <div class="coordinates" id="coordinates" style="display: none; position: static; margin-left: auto; margin-right: 10px; background-color: rgba(0, 0, 0, 0.7); padding: 5px 10px; border-radius: 4px; font-size: 12px;">
+                    X: 0, Y: 0
+                </div>
+
                 <!-- User Menu -->
-                <div class="user-menu" id="userMenu" style="margin-left: auto; display: none;">
+                <div class="user-menu" id="userMenu" style="display: none;">
                     <button class="btn user-menu-btn" id="userMenuBtn">
                         <span id="userDisplayName">User</span>
                         <span class="dropdown-arrow">▼</span>
@@ -157,16 +162,20 @@
                 </div>
 
                 <!-- Login Button (shown when not authenticated) -->
-                <button class="btn" id="loginBtn" style="margin-left: auto; display: none;" onclick="if(window.authModal) window.authModal.show();">
+                <button class="btn" id="loginBtn" style="display: none;" onclick="if(window.authModal) window.authModal.show();">
                     Login / Sign Up
                 </button>
             </div>
-            <div class="coordinates" id="coordinates" style="display: none;">
-                X: 0, Y: 0
-            </div>
+            <button class="toolbar-toggle" id="toolbarToggle" title="Toggle Toolbar">▲</button>
         </div>
 
-        <div class="dashboard" id="dashboard">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="game-area">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+            </div>
+
+            <div class="dashboard" id="dashboard">
             <div class="section">
                 <h3>Game Mode</h3>
                 <div class="item">
@@ -797,6 +806,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Platform System Scripts -->
