@@ -133,9 +133,6 @@
                 <button class="btn" id="devModeBtn">Development Mode</button>
                 <button class="btn" id="productionBtn">Production Mode</button>
                 <button class="btn" id="cameraModeBtn">Camera: Character Mode</button>
-                <button class="btn" id="gameSettingsBtn">⚙️ Game Settings</button>
-                <button class="btn" id="selectGameBtn" onclick="gameSelector.open()">🎮 Select Game</button>
-                <span id="currentGameIndicator" style="margin-left: 10px; padding: 5px 10px; background: #4CAF50; color: white; border-radius: 4px; font-size: 12px; display: none;"></span>
                 <button class="btn" id="backToDevBtn" style="display: none;">Back to Dev</button>
                 <select id="productionSceneSelect" style="display: none; margin-left: 10px; padding: 5px; width: auto;">
                     <option value="">Select Scene...</option>
@@ -177,10 +174,10 @@
 
             <div class="dashboard" id="dashboard">
             <div class="section">
-                <h3>Game Mode</h3>
-                <div class="item">
-                    <div class="item-name">Current Mode: <span id="currentMode">Development</span></div>
-                    <div class="item-details">Switch between development and production modes</div>
+                <h3>Game <span id="currentGameIndicator" style="font-size: 11px; color: #6b7b8c; font-weight: normal; margin-left: 10px; display: none;"></span></h3>
+                <div class="property-row">
+                    <button class="btn small" id="gameSettingsBtn">⚙️ Game Settings</button>
+                    <button class="btn small" id="selectGameBtn" onclick="gameSelector.open()">🎮 Select Game</button>
                 </div>
             </div>
 

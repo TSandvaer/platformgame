@@ -335,14 +335,14 @@ class GameSelector {
         try {
             const response = await this.apiClient.getGame(currentGameId);
             if (response.success && response.game) {
-                indicator.textContent = `Editing: ${response.game.name}`;
-                indicator.style.display = 'inline-block';
+                indicator.innerHTML = `Currently editing <span style="color: #4a90e2; font-weight: 500;">${this.escapeHTML(response.game.name)}</span>`;
+                indicator.style.display = 'inline';
                 indicator.title = `Game ID: ${currentGameId}`;
             }
         } catch (error) {
             console.error('Error loading game name:', error);
-            indicator.textContent = `Game ID: ${currentGameId.substring(0, 8)}...`;
-            indicator.style.display = 'inline-block';
+            indicator.innerHTML = `Currently editing <span style="color: #4a90e2; font-weight: 500;">Game ID: ${currentGameId.substring(0, 8)}...</span>`;
+            indicator.style.display = 'inline';
         }
     }
 
