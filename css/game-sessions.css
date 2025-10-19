@@ -1,0 +1,488 @@
+/* Game Session Menu & Modals */
+/* Styling for save slot management in published games */
+
+/* Session Menu Modal (main menu) */
+.session-menu-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.session-menu-modal.show {
+  display: flex;
+}
+
+.session-menu-content {
+  background: #2a2a3e;
+  border-radius: 12px;
+  padding: 50px 60px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s ease;
+  text-align: center;
+}
+
+.session-menu-title {
+  color: #667eea;
+  font-size: 32px;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
+
+.session-menu-subtitle {
+  color: #aaa;
+  font-size: 16px;
+  margin: 0 0 40px 0;
+}
+
+.session-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.session-btn {
+  padding: 18px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.session-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.session-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.session-btn-secondary {
+  background: #3a3a4e;
+  color: white;
+}
+
+.session-btn-secondary:hover:not(:disabled) {
+  background: #4a4a5e;
+  transform: translateY(-2px);
+}
+
+.session-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* New Session Modal */
+.new-session-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: fadeIn 0.3s ease;
+}
+
+.new-session-modal.show {
+  display: flex;
+}
+
+.new-session-content {
+  background: #2a2a3e;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s ease;
+}
+
+.new-session-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.new-session-header h2 {
+  color: #667eea;
+  font-size: 28px;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.new-session-step {
+  display: none;
+}
+
+.new-session-step.active {
+  display: block;
+}
+
+.session-form-group {
+  margin-bottom: 20px;
+}
+
+.session-form-group label {
+  display: block;
+  color: #ddd;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.session-form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #1a1a2e;
+  border: 2px solid #3a3a4e;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.session-form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.char-counter {
+  display: block;
+  color: #888;
+  font-size: 12px;
+  margin-top: 6px;
+  text-align: right;
+}
+
+.char-counter.warning {
+  color: #ffa500;
+}
+
+.char-counter.limit {
+  color: #ff6b6b;
+}
+
+/* Character Selection Grid */
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.character-card {
+  background: #1a1a2e;
+  border: 2px solid #3a3a4e;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.character-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.character-card.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+}
+
+.character-card.selected::after {
+  content: '✓ Selected';
+  display: block;
+  color: #667eea;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.character-info {
+  text-align: center;
+}
+
+.character-name {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.character-description {
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.character-size {
+  color: #888;
+  font-size: 11px;
+}
+
+/* Load Session Modal */
+.load-session-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: fadeIn 0.3s ease;
+}
+
+.load-session-modal.show {
+  display: flex;
+}
+
+.load-session-content {
+  background: #2a2a3e;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 700px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s ease;
+}
+
+.load-session-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.load-session-header h2 {
+  color: #667eea;
+  font-size: 28px;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.session-card {
+  background: #1a1a2e;
+  border: 2px solid #3a3a4e;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.session-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.session-character-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a3e;
+  border-radius: 8px;
+  flex-shrink: 0;
+  font-size: 32px;
+}
+
+.session-info {
+  flex: 1;
+}
+
+.session-name {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.session-meta {
+  color: #888;
+  font-size: 13px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.session-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.session-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-btn {
+  padding: 8px 12px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.delete-btn:hover {
+  background: #ff5252;
+}
+
+.empty-sessions {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+
+.empty-sessions-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.empty-sessions p {
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Modal Footer Buttons */
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.modal-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.modal-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.modal-btn-secondary {
+  background: #3a3a4e;
+  color: white;
+}
+
+.modal-btn-secondary:hover {
+  background: #4a4a5e;
+}
+
+.modal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error Messages */
+.session-error {
+  background: rgba(255, 107, 107, 0.1);
+  border-left: 3px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  display: none;
+}
+
+.session-error.show {
+  display: block;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .session-menu-content {
+    padding: 40px 30px;
+  }
+
+  .new-session-content,
+  .load-session-content {
+    padding: 30px 20px;
+  }
+
+  .character-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .session-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .session-meta {
+    justify-content: center;
+  }
+}

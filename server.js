@@ -39,11 +39,15 @@ mongoose.connect(MONGODB_URI)
 // Import routes
 const gameRoutes = require('./routes/games');
 const userRoutes = require('./routes/users');
+const progressRoutes = require('./routes/playerProgress');
+const sessionRoutes = require('./routes/gameSessions');
 const path = require('path');
 
 // API Routes (must come before static file middleware)
 app.use('/api/games', gameRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/progress', progressRoutes);
+app.use('/api/sessions', sessionRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

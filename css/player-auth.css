@@ -1,0 +1,201 @@
+/* Player Auth Modal Styles */
+/* Game-focused, minimal design for player authentication */
+
+.player-auth-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.player-auth-content {
+  background: #2a2a3e;
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.player-auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.player-auth-header h2 {
+  color: #667eea;
+  font-size: 28px;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.player-auth-author {
+  color: #888;
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+.player-auth-message {
+  color: #aaa;
+  font-size: 15px;
+  margin: 0;
+  padding: 12px 20px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.player-auth-body {
+  margin-top: 30px;
+}
+
+.player-auth-form h3 {
+  color: #fff;
+  font-size: 22px;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.player-form-group {
+  margin-bottom: 18px;
+}
+
+.player-form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  background: #1a1a2e;
+  border: 2px solid #3a3a4e;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.player-form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.player-form-hint {
+  display: block;
+  color: #888;
+  font-size: 12px;
+  margin-top: 6px;
+  margin-left: 4px;
+}
+
+.player-form-error {
+  color: #ff6b6b;
+  font-size: 14px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #ff6b6b;
+  min-height: 20px;
+}
+
+.player-form-error:empty {
+  display: none;
+}
+
+.player-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.player-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.player-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.player-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.player-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.player-btn-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.player-auth-switch {
+  text-align: center;
+  color: #aaa;
+  font-size: 14px;
+  margin: 0;
+}
+
+.player-auth-switch a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.player-auth-switch a:hover {
+  color: #8899ff;
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .player-auth-content {
+    padding: 30px 20px;
+  }
+
+  .player-auth-header h2 {
+    font-size: 24px;
+  }
+
+  .player-auth-form h3 {
+    font-size: 20px;
+  }
+}

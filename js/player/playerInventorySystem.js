@@ -315,10 +315,35 @@ class PlayerInventorySystem {
         }
     }
 
-    // Save player data to localStorage
+    // Save player data to localStorage and server (if in player mode)
     savePlayerData() {
         if (this.game.playerSystem && this.game.playerSystem.data) {
             this.playerDataStorage.save(this.game.playerSystem.data);
+
+            // Also save to server if in player mode
+            if (window.PLAYER_MODE && window.progressAPI) {
+                setTimeout(() => {
+                    try {
+                        const currentSceneId = this.game.sceneManager?.currentSceneId || 0;
+                        const completedScenes = this.game.sceneManager?.completedScenes || [];
+                        const playtime = this.game.playtime || 0;
+                        const deaths = this.game.deaths || 0;
+
+                        const progressData = this.game.playerSystem.data.serializeProgress(
+                            currentSceneId,
+                            completedScenes,
+                            playtime,
+                            deaths
+                        );
+
+                        window.progressAPI.saveProgress(progressData).catch(err => {
+                            console.error('Failed to save progress:', err);
+                        });
+                    } catch (error) {
+                        console.error('Error saving progress:', error);
+                    }
+                }, 100);
+            }
         }
     }
 

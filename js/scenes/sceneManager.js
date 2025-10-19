@@ -666,6 +666,25 @@ class SceneManager {
         // Load the target scene with specified player position
         this.loadScene(zone.targetSceneId, zone.playerStartX, zone.playerStartY);
 
+        // Save player progress after scene transition (if in player mode)
+        if (window.PLAYER_MODE && window.progressAPI && this.game.player) {
+            setTimeout(() => {
+                try {
+                    const progressData = this.game.player.serializeProgress(
+                        zone.targetSceneId,
+                        this.game.sceneManager?.completedScenes || [],
+                        this.game.playtime || 0,
+                        this.game.deaths || 0
+                    );
+                    window.progressAPI.saveProgress(progressData).catch(err => {
+                        console.error('Failed to save progress after scene transition:', err);
+                    });
+                } catch (error) {
+                    console.error('Error saving progress after transition:', error);
+                }
+            }, 100);
+        }
+
         // Reset transition flag after a short delay
         setTimeout(() => {
             this.isTransitioning = false;

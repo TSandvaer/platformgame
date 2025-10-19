@@ -445,6 +445,34 @@ class PlayerData {
             this.frameIndex = 0;
             this.frameTimer = 0;
 
+            // Save progress on death (if in player mode)
+            if (window.PLAYER_MODE && window.progressAPI && window.game) {
+                setTimeout(() => {
+                    try {
+                        const currentSceneId = window.game.sceneManager?.currentSceneId || 0;
+                        const completedScenes = window.game.sceneManager?.completedScenes || [];
+                        const playtime = window.game.playtime || 0;
+                        const deaths = (window.game.deaths || 0) + 1; // Increment death count
+
+                        // Update game's death counter
+                        window.game.deaths = deaths;
+
+                        const progressData = this.serializeProgress(
+                            currentSceneId,
+                            completedScenes,
+                            playtime,
+                            deaths
+                        );
+
+                        window.progressAPI.saveProgress(progressData).catch(err => {
+                            console.error('Failed to save progress on death:', err);
+                        });
+                    } catch (error) {
+                        console.error('Error saving progress on death:', error);
+                    }
+                }, 100);
+            }
+
         }
 
         // Handle death timer and kill effects
@@ -525,5 +553,107 @@ class PlayerData {
         if (state.onGround !== undefined) this.onGround = state.onGround;
         if (state.currentAnimation !== undefined) this.currentAnimation = state.currentAnimation;
         if (state.isAttacking !== undefined) this.isAttacking = state.isAttacking;
+    }
+
+    /**
+     * Serialize player progress for server-side saving
+     * @param {number} currentSceneId - Current scene ID
+     * @param {Array} completedScenes - Array of completed scene IDs
+     * @param {number} playtime - Total playtime in seconds
+     * @param {number} deaths - Total death count
+     * @returns {Object} Progress data ready to save
+     */
+    serializeProgress(currentSceneId, completedScenes = [], playtime = 0, deaths = 0) {
+        return {
+            currentSceneId: currentSceneId,
+            position: {
+                x: Math.round(this.x),
+                y: Math.round(this.y),
+            },
+            health: this.health,
+            maxHealth: this.maxHealth,
+            stamina: this.stamina,
+            maxStamina: this.maxStamina,
+            inventory: this.playerInventory.map(item => ({
+                itemId: item.id,
+                quantity: item.quantity || 1,
+                itemData: item, // Store full item data for display
+            })),
+            beltItems: this.belt.map((item, index) => {
+                if (!item) return null;
+                return {
+                    slot: index,
+                    itemId: item.id,
+                    quantity: item.quantity || 1,
+                    itemData: item,
+                };
+            }).filter(item => item !== null),
+            completedScenes: completedScenes,
+            selectedCharacter: this.selectedCharacter,
+            playtime: playtime,
+            deaths: deaths,
+        };
+    }
+
+    /**
+     * Load player progress from server data
+     * @param {Object} progressData - Progress data from server
+     * @returns {boolean} Success status
+     */
+    loadProgress(progressData) {
+        try {
+            // Load position
+            if (progressData.position) {
+                this.x = progressData.position.x;
+                this.y = progressData.position.y;
+                this.lastValidPosition = { ...progressData.position };
+            }
+
+            // Load stats
+            if (progressData.health !== undefined) {
+                this.health = progressData.health;
+            }
+            if (progressData.maxHealth !== undefined) {
+                this.maxHealth = progressData.maxHealth;
+            }
+            if (progressData.stamina !== undefined) {
+                this.stamina = progressData.stamina;
+            }
+            if (progressData.maxStamina !== undefined) {
+                this.maxStamina = progressData.maxStamina;
+            }
+
+            // Load inventory
+            if (progressData.inventory && Array.isArray(progressData.inventory)) {
+                this.playerInventory = progressData.inventory.map(item => ({
+                    ...item.itemData,
+                    quantity: item.quantity,
+                }));
+            }
+
+            // Load belt items
+            if (progressData.beltItems && Array.isArray(progressData.beltItems)) {
+                this.belt = [null, null, null, null];
+                progressData.beltItems.forEach(beltItem => {
+                    if (beltItem && beltItem.slot >= 0 && beltItem.slot < 4) {
+                        this.belt[beltItem.slot] = {
+                            ...beltItem.itemData,
+                            quantity: beltItem.quantity,
+                        };
+                    }
+                });
+            }
+
+            // Load character selection
+            if (progressData.selectedCharacter) {
+                this.selectedCharacter = progressData.selectedCharacter;
+            }
+
+            console.log('✅ Player progress loaded successfully');
+            return true;
+        } catch (error) {
+            console.error('❌ Error loading player progress:', error);
+            return false;
+        }
     }
 }

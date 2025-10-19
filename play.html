@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play Game - Platform Game Portal</title>
     <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/player-auth.css">
+    <link rel="stylesheet" href="/css/game-sessions.css">
     <style>
         body {
             margin: 0;
@@ -24,6 +26,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #444;
+            position: relative;
         }
 
         .game-info-header {
@@ -135,6 +138,88 @@
         .fullscreen-btn:hover {
             background: #4a4a4a;
         }
+
+        /* User Menu */
+        .user-menu {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            background: #3a3a3a;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-menu:hover {
+            background: #4a4a4a;
+        }
+
+        .user-menu.active {
+            display: flex;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .user-name::after {
+            content: '▼';
+            margin-left: 6px;
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px 0;
+            min-width: 180px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            color: #ddd;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #3a3a3a;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #444;
+            margin: 4px 0;
+        }
     </style>
 </head>
 <body>
@@ -147,7 +232,21 @@
             <button id="fullscreenBtn" class="btn btn-secondary">⛶ Fullscreen</button>
             <a href="gallery.html" class="btn btn-secondary">📚 Browse Games</a>
             <a href="index.html" class="btn">📝 Create Your Own</a>
+
+            <!-- User Menu -->
+            <div class="user-menu" id="userMenu">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span class="user-name" id="userName">User</span>
+            </div>
         </div>
+    </div>
+
+    <!-- User Dropdown -->
+    <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-item" id="viewProfileBtn">👤 Profile</div>
+        <div class="dropdown-item" id="myGamesBtn">🎮 My Games</div>
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item" id="logoutBtn">🚪 Logout</div>
     </div>
 
     <div class="game-container">
@@ -262,6 +361,26 @@
     <!-- UI System Scripts (needed for feedback) -->
     <script src="/js/ui/feedbackSystem.js"></script>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Authentication System -->
+    <script src="/js/auth/firebaseConfig.js"></script>
+    <script src="/js/auth/authSystem.js"></script>
+
+    <!-- Player Auth Modal -->
+    <script src="/js/player/playerAuthModal.js"></script>
+
+    <!-- Progress API -->
+    <script src="/js/player/progressAPI.js"></script>
+
+    <!-- Session API & Components -->
+    <script src="/js/player/sessionAPI.js"></script>
+    <script src="/js/player/gameSessionMenu.js"></script>
+    <script src="/js/player/newSessionModal.js"></script>
+    <script src="/js/player/loadSessionModal.js"></script>
+
     <!-- Editor System Scripts (needed by game.js, will be overridden for player mode) -->
     <script src="/js/gameEditor/editorUI.js"></script>
     <script src="/js/gameEditor/editorMode.js"></script>
@@ -341,8 +460,44 @@
                 this.ctx = this.canvas.getContext('2d');
                 this.game = null;
                 this.baseURL = 'http://localhost:3000/api';
+                this.gameData = null;
+                this.gameId = null;
+                this.authModal = null;
 
-                this.loadGameFromURL();
+                // Session system
+                this.currentSessionId = null;
+                this.currentSessionCharacter = null;
+                this.sessionMenu = null;
+                this.newSessionModal = null;
+                this.loadSessionModal = null;
+
+                // Wait for auth system to be ready
+                this.initializeAuthSystem();
+            }
+
+            async initializeAuthSystem() {
+                try {
+                    console.log('🔐 Initializing auth system...');
+
+                    // Check if auth system is available
+                    if (!window.authSystem) {
+                        throw new Error('Auth system not loaded');
+                    }
+
+                    // Initialize the auth system
+                    await window.authSystem.initialize();
+
+                    console.log('✅ Auth system ready');
+
+                    // Setup user menu
+                    this.setupUserMenu();
+
+                    this.loadGameFromURL();
+                } catch (error) {
+                    console.error('❌ Error initializing auth system:', error);
+                    console.error('Auth system state:', window.authSystem);
+                    this.showError('Failed to initialize authentication: ' + error.message);
+                }
             }
 
             async loadGameFromURL() {
@@ -375,17 +530,97 @@
                     }
 
                     const data = await response.json();
+                    this.gameData = data.game;
+                    this.gameId = data.game.id; // Use .id instead of ._id
 
                     // Track play
                     this.trackGamePlayed(username, slug);
 
-                    // Load game
-                    this.startGame(data.game, data.author);
+                    // Check if user is authenticated
+                    if (!window.authSystem.isAuthenticated()) {
+                        // Show auth modal
+                        this.showAuthModal(data.game, data.author);
+                    } else {
+                        // User is already logged in, load game with progress
+                        await this.startGame(data.game, data.author);
+                    }
 
                 } catch (error) {
                     console.error('Error loading game:', error);
                     this.showError(error.message);
                 }
+            }
+
+            setupUserMenu() {
+                // Update user menu when user is authenticated
+                window.authSystem.onAuthStateChange((user) => {
+                    const userMenu = document.getElementById('userMenu');
+                    const userAvatar = document.getElementById('userAvatar');
+                    const userName = document.getElementById('userName');
+
+                    if (user && user.userData) {
+                        // Show user menu with user data
+                        const displayName = user.userData.displayName || user.userData.username;
+                        const initial = displayName.charAt(0).toUpperCase();
+
+                        userAvatar.textContent = initial;
+                        userName.textContent = displayName;
+                        userMenu.classList.add('active');
+                    } else {
+                        // Hide user menu if not authenticated
+                        userMenu.classList.remove('active');
+                    }
+                });
+
+                // User menu dropdown toggle
+                const userMenu = document.getElementById('userMenu');
+                const userDropdown = document.getElementById('userDropdown');
+
+                userMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    userDropdown.classList.remove('show');
+                });
+
+                // Dropdown actions
+                document.getElementById('viewProfileBtn').addEventListener('click', () => {
+                    window.location.href = '/profile.html';
+                });
+
+                document.getElementById('myGamesBtn').addEventListener('click', () => {
+                    window.location.href = '/index.html';
+                });
+
+                document.getElementById('logoutBtn').addEventListener('click', async () => {
+                    try {
+                        await window.authSystem.logout();
+                        window.location.href = '/gallery.html';
+                    } catch (error) {
+                        console.error('Logout error:', error);
+                    }
+                });
+            }
+
+            showAuthModal(gameData, author) {
+                // Create and show auth modal
+                this.authModal = new PlayerAuthModal();
+                this.authModal.initialize(
+                    gameData.name,
+                    author.displayName || author.username,
+                    async () => {
+                        // On successful auth, load game and update user menu
+                        this.setupUserMenu(); // Re-setup to update user display
+                        await this.startGame(gameData, author);
+                    }
+                );
+
+                // Hide loading, show modal
+                document.getElementById('loadingContainer').style.display = 'none';
+                this.authModal.show();
             }
 
             async trackGamePlayed(username, slug) {
@@ -398,52 +633,173 @@
                 }
             }
 
-            startGame(gameData, author) {
-                // Update header
-                document.getElementById('gameTitle').textContent = gameData.name;
-                document.getElementById('gameAuthor').textContent = author.displayName || author.username;
+            async startGame(gameData, author) {
+                try {
+                    // Update header
+                    document.getElementById('gameTitle').textContent = gameData.name;
+                    document.getElementById('gameAuthor').textContent = author.displayName || author.username;
 
-                // Hide loading, show canvas
-                document.getElementById('loadingContainer').style.display = 'none';
-                this.canvas.style.display = 'block';
+                    // Hide loading
+                    document.getElementById('loadingContainer').style.display = 'none';
 
-                // Initialize game (using existing game.js structure)
-                // We need to adapt the existing game code to work here
-                // For now, show placeholder
-                console.log('🎯 Game data loaded from server:', gameData);
-                console.log('🎯 Inner gameData:', gameData.gameData);
-                console.log('🎯 HUD settings from server:', gameData.gameData?.gameSettings?.hud);
-
-                // Start the game
-                this.initializeGame(gameData.gameData);
+                    // Initialize session modals
+                    await this.initializeSessionSystem(gameData, author);
+                } catch (error) {
+                    console.error('Error starting game:', error);
+                    this.showError('Failed to start game: ' + error.message);
+                }
             }
 
-            initializeGame(gameData) {
+            async initializeSessionSystem(gameData, author) {
                 try {
-                    console.log('Initializing game with data:', gameData);
+                    console.log('🎮 Initializing session system...');
 
-                    // Prevent the default game.js DOMContentLoaded initialization
-                    // We'll handle initialization ourselves
+                    // Initialize PlayerCharacters early (needed for character selection)
+                    if (!window.playerCharacters) {
+                        window.playerCharacters = new PlayerCharacters();
+                        console.log('✅ PlayerCharacters initialized');
+                    }
 
-                    // Initialize the game using PlayerGameController
-                    this.gameController = new PlayerGameController(this.canvas, gameData);
+                    // Create session menu
+                    this.sessionMenu = new GameSessionMenu();
+                    await this.sessionMenu.initialize(
+                        gameData.name,
+                        this.gameId, // Use stored gameId instead of gameData._id
+                        () => this.handleNewGame(),
+                        () => this.handleLoadGame()
+                    );
+
+                    // Create new session modal
+                    this.newSessionModal = new NewSessionModal();
+                    this.newSessionModal.initialize(
+                        this.gameId, // Use stored gameId
+                        (session) => this.handleSessionCreated(session, gameData, author)
+                    );
+
+                    // Create load session modal
+                    this.loadSessionModal = new LoadSessionModal();
+                    this.loadSessionModal.initialize(
+                        this.gameId, // Use stored gameId
+                        (session) => this.handleSessionLoaded(session, gameData, author),
+                        (session) => this.handleSessionDeleted(session)
+                    );
+
+                    // Show session menu
+                    this.sessionMenu.show();
+                    console.log('✅ Session system ready');
+                } catch (error) {
+                    console.error('❌ Error initializing session system:', error);
+                    this.showError('Failed to initialize session system: ' + error.message);
+                }
+            }
+
+            handleNewGame() {
+                console.log('📝 Creating new game session...');
+                this.newSessionModal.show();
+            }
+
+            handleLoadGame() {
+                console.log('📁 Loading game session...');
+                this.loadSessionModal.show();
+            }
+
+            async handleSessionCreated(session, gameData, author) {
+                console.log('✅ Session created:', session);
+
+                // Store current session
+                this.currentSessionId = session._id;
+                this.currentSessionCharacter = session.sessionCharacter;
+
+                // Start game with fresh progress for this session
+                await this.startGameWithSession(gameData, author, session);
+            }
+
+            async handleSessionLoaded(session, gameData, author) {
+                console.log('✅ Session loaded:', session);
+
+                // Store current session
+                this.currentSessionId = session._id;
+                this.currentSessionCharacter = session.sessionCharacter;
+
+                // Start game with existing progress from session
+                await this.startGameWithSession(gameData, author, session);
+            }
+
+            handleSessionDeleted(session) {
+                console.log('🗑️ Session deleted:', session);
+                // Refresh session menu if needed
+                if (this.sessionMenu) {
+                    this.sessionMenu.refresh();
+                }
+            }
+
+            async startGameWithSession(gameData, author, session) {
+                try {
+                    console.log('🎮 Starting game with session:', session.sessionName);
+
+                    // Configure progressAPI to use session-based saving
+                    window.progressAPI.setGameId(gameData._id);
+                    window.progressAPI.setSessionId(this.currentSessionId);
+
+                    // Show canvas
+                    this.canvas.style.display = 'block';
+
+                    // Initialize the game using PlayerGameController with session data
+                    this.gameController = new PlayerGameController(
+                        this.canvas,
+                        gameData.gameData,
+                        session, // Pass full session data including progress
+                        this.currentSessionCharacter // Character key
+                    );
                     this.game = this.gameController.getGame();
 
-                    console.log('Game initialized successfully!');
+                    // Enable auto-save with session ID
+                    this.enableAutoSaveWithSession();
+
+                    console.log('✅ Game started successfully with session:', session.sessionName);
                 } catch (error) {
-                    console.error('Error initializing game:', error);
-                    this.ctx.fillStyle = '#1a1a1a';
-                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-                    this.ctx.fillStyle = '#ff6b6b';
-                    this.ctx.font = '24px Arial';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText('Failed to load game', this.canvas.width / 2, this.canvas.height / 2 - 40);
-
-                    this.ctx.font = '16px Arial';
-                    this.ctx.fillStyle = '#888';
-                    this.ctx.fillText(error.message, this.canvas.width / 2, this.canvas.height / 2);
+                    console.error('Error starting game with session:', error);
+                    this.showError('Failed to start game: ' + error.message);
                 }
+            }
+
+            enableAutoSaveWithSession() {
+                // Auto-save every 30 seconds using session API
+                this.autoSaveInterval = setInterval(async () => {
+                    try {
+                        // Get current progress data from game
+                        if (!this.game || !this.game.player || !this.currentSessionId) {
+                            return;
+                        }
+
+                        // Get current scene and completed scenes
+                        const currentSceneId = this.game.sceneManager?.currentSceneId || 0;
+                        const completedScenes = this.game.sceneManager?.completedScenes || [];
+                        const playtime = this.game.playtime || 0;
+                        const deaths = this.game.deaths || 0;
+
+                        // Serialize progress using player's method
+                        const progressData = this.game.player.serializeProgress(
+                            currentSceneId,
+                            completedScenes,
+                            playtime,
+                            deaths
+                        );
+
+                        // Save to session
+                        await window.sessionAPI.saveSessionProgress(
+                            this.gameId,
+                            this.currentSessionId,
+                            progressData
+                        );
+
+                        console.log('💾 Auto-save completed');
+                    } catch (error) {
+                        console.error('❌ Auto-save failed:', error);
+                    }
+                }, 30000); // Every 30 seconds
+
+                console.log('✅ Auto-save enabled (every 30 seconds)');
             }
 
             showError(message) {

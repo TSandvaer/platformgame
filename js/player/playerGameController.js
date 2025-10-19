@@ -5,11 +5,18 @@
  */
 
 class PlayerGameController {
-    constructor(canvas, gameData) {
+    constructor(canvas, gameData, sessionData = null, sessionCharacter = null) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.gameData = gameData;
+        this.sessionData = sessionData; // Full session data including progress
+        this.sessionCharacter = sessionCharacter; // Locked character for this session
         this.game = null;
+
+        console.log('🎮 PlayerGameController initialized with session:', {
+            sessionName: sessionData?.sessionName,
+            sessionCharacter: sessionCharacter
+        });
 
         this.initialize();
     }
@@ -40,11 +47,7 @@ class PlayerGameController {
 
             // Temporarily replace GameDataSystem to inject our loaded game data
             const loadedGameData = this.gameData;
-            console.log('🎯 About to replace GameDataSystem');
-            console.log('   - Original GameDataSystem:', window.GameDataSystem);
-            console.log('   - loadedGameData:', loadedGameData);
-            console.log('   - loadedGameData.gameSettings:', loadedGameData?.gameSettings);
-            console.log('   - loadedGameData.gameSettings.hud:', loadedGameData?.gameSettings?.hud);
+            const lockedSessionCharacter = this.sessionCharacter; // Capture session character for closure
 
             window.GameDataSystem = class PlayerGameDataSystem {
                 constructor(game) {
@@ -142,19 +145,35 @@ class PlayerGameController {
                     }
                 }
                 loadSavedCharacterSettings() {
+                    // IMPORTANT: In player mode with sessions, character is locked to the session
+                    // Use the captured session character from closure
+
                     // Apply character settings from loaded data
                     if (loadedGameData && loadedGameData.characterSettings) {
                         this.gameData.characterSettings = loadedGameData.characterSettings;
 
                         if (this.game.playerSystem && this.game.playerSystem.data) {
                             const player = this.game.playerSystem.data;
-                            const settings = loadedGameData.characterSettings;
 
-                            const selectedCharacter = settings.selectedCharacter || 'soldier';
+                            // Use locked session character if available, otherwise use game data
+                            const selectedCharacter = lockedSessionCharacter ||
+                                                    loadedGameData.characterSettings?.selectedCharacter ||
+                                                    'soldier';
+
                             player.selectedCharacter = selectedCharacter;
 
                             if (this.game.playerSystem.animator && window.playerCharacters) {
                                 this.game.playerSystem.animator.switchCharacter(selectedCharacter);
+                            }
+                        }
+                    } else if (lockedSessionCharacter) {
+                        // No character settings in game data, but we have a session character
+                        if (this.game.playerSystem && this.game.playerSystem.data) {
+                            const player = this.game.playerSystem.data;
+                            player.selectedCharacter = lockedSessionCharacter;
+
+                            if (this.game.playerSystem.animator && window.playerCharacters) {
+                                this.game.playerSystem.animator.switchCharacter(lockedSessionCharacter);
                             }
                         }
                     }
@@ -234,10 +253,71 @@ class PlayerGameController {
             this.resizeCanvas();
             window.addEventListener('resize', () => this.resizeCanvas());
 
-            console.log('Player game initialized successfully');
+            // Load player progress from session data if available
+            if (this.sessionData) {
+                this.loadPlayerProgress(this.sessionData);
+            }
+
+            console.log('Player game initialized successfully with session');
         } catch (error) {
             console.error('Error initializing player game:', error);
             throw error;
+        }
+    }
+
+    loadPlayerProgress(progressData) {
+        try {
+            console.log('📂 Loading player progress:', progressData);
+
+            if (!this.game || !this.game.player) {
+                console.error('Cannot load progress: game or player not initialized');
+                return;
+            }
+
+            // CRITICAL: Set session character FIRST before loading progress
+            if (this.sessionCharacter && progressData.sessionCharacter) {
+                console.log('🎭 Setting session character:', this.sessionCharacter);
+                this.game.player.selectedCharacter = this.sessionCharacter;
+
+                // Switch character via animator
+                if (this.game.playerSystem && this.game.playerSystem.animator && window.playerCharacters) {
+                    console.log('🎭 Switching to character via animator:', this.sessionCharacter);
+                    this.game.playerSystem.animator.switchCharacter(this.sessionCharacter);
+                } else {
+                    console.warn('⚠️ Player animator not available yet');
+                }
+            }
+
+            // Load progress into player data
+            this.game.player.loadProgress(progressData);
+
+            // Load scene (if different from default)
+            if (progressData.currentSceneId !== undefined && this.game.sceneManager) {
+                const currentScene = this.game.sceneManager.currentSceneId;
+                if (progressData.currentSceneId !== currentScene) {
+                    console.log(`📂 Loading scene ${progressData.currentSceneId} (was ${currentScene})`);
+                    this.game.sceneManager.loadScene(progressData.currentSceneId);
+                }
+
+                // Load completed scenes
+                if (progressData.completedScenes && Array.isArray(progressData.completedScenes)) {
+                    this.game.sceneManager.completedScenes = [...progressData.completedScenes];
+                    console.log('📂 Loaded completed scenes:', progressData.completedScenes);
+                }
+            }
+
+            // Track playtime and deaths if game tracks them
+            if (progressData.playtime !== undefined) {
+                this.game.playtime = progressData.playtime;
+            }
+            if (progressData.deaths !== undefined) {
+                this.game.deaths = progressData.deaths;
+            }
+
+            console.log('✅ Player progress loaded successfully');
+        } catch (error) {
+            console.error('Error loading player progress:', error);
+            // Don't throw - let player start fresh if progress loading fails
         }
     }
 
