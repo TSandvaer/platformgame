@@ -220,10 +220,76 @@
             background: #444;
             margin: 4px 0;
         }
+
+        /* Session Menu (Burger Menu) */
+        .session-burger-menu {
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .session-burger-menu.active {
+            display: flex;
+        }
+
+        .burger-icon {
+            width: 40px;
+            height: 40px;
+            background: #3a3a3a;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #ddd;
+            transition: background 0.2s;
+        }
+
+        .burger-icon:hover {
+            background: #4a4a4a;
+        }
+
+        .current-session-label {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .current-session-name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .session-dropdown {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px 0;
+            min-width: 180px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .session-dropdown.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="player-header">
+        <!-- Session Menu (Burger) -->
+        <div class="session-burger-menu" id="sessionBurgerMenu">
+            <button class="burger-icon" id="burgerMenuBtn">☰</button>
+            <span class="current-session-label">
+                Current game slot: <span class="current-session-name" id="currentSessionName">-</span>
+            </span>
+        </div>
+
         <div class="game-info-header">
             <h1 class="game-title-header" id="gameTitle">Loading...</h1>
             <span class="game-author-header">by <span id="gameAuthor">...</span></span>
@@ -247,6 +313,12 @@
         <div class="dropdown-item" id="myGamesBtn">🎮 My Games</div>
         <div class="dropdown-divider"></div>
         <div class="dropdown-item" id="logoutBtn">🚪 Logout</div>
+    </div>
+
+    <!-- Session Dropdown (Burger Menu) -->
+    <div class="session-dropdown" id="sessionDropdown">
+        <div class="dropdown-item" id="burgerNewGameBtn">🎮 New Game</div>
+        <div class="dropdown-item" id="burgerLoadGameBtn">💾 Load Game</div>
     </div>
 
     <div class="game-container">
@@ -489,8 +561,9 @@
 
                     console.log('✅ Auth system ready');
 
-                    // Setup user menu
+                    // Setup user menu and burger menu
                     this.setupUserMenu();
+                    this.setupBurgerMenu();
 
                     this.loadGameFromURL();
                 } catch (error) {
@@ -579,11 +652,14 @@
                 userMenu.addEventListener('click', (e) => {
                     e.stopPropagation();
                     userDropdown.classList.toggle('show');
+                    // Close session dropdown if open
+                    document.getElementById('sessionDropdown').classList.remove('show');
                 });
 
-                // Close dropdown when clicking outside
+                // Close dropdowns when clicking outside
                 document.addEventListener('click', () => {
                     userDropdown.classList.remove('show');
+                    document.getElementById('sessionDropdown').classList.remove('show');
                 });
 
                 // Dropdown actions
@@ -603,6 +679,39 @@
                         console.error('Logout error:', error);
                     }
                 });
+            }
+
+            setupBurgerMenu() {
+                // Burger menu dropdown toggle
+                const burgerBtn = document.getElementById('burgerMenuBtn');
+                const sessionDropdown = document.getElementById('sessionDropdown');
+
+                burgerBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sessionDropdown.classList.toggle('show');
+                    // Close user dropdown if open
+                    document.getElementById('userDropdown').classList.remove('show');
+                });
+
+                // Session dropdown actions
+                document.getElementById('burgerNewGameBtn').addEventListener('click', () => {
+                    sessionDropdown.classList.remove('show');
+                    this.handleNewGame();
+                });
+
+                document.getElementById('burgerLoadGameBtn').addEventListener('click', () => {
+                    sessionDropdown.classList.remove('show');
+                    this.handleLoadGame();
+                });
+            }
+
+            showBurgerMenu(sessionName) {
+                // Show burger menu with current session name
+                const burgerMenu = document.getElementById('sessionBurgerMenu');
+                const sessionNameLabel = document.getElementById('currentSessionName');
+
+                sessionNameLabel.textContent = sessionName;
+                burgerMenu.classList.add('active');
             }
 
             showAuthModal(gameData, author) {
@@ -740,6 +849,9 @@
                     // Configure progressAPI to use session-based saving
                     window.progressAPI.setGameId(gameData._id);
                     window.progressAPI.setSessionId(this.currentSessionId);
+
+                    // Show burger menu with current session name
+                    this.showBurgerMenu(session.sessionName);
 
                     // Show canvas
                     this.canvas.style.display = 'block';
