@@ -1282,8 +1282,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         // Check if a game is selected
         const hasGameSelected = await window.gameSelector.checkAndPromptGameSelection();
 
-        // If no game selected, the selector modal will show
-        // User must select a game before proceeding
+        // If no game selected, wait for user to select one before initializing game
+        if (!hasGameSelected) {
+            console.log('⚠️ No game selected - please select a game from the game selector');
+            // Don't create the game instance until a game is selected
+            // The game selector's selectGame method will reload the page after selection
+            return;
+        }
     }
 
     const game = new PlatformRPG();

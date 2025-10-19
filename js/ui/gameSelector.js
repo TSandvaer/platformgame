@@ -484,7 +484,7 @@ class GameSelector {
     }
 
     /**
-     * Check if a game is selected, if not, show the selector
+     * Check if a game is selected and valid, if not, show the selector
      */
     async checkAndPromptGameSelection() {
         const currentGameId = this.apiClient.getCurrentGameId();
@@ -495,7 +495,25 @@ class GameSelector {
             return false;
         }
 
-        return true;
+        // Verify the game actually exists in MongoDB
+        try {
+            const response = await this.apiClient.getGame(currentGameId);
+            if (!response.success || !response.game) {
+                console.warn(`⚠️ Game ID ${currentGameId} not found in database, clearing and showing selector...`);
+                // Clear invalid game ID
+                this.apiClient.setCurrentGameId(null);
+                await this.open();
+                return false;
+            }
+            console.log(`✅ Valid game selected: ${response.game.name}`);
+            return true;
+        } catch (error) {
+            console.error('Error verifying game:', error);
+            // Clear invalid game ID on error
+            this.apiClient.setCurrentGameId(null);
+            await this.open();
+            return false;
+        }
     }
 }
 
