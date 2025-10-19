@@ -21,6 +21,31 @@
     overflow-y: auto;
 }
 
+/* Modal scrollbar styling */
+.modal-content::-webkit-scrollbar {
+    width: 12px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #0d1921;
+    border-radius: 6px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #2d3f5f;
+    border-radius: 6px;
+    border: 2px solid #1e2d3d;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #4a90e2;
+}
+
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #2d3f5f #0d1921;
+}
+
 .modal-header {
     padding: 15px 20px;
     border-bottom: 1px solid #2d3f5f;
