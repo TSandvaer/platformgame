@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Game - Platform Game Portal</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .player-header {
+            background: #2a2a2a;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #444;
+        }
+
+        .game-info-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-title-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .game-author-header {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #3a3a3a;
+        }
+
+        .btn-secondary:hover {
+            background: #4a4a4a;
+        }
+
+        .game-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        canvas {
+            border: 2px solid #444;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #3a3a3a;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .error-container h2 {
+            color: #ff6b6b;
+            margin: 0 0 15px 0;
+        }
+
+        .error-container p {
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+
+        .fullscreen-btn {
+            background: #3a3a3a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .fullscreen-btn:hover {
+            background: #4a4a4a;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-header">
+        <div class="game-info-header">
+            <h1 class="game-title-header" id="gameTitle">Loading...</h1>
+            <span class="game-author-header">by <span id="gameAuthor">...</span></span>
+        </div>
+        <div class="header-actions">
+            <button id="fullscreenBtn" class="btn btn-secondary">⛶ Fullscreen</button>
+            <a href="gallery.html" class="btn btn-secondary">📚 Browse Games</a>
+            <a href="index.html" class="btn">📝 Create Your Own</a>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div id="loadingContainer" class="loading-container">
+            <div class="loading-spinner"></div>
+            <h2>Loading Game...</h2>
+            <p id="loadingMessage">Please wait</p>
+        </div>
+
+        <div id="errorContainer" class="error-container" style="display: none;">
+            <h2>⚠️ Game Not Found</h2>
+            <p id="errorMessage">This game does not exist or is not published.</p>
+            <a href="gallery.html" class="btn">Browse Other Games</a>
+        </div>
+
+        <canvas id="gameCanvas" width="800" height="600" style="display: none;"></canvas>
+    </div>
+
+    <!-- Hidden containers needed by game engine -->
+    <div id="dashboard" style="display: none;"></div>
+    <div class="controls" style="display: none;"></div>
+
+    <!-- Death Overlay (used by game) -->
+    <div class="death-overlay" id="deathOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000;">
+        <div class="death-text" style="color: #ff6b6b; font-size: 48px; font-weight: bold;">You died!</div>
+    </div>
+
+    <!-- Scene Saved Overlay (used by game) -->
+    <div class="scene-saved-overlay" id="sceneSavedOverlay" style="display: none;"></div>
+
+    <!-- Prevent default game initialization -->
+    <script>
+        // Set flag to prevent game.js from auto-initializing
+        window.PLAYER_MODE = true;
+    </script>
+
+    <!-- Core Game Scripts (NO EDITOR CODE) -->
+    <script src="/js/platforms/platformData.js"></script>
+    <script src="/js/platforms/platformRenderer.js"></script>
+    <script src="/js/platforms/platformCollisions.js"></script>
+    <script src="/js/platforms/platformManager.js"></script>
+    <script src="/js/platforms/platformSystem.js"></script>
+
+    <script src="/js/props/propData.js"></script>
+    <script src="/js/inventory/inventoryItemsData.js"></script>
+    <script src="/js/items/itemDropSystem.js"></script>
+    <script src="/js/items/itemDropRenderer.js"></script>
+    <script src="/js/props/propRenderer.js"></script>
+    <script src="/js/props/propCollisions.js"></script>
+    <script src="/js/props/propManager.js"></script>
+    <script src="/js/props/propSystem.js"></script>
+
+    <script src="/js/lootables/lootableData.js"></script>
+    <script src="/js/lootables/lootableRenderer.js"></script>
+    <script src="/js/lootables/lootableManager.js"></script>
+    <script src="/js/lootables/lootableSystem.js"></script>
+
+    <script src="/js/scenes/sceneData.js"></script>
+    <script src="/js/scenes/sceneRenderer.js"></script>
+    <script src="/js/scenes/sceneManager.js"></script>
+    <script src="/js/scenes/sceneSystem.js"></script>
+
+    <script src="/js/camera/cameraData.js"></script>
+    <script src="/js/camera/cameraManager.js"></script>
+    <script src="/js/camera/cameraController.js"></script>
+    <script src="/js/camera/freeCameraSystem.js"></script>
+    <script src="/js/camera/cameraSystem.js"></script>
+
+    <script src="/js/player/playerCharacters.js"></script>
+    <script src="/js/player/playerData.js"></script>
+    <script src="/js/player/playerDataStorage.js"></script>
+    <script src="/js/player/playerInventorySystem.js"></script>
+    <script src="/js/player/playerPhysics.js"></script>
+    <script src="/js/player/playerAnimator.js"></script>
+    <script src="/js/player/playerController.js"></script>
+    <script src="/js/player/playerRenderer.js"></script>
+    <script src="/js/player/playerProjectileAnimator.js"></script>
+    <script src="/js/player/playerProjectileSystem.js"></script>
+    <script src="/js/player/playerSystem.js"></script>
+
+    <script src="/js/enemy/enemyData.js"></script>
+    <script src="/js/enemy/enemyAnimator.js"></script>
+    <script src="/js/enemy/enemyProjectileAnimator.js"></script>
+    <script src="/js/enemy/enemyProjectileSystem.js"></script>
+    <script src="/js/enemy/enemyRenderer.js"></script>
+    <script src="/js/enemy/enemyAI.js"></script>
+    <script src="/js/enemy/enemyCollisions.js"></script>
+    <script src="/js/enemy/enemyManager.js"></script>
+    <script src="/js/enemy/enemySystem.js"></script>
+
+    <script src="/js/npc/npcData.js"></script>
+    <script src="/js/npc/npcAnimator.js"></script>
+    <script src="/js/npc/npcRenderer.js"></script>
+    <script src="/js/npc/npcManager.js"></script>
+    <script src="/js/npc/npcSystem.js"></script>
+
+    <script src="/js/input/inputKeyboard.js"></script>
+    <script src="/js/input/inputMouse.js"></script>
+    <script src="/js/input/inputSystem.js"></script>
+
+    <script src="/js/background/backgroundSystem.js"></script>
+    <script src="/js/viewport/viewportSystem.js"></script>
+    <script src="/js/hud/hudSystem.js"></script>
+
+    <!-- Game Data System Scripts (needed for game initialization) -->
+    <script src="/js/gameData/gameDataStorage.js"></script>
+    <script src="/js/gameData/gameDataValidator.js"></script>
+    <script src="/js/gameData/gameDataExporter.js"></script>
+    <script src="/js/gameData/gameDataImporter.js"></script>
+    <script src="/js/gameData/gameDataSystem.js"></script>
+
+    <!-- UI System Scripts (needed for feedback) -->
+    <script src="/js/ui/feedbackSystem.js"></script>
+
+    <!-- Editor System Scripts (needed by game.js, will be overridden for player mode) -->
+    <script src="/js/gameEditor/editorUI.js"></script>
+    <script src="/js/gameEditor/editorMode.js"></script>
+    <script src="/js/gameEditor/editorTools.js"></script>
+    <script src="/js/gameEditor/editorContextMenu.js"></script>
+    <script src="/js/gameEditor/editorSystem.js"></script>
+
+    <!-- Stubs for editor dependencies (not used in player but referenced by game.js) -->
+    <script>
+        // Stub for DevelopmentInputHandler
+        class DevelopmentInputHandler {
+            constructor(game) { this.game = game; }
+            handleKeyDown(e) {}
+        }
+        window.DevelopmentInputHandler = DevelopmentInputHandler;
+
+        // Stub for UIEventHandler
+        class UIEventHandler {
+            constructor(game) { this.game = game; }
+            initialize() {}
+            updateEnemyList() {}
+            updateEnemyProperties() {}
+            updateNPCList() {}
+            updateNPCProperties() {}
+        }
+        window.UIEventHandler = UIEventHandler;
+
+        // Stub for InputEditor (not needed in player)
+        class InputEditor {
+            constructor(game) { this.game = game; }
+            handleMouseDown(e) {}
+            handleMouseMove(e) {}
+            handleMouseUp(e) {}
+            handleKeyDown(e) {}
+        }
+        window.InputEditor = InputEditor;
+
+        // Stub for EnemyMouseHandler (not needed in player)
+        class EnemyMouseHandler {
+            constructor(game) { this.game = game; }
+            handleMouseDown(e) {}
+            handleMouseMove(e) {}
+            handleMouseUp(e) {}
+        }
+        window.EnemyMouseHandler = EnemyMouseHandler;
+
+        // Stub for NPCMouseHandler (not needed in player)
+        class NPCMouseHandler {
+            constructor(game) { this.game = game; }
+            handleMouseDown(e) {}
+            handleMouseMove(e) {}
+            handleMouseUp(e) {}
+        }
+        window.NPCMouseHandler = NPCMouseHandler;
+
+        // Stub for GameSelector (not needed in player)
+        window.gameSelector = null;
+
+        // Stub for apiClient (not needed in player)
+        window.apiClient = null;
+    </script>
+
+    <!-- Main Game Engine -->
+    <script src="/game.js"></script>
+
+    <!-- Player Game Controller -->
+    <script src="/js/player/playerGameController.js"></script>
+
+    <!-- Player App Script -->
+    <script>
+        // Player Application
+        // Loads and plays published games without editor functionality
+
+        class GamePlayer {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.game = null;
+                this.baseURL = 'http://localhost:3000/api';
+
+                this.loadGameFromURL();
+            }
+
+            async loadGameFromURL() {
+                try {
+                    // Parse URL path: /play/username/gameslug
+                    const path = window.location.pathname;
+                    const match = path.match(/\/play\/([^\/]+)\/([^\/]+)/);
+
+                    if (!match) {
+                        this.showError('Invalid game URL');
+                        return;
+                    }
+
+                    const username = match[1];
+                    const slug = match[2];
+
+                    // Get token from query string if present (for private games)
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const token = urlParams.get('token');
+
+                    document.getElementById('loadingMessage').textContent = `Loading ${slug}...`;
+
+                    // Fetch game data
+                    const url = `${this.baseURL}/games/play/${username}/${slug}${token ? `?token=${token}` : ''}`;
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Game not found');
+                    }
+
+                    const data = await response.json();
+
+                    // Track play
+                    this.trackGamePlayed(username, slug);
+
+                    // Load game
+                    this.startGame(data.game, data.author);
+
+                } catch (error) {
+                    console.error('Error loading game:', error);
+                    this.showError(error.message);
+                }
+            }
+
+            async trackGamePlayed(username, slug) {
+                try {
+                    await fetch(`${this.baseURL}/games/play/${username}/${slug}/played`, {
+                        method: 'POST'
+                    });
+                } catch (error) {
+                    console.error('Error tracking play:', error);
+                }
+            }
+
+            startGame(gameData, author) {
+                // Update header
+                document.getElementById('gameTitle').textContent = gameData.name;
+                document.getElementById('gameAuthor').textContent = author.displayName || author.username;
+
+                // Hide loading, show canvas
+                document.getElementById('loadingContainer').style.display = 'none';
+                this.canvas.style.display = 'block';
+
+                // Initialize game (using existing game.js structure)
+                // We need to adapt the existing game code to work here
+                // For now, show placeholder
+                console.log('🎯 Game data loaded from server:', gameData);
+                console.log('🎯 Inner gameData:', gameData.gameData);
+                console.log('🎯 HUD settings from server:', gameData.gameData?.gameSettings?.hud);
+
+                // Start the game
+                this.initializeGame(gameData.gameData);
+            }
+
+            initializeGame(gameData) {
+                try {
+                    console.log('Initializing game with data:', gameData);
+
+                    // Prevent the default game.js DOMContentLoaded initialization
+                    // We'll handle initialization ourselves
+
+                    // Initialize the game using PlayerGameController
+                    this.gameController = new PlayerGameController(this.canvas, gameData);
+                    this.game = this.gameController.getGame();
+
+                    console.log('Game initialized successfully!');
+                } catch (error) {
+                    console.error('Error initializing game:', error);
+                    this.ctx.fillStyle = '#1a1a1a';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    this.ctx.fillStyle = '#ff6b6b';
+                    this.ctx.font = '24px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('Failed to load game', this.canvas.width / 2, this.canvas.height / 2 - 40);
+
+                    this.ctx.font = '16px Arial';
+                    this.ctx.fillStyle = '#888';
+                    this.ctx.fillText(error.message, this.canvas.width / 2, this.canvas.height / 2);
+                }
+            }
+
+            showError(message) {
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('errorContainer').style.display = 'block';
+                document.getElementById('errorMessage').textContent = message;
+            }
+        }
+
+        // Fullscreen functionality
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            const canvas = document.getElementById('gameCanvas');
+            if (canvas.requestFullscreen) {
+                canvas.requestFullscreen();
+            } else if (canvas.webkitRequestFullscreen) {
+                canvas.webkitRequestFullscreen();
+            } else if (canvas.msRequestFullscreen) {
+                canvas.msRequestFullscreen();
+            }
+        });
+
+        // Initialize player
+        const player = new GamePlayer();
+    </script>
+</body>
+</html>

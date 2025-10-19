@@ -19,7 +19,7 @@ class EnemyProjectileAnimator {
         img.onerror = () => {
             console.error('❌ Failed to load fire projectile sprite');
         };
-        img.src = 'sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline/projectile_diagonal.png';
+        img.src = '/sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline/projectile_diagonal.png';
         this.sprite.image = img;
     }
 

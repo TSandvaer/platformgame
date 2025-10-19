@@ -39,7 +39,7 @@ class PropRenderer {
             loadedCount++;
             checkAllLoaded();
         };
-        torchFlameImg.src = 'sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
+        torchFlameImg.src = '/sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
         this.propSprites.torchFlame.image = torchFlameImg;
 
         // Load chest animation sprite sheet
@@ -53,7 +53,7 @@ class PropRenderer {
             loadedCount++;
             checkAllLoaded();
         };
-        chestImg.src = 'sprites/Pixel Art Platformer/Texture/TX Chest Animation.png';
+        chestImg.src = '/sprites/Pixel Art Platformer/Texture/TX Chest Animation.png';
         this.propSprites.chestAnimation.image = chestImg;
     }
 

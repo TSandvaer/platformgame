@@ -807,33 +807,46 @@ class PlatformRPG {
             return;
         }
 
-        document.getElementById('charactersList').innerHTML = (gameData.characters || []).map(char =>
-            `<div class="item">
-                <div class="item-name">${char.name}</div>
-                <div class="item-details">${char.description}</div>
-            </div>`
-        ).join('');
+        // Only update UI elements if they exist (editor mode)
+        const charactersList = document.getElementById('charactersList');
+        if (charactersList) {
+            charactersList.innerHTML = (gameData.characters || []).map(char =>
+                `<div class="item">
+                    <div class="item-name">${char.name}</div>
+                    <div class="item-details">${char.description}</div>
+                </div>`
+            ).join('');
+        }
 
-        document.getElementById('classesList').innerHTML = (gameData.classes || []).map(cls =>
-            `<div class="item">
-                <div class="item-name">${cls.name}</div>
-                <div class="item-details">${cls.description}</div>
-            </div>`
-        ).join('');
+        const classesList = document.getElementById('classesList');
+        if (classesList) {
+            classesList.innerHTML = (gameData.classes || []).map(cls =>
+                `<div class="item">
+                    <div class="item-name">${cls.name}</div>
+                    <div class="item-details">${cls.description}</div>
+                </div>`
+            ).join('');
+        }
 
-        document.getElementById('weaponsList').innerHTML = (gameData.weapons || []).map(weapon =>
-            `<div class="item">
-                <div class="item-name">${weapon.name}</div>
-                <div class="item-details">${weapon.description}</div>
-            </div>`
-        ).join('');
+        const weaponsList = document.getElementById('weaponsList');
+        if (weaponsList) {
+            weaponsList.innerHTML = (gameData.weapons || []).map(weapon =>
+                `<div class="item">
+                    <div class="item-name">${weapon.name}</div>
+                    <div class="item-details">${weapon.description}</div>
+                </div>`
+            ).join('');
+        }
 
-        document.getElementById('itemsList').innerHTML = (gameData.items || []).map(item =>
-            `<div class="item">
-                <div class="item-name">${item.name}</div>
-                <div class="item-details">${item.description}</div>
-            </div>`
-        ).join('');
+        const itemsList = document.getElementById('itemsList');
+        if (itemsList) {
+            itemsList.innerHTML = (gameData.items || []).map(item =>
+                `<div class="item">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-details">${item.description}</div>
+                </div>`
+            ).join('');
+        }
     }
 
 
@@ -1256,6 +1269,12 @@ class PlatformRPG {
 
 // Wait for DOM to be ready before creating the game
 window.addEventListener('DOMContentLoaded', async () => {
+    // Skip initialization if in player mode (player app will handle initialization)
+    if (window.PLAYER_MODE) {
+        console.log('Player mode detected - skipping automatic game initialization');
+        return;
+    }
+
     // Initialize game selector
     if (window.gameSelector) {
         window.gameSelector.initialize();

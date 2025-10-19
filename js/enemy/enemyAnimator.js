@@ -53,7 +53,9 @@ class EnemyAnimator {
                 if (loadedCount === totalSprites) {
                 }
             };
-            img.src = `${baseFolder}/${animData.file}`;
+            // Ensure path is absolute
+            const spritePath = `${baseFolder}/${animData.file}`;
+            img.src = spritePath.startsWith('/') ? spritePath : '/' + spritePath;
             this.sprites[animName].image = img;
             this.sprites[animName].frames = animData.frames;
             // Use per-animation dimensions from enemy type definition, with fallback to 100x100

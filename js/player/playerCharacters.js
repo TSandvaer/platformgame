@@ -8,7 +8,7 @@ class PlayerCharacters {
                 description: 'A skilled warrior with balanced stats',
 
                 // Sprite configuration
-                spriteBasePath: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier',
+                spriteBasePath: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier',
                 spriteSize: {
                     frameWidth: 100,
                     frameHeight: 100
@@ -72,7 +72,7 @@ class PlayerCharacters {
 
                 // Projectile configuration (arrow)
                 projectile: {
-                    spriteSheet: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Arrow(projectile)/Arrow01(32x32).png',
+                    spriteSheet: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Arrow(projectile)/Arrow01(32x32).png',
                     frameWidth: 32,
                     frameHeight: 32,
                     frames: 1,  // Static arrow sprite (no animation)
@@ -93,7 +93,7 @@ class PlayerCharacters {
                 description: 'A tough dwarf with powerful attacks',
 
                 // Sprite configuration
-                spriteBasePath: 'sprites/PLAYER/CHARACTER/MATTZ ART/Dwarf Warrior 2D Pixel Art v1.2/Sprites/no_outline',
+                spriteBasePath: '/sprites/PLAYER/CHARACTER/MATTZ ART/Dwarf Warrior 2D Pixel Art v1.2/Sprites/no_outline',
                 spriteSize: {
                     frameWidth: 128,  // 1280px / 10 frames = 128px per frame
                     frameHeight: 96   // Actual sprite sheet height
@@ -155,7 +155,7 @@ class PlayerCharacters {
                 description: 'A powerful mage with melee and ranged magic attacks',
 
                 // Sprite configuration
-                spriteBasePath: 'sprites/PLAYER/CHARACTER/MATTZ ART/Wizard 2D Pixel Art v2.0/Sprites/without_outline',
+                spriteBasePath: '/sprites/PLAYER/CHARACTER/MATTZ ART/Wizard 2D Pixel Art v2.0/Sprites/without_outline',
                 spriteSize: {
                     frameWidth: 128,  // 768px / 6 frames = 128px per frame (for idle)
                     frameHeight: 78   // Actual sprite sheet height
@@ -218,7 +218,7 @@ class PlayerCharacters {
 
                 // Projectile configuration
                 projectile: {
-                    spriteSheet: 'sprites/PLAYER/CHARACTER/MATTZ ART/Wizard 2D Pixel Art v2.0/Projectile.png',
+                    spriteSheet: '/sprites/PLAYER/CHARACTER/MATTZ ART/Wizard 2D Pixel Art v2.0/Projectile.png',
                     frameWidth: 32,
                     frameHeight: 32,
                     frames: 5,
@@ -240,7 +240,7 @@ class PlayerCharacters {
                 description: 'A skilled archer specializing in ranged attacks',
 
                 // Sprite configuration
-                spriteBasePath: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Archer/Archer',
+                spriteBasePath: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Archer/Archer',
                 spriteSize: {
                     frameWidth: 100,
                     frameHeight: 100
@@ -299,7 +299,7 @@ class PlayerCharacters {
 
                 // Projectile configuration (arrow)
                 projectile: {
-                    spriteSheet: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Archer/Arrow(projectile)/Arrow02(32x32).png',
+                    spriteSheet: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Archer/Arrow(projectile)/Arrow02(32x32).png',
                     frameWidth: 32,
                     frameHeight: 32,
                     frames: 1,  // Static arrow sprite (no animation)

@@ -28,6 +28,16 @@ class APIClient {
     }
 
     /**
+     * Get auth headers if user is authenticated
+     */
+    getAuthHeaders() {
+        if (window.authSystem && window.authSystem.isAuthenticated()) {
+            return window.authSystem.getAuthHeaders();
+        }
+        return {};
+    }
+
+    /**
      * Make HTTP request to API
      */
     async request(endpoint, options = {}) {
@@ -36,10 +46,19 @@ class APIClient {
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
+                ...this.getAuthHeaders(),
             }
         };
 
-        const config = { ...defaultOptions, ...options };
+        // Merge headers properly
+        const config = {
+            ...defaultOptions,
+            ...options,
+            headers: {
+                ...defaultOptions.headers,
+                ...(options.headers || {})
+            }
+        };
 
         try {
             const response = await fetch(url, config);
@@ -173,6 +192,56 @@ class APIClient {
             throw new Error('No game selected');
         }
         return await this.saveGameData(gameId, gameData);
+    }
+
+    /**
+     * Publish a game
+     */
+    async publishGame(gameId, visibility = 'public', slug = null) {
+        return await this.request(`/games/${gameId}/publish`, {
+            method: 'POST',
+            body: JSON.stringify({ visibility, slug })
+        });
+    }
+
+    /**
+     * Unpublish a game
+     */
+    async unpublishGame(gameId) {
+        return await this.request(`/games/${gameId}/unpublish`, {
+            method: 'POST'
+        });
+    }
+
+    /**
+     * Get public games gallery
+     */
+    async getPublicGames(sort = 'newest', limit = 20) {
+        return await this.request(`/games/public/gallery?sort=${sort}&limit=${limit}`);
+    }
+
+    /**
+     * Get game by username and slug (for player)
+     */
+    async getGameBySlug(username, slug, token = null) {
+        const tokenParam = token ? `?token=${token}` : '';
+        return await this.request(`/games/play/${username}/${slug}${tokenParam}`);
+    }
+
+    /**
+     * Increment play count
+     */
+    async trackGamePlayed(username, slug) {
+        return await this.request(`/games/play/${username}/${slug}/played`, {
+            method: 'POST'
+        });
+    }
+
+    /**
+     * Get user's published games
+     */
+    async getUserGames(username) {
+        return await this.request(`/games/user/${username}`);
     }
 }
 

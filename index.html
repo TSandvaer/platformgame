@@ -14,8 +14,94 @@
     <link rel="stylesheet" href="css/inventory.css">
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/game-selector.css">
+    <link rel="stylesheet" href="css/user-menu.css">
 </head>
 <body>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="js/auth/firebaseConfig.js"></script>
+    <script src="js/auth/authSystem.js"></script>
+    <script src="js/auth/authModal.js"></script>
+
+    <!-- Initialize Auth System and Check Authentication -->
+    <script>
+        // Initialize auth system as soon as it's loaded
+        if (window.authSystem) {
+            authSystem.initialize().then(() => {
+                console.log('✅ Auth system initialized on editor page');
+
+                // Track if this is the initial load
+                let isInitialLoad = true;
+
+                // Check authentication status
+                const isAuthenticated = authSystem.isAuthenticated();
+                console.log('🔐 Authentication status:', isAuthenticated);
+
+                if (!isAuthenticated) {
+                    // Hide editor UI
+                    console.log('❌ User not authenticated - hiding editor UI');
+                    document.querySelector('.container').style.display = 'none';
+
+                    // Show auth modal
+                    if (window.authModal) {
+                        window.authModal.show();
+                    } else {
+                        // Wait for authModal to be ready
+                        const checkAuthModal = setInterval(() => {
+                            if (window.authModal) {
+                                clearInterval(checkAuthModal);
+                                window.authModal.show();
+                            }
+                        }, 100);
+                    }
+                } else {
+                    // User is authenticated - show editor UI
+                    console.log('✅ User authenticated - showing editor UI');
+                    document.querySelector('.container').style.display = 'flex';
+                }
+
+                // Listen for authentication state changes
+                authSystem.onAuthStateChange((user) => {
+                    // Skip the initial callback (which fires immediately with current state)
+                    if (isInitialLoad) {
+                        isInitialLoad = false;
+                        return;
+                    }
+
+                    if (user) {
+                        console.log('✅ User logged in:', user);
+
+                        // Hide auth modal
+                        if (window.authModal) {
+                            window.authModal.hide();
+                        }
+
+                        // Show editor UI
+                        document.querySelector('.container').style.display = 'flex';
+
+                        // Reload the page to initialize game with user data
+                        window.location.reload();
+                    } else {
+                        console.log('❌ User logged out');
+
+                        // Hide editor UI
+                        document.querySelector('.container').style.display = 'none';
+
+                        // Show auth modal
+                        if (window.authModal) {
+                            window.authModal.show();
+                        }
+                    }
+                });
+            }).catch(err => {
+                console.error('❌ Auth initialization error:', err);
+            });
+        }
+    </script>
+
     <!-- Scene Saved Overlay -->
     <div class="scene-saved-overlay" id="sceneSavedOverlay">
         <div class="scene-saved-text">Scene Saved!</div>
@@ -40,7 +126,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container" style="display: none;">
         <div class="game-area">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <div class="controls">
@@ -56,6 +142,26 @@
                 <select id="productionSceneSelect" style="display: none; margin-left: 10px; padding: 5px; width: auto;">
                     <option value="">Select Scene...</option>
                 </select>
+
+                <!-- User Menu -->
+                <div class="user-menu" id="userMenu" style="margin-left: auto; display: none;">
+                    <button class="btn user-menu-btn" id="userMenuBtn">
+                        <span id="userDisplayName">User</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+                    <div class="user-menu-dropdown" id="userMenuDropdown">
+                        <div class="user-menu-item" id="publishGameMenuItem">📤 Publish Game</div>
+                        <div class="user-menu-item" id="myGamesMenuItem">🎮 My Games</div>
+                        <div class="user-menu-item" id="profileMenuItem">👤 Profile</div>
+                        <div class="user-menu-separator"></div>
+                        <div class="user-menu-item" id="logoutMenuItem">🚪 Logout</div>
+                    </div>
+                </div>
+
+                <!-- Login Button (shown when not authenticated) -->
+                <button class="btn" id="loginBtn" style="margin-left: auto; display: none;" onclick="if(window.authModal) window.authModal.show();">
+                    Login / Sign Up
+                </button>
             </div>
             <div class="coordinates" id="coordinates" style="display: none;">
                 X: 0, Y: 0
@@ -818,6 +924,8 @@
     <!-- API and Game Selector Scripts (load before game.js) -->
     <script src="js/api/apiClient.js"></script>
     <script src="js/ui/gameSelector.js"></script>
+    <script src="js/ui/userMenuHandler.js"></script>
+    <script src="js/publishing/publishingSystem.js"></script>
 
     <!-- Chest Inventory Editor Modal -->
     <div id="chestInventoryModal" class="modal" style="display: none;">

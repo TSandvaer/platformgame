@@ -22,12 +22,15 @@ class ViewportSystem {
 
     applySettings() {
         const modeSelect = document.getElementById('viewportModeSelect');
-        const designWidth = parseInt(document.getElementById('designWidth').value);
-        const designHeight = parseInt(document.getElementById('designHeight').value);
+        const designWidthEl = document.getElementById('designWidth');
+        const designHeightEl = document.getElementById('designHeight');
+
+        // Check if elements exist (editor mode)
+        if (!modeSelect || !designWidthEl || !designHeightEl) return;
 
         this.viewport.mode = modeSelect.value;
-        this.viewport.designWidth = designWidth;
-        this.viewport.designHeight = designHeight;
+        this.viewport.designWidth = parseInt(designWidthEl.value);
+        this.viewport.designHeight = parseInt(designHeightEl.value);
 
         this.updateViewport();
         this.updateUI();
@@ -38,17 +41,26 @@ class ViewportSystem {
         this.viewport.designWidth = 1920;
         this.viewport.designHeight = 1080;
 
-        document.getElementById('viewportModeSelect').value = 'fit';
-        document.getElementById('designWidth').value = '1920';
-        document.getElementById('designHeight').value = '1080';
+        // Update UI elements if they exist (editor mode)
+        const modeSelect = document.getElementById('viewportModeSelect');
+        const designWidthEl = document.getElementById('designWidth');
+        const designHeightEl = document.getElementById('designHeight');
+
+        if (modeSelect) modeSelect.value = 'fit';
+        if (designWidthEl) designWidthEl.value = '1920';
+        if (designHeightEl) designHeightEl.value = '1080';
 
         this.updateViewport();
         this.updateUI();
     }
 
     updateUI() {
-        document.getElementById('currentScale').textContent = `${this.viewport.scale.toFixed(2)}x`;
-        document.getElementById('actualSize').textContent = `${this.viewport.actualWidth}x${this.viewport.actualHeight}`;
+        // Only update UI if elements exist (editor mode)
+        const currentScaleEl = document.getElementById('currentScale');
+        const actualSizeEl = document.getElementById('actualSize');
+
+        if (currentScaleEl) currentScaleEl.textContent = `${this.viewport.scale.toFixed(2)}x`;
+        if (actualSizeEl) actualSizeEl.textContent = `${this.viewport.actualWidth}x${this.viewport.actualHeight}`;
     }
 
     updateViewport() {

@@ -12,7 +12,7 @@ class EnemyRenderer {
             if (!frame) {
                 this.renderFallback(enemy, viewport, camera);
             } else {
-                this.renderSprite(enemy, frame, viewport, camera);
+                this.renderSprite(enemy, frame, viewport, camera, animator);
             }
         }
 
@@ -35,7 +35,7 @@ class EnemyRenderer {
         }
     }
 
-    renderSprite(enemy, frame, viewport, camera) {
+    renderSprite(enemy, frame, viewport, camera, animator) {
         this.ctx.save();
 
         // Disable image smoothing for crisp pixel art
@@ -48,7 +48,8 @@ class EnemyRenderer {
         }
 
         // Get enemy type data for scale and rendering offsets
-        const enemyTypeData = window.game?.enemySystem?.data?.enemyTypes?.[enemy.type];
+        // Try animator first (always available), fallback to window.game (dev mode)
+        const enemyTypeData = animator?.enemyTypeData || window.game?.enemySystem?.data?.enemyTypes?.[enemy.type];
         const typeScale = enemyTypeData?.scale || 1.0;
         const sizeMultiplier = enemy.sizeMultiplier || 1.0;
         const totalScale = typeScale * sizeMultiplier; // Combine type scale and instance size multiplier
@@ -67,14 +68,6 @@ class EnemyRenderer {
 
         // Calculate Y offset to keep bottom of collision box at same position
         const scaleYOffset = enemy.height * (1 - sizeMultiplier);
-
-        // Apply camera and viewport transformation (with scale Y offset)
-        let renderX = enemy.x;
-        let renderY = enemy.y + scaleYOffset;
-        if (viewport && camera) {
-            renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
-            renderY = ((enemy.y + scaleYOffset) - camera.y) * viewport.scaleY + viewport.offsetY;
-        }
 
         // Calculate sprite render dimensions using actual frame dimensions and total scale
         const spriteRenderWidth = Math.round(frame.frameWidth * totalScale);
@@ -98,11 +91,28 @@ class EnemyRenderer {
         const spriteOffsetX = Math.round((enemyScaledWidth - spriteRenderWidth) / 2) + renderOffsetX;
         const spriteOffsetY = Math.round(enemyScaledHeight - spriteRenderHeight) + renderOffsetY - heightCompensation;
 
-        // Apply viewport scaling to offsets with pixel-perfect rounding
-        const scaledOffsetX = Math.round(spriteOffsetX * (viewport ? viewport.scaleX : 1));
-        const scaledOffsetY = Math.round(spriteOffsetY * (viewport ? viewport.scaleY : 1));
-        const scaledWidth = Math.round(spriteRenderWidth * (viewport ? viewport.scaleX : 1));
-        const scaledHeight = Math.round(spriteRenderHeight * (viewport ? viewport.scaleY : 1));
+        // Handle two rendering modes:
+        // 1. When viewport & camera are provided: manually transform coordinates (dev mode with separate rendering)
+        // 2. When both are null: use world coordinates, canvas transforms already applied (player mode)
+        let renderX, renderY, scaledOffsetX, scaledOffsetY, scaledWidth, scaledHeight;
+
+        if (viewport && camera) {
+            // Dev mode: manually apply camera and viewport transformations
+            renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
+            renderY = ((enemy.y + scaleYOffset) - camera.y) * viewport.scaleY + viewport.offsetY;
+            scaledOffsetX = Math.round(spriteOffsetX * viewport.scaleX);
+            scaledOffsetY = Math.round(spriteOffsetY * viewport.scaleY);
+            scaledWidth = Math.round(spriteRenderWidth * viewport.scaleX);
+            scaledHeight = Math.round(spriteRenderHeight * viewport.scaleY);
+        } else {
+            // Player mode: use world coordinates, canvas transforms handle camera & viewport
+            renderX = enemy.x;
+            renderY = enemy.y + scaleYOffset;
+            scaledOffsetX = spriteOffsetX;
+            scaledOffsetY = spriteOffsetY;
+            scaledWidth = spriteRenderWidth;
+            scaledHeight = spriteRenderHeight;
+        }
 
         // Flip sprite horizontally based on facing direction (shouldFlip calculated earlier)
         if (shouldFlip) {
@@ -163,7 +173,8 @@ class EnemyRenderer {
 
         // Add type indicator
         this.ctx.fillStyle = 'white';
-        this.ctx.font = `${12 * (viewport ? viewport.scaleX : 1)}px Arial`;
+        const fontSize = (viewport && camera) ? (12 * viewport.scaleX) : 12;
+        this.ctx.font = `${fontSize}px Arial`;
         this.ctx.textAlign = 'center';
         this.ctx.fillText(enemy.type.toUpperCase(), renderX + renderWidth / 2, renderY + renderHeight / 2);
 
@@ -173,7 +184,7 @@ class EnemyRenderer {
     renderDebugInfo(enemy, viewport, camera, selectedEnemy = null) {
         this.ctx.save();
 
-        // Apply camera and viewport transformation
+        // Calculate enemy dimensions
         const sizeMultiplier = enemy.sizeMultiplier || 1.0;
         const enemyScaledWidth = enemy.width * sizeMultiplier;
         const enemyScaledHeight = enemy.height * sizeMultiplier;
@@ -181,21 +192,23 @@ class EnemyRenderer {
         // Calculate Y offset to keep bottom of collision box at same position
         const scaleYOffset = enemy.height * (1 - sizeMultiplier);
 
-        let renderX = enemy.x;
-        let renderY = enemy.y + scaleYOffset;
-        let renderWidth = enemyScaledWidth;
-        let renderHeight = enemyScaledHeight;
-
         // Apply collision box offset for floating enemies
         const collisionOffsetY = enemy.collisionOffsetY || 0;
 
+        let renderX, renderY, renderWidth, renderHeight;
+
         if (viewport && camera) {
+            // Dev mode: manually apply transformations
             renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
             renderY = ((enemy.y + collisionOffsetY + scaleYOffset) - camera.y) * viewport.scaleY + viewport.offsetY;
             renderWidth = enemyScaledWidth * viewport.scaleX;
             renderHeight = enemyScaledHeight * viewport.scaleY;
         } else {
+            // Player mode: use world coordinates
+            renderX = enemy.x;
             renderY = enemy.y + collisionOffsetY + scaleYOffset;
+            renderWidth = enemyScaledWidth;
+            renderHeight = enemyScaledHeight;
         }
 
         // Draw collision box
@@ -302,21 +315,25 @@ class EnemyRenderer {
 
         this.ctx.save();
 
-        // Apply camera and viewport transformation
+        // Calculate enemy dimensions
         const sizeMultiplier = enemy.sizeMultiplier || 1.0;
         const enemyScaledWidth = enemy.width * sizeMultiplier;
 
         // Calculate Y offset to keep bottom of collision box at same position
         const scaleYOffset = enemy.height * (1 - sizeMultiplier);
 
-        let renderX = enemy.x;
-        let renderY = enemy.y + scaleYOffset;
-        let renderWidth = enemyScaledWidth;
+        let renderX, renderY, renderWidth;
 
         if (viewport && camera) {
+            // Dev mode: manually apply transformations
             renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
             renderY = ((enemy.y + scaleYOffset) - camera.y) * viewport.scaleY + viewport.offsetY;
             renderWidth = enemyScaledWidth * viewport.scaleX;
+        } else {
+            // Player mode: use world coordinates
+            renderX = enemy.x;
+            renderY = enemy.y + scaleYOffset;
+            renderWidth = enemyScaledWidth;
         }
 
         // Health bar dimensions
@@ -348,7 +365,7 @@ class EnemyRenderer {
     renderSelectionIndicator(enemy, viewport, camera) {
         this.ctx.save();
 
-        // Apply camera and viewport transformation
+        // Calculate enemy dimensions
         const sizeMultiplier = enemy.sizeMultiplier || 1.0;
         const enemyScaledWidth = enemy.width * sizeMultiplier;
         const enemyScaledHeight = enemy.height * sizeMultiplier;
@@ -356,16 +373,20 @@ class EnemyRenderer {
         // Calculate Y offset to keep bottom of collision box at same position
         const scaleYOffset = enemy.height * (1 - sizeMultiplier);
 
-        let renderX = enemy.x;
-        let renderY = enemy.y + scaleYOffset;
-        let renderWidth = enemyScaledWidth;
-        let renderHeight = enemyScaledHeight;
+        let renderX, renderY, renderWidth, renderHeight;
 
         if (viewport && camera) {
+            // Dev mode: manually apply transformations
             renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
             renderY = ((enemy.y + scaleYOffset) - camera.y) * viewport.scaleY + viewport.offsetY;
             renderWidth = enemyScaledWidth * viewport.scaleX;
             renderHeight = enemyScaledHeight * viewport.scaleY;
+        } else {
+            // Player mode: use world coordinates
+            renderX = enemy.x;
+            renderY = enemy.y + scaleYOffset;
+            renderWidth = enemyScaledWidth;
+            renderHeight = enemyScaledHeight;
         }
 
         // Draw selection outline (bright green)
@@ -386,31 +407,45 @@ class EnemyRenderer {
     renderFleeingText(enemy, viewport, camera) {
         this.ctx.save();
 
-        // Apply camera and viewport transformation
+        // Calculate enemy dimensions
         const sizeMultiplier = enemy.sizeMultiplier || 1.0;
         const enemyScaledWidth = enemy.width * sizeMultiplier;
 
         // Calculate Y offset to keep bottom of collision box at same position
         const scaleYOffset = enemy.height * (1 - sizeMultiplier);
 
-        let renderX = enemy.x;
-        let renderY = enemy.y + scaleYOffset;
-        let renderWidth = enemyScaledWidth;
+        let renderX, renderY, renderWidth;
 
         if (viewport && camera) {
+            // Dev mode: manually apply transformations
             renderX = (enemy.x - camera.x) * viewport.scaleX + viewport.offsetX;
             renderY = ((enemy.y + scaleYOffset) - camera.y) * viewport.scaleY + viewport.offsetY;
             renderWidth = enemyScaledWidth * viewport.scaleX;
+        } else {
+            // Player mode: use world coordinates
+            renderX = enemy.x;
+            renderY = enemy.y + scaleYOffset;
+            renderWidth = enemyScaledWidth;
         }
 
         // Text properties
-        const fontSize = 14 * (viewport ? viewport.scaleX : 1);
+        let fontSize, textYOffset;
+        if (viewport && camera) {
+            // Dev mode: scale font size
+            fontSize = 14 * viewport.scaleX;
+            textYOffset = 25 * viewport.scaleY;
+        } else {
+            // Player mode: use world-space size, canvas scaling will handle it
+            fontSize = 14;
+            textYOffset = 25;
+        }
+
         this.ctx.font = `bold ${fontSize}px Arial`;
         this.ctx.textAlign = 'center';
 
         // Position text above enemy
         const textX = renderX + renderWidth / 2;
-        const textY = renderY - 25 * (viewport ? viewport.scaleY : 1);
+        const textY = renderY - textYOffset;
 
         // Draw text background for better visibility
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';

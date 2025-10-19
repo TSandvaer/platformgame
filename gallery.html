@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Gallery - Platform Game Editor</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/gallery.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .gallery-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .gallery-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 36px;
+        }
+
+        .gallery-header p {
+            margin: 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .gallery-nav {
+            background: #2a2a2a;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .gallery-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .gallery-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .game-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 2px solid #3a3a3a;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .game-thumbnail {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .game-info {
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+
+        .game-description {
+            font-size: 14px;
+            color: #aaa;
+            margin: 0 0 15px 0;
+            line-height: 1.5;
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        .game-author {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 18px;
+            color: #888;
+        }
+
+        .no-games {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .no-games h2 {
+            margin: 0 0 10px 0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        select {
+            padding: 8px 12px;
+            background: #3a3a3a;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery-header">
+        <h1>🎮 Game Gallery</h1>
+        <p>Discover and play amazing games created by our community</p>
+    </div>
+
+    <div class="gallery-nav">
+        <div class="gallery-controls">
+            <label for="sortSelect">Sort by:</label>
+            <select id="sortSelect">
+                <option value="newest">Newest First</option>
+                <option value="popular">Most Popular</option>
+            </select>
+        </div>
+        <div>
+            <a href="index.html" class="btn">📝 Create Your Own Game</a>
+        </div>
+    </div>
+
+    <div class="gallery-container">
+        <div id="loadingIndicator" class="loading">
+            Loading games...
+        </div>
+
+        <div id="gamesGrid" class="games-grid" style="display: none;">
+            <!-- Games will be dynamically loaded here -->
+        </div>
+
+        <div id="noGamesMessage" class="no-games" style="display: none;">
+            <h2>No Games Yet</h2>
+            <p>Be the first to publish a game!</p>
+            <a href="index.html" class="btn" style="margin-top: 20px;">Create a Game</a>
+        </div>
+    </div>
+
+    <script>
+        // Simple API client (inline for standalone page)
+        const baseURL = 'http://localhost:3000/api';
+
+        async function loadGames(sort = 'newest') {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const gamesGrid = document.getElementById('gamesGrid');
+            const noGamesMessage = document.getElementById('noGamesMessage');
+
+            // Show loading
+            loadingIndicator.style.display = 'block';
+            gamesGrid.style.display = 'none';
+            noGamesMessage.style.display = 'none';
+
+            try {
+                const response = await fetch(`${baseURL}/games/public/gallery?sort=${sort}&limit=50`);
+                const data = await response.json();
+
+                // Hide loading
+                loadingIndicator.style.display = 'none';
+
+                if (data.games && data.games.length > 0) {
+                    renderGames(data.games);
+                    gamesGrid.style.display = 'grid';
+                } else {
+                    noGamesMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading games:', error);
+                loadingIndicator.textContent = 'Failed to load games. Please try again later.';
+            }
+        }
+
+        function renderGames(games) {
+            const gamesGrid = document.getElementById('gamesGrid');
+            gamesGrid.innerHTML = '';
+
+            games.forEach(game => {
+                const card = createGameCard(game);
+                gamesGrid.appendChild(card);
+            });
+        }
+
+        function createGameCard(game) {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.onclick = () => playGame(game);
+
+            const thumbnail = game.thumbnail || '🎮';
+            const description = game.description || 'No description available';
+            const authorName = game.author?.displayName || game.author?.username || 'Anonymous';
+
+            card.innerHTML = `
+                <div class="game-thumbnail">
+                    ${thumbnail.startsWith('http') ? `<img src="${thumbnail}" style="width:100%;height:100%;object-fit:cover;">` : thumbnail}
+                </div>
+                <div class="game-info">
+                    <h3 class="game-title">${escapeHtml(game.name)}</h3>
+                    <p class="game-description">${escapeHtml(description)}</p>
+                    <div class="game-author">
+                        By <strong>${escapeHtml(authorName)}</strong>
+                    </div>
+                    <div class="game-stats">
+                        <div class="stat">
+                            <span>👁️</span>
+                            <span>${game.stats?.views || 0} views</span>
+                        </div>
+                        <div class="stat">
+                            <span>🎮</span>
+                            <span>${game.stats?.playCount || 0} plays</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function playGame(game) {
+            if (game.playUrl) {
+                window.location.href = game.playUrl;
+            } else {
+                alert('Game URL not available');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Sort change handler
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            loadGames(e.target.value);
+        });
+
+        // Initial load
+        loadGames();
+    </script>
+</body>
+</html>

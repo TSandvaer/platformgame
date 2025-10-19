@@ -114,7 +114,7 @@ class HUDSystem {
         coinImg.onerror = () => {
             console.error('💰 Failed to load coin icon for HUD');
         };
-        coinImg.src = 'sprites/Coins/gold/gold.png';
+        coinImg.src = '/sprites/Coins/gold/gold.png';
     }
 
     loadWoodenGUIAssets() {
@@ -126,7 +126,7 @@ class HUDSystem {
         stoneImg.onerror = () => {
             console.error('🏰 Failed to load stone background for HUD');
         };
-        stoneImg.src = 'GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  stone.png';
+        stoneImg.src = '/GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  stone.png';
 
         // Load parchment background
         const parchmentImg = new Image();
@@ -136,7 +136,7 @@ class HUDSystem {
         parchmentImg.onerror = () => {
             console.error('📜 Failed to load parchment background for HUD');
         };
-        parchmentImg.src = 'GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png';
+        parchmentImg.src = '/GUI/graphics/Fantasy Wooden GUI/PNG/UI board Small  parchment.png';
     }
 
     calculateUIScale() {
@@ -792,12 +792,21 @@ class HUDSystem {
 
     // Load HUD settings from gameData
     loadSettings() {
+        console.log('📊 HUD loadSettings() called');
         let hudSettings = null;
 
         // Try to get settings from gameDataSystem first
         if (this.game.gameDataSystem && this.game.gameDataSystem.gameData.gameSettings?.hud) {
             hudSettings = this.game.gameDataSystem.gameData.gameSettings.hud;
+            console.log('📊 HUD: Found settings from gameDataSystem:', hudSettings);
         } else {
+            console.log('📊 HUD: gameDataSystem not available or no HUD settings, checking localStorage...');
+            console.log('   - gameDataSystem exists:', !!this.game.gameDataSystem);
+            if (this.game.gameDataSystem) {
+                console.log('   - gameData:', this.game.gameDataSystem.gameData);
+                console.log('   - gameSettings:', this.game.gameDataSystem.gameData?.gameSettings);
+            }
+
             // If gameDataSystem isn't ready, load directly from localStorage
             try {
                 const dataStr = localStorage.getItem('platformGame_gameData');
@@ -805,7 +814,12 @@ class HUDSystem {
                     const gameData = JSON.parse(dataStr);
                     if (gameData.gameSettings?.hud) {
                         hudSettings = gameData.gameSettings.hud;
+                        console.log('📊 HUD: Found settings from localStorage:', hudSettings);
+                    } else {
+                        console.log('📊 HUD: No HUD settings in localStorage');
                     }
+                } else {
+                    console.log('📊 HUD: No data in localStorage');
                 }
             } catch (error) {
                 console.error('Error loading HUD settings from localStorage:', error);
@@ -814,12 +828,14 @@ class HUDSystem {
 
         // Apply the settings if found - these are unscaled values
         if (hudSettings) {
+            console.log('✅ HUD: Applying settings:', hudSettings);
             if (hudSettings.position) {
                 // Store as manual position (unscaled values)
                 this.manualPosition = {
                     x: hudSettings.position.x,
                     y: hudSettings.position.y
                 };
+                console.log('   - manualPosition set to:', this.manualPosition);
             }
             if (hudSettings.width && hudSettings.height) {
                 // Store as manual size (unscaled values)
@@ -827,7 +843,10 @@ class HUDSystem {
                     width: hudSettings.width,
                     height: hudSettings.height
                 };
+                console.log('   - manualSize set to:', this.manualSize);
             }
+        } else {
+            console.warn('⚠️ HUD: No settings found - using defaults');
         }
     }
 

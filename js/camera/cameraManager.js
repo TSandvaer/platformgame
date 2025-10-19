@@ -125,7 +125,7 @@ class CameraManager {
             this.viewport.offsetX = 0;
         }
 
-        // Debug logging for camera constraints (can be removed for production)
+        // Debug logging for camera constraints (can be removed for production)
     }
 
     focusOnPlayer(player) {

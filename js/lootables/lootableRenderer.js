@@ -43,7 +43,7 @@ class LootableRenderer {
             };
             this.checkAllLoaded();
         };
-        coinImg.src = 'sprites/Coins/gold/golden.rotate.png';
+        coinImg.src = '/sprites/Coins/gold/golden.rotate.png';
 
         // Load heart sprite (animated)
         const heartImg = new Image();
@@ -59,7 +59,7 @@ class LootableRenderer {
         heartImg.onerror = () => {
             console.error('💖 Failed to load heart sprite');
         };
-        heartImg.src = 'sprites/Heart/heart_rotating2.png';
+        heartImg.src = '/sprites/Heart/heart_rotating2.png';
 
         // Load pickup effect sprite (sprite sheet with 8 frames, 256x32, 1 row)
         const pickupImg = new Image();
@@ -76,7 +76,7 @@ class LootableRenderer {
         pickupImg.onerror = () => {
             console.error('✨ Failed to load pickup effect sprite');
         };
-        pickupImg.src = 'sprites/Coins/pick_up_effect.png';
+        pickupImg.src = '/sprites/Coins/pick_up_effect.png';
     }
 
     checkAllLoaded() {

@@ -16,7 +16,7 @@ class ItemDropRenderer {
         spriteImage.onerror = () => {
             console.error('Failed to load item drop sprites');
         };
-        spriteImage.src = 'sprites/Inventory item sprite sets/inventory_items_pack1.png';
+        spriteImage.src = '/sprites/Inventory item sprite sets/inventory_items_pack1.png';
     }
 
     render(ctx, droppedItems, camera, viewport) {

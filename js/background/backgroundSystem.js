@@ -216,7 +216,8 @@ class BackgroundSystem {
             img.onerror = (error) => {
                 console.error(`Failed to load background layer: ${path}`, error);
             };
-            img.src = path;
+            // Ensure path is absolute
+            img.src = path.startsWith('/') ? path : '/' + path;
             background.layers.push(img);
         });
 
@@ -707,7 +708,8 @@ class BackgroundSystem {
                         drawAllLayers();
                     }
                 };
-                img.src = path;
+                // Ensure path is absolute
+                img.src = path.startsWith('/') ? path : '/' + path;
                 layers[index] = img;
             });
         }

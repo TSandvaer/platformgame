@@ -102,7 +102,7 @@ class PlatformRenderer {
         groundImg.onerror = () => {
             console.error('Failed to load ground tileset');
         };
-        groundImg.src = 'textures_02_08_25.png';
+        groundImg.src = '/textures_02_08_25.png';
         this.platformSprites.tileset.image = groundImg;
 
         // Load village props tileset
@@ -114,7 +114,7 @@ class PlatformRenderer {
         propsImg.onerror = () => {
             console.error('Failed to load village props tileset');
         };
-        propsImg.src = 'sprites/Pixel Art Platformer/Texture/TX Village Props.png';
+        propsImg.src = '/sprites/Pixel Art Platformer/Texture/TX Village Props.png';
         this.platformSprites.villageProps.image = propsImg;
 
         // Load Fantasy Forest Trees tileset
@@ -128,7 +128,7 @@ class PlatformRenderer {
             loadedCount++;
             checkAllLoaded();
         };
-        treesImg.src = 'sprites/PROPS/Full Fantasy Forest/Trees.png';
+        treesImg.src = '/sprites/PROPS/Full Fantasy Forest/Trees.png';
         this.platformSprites.trees.image = treesImg;
 
         // Load Fantasy Forest Vegetation tileset
@@ -142,7 +142,7 @@ class PlatformRenderer {
             loadedCount++;
             checkAllLoaded();
         };
-        vegetationImg.src = 'sprites/PROPS/Full Fantasy Forest/Vegetation.png';
+        vegetationImg.src = '/sprites/PROPS/Full Fantasy Forest/Vegetation.png';
         this.platformSprites.vegetation.image = vegetationImg;
     }
 
