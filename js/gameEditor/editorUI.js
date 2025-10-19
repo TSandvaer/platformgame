@@ -47,14 +47,6 @@ class EditorUI {
             });
         }
 
-        // Dashboard toggle
-        const toggleDashboardBtn = document.getElementById('toggleDashboardBtn');
-        if (toggleDashboardBtn) {
-            toggleDashboardBtn.addEventListener('click', () => {
-                this.editor.toggleDashboard();
-            });
-        }
-
         // Add transition button
         // Transition button is now handled by SceneManager
         // const addTransitionBtn = document.getElementById('addTransition');
@@ -168,9 +160,7 @@ class EditorUI {
         const devButtons = [
             'devModeBtn',
             'productionBtn',
-            'toggleDashboardBtn',
-            'cameraModeBtn',
-            'focusPlayerBtn'
+            'cameraModeBtn'
         ];
 
         devButtons.forEach(btnId => {

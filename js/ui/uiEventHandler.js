@@ -61,24 +61,9 @@ class UIEventHandler {
         document.getElementById('productionBtn').addEventListener('click', () => {
             this.game.setDevelopmentMode(false);
         });
-        document.getElementById('toggleDashboardBtn').addEventListener('click', () => {
-            this.game.toggleDashboard();
-        });
-
-        // Prevent the toggle dashboard button from being triggered by space key
-        document.getElementById('toggleDashboardBtn').addEventListener('keydown', (e) => {
-            if (e.key === ' ') {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        });
 
         document.getElementById('cameraModeBtn').addEventListener('click', () => {
             this.game.cameraSystem.toggleMode();
-        });
-
-        document.getElementById('focusPlayerBtn').addEventListener('click', () => {
-            this.game.cameraSystem.focusOnPlayer(this.game.player);
         });
 
         document.getElementById('backToDevBtn').addEventListener('click', () => {
