@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const compression = require('compression');
+const path = require('path');
 require('dotenv').config();
 
 // Initialize Firebase Admin SDK
@@ -19,6 +21,18 @@ try {
 
 // Middleware
 app.use(cors());
+
+// Compression middleware (gzip/deflate) - reduces file sizes by 60-70%
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6, // Compression level (0-9, 6 is good balance)
+}));
+
 app.use(bodyParser.json({ limit: '50mb' })); // Increased limit for large game data
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -41,7 +55,6 @@ const gameRoutes = require('./routes/games');
 const userRoutes = require('./routes/users');
 const progressRoutes = require('./routes/playerProgress');
 const sessionRoutes = require('./routes/gameSessions');
-const path = require('path');
 
 // API Routes (must come before static file middleware)
 app.use('/api/games', gameRoutes);
@@ -69,6 +82,7 @@ app.get('/gallery', (req, res) => {
 });
 
 // Serve static files (AFTER routes so routes take priority)
+// Files are automatically compressed via compression middleware
 app.use(express.static(__dirname));
 
 // Error handling middleware
