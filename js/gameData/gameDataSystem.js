@@ -163,13 +163,7 @@ class GameDataSystem {
             }
         }
 
-        // Try to load from gameData.json file
-        const fileData = await this.storage.loadFromFile('./gameData.json');
-        if (fileData) {
-            this.applyGameData(fileData);
-            return;
-        }
-
+        // No saved data found in MongoDB - proceed with default initialization
         // Check if scene system already has default scenes before applying empty defaults
         if (this.game.sceneSystem && this.game.sceneSystem.data.scenes.length > 0) {
             // Collect current scene data instead of overwriting

@@ -20,3 +20,6 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Game data (stored in MongoDB, not in repo)
+gameData.json
