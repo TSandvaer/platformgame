@@ -204,7 +204,20 @@
 
     <script>
         // Simple API client (inline for standalone page)
-        const baseURL = 'http://localhost:3000/api';
+        function getBaseURL() {
+            const isDevelopment = window.location.hostname === 'localhost' ||
+                                 window.location.hostname === '127.0.0.1' ||
+                                 window.location.hostname === '';
+
+            if (isDevelopment) {
+                return 'http://localhost:3000/api';
+            }
+
+            // For production, use the same host as the frontend
+            return `${window.location.protocol}//${window.location.host}/api`;
+        }
+
+        const baseURL = getBaseURL();
 
         async function loadGames(sort = 'newest') {
             const loadingIndicator = document.getElementById('loadingIndicator');

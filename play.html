@@ -531,7 +531,7 @@
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.game = null;
-                this.baseURL = 'http://localhost:3000/api';
+                this.baseURL = this.getBaseURL();
                 this.gameData = null;
                 this.gameId = null;
                 this.authModal = null;
@@ -545,6 +545,19 @@
 
                 // Wait for auth system to be ready
                 this.initializeAuthSystem();
+            }
+
+            getBaseURL() {
+                const isDevelopment = window.location.hostname === 'localhost' ||
+                                     window.location.hostname === '127.0.0.1' ||
+                                     window.location.hostname === '';
+
+                if (isDevelopment) {
+                    return 'http://localhost:3000/api';
+                }
+
+                // For production, use the same host as the frontend
+                return `${window.location.protocol}//${window.location.host}/api`;
             }
 
             async initializeAuthSystem() {
