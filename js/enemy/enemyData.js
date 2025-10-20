@@ -6,7 +6,7 @@ class EnemyData {
         this.enemyTypes = {
             orc: {
                 name: 'Orc',
-                spriteFolder: 'sprites/Tiny RPG assets/Characters(100x100)/Orc/Orc',
+                spriteFolder: '/sprites/Tiny RPG assets/Characters(100x100)/Orc/Orc',
                 defaultHealth: 100,
                 defaultDamage: 20,
                 fleeHealthThreshold: 0.4, // Flee when health drops below 40%
@@ -24,7 +24,7 @@ class EnemyData {
             },
             skeleton: {
                 name: 'Skeleton',
-                spriteFolder: 'sprites/Tiny RPG assets/Characters(100x100)/Skeleton/Skeleton',
+                spriteFolder: '/sprites/Tiny RPG assets/Characters(100x100)/Skeleton/Skeleton',
                 defaultHealth: 75,
                 defaultDamage: 15,
                 fleeHealthThreshold: 0.3, // Flee when health drops below 30%
@@ -42,7 +42,7 @@ class EnemyData {
             },
             babyDragon: {
                 name: 'Baby Dragon',
-                spriteFolder: 'sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline',
+                spriteFolder: '/sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline',
                 defaultHealth: 150,
                 defaultDamage: 30,
                 fleeHealthThreshold: 0.2, // Flee when health drops below 20%
@@ -66,7 +66,7 @@ class EnemyData {
             // Alias for backward compatibility
             dragon: {
                 name: 'Baby Dragon',
-                spriteFolder: 'sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline',
+                spriteFolder: '/sprites/Mattz Art/Baby Dragon 2D Pixel Art/Sprites/without_outline',
                 defaultHealth: 150,
                 defaultDamage: 30,
                 fleeHealthThreshold: 0.2,
@@ -89,7 +89,7 @@ class EnemyData {
             },
             adultDragon: {
                 name: 'Adult Dragon',
-                spriteFolder: 'sprites/Mattz Art/Dragon 2D Pixel Art v1.2/Sprites/without_outline',
+                spriteFolder: '/sprites/Mattz Art/Dragon 2D Pixel Art v1.2/Sprites/without_outline',
                 defaultHealth: 250,
                 defaultDamage: 40,
                 fleeHealthThreshold: 0.15, // Flee when health drops below 15% (tougher than baby)
@@ -114,7 +114,7 @@ class EnemyData {
             },
             slime: {
                 name: 'Slime',
-                spriteFolder: 'sprites/Tiny RPG assets/Characters(100x100)/Slime/Slime',
+                spriteFolder: '/sprites/Tiny RPG assets/Characters(100x100)/Slime/Slime',
                 defaultHealth: 60,
                 defaultDamage: 10,
                 fleeHealthThreshold: 0.5, // Slimes flee easily when health drops below 50%
@@ -132,7 +132,7 @@ class EnemyData {
             },
             goblin: {
                 name: 'Goblin',
-                spriteFolder: 'sprites/Mattz Art/Goblin 2D Pixel Art v1.1/Sprites/without_outline',
+                spriteFolder: '/sprites/Mattz Art/Goblin 2D Pixel Art v1.1/Sprites/without_outline',
                 defaultHealth: 80,
                 defaultDamage: 15,
                 fleeHealthThreshold: 0.4, // Flee when health drops below 40%

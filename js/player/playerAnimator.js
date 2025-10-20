@@ -111,11 +111,11 @@ class PlayerAnimator {
     // Fallback to load default soldier sprites if PlayerCharacters isn't available
     loadDefaultSoldierSprites() {
         const spritePaths = {
-            idle: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
-            walk: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
-            attack: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
-            hurt: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
-            death: 'sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
+            idle: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Idle.png',
+            walk: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Walk.png',
+            attack: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Attack01.png',
+            hurt: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Hurt.png',
+            death: '/sprites/PLAYER/CHARACTER/Tiny RPG assets/Characters(100x100)/Soldier/Soldier/Soldier-Death.png'
         };
 
         let loadedCount = 0;
