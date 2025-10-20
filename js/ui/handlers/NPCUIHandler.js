@@ -11,6 +11,7 @@ class NPCUIHandler extends UIHandler {
      */
     initialize() {
         this.setupNPCControls();
+        this.setupNPCPropertyEditing();
     }
 
     /**
@@ -26,6 +27,53 @@ class NPCUIHandler extends UIHandler {
                 this.game.npcSystem.clearAllNPCs();
                 this.updateNPCList();
                 this.updateNPCProperties();
+            }
+        });
+    }
+
+    /**
+     * Set up NPC property editing controls
+     */
+    setupNPCPropertyEditing() {
+        // Update NPC button
+        this.addListener('updateNPC', 'click', () => {
+            this.updateSelectedNPC();
+        });
+
+        // Delete NPC button
+        this.addListener('deleteNPC', 'click', () => {
+            this.deleteSelectedNPC();
+        });
+
+        // NPC property input change handlers
+        const propertyInputs = [
+            'npcX', 'npcY', 'npcInteractionRadius'
+        ];
+
+        propertyInputs.forEach(inputId => {
+            const input = this.getElementById(inputId, true); // Silent - optional
+            if (input) {
+                input.addEventListener('input', () => {
+                    // Real-time update as user types
+                    this.updateSelectedNPC();
+                });
+            }
+        });
+
+        // Facing dropdown change handler
+        const facingSelect = this.getElementById('npcFacing', true);
+        if (facingSelect) {
+            facingSelect.addEventListener('change', () => {
+                this.updateSelectedNPC();
+            });
+        }
+
+        // Can interact checkbox handler
+        this.addListener('npcCanInteract', 'change', (e) => {
+            const selectedNPC = this.game.npcSystem.getSelectedNPC();
+            if (selectedNPC) {
+                selectedNPC.canInteract = e.target.checked;
+                this.updateNPCList();
             }
         });
     }
@@ -77,20 +125,66 @@ class NPCUIHandler extends UIHandler {
         if (!propertiesDiv) return;
 
         if (!selectedNPC) {
-            propertiesDiv.innerHTML = '<div class="empty-state">Select an NPC to edit properties</div>';
+            propertiesDiv.style.display = 'none';
             return;
         }
 
-        propertiesDiv.innerHTML = `
-            <div class="property-group">
-                <h3>NPC Properties</h3>
-                <label>Type: <strong>${selectedNPC.type}</strong></label>
-                <label>ID: <strong>${selectedNPC.id}</strong></label>
-                <label>Position: (${Math.round(selectedNPC.x)}, ${Math.round(selectedNPC.y)})</label>
-                <label>Health: ${selectedNPC.health}/${selectedNPC.maxHealth}</label>
-                <button class="btn danger" onclick="window.uiEventHandler.npcHandler.deleteSelectedNPC()">Delete NPC</button>
-            </div>
-        `;
+        propertiesDiv.style.display = 'block';
+
+        // Update NPC properties form
+        const updateValue = (id, value) => {
+            const element = document.getElementById(id);
+            if (element && value !== undefined && !isNaN(value)) {
+                element.value = value;
+            } else if (element) {
+                element.value = '';
+            }
+        };
+
+        updateValue('npcX', Math.round(selectedNPC.x));
+        updateValue('npcY', Math.round(selectedNPC.y));
+        updateValue('npcInteractionRadius', selectedNPC.interactionRadius || 50);
+
+        // Update facing dropdown
+        const facingSelect = document.getElementById('npcFacing');
+        if (facingSelect) {
+            facingSelect.value = selectedNPC.facing || 'right';
+        }
+
+        // Update checkbox
+        const canInteractCheckbox = document.getElementById('npcCanInteract');
+        if (canInteractCheckbox) {
+            canInteractCheckbox.checked = selectedNPC.canInteract !== undefined ? selectedNPC.canInteract : true;
+        }
+    }
+
+    /**
+     * Update the selected NPC with values from input fields
+     */
+    updateSelectedNPC() {
+        const selectedNPC = this.game.npcSystem.getSelectedNPC();
+        if (!selectedNPC) return;
+
+        // Get values from inputs
+        const xInput = parseInt(document.getElementById('npcX')?.value);
+        const yInput = parseInt(document.getElementById('npcY')?.value);
+        const interactionRadiusInput = parseInt(document.getElementById('npcInteractionRadius')?.value);
+        const facingInput = document.getElementById('npcFacing')?.value;
+
+        // Only use input values if they're valid numbers
+        const x = !isNaN(xInput) ? xInput : selectedNPC.x;
+        const y = !isNaN(yInput) ? yInput : selectedNPC.y;
+        const interactionRadius = !isNaN(interactionRadiusInput) ? interactionRadiusInput : (selectedNPC.interactionRadius || 50);
+        const facing = facingInput || selectedNPC.facing || 'right';
+
+        // Update NPC properties
+        selectedNPC.x = x;
+        selectedNPC.y = y;
+        selectedNPC.interactionRadius = interactionRadius;
+        selectedNPC.facing = facing;
+
+        // Update UI
+        this.updateNPCList();
     }
 
     /**

@@ -328,6 +328,33 @@ class InputKeyboard {
                         }
                     );
                 }
+                return;
+            }
+        }
+
+        // Delete selected NPC
+        if (this.game.npcSystem && this.game.npcSystem.getSelectedNPC) {
+            const selectedNPC = this.game.npcSystem.getSelectedNPC();
+            if (selectedNPC) {
+                // Show confirmation modal before deleting
+                if (this.game.uiEventHandler) {
+                    this.game.uiEventHandler.showConfirmationModal(
+                        'Delete this NPC? This cannot be undone.',
+                        () => {
+                            // On confirm - delete NPC
+                            const msgX = selectedNPC.x;
+                            const msgY = selectedNPC.y;
+                            this.game.npcSystem.removeNPCFromScene(selectedNPC.id);
+                            this.game.showFeedbackMessage('Deleted 1 NPC', msgX, msgY);
+
+                            // Update UI
+                            if (this.game.uiEventHandler && this.game.uiEventHandler.npcHandler) {
+                                this.game.uiEventHandler.npcHandler.updateNPCList();
+                                this.game.uiEventHandler.npcHandler.updateNPCProperties();
+                            }
+                        }
+                    );
+                }
             }
         }
     }
