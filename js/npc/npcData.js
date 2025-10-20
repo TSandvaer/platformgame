@@ -6,7 +6,7 @@ class NPCData {
         this.npcTypes = {
             blacksmith: {
                 name: 'Blacksmith',
-                spriteFolder: 'sprites/NPC/Blacksmith/sprites',
+                spriteFolder: 'sprites/NPC/Blacksmith/Sprites',
                 width: 48,
                 height: 48,
                 scale: 1.0,
