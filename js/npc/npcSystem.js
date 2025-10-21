@@ -139,6 +139,18 @@ class NPCSystem {
         }
     }
 
+    setNPCType(npcType) {
+        if (this.mouseHandler) {
+            this.mouseHandler.setNPCType(npcType);
+        }
+    }
+
+    enableNPCPlacement() {
+        if (this.mouseHandler) {
+            this.mouseHandler.npcPlacementMode = true;
+        }
+    }
+
     get npcPlacementMode() {
         return this.mouseHandler ? this.mouseHandler.npcPlacementMode : false;
     }

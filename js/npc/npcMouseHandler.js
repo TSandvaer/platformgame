@@ -7,6 +7,7 @@ class NPCMouseHandler {
 
         // Mouse interaction state
         this.npcPlacementMode = false;
+        this.selectedNPCType = 'blacksmith'; // Default NPC type
         this.isDraggingNPC = false;
         this.draggedNPC = null;
         this.dragOffsetX = 0;
@@ -16,9 +17,8 @@ class NPCMouseHandler {
     handleMouseDown(worldMouseX, worldMouseY, ctrlPressed = false, shiftPressed = false) {
         // Check if we're in NPC placement mode
         if (this.npcPlacementMode) {
-            // Get current NPC type from UI
-            const npcTypeSelect = document.getElementById('npcTypeSelect');
-            const npcType = npcTypeSelect ? npcTypeSelect.value : 'blacksmith';
+            // Use the selected NPC type from the modal
+            const npcType = this.selectedNPCType || 'blacksmith';
 
             // Create new NPC at click position
             const npc = this.npcSystem.addNPCToScene(worldMouseX, worldMouseY, npcType);
@@ -72,6 +72,15 @@ class NPCMouseHandler {
 
                 return { handled: true, action: 'selected' };
             }
+        } else {
+            // Clicked on empty space - deselect current NPC
+            this.npcSystem.selectNPC(null);
+
+            // Update UI
+            if (window.uiEventHandler) {
+                window.uiEventHandler.updateNPCList();
+                window.uiEventHandler.updateNPCProperties();
+            }
         }
 
         return { handled: false };
@@ -119,17 +128,9 @@ class NPCMouseHandler {
 
     toggleNPCPlacement() {
         this.npcPlacementMode = !this.npcPlacementMode;
+    }
 
-        // Update button appearance
-        const addButton = document.getElementById('addNPCBtn');
-        if (addButton) {
-            if (this.npcPlacementMode) {
-                addButton.textContent = 'Click on map to place NPC';
-                addButton.classList.add('active');
-            } else {
-                addButton.textContent = 'Add NPC (Click on map)';
-                addButton.classList.remove('active');
-            }
-        }
+    setNPCType(npcType) {
+        this.selectedNPCType = npcType;
     }
 }

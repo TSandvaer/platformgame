@@ -720,15 +720,7 @@
                 <div class="platform-editor" id="npcEditor">
                     <h4>NPC Manager</h4>
                     <div class="property-row">
-                        <span class="property-label">NPC Type:</span>
-                        <select id="npcTypeSelect" style="width: 100px;">
-                            <option value="blacksmith">Blacksmith</option>
-                            <option value="alchemist">Alchemist</option>
-                            <option value="enchanter">Enchanter</option>
-                        </select>
-                    </div>
-                    <div class="property-row">
-                        <button class="btn small" id="addNPCBtn">Add NPC (Click on map)</button>
+                        <button class="btn small" id="openNPCsEditorBtn">Open NPC Editor</button>
                     </div>
                     <div class="property-row">
                         <button class="btn small danger" id="clearNPCsBtn">Clear All NPCs</button>
@@ -1457,6 +1449,43 @@
                     </div>
                     <div id="noEnemySelected" style="color: #888; font-size: 12px; text-align: center; padding: 20px;">
                         Select an enemy from the grid above to place it
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NPCs Editor Modal -->
+    <div id="npcsEditorModal" class="modal no-theme" style="display: none;">
+        <div class="modal-content no-theme" style="width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3>NPCs Editor</h3>
+                <button class="modal-close" id="closeNPCsEditorModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- NPC Selection Grid -->
+                <div class="section">
+                    <h3>Select NPC Type</h3>
+                    <div id="npcsGridContainer">
+                        <div class="npcs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <!-- NPCs will be rendered here as thumbnails -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="section">
+                    <div id="selectedNPCConfig" style="display: none;">
+                        <div class="property-row">
+                            <span class="property-label">Selected:</span>
+                            <span id="selectedNPCTypeName" style="font-weight: bold; color: #4CAF50;"></span>
+                        </div>
+                        <div class="property-row">
+                            <button class="btn" id="modalAddNPCBtn">Add NPC (Click on map)</button>
+                        </div>
+                    </div>
+                    <div id="noNPCSelected" style="color: #888; font-size: 12px; text-align: center; padding: 20px;">
+                        Select an NPC from the grid above to place it
                     </div>
                 </div>
             </div>
