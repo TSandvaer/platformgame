@@ -209,6 +209,22 @@ class PlatformRenderer {
                 // Draw resize handles
                 this.drawResizeHandles(platform);
             }
+
+            // Check if in binding mode and mouse is over this platform
+            const isHoveringForBinding = this.checkBindingModeHover(platform);
+            if (isHoveringForBinding) {
+                this.ctx.strokeStyle = '#4CAF50';
+                this.ctx.lineWidth = 4;
+                this.ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+
+                // Draw binding indicator text
+                this.ctx.fillStyle = '#4CAF50';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(`✓ Click to bind here`,
+                    platform.x + platform.width / 2,
+                    platform.y + platform.height / 2);
+            }
         }
 
         // Restore context state (removes rotation)
@@ -355,5 +371,23 @@ class PlatformRenderer {
         edgeHandles.forEach(handle => {
             this.ctx.fillRect(handle.x - handleSize/2, handle.y - handleSize/2, handleSize, handleSize);
         });
+    }
+
+    /**
+     * Check if mouse is hovering over platform during binding mode
+     */
+    checkBindingModeHover(platform) {
+        // Check if prop manager is in binding mode
+        if (this.game?.propSystem?.manager?.isBindingToPlatform) {
+            const mousePos = this.game.inputSystem?.getMousePosition();
+            if (mousePos) {
+                // Get actual position based on platform positioning mode
+                const viewport = this.game.cameraSystem.viewport;
+                const actualPos = this.data.getActualPosition(platform, viewport.designWidth, viewport.designHeight);
+                const renderPlatform = { ...platform, x: actualPos.x, y: actualPos.y };
+                return this.data.isPointInPlatform(mousePos.x, mousePos.y, renderPlatform);
+            }
+        }
+        return false;
     }
 }

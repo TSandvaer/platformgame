@@ -549,6 +549,33 @@ class PropManager {
                 propMovementZoneControls3.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
             }
 
+            // Update platform binding UI
+            const boundPlatformInfo = document.getElementById('boundPlatformInfo');
+            const boundPlatformName = document.getElementById('boundPlatformName');
+            const unbindButton = document.getElementById('unbindFromPlatform');
+
+            if (this.propData.selectedProp.boundToPlatform) {
+                // Prop is bound - show info and unbind button
+                if (boundPlatformInfo) boundPlatformInfo.style.display = 'block';
+                if (unbindButton) unbindButton.style.display = 'inline-block';
+
+                // Get platform details and display
+                if (boundPlatformName && this.propData.game?.platformSystem) {
+                    const platform = this.propData.game.platformSystem.data.getPlatformById(
+                        this.propData.selectedProp.boundToPlatform
+                    );
+                    if (platform) {
+                        boundPlatformName.textContent = `Platform #${platform.id}`;
+                    } else {
+                        boundPlatformName.textContent = `Platform #${this.propData.selectedProp.boundToPlatform} (not found)`;
+                    }
+                }
+            } else {
+                // Prop not bound - hide info and unbind button
+                if (boundPlatformInfo) boundPlatformInfo.style.display = 'none';
+                if (unbindButton) unbindButton.style.display = 'none';
+            }
+
             // Add event listeners for movement checkboxes to update UI immediately
             if (isMovingInput) {
                 // Remove existing listeners to avoid duplicates

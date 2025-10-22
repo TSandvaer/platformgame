@@ -17,6 +17,7 @@ class PropUIHandler extends UIHandler {
         this.setupLegacyPropListeners();
         this.setupPropZOrderListeners();
         this.setupPropDropListeners();
+        this.setupPropPlatformBindingListeners();
     }
 
     /**
@@ -575,5 +576,55 @@ class PropUIHandler extends UIHandler {
         // Close modal
         const modal = this.getElementById('dropConfigModal');
         if (modal) modal.style.display = 'none';
+    }
+
+    /**
+     * Set up platform binding buttons
+     */
+    setupPropPlatformBindingListeners() {
+        // Bind to platform button
+        this.addListener('bindToPlatform', 'click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.startPlatformBinding(this.game.propSystem.selectedProp);
+                // Show visual feedback
+                this.showBindingModeMessage();
+            } else {
+                alert('Please select a prop first');
+            }
+        });
+
+        // Unbind from platform button
+        this.addListener('unbindFromPlatform', 'click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.unbindFromPlatform(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
+            }
+        });
+    }
+
+    /**
+     * Show visual feedback when in platform binding mode
+     */
+    showBindingModeMessage() {
+        // Show visual indicator that binding mode is active
+        const message = document.createElement('div');
+        message.id = 'bindingModeMessage';
+        message.textContent = 'Click on a platform to bind the prop to it (or click elsewhere to cancel)';
+        message.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(76, 175, 80, 0.95); color: white; padding: 15px 25px; border-radius: 8px; font-size: 14px; z-index: 10000; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+        document.body.appendChild(message);
+
+        // Change cursor
+        this.game.canvas.style.cursor = 'crosshair';
+
+        // Remove message and reset cursor when binding completes/cancels
+        const checkBinding = setInterval(() => {
+            if (!this.game.propSystem.manager.isBindingToPlatform) {
+                const msg = document.getElementById('bindingModeMessage');
+                if (msg) msg.remove();
+                this.game.canvas.style.cursor = 'default';
+                clearInterval(checkBinding);
+            }
+        }, 100);
     }
 }
