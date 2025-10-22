@@ -294,6 +294,13 @@ class PlatformRPG {
             await this.gameDataSystem.loadGameData();
             console.log('✅ Game data loaded');
 
+            // Reload HUD settings now that game data is loaded
+            // This ensures HUD uses saved settings from MongoDB instead of localStorage fallback
+            if (this.hudSystem) {
+                console.log('🔄 Reloading HUD settings from loaded game data...');
+                this.hudSystem.loadSettings();
+            }
+
             // Initialize scene system ONLY if no data was loaded from MongoDB
             // (applyGameData already loads the scene, so we only need to initialize if there was no data)
             if (this.sceneSystem.data.scenes.length === 0) {
@@ -1286,23 +1293,32 @@ window.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Check authentication status BEFORE showing game selector
-    // The auth modal (if not authenticated) should be shown first
+    // ALWAYS initialize game selector UI (so buttons don't error)
+    // This creates the modal HTML but doesn't open it yet
+    if (window.gameSelector) {
+        window.gameSelector.initialize();
+    }
+
+    // Wait for auth system to fully initialize before checking authentication
+    // This prevents race conditions where DOMContentLoaded fires before Firebase auth state is ready
     if (window.authSystem) {
+        if (!window.authSystem.isInitialized) {
+            console.log('⏳ Waiting for auth system to initialize...');
+            await window.authSystem.initialize();
+        }
+
+        // Check authentication status AFTER auth system is fully initialized
         const isAuthenticated = window.authSystem.isAuthenticated();
         if (!isAuthenticated) {
             console.log('⚠️ User not authenticated - waiting for login before initializing game');
-            // Don't initialize game or show game selector until user logs in
+            // Don't show game selector or initialize game until user logs in
             // The auth modal will be shown by the auth initialization code in index.html
             return;
         }
     }
 
-    // Initialize game selector (only if authenticated)
+    // Check if a game is selected (only if authenticated)
     if (window.gameSelector) {
-        window.gameSelector.initialize();
-
-        // Check if a game is selected
         const hasGameSelected = await window.gameSelector.checkAndPromptGameSelection();
 
         // If no game selected, wait for user to select one before initializing game

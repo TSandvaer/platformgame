@@ -9,6 +9,7 @@ class AuthSystem {
     this.authToken = null;
     this.listeners = [];
     this.isInitialized = false;
+    this.initPromise = null;  // Track initialization promise to prevent duplicate listeners
     this.baseURL = this.getBaseURL();
   }
 
@@ -34,10 +35,15 @@ class AuthSystem {
    */
   async initialize() {
     if (this.isInitialized) {
-      return;
+      return Promise.resolve();
     }
 
-    return new Promise((resolve) => {
+    // Return existing promise if already initializing (prevents duplicate listeners)
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = new Promise((resolve) => {
       // Listen for auth state changes
       firebase.auth().onAuthStateChanged(async (firebaseUser) => {
         console.log('Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
@@ -81,6 +87,8 @@ class AuthSystem {
         }
       });
     });
+
+    return this.initPromise;
   }
 
   /**

@@ -121,6 +121,13 @@ class GameSelector {
      * Open the game selector modal
      */
     async open() {
+        // Defensive check: if modal doesn't exist yet, initialize first
+        if (!this.modal) {
+            console.warn('⚠️ Game selector not initialized, initializing now...');
+            this.createModal();
+            this.setupEventListeners();
+        }
+
         this.modal.style.display = 'block';
         await this.loadGames();
     }
