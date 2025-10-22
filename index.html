@@ -213,21 +213,21 @@
                     <h4>Scene Properties</h4>
                     <div class="property-row">
                         <span class="property-label">Name:</span>
-                        <input type="text" id="sceneName" style="width: 180px;">
+                        <input type="text" id="sceneName" class="property-input input-large">
                     </div>
                     <div class="property-row">
                         <span class="property-label">Description:</span>
-                        <textarea id="sceneDescription" style="width: 180px; height: 60px; resize: vertical;"></textarea>
+                        <textarea id="sceneDescription" class="property-input input-large" style="height: 60px;"></textarea>
                     </div>
                     <div class="property-row">
                         <span class="property-label">Player Start:</span>
-                        <input type="number" id="playerStartX" style="width: 70px;" placeholder="X">
-                        <input type="number" id="playerStartY" style="width: 70px;" placeholder="Y">
+                        <input type="number" id="playerStartX" class="property-input input-small" placeholder="X">
+                        <input type="number" id="playerStartY" class="property-input input-small" placeholder="Y">
                     </div>
                     <div class="property-row">
                         <span class="property-label">Background:</span>
-                        <span id="currentBackgroundName" style="color: #4CAF50; font-weight: bold;">None</span>
-                        <button class="btn small" id="selectBackgroundBtn" style="margin-left: 10px;">Select Background</button>
+                        <span id="currentBackgroundName" class="background-name" style="color: #4CAF50; font-weight: bold;">None</span>
+                        <button class="btn small" id="selectBackgroundBtn">Select Background</button>
                     </div>
                     <div class="property-row">
                         <h4>Transitions (<span id="transitionCount">0</span>)</h4>

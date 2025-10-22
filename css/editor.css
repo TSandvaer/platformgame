@@ -187,8 +187,50 @@
 }
 
 .property-label {
-    min-width: 30px;
+    width: 90px;
+    flex-shrink: 0;
     font-size: 12px;
+}
+
+/* Responsive Input Fields */
+.property-input {
+    flex: 1;
+    min-width: 60px;
+    max-width: 100%;
+    width: 100%; /* Override default input width */
+    padding: 4px 8px;
+    background-color: #0d1921;
+    color: white;
+    border: 1px solid #2d3f5f;
+    border-radius: 3px;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.property-input:focus {
+    outline: none;
+    border-color: #4a90e2;
+}
+
+/* Input Size Variants */
+.input-small {
+    flex: 0 1 65px;
+    max-width: 65px;
+}
+
+.input-medium {
+    flex: 1 1 120px;
+    max-width: 150px;
+}
+
+.input-large {
+    flex: 1 1 100%;
+    max-width: 100%;
+}
+
+/* Textarea styling */
+textarea.property-input {
+    resize: vertical;
+    font-family: inherit;
 }
 
 .property-group {
@@ -207,8 +249,21 @@
     gap: 5px;
 }
 
-.input-row input {
+.input-row input,
+.input-row select,
+.input-row textarea {
     flex: 1;
+    min-width: 80px;
+}
+
+/* Background name truncation */
+.background-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+    display: inline-block;
 }
 
 /* Editor Tabs Styles */

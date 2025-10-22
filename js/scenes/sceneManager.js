@@ -859,30 +859,30 @@ class SceneManager {
                 <h3>Scene Properties</h3>
                 <div class="property-group">
                     <label>Name:</label>
-                    <input type="text" id="sceneName" value="${currentScene.name}" onchange="game.sceneSystem.updateSceneName(this.value)">
+                    <input type="text" id="sceneName" class="property-input input-large" value="${currentScene.name}" onchange="game.sceneSystem.updateSceneName(this.value)">
                 </div>
                 <div class="property-group">
                     <label>Description:</label>
-                    <textarea id="sceneDescription" onchange="game.sceneSystem.updateSceneDescription(this.value)">${currentScene.description}</textarea>
+                    <textarea id="sceneDescription" class="property-input input-large" style="height: 60px;" onchange="game.sceneSystem.updateSceneDescription(this.value)">${currentScene.description}</textarea>
                 </div>
                 <div class="property-group">
                     <label>Player Start Position:</label>
                     <div class="input-row">
-                        <input type="number" id="playerStartX" value="${currentScene.settings.playerStartX}" onchange="game.sceneSystem.updatePlayerStart()">
-                        <input type="number" id="playerStartY" value="${currentScene.settings.playerStartY}" onchange="game.sceneSystem.updatePlayerStart()">
+                        <input type="number" id="playerStartX" class="property-input input-small" value="${currentScene.settings.playerStartX}" onchange="game.sceneSystem.updatePlayerStart()">
+                        <input type="number" id="playerStartY" class="property-input input-small" value="${currentScene.settings.playerStartY}" onchange="game.sceneSystem.updatePlayerStart()">
                     </div>
                 </div>
                 <div class="property-group">
                     <label>Background:</label>
                     <div class="input-row">
-                        <span id="currentSceneBackgroundName" style="color: #4CAF50; font-weight: bold;">${currentScene.settings.backgroundName === 'none' || !currentScene.settings.backgroundName ? 'None' : this.game.backgroundSystem.formatBackgroundName(currentScene.settings.backgroundName)}</span>
-                        <button class="btn small" id="selectSceneBackgroundBtn" style="margin-left: 10px;">Select Background</button>
+                        <span id="currentSceneBackgroundName" class="background-name" style="color: #4CAF50; font-weight: bold;">${currentScene.settings.backgroundName === 'none' || !currentScene.settings.backgroundName ? 'None' : this.game.backgroundSystem.formatBackgroundName(currentScene.settings.backgroundName)}</span>
+                        <button class="btn small" id="selectSceneBackgroundBtn">Select Background</button>
                     </div>
                 </div>
                 <div class="property-group">
                     <label>Default Background Color:</label>
                     <div class="input-row">
-                        <select id="defaultBackgroundColor" onchange="game.sceneSystem.manager.updateDefaultBackgroundColor(this.value)">
+                        <select id="defaultBackgroundColor" class="property-input" onchange="game.sceneSystem.manager.updateDefaultBackgroundColor(this.value)">
                             <option value="#87CEEB" ${(currentScene.settings.defaultBackgroundColor || '#87CEEB') === '#87CEEB' ? 'selected' : ''}>Sky Blue</option>
                             <option value="#000000" ${currentScene.settings.defaultBackgroundColor === '#000000' ? 'selected' : ''}>Black</option>
                         </select>
@@ -892,15 +892,15 @@ class SceneManager {
                     <h4>Scene Boundaries</h4>
                     <div class="input-row">
                         <label>Left:</label>
-                        <input type="number" id="boundaryLeft" value="${currentScene.boundaries.left}" style="width: 80px;" data-action="boundary-change">
+                        <input type="number" id="boundaryLeft" class="property-input input-small" value="${currentScene.boundaries.left}" data-action="boundary-change">
                         <label>Right:</label>
-                        <input type="number" id="boundaryRight" value="${currentScene.boundaries.right}" style="width: 80px;" data-action="boundary-change">
+                        <input type="number" id="boundaryRight" class="property-input input-small" value="${currentScene.boundaries.right}" data-action="boundary-change">
                     </div>
                     <div class="input-row">
                         <label>Top:</label>
-                        <input type="number" id="boundaryTop" value="${currentScene.boundaries.top}" style="width: 80px;" data-action="boundary-change">
+                        <input type="number" id="boundaryTop" class="property-input input-small" value="${currentScene.boundaries.top}" data-action="boundary-change">
                         <label>Bottom:</label>
-                        <input type="number" id="boundaryBottom" value="${currentScene.boundaries.bottom}" style="width: 80px;" data-action="boundary-change">
+                        <input type="number" id="boundaryBottom" class="property-input input-small" value="${currentScene.boundaries.bottom}" data-action="boundary-change">
                     </div>
                     <button data-action="apply-boundaries" class="btn-small">Apply Boundaries</button>
                 </div>
