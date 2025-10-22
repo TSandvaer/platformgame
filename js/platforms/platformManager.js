@@ -493,19 +493,88 @@ class PlatformManager {
             if (yInput) yInput.value = Math.round(this.platformData.selectedPlatform.y || 0);
             if (widthInput) widthInput.value = this.platformData.selectedPlatform.width || 100;
             if (heightInput) heightInput.value = this.platformData.selectedPlatform.height || 20;
-            if (spriteTypeInput) spriteTypeInput.value = this.platformData.selectedPlatform.spriteType || 'color';
-            if (damageInput) damageInput.value = this.platformData.selectedPlatform.damagePerSecond || 0;
-            if (killEffectInput) killEffectInput.value = this.platformData.selectedPlatform.killEffect || 'normal';
+
+            if (spriteTypeInput) {
+                spriteTypeInput.value = this.platformData.selectedPlatform.spriteType || 'color';
+                // Auto-apply on change
+                spriteTypeInput.removeEventListener('change', this.handleSpriteTypeChange);
+                this.handleSpriteTypeChange = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.spriteType = spriteTypeInput.value;
+                    }
+                };
+                spriteTypeInput.addEventListener('change', this.handleSpriteTypeChange);
+            }
+
+            if (damageInput) {
+                damageInput.value = this.platformData.selectedPlatform.damagePerSecond || 0;
+                // Auto-apply on blur (when user leaves the field)
+                damageInput.removeEventListener('blur', this.handleDamageBlur);
+                this.handleDamageBlur = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.damagePerSecond = Math.max(0, parseFloat(damageInput.value) || 0);
+                    }
+                };
+                damageInput.addEventListener('blur', this.handleDamageBlur);
+            }
+
+            if (killEffectInput) {
+                killEffectInput.value = this.platformData.selectedPlatform.killEffect || 'normal';
+                // Auto-apply on change
+                killEffectInput.removeEventListener('change', this.handleKillEffectChange);
+                this.handleKillEffectChange = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.killEffect = killEffectInput.value;
+                    }
+                };
+                killEffectInput.addEventListener('change', this.handleKillEffectChange);
+            }
 
             const blockPlayerInput = document.getElementById('platformBlockPlayer');
-            if (blockPlayerInput) blockPlayerInput.checked = this.platformData.selectedPlatform.blockPlayer || false;
+            if (blockPlayerInput) {
+                blockPlayerInput.checked = this.platformData.selectedPlatform.blockPlayer || false;
+                // Auto-apply on change
+                blockPlayerInput.removeEventListener('change', this.handleBlockPlayerChange);
+                this.handleBlockPlayerChange = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.blockPlayer = blockPlayerInput.checked;
+                    }
+                };
+                blockPlayerInput.addEventListener('change', this.handleBlockPlayerChange);
+            }
 
             const isBackgroundInput = document.getElementById('platformIsBackground');
-            if (isBackgroundInput) isBackgroundInput.checked = this.platformData.selectedPlatform.isBackground || false;
+            if (isBackgroundInput) {
+                isBackgroundInput.checked = this.platformData.selectedPlatform.isBackground || false;
+                // Auto-apply on change
+                isBackgroundInput.removeEventListener('change', this.handleIsBackgroundChange);
+                this.handleIsBackgroundChange = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.isBackground = isBackgroundInput.checked;
+                    }
+                };
+                isBackgroundInput.addEventListener('change', this.handleIsBackgroundChange);
+            }
 
             // Handle positioning properties
             const positioning = this.platformData.selectedPlatform.positioning || 'absolute';
-            if (positioningInput) positioningInput.value = positioning;
+            if (positioningInput) {
+                positioningInput.value = positioning;
+                // Auto-apply on change
+                positioningInput.removeEventListener('change', this.handlePositioningChange);
+                this.handlePositioningChange = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.positioning = positioningInput.value;
+                        // Update relative position controls visibility
+                        const relativeRow = document.getElementById('relativePositionRow');
+                        if (relativeRow) {
+                            relativeRow.style.display = positioningInput.value === 'screen-relative' ? 'block' : 'none';
+                        }
+                    }
+                };
+                positioningInput.addEventListener('change', this.handlePositioningChange);
+            }
+
             if (relativeXInput) relativeXInput.value = this.platformData.selectedPlatform.relativeX || 0.5;
             if (relativeYInput) relativeYInput.value = this.platformData.selectedPlatform.relativeY || 0.5;
 
@@ -523,7 +592,18 @@ class PlatformManager {
             const zoneYInput = document.getElementById('selectedPlatformZoneY');
 
             if (isMovingInput) isMovingInput.checked = this.platformData.selectedPlatform.isMoving || false;
-            if (moveSpeedInput) moveSpeedInput.value = this.platformData.selectedPlatform.moveSpeed || 2;
+
+            if (moveSpeedInput) {
+                moveSpeedInput.value = this.platformData.selectedPlatform.moveSpeed || 2;
+                // Auto-apply on blur
+                moveSpeedInput.removeEventListener('blur', this.handleMoveSpeedBlur);
+                this.handleMoveSpeedBlur = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.moveSpeed = parseFloat(moveSpeedInput.value) || 2;
+                    }
+                };
+                moveSpeedInput.addEventListener('blur', this.handleMoveSpeedBlur);
+            }
             if (movementEnabledInput) movementEnabledInput.checked = this.platformData.selectedPlatform.movementZone?.enabled || false;
             if (zoneStartXInput) zoneStartXInput.value = this.platformData.selectedPlatform.movementZone?.startX || 0;
             if (zoneEndXInput) zoneEndXInput.value = this.platformData.selectedPlatform.movementZone?.endX || 0;
@@ -587,6 +667,12 @@ class PlatformManager {
                 isMovingInput.removeEventListener('change', this.handlePlatformMovingCheckboxChange);
                 this.handlePlatformMovingCheckboxChange = () => {
                     const isMoving = isMovingInput.checked;
+
+                    // Auto-apply: Update the platform object immediately
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.isMoving = isMoving;
+                    }
+
                     if (platformMovementSection) platformMovementSection.style.display = isMoving ? 'block' : 'none';
                     if (platformMovementZoneSection) platformMovementZoneSection.style.display = isMoving ? 'block' : 'none';
                     if (platformMovementControlSection) platformMovementControlSection.style.display = isMoving ? 'block' : 'none';
@@ -624,6 +710,21 @@ class PlatformManager {
                     const movementEnabled = movementEnabledInput.checked;
                     const isMoving = isMovingInput?.checked || false;
 
+                    // Auto-apply: Update the platform object immediately
+                    if (this.platformData.selectedPlatform) {
+                        if (!this.platformData.selectedPlatform.movementZone) {
+                            this.platformData.selectedPlatform.movementZone = {
+                                enabled: false,
+                                startX: this.platformData.selectedPlatform.x - 50,
+                                startY: this.platformData.selectedPlatform.y,
+                                endX: this.platformData.selectedPlatform.x + 50,
+                                endY: this.platformData.selectedPlatform.y,
+                                angle: 0
+                            };
+                        }
+                        this.platformData.selectedPlatform.movementZone.enabled = movementEnabled;
+                    }
+
                     if (platformMovementZoneControls) {
                         platformMovementZoneControls.style.display = (isMoving && movementEnabled) ? 'block' : 'none';
                     }
@@ -643,8 +744,29 @@ class PlatformManager {
             const spinClockwiseInput = document.getElementById('selectedPlatformSpinClockwise');
 
             if (isSpinningInput) isSpinningInput.checked = this.platformData.selectedPlatform.isSpinning || false;
-            if (spinSpeedInput) spinSpeedInput.value = this.platformData.selectedPlatform.spinSpeed || 1.0;
-            if (spinClockwiseInput) spinClockwiseInput.checked = this.platformData.selectedPlatform.spinClockwise !== false; // Default true
+
+            if (spinSpeedInput) {
+                spinSpeedInput.value = this.platformData.selectedPlatform.spinSpeed || 1.0;
+                // Auto-apply on blur
+                spinSpeedInput.removeEventListener('blur', this.handleSpinSpeedBlur);
+                this.handleSpinSpeedBlur = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.spinSpeed = parseFloat(spinSpeedInput.value) || 1.0;
+                    }
+                };
+                spinSpeedInput.addEventListener('blur', this.handleSpinSpeedBlur);
+            }
+            if (spinClockwiseInput) {
+                spinClockwiseInput.checked = this.platformData.selectedPlatform.spinClockwise !== false; // Default true
+                // Auto-apply on change
+                spinClockwiseInput.removeEventListener('change', this.handleSpinClockwiseChange);
+                this.handleSpinClockwiseChange = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.spinClockwise = spinClockwiseInput.checked;
+                    }
+                };
+                spinClockwiseInput.addEventListener('change', this.handleSpinClockwiseChange);
+            }
 
             // Update easing and delay properties
             const useEasingInput = document.getElementById('selectedPlatformUseEasing');
@@ -652,10 +774,52 @@ class PlatformManager {
             const easingMinSpeedInput = document.getElementById('selectedPlatformEasingMinSpeed');
             const endDelayInput = document.getElementById('selectedPlatformEndDelay');
 
-            if (useEasingInput) useEasingInput.checked = this.platformData.selectedPlatform.useEasing || false;
-            if (easingDistanceInput) easingDistanceInput.value = this.platformData.selectedPlatform.easingDistance || 0.2;
-            if (easingMinSpeedInput) easingMinSpeedInput.value = this.platformData.selectedPlatform.easingMinSpeed || 0.2;
-            if (endDelayInput) endDelayInput.value = this.platformData.selectedPlatform.endDelay || 0;
+            if (useEasingInput) {
+                useEasingInput.checked = this.platformData.selectedPlatform.useEasing || false;
+                // Auto-apply on change
+                useEasingInput.removeEventListener('change', this.handleUseEasingAutoApply);
+                this.handleUseEasingAutoApply = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.useEasing = useEasingInput.checked;
+                    }
+                };
+                useEasingInput.addEventListener('change', this.handleUseEasingAutoApply);
+            }
+            if (easingDistanceInput) {
+                easingDistanceInput.value = this.platformData.selectedPlatform.easingDistance || 0.2;
+                // Auto-apply on blur
+                easingDistanceInput.removeEventListener('blur', this.handleEasingDistanceBlur);
+                this.handleEasingDistanceBlur = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.easingDistance = parseFloat(easingDistanceInput.value) || 0.2;
+                    }
+                };
+                easingDistanceInput.addEventListener('blur', this.handleEasingDistanceBlur);
+            }
+
+            if (easingMinSpeedInput) {
+                easingMinSpeedInput.value = this.platformData.selectedPlatform.easingMinSpeed || 0.2;
+                // Auto-apply on blur
+                easingMinSpeedInput.removeEventListener('blur', this.handleEasingMinSpeedBlur);
+                this.handleEasingMinSpeedBlur = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.easingMinSpeed = parseFloat(easingMinSpeedInput.value) || 0.2;
+                    }
+                };
+                easingMinSpeedInput.addEventListener('blur', this.handleEasingMinSpeedBlur);
+            }
+
+            if (endDelayInput) {
+                endDelayInput.value = this.platformData.selectedPlatform.endDelay || 0;
+                // Auto-apply on blur
+                endDelayInput.removeEventListener('blur', this.handleEndDelayBlur);
+                this.handleEndDelayBlur = () => {
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.endDelay = parseFloat(endDelayInput.value) || 0;
+                    }
+                };
+                endDelayInput.addEventListener('blur', this.handleEndDelayBlur);
+            }
 
             // Show/hide spinning sections based on isSpinning flag
             const isSpinning = this.platformData.selectedPlatform.isSpinning || false;
@@ -677,6 +841,11 @@ class PlatformManager {
                     const platformSpinDirectionSection = document.getElementById('platformSpinDirectionSection');
                     const isSpinning = isSpinningInput.checked;
 
+                    // Auto-apply: Update the platform object immediately
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.isSpinning = isSpinning;
+                    }
+
                     if (platformSpinningSection) platformSpinningSection.style.display = isSpinning ? 'block' : 'none';
                     if (platformSpinDirectionSection) platformSpinDirectionSection.style.display = isSpinning ? 'block' : 'none';
                 };
@@ -691,6 +860,11 @@ class PlatformManager {
                     const platformEasingMinSpeedSection = document.getElementById('platformEasingMinSpeedSection');
                     const useEasing = useEasingInput.checked;
                     const isMoving = this.platformData.selectedPlatform?.isMoving || false;
+
+                    // Auto-apply: Update the platform object immediately (duplicated but kept for consistency)
+                    if (this.platformData.selectedPlatform) {
+                        this.platformData.selectedPlatform.useEasing = useEasing;
+                    }
 
                     if (platformEasingDistanceSection) {
                         platformEasingDistanceSection.style.display = (isMoving && useEasing) ? 'block' : 'none';
