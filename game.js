@@ -1286,7 +1286,19 @@ window.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Initialize game selector
+    // Check authentication status BEFORE showing game selector
+    // The auth modal (if not authenticated) should be shown first
+    if (window.authSystem) {
+        const isAuthenticated = window.authSystem.isAuthenticated();
+        if (!isAuthenticated) {
+            console.log('⚠️ User not authenticated - waiting for login before initializing game');
+            // Don't initialize game or show game selector until user logs in
+            // The auth modal will be shown by the auth initialization code in index.html
+            return;
+        }
+    }
+
+    // Initialize game selector (only if authenticated)
     if (window.gameSelector) {
         window.gameSelector.initialize();
 
