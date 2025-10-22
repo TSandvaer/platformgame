@@ -5,6 +5,7 @@ class ModalUIHandler extends UIHandler {
     constructor(game) {
         super(game);
         this._confirmationKeyHandler = null;
+        this._mouseDownTarget = null; // Track where mousedown started for proper click-outside detection
     }
 
     /**
@@ -45,13 +46,19 @@ class ModalUIHandler extends UIHandler {
             });
         }
 
-        // Click outside to close
+        // Click outside to close - track mousedown and mouseup to prevent closing during text selection drag
         const modal = this.getElementById('gameSettingsModal');
         if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
+            modal.addEventListener('mousedown', (e) => {
+                this._mouseDownTarget = e.target;
+            });
+
+            modal.addEventListener('mouseup', (e) => {
+                // Only close if both mousedown and mouseup happened on the modal overlay
+                if (e.target === modal && this._mouseDownTarget === modal) {
                     this.closeGameSettingsModal();
                 }
+                this._mouseDownTarget = null;
             });
         }
     }
@@ -129,12 +136,18 @@ class ModalUIHandler extends UIHandler {
         this._confirmationKeyHandler = keyHandler;
         document.addEventListener('keydown', keyHandler);
 
-        // Close on click outside
-        modal.onclick = (e) => {
-            if (e.target === modal) {
+        // Close on click outside - track mousedown and mouseup to prevent closing during text selection drag
+        modal.onmousedown = (e) => {
+            this._mouseDownTarget = e.target;
+        };
+
+        modal.onmouseup = (e) => {
+            // Only close if both mousedown and mouseup happened on the modal overlay
+            if (e.target === modal && this._mouseDownTarget === modal) {
                 this.closeConfirmationModal();
                 if (onCancel) onCancel();
             }
+            this._mouseDownTarget = null;
         };
 
         // Show modal
@@ -153,7 +166,8 @@ class ModalUIHandler extends UIHandler {
         const modal = document.getElementById('confirmationModal');
         if (modal) {
             modal.style.display = 'none';
-            modal.onclick = null; // Remove click outside handler
+            modal.onmousedown = null; // Remove mousedown handler
+            modal.onmouseup = null; // Remove mouseup handler
         }
 
         // Remove keyboard event listener
@@ -161,6 +175,9 @@ class ModalUIHandler extends UIHandler {
             document.removeEventListener('keydown', this._confirmationKeyHandler);
             this._confirmationKeyHandler = null;
         }
+
+        // Reset mousedown tracker
+        this._mouseDownTarget = null;
     }
 
     /**

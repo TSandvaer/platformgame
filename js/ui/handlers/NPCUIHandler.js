@@ -5,6 +5,7 @@ class NPCUIHandler extends UIHandler {
     constructor(game) {
         super(game);
         this.selectedModalNPCType = null;
+        this._mouseDownTarget = null; // Track where mousedown started for proper click-outside detection
     }
 
     /**
@@ -49,13 +50,19 @@ class NPCUIHandler extends UIHandler {
             });
         }
 
-        // Click outside to close
+        // Click outside to close - track mousedown and mouseup to prevent closing during text selection drag
         const modal = this.getElementById('npcsEditorModal');
         if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
+            modal.addEventListener('mousedown', (e) => {
+                this._mouseDownTarget = e.target;
+            });
+
+            modal.addEventListener('mouseup', (e) => {
+                // Only close if both mousedown and mouseup happened on the modal overlay
+                if (e.target === modal && this._mouseDownTarget === modal) {
                     this.closeNPCEditorModal();
                 }
+                this._mouseDownTarget = null;
             });
         }
 

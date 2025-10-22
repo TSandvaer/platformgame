@@ -6,6 +6,7 @@ class PropUIHandler extends UIHandler {
         super(game);
         this.modalHandler = modalHandler;
         this.selectedModalPropType = null;
+        this._mouseDownTarget = null; // Track where mousedown started for proper click-outside detection
     }
 
     /**
@@ -74,13 +75,19 @@ class PropUIHandler extends UIHandler {
             });
         }
 
-        // Click outside to close
+        // Click outside to close - track mousedown and mouseup to prevent closing during text selection drag
         const modal = this.getElementById('propsEditorModal');
         if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
+            modal.addEventListener('mousedown', (e) => {
+                this._mouseDownTarget = e.target;
+            });
+
+            modal.addEventListener('mouseup', (e) => {
+                // Only close if both mousedown and mouseup happened on the modal overlay
+                if (e.target === modal && this._mouseDownTarget === modal) {
                     this.closePropsEditorModal();
                 }
+                this._mouseDownTarget = null;
             });
         }
 

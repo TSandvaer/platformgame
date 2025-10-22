@@ -8,6 +8,7 @@ class BackgroundSystem {
         this.backgrounds = {};
         this.currentBackground = null;
         this.availableBackgrounds = [];
+        this._mouseDownTarget = null; // Track where mousedown started for proper click-outside detection
 
         this.loadAvailableBackgrounds();
     }
@@ -385,12 +386,18 @@ class BackgroundSystem {
             });
         }
 
-        // Close modal when clicking outside
+        // Close modal when clicking outside - track mousedown and mouseup to prevent closing during text selection drag
         if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
+            modal.addEventListener('mousedown', (e) => {
+                this._mouseDownTarget = e.target;
+            });
+
+            modal.addEventListener('mouseup', (e) => {
+                // Only close if both mousedown and mouseup happened on the modal overlay
+                if (e.target === modal && this._mouseDownTarget === modal) {
                     this.closeBackgroundModal();
                 }
+                this._mouseDownTarget = null;
             });
         }
     }

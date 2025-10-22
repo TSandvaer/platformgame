@@ -3,6 +3,7 @@ class PlayerInventorySystem {
         this.game = game;
         this.currentChest = null;
         this.isModalOpen = false;
+        this._mouseDownTarget = null; // Track where mousedown started for proper click-outside detection
 
         // Initialize player data storage
         this.playerDataStorage = new PlayerDataStorage();
@@ -23,13 +24,19 @@ class PlayerInventorySystem {
             });
         }
 
-        // Close modal on outside click
+        // Close modal on outside click - track mousedown and mouseup to prevent closing during text selection drag
         const modal = document.getElementById('playerChestModal');
         if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
+            modal.addEventListener('mousedown', (e) => {
+                this._mouseDownTarget = e.target;
+            });
+
+            modal.addEventListener('mouseup', (e) => {
+                // Only close if both mousedown and mouseup happened on the modal overlay
+                if (e.target === modal && this._mouseDownTarget === modal) {
                     this.closeChestModal();
                 }
+                this._mouseDownTarget = null;
             });
         }
 
@@ -377,13 +384,19 @@ class PlayerInventorySystem {
             });
         }
 
-        // Close modal on outside click
+        // Close modal on outside click - track mousedown and mouseup to prevent closing during text selection drag
         const modal = document.getElementById('playerInventoryModal');
         if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
+            modal.addEventListener('mousedown', (e) => {
+                this._mouseDownTarget = e.target;
+            });
+
+            modal.addEventListener('mouseup', (e) => {
+                // Only close if both mousedown and mouseup happened on the modal overlay
+                if (e.target === modal && this._mouseDownTarget === modal) {
                     this.closePlayerInventoryModal();
                 }
+                this._mouseDownTarget = null;
             });
         }
 

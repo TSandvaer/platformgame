@@ -9,6 +9,7 @@ class GameSelector {
         this.selectedGameId = null;
         this.modal = null;
         this.renamingGameId = null; // Track which game is being renamed
+        this.mouseDownTarget = null; // Track where mousedown started for proper click-outside detection
     }
 
     /**
@@ -102,11 +103,17 @@ class GameSelector {
      * Setup event listeners
      */
     setupEventListeners() {
-        // Close modal when clicking outside
-        this.modal.addEventListener('click', (e) => {
-            if (e.target === this.modal) {
+        // Close modal when clicking outside - track mousedown and mouseup to prevent closing during text selection drag
+        this.modal.addEventListener('mousedown', (e) => {
+            this.mouseDownTarget = e.target;
+        });
+
+        this.modal.addEventListener('mouseup', (e) => {
+            // Only close if both mousedown and mouseup happened on the modal overlay
+            if (e.target === this.modal && this.mouseDownTarget === this.modal) {
                 this.close();
             }
+            this.mouseDownTarget = null;
         });
 
         // ESC key to close
