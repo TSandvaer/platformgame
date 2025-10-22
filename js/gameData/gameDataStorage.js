@@ -37,6 +37,55 @@ class GameDataStorage {
         if (this.autoSaveEnabled) {
             this.startAutoSave();
         }
+
+        // Register callback for remote updates via Socket.IO
+        if (window.socketSync) {
+            window.socketSync.onRemoteUpdate((gameId, updatedBy, timestamp) => {
+                this.handleRemoteUpdate(gameId, updatedBy, timestamp);
+            });
+        }
+    }
+
+    // Handle remote game data update from another tab
+    async handleRemoteUpdate(gameId, updatedBy, timestamp) {
+        console.log(`📥 Handling remote update for game ${gameId} from ${updatedBy}`);
+
+        // Only reload if this is the current game
+        const currentGameId = this.apiClient?.getCurrentGameId();
+        if (currentGameId !== gameId) {
+            console.log('⏭️ Update is for a different game, ignoring');
+            return;
+        }
+
+        try {
+            // Reload game data from MongoDB
+            console.log('🔄 Reloading game data from server...');
+            const savedData = await this.loadFromMongoDB();
+
+            if (savedData && savedData.scenes) {
+                // Apply the updated data to the game (skip save since data is already in MongoDB)
+                if (this.dataSystem.game.gameDataSystem) {
+                    this.dataSystem.game.gameDataSystem.applyGameData(savedData, { skipSave: true });
+                    console.log('✅ Game data reloaded successfully');
+
+                    // Update UI to reflect changes (with safety checks)
+                    if (this.dataSystem.game.platformSystem) {
+                        this.dataSystem.game.platformSystem.updatePlatformList();
+                    }
+                    if (this.dataSystem.game.propSystem) {
+                        this.dataSystem.game.propSystem.updatePropList();
+                    }
+                    if (this.dataSystem.game.enemySystem && typeof this.dataSystem.game.enemySystem.updateEnemyList === 'function') {
+                        this.dataSystem.game.enemySystem.updateEnemyList();
+                    }
+                    if (this.dataSystem.game.npcSystem && typeof this.dataSystem.game.npcSystem.updateNPCList === 'function') {
+                        this.dataSystem.game.npcSystem.updateNPCList();
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error handling remote update:', error);
+        }
     }
 
     // Start auto-save timer
@@ -107,6 +156,12 @@ class GameDataStorage {
             // Also save to localStorage as backup
             if (this.useLocalStorageFallback) {
                 this.saveToLocalStorage(gameData);
+            }
+
+            // Notify other tabs via Socket.IO
+            if (window.socketSync && window.socketSync.isSocketConnected()) {
+                window.socketSync.notifySave(gameId);
+                console.log('📡 Notified other tabs of save');
             }
 
             return true;

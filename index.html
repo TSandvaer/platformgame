@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/themes.css">
     <link rel="stylesheet" href="css/game-selector.css">
     <link rel="stylesheet" href="css/user-menu.css">
+    <link rel="stylesheet" href="css/sync-notifications.css">
 </head>
 <body>
     <!-- Firebase SDK -->
@@ -933,6 +934,10 @@
     <script src="js/ui/gameSelector.js"></script>
     <script src="js/ui/userMenuHandler.js"></script>
     <script src="js/publishing/publishingSystem.js"></script>
+
+    <!-- Socket.IO for Real-Time Multi-Tab Sync -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/sync/socketSync.js"></script>
 
     <!-- Chest Inventory Editor Modal -->
     <div id="chestInventoryModal" class="modal" style="display: none;">

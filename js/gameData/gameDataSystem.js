@@ -175,7 +175,9 @@ class GameDataSystem {
     }
 
     // Apply loaded data to the game
-    applyGameData(gameData) {
+    applyGameData(gameData, options = {}) {
+        const { skipSave = false } = options;
+
         // Validate the data first
         if (!this.validator.validateGameData(gameData)) {
             console.error('Invalid game data structure');
@@ -193,7 +195,12 @@ class GameDataSystem {
             });
 
             // Save the scene data to localStorage using scene system's method
-            this.game.sceneSystem.saveScenes();
+            // Skip save when applying remote updates (data is already in MongoDB)
+            if (!skipSave) {
+                this.game.sceneSystem.saveScenes();
+            } else {
+                console.log('⏭️ Skipping save (applying remote data from MongoDB)');
+            }
 
             // Load the appropriate scene
             if (this.game.allSpritesLoaded) {

@@ -1,0 +1,83 @@
+/* Real-Time Sync Notification Styles */
+
+.sync-notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sync-notification {
+    background: rgba(255, 255, 255, 0.95);
+    border-left: 4px solid #4CAF50;
+    border-radius: 4px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 280px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.3s ease-out;
+    pointer-events: auto;
+}
+
+.sync-notification-show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sync-notification-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.sync-notification-message {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Notification types */
+.sync-notification-info {
+    border-left-color: #2196F3;
+}
+
+.sync-notification-success {
+    border-left-color: #4CAF50;
+}
+
+.sync-notification-error {
+    border-left-color: #f44336;
+    background: rgba(255, 245, 245, 0.95);
+}
+
+.sync-notification-error .sync-notification-message {
+    color: #c62828;
+}
+
+/* Dark theme support */
+body.dark-mode .sync-notification {
+    background: rgba(40, 40, 40, 0.95);
+    border-color: #4CAF50;
+}
+
+body.dark-mode .sync-notification-message {
+    color: #e0e0e0;
+}
+
+body.dark-mode .sync-notification-error {
+    background: rgba(60, 30, 30, 0.95);
+    border-color: #f44336;
+}
+
+body.dark-mode .sync-notification-error .sync-notification-message {
+    color: #ff8a80;
+}

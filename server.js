@@ -4,12 +4,21 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 
 // Initialize Firebase Admin SDK
 const { initializeFirebase } = require('./config/firebase');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*', // In production, specify your actual domain
+    methods: ['GET', 'POST']
+  }
+});
 
 // Initialize Firebase (with error handling)
 try {
@@ -85,6 +94,45 @@ app.get('/gallery', (req, res) => {
 // Files are automatically compressed via compression middleware
 app.use(express.static(__dirname));
 
+// Socket.IO Configuration for Real-Time Game Data Sync
+io.on('connection', (socket) => {
+    console.log('🔌 Client connected:', socket.id);
+
+    // Join a game room when user opens a game
+    socket.on('join-game', (gameId) => {
+        socket.join(`game:${gameId}`);
+        console.log(`📥 Socket ${socket.id} joined game room: ${gameId}`);
+        socket.gameId = gameId; // Store gameId on socket for later use
+    });
+
+    // Leave a game room
+    socket.on('leave-game', (gameId) => {
+        socket.leave(`game:${gameId}`);
+        console.log(`📤 Socket ${socket.id} left game room: ${gameId}`);
+    });
+
+    // When a client saves game data, notify all other clients in the same game room
+    socket.on('save-game-data', (data) => {
+        const { gameId, userId, userName } = data;
+        console.log(`💾 Game ${gameId} saved by ${userName || userId}, broadcasting to room...`);
+
+        // Broadcast to all other clients in this game's room (except the sender)
+        socket.to(`game:${gameId}`).emit('game-data-updated', {
+            gameId,
+            updatedBy: userName || userId || 'Unknown',
+            timestamp: new Date().toISOString()
+        });
+    });
+
+    // Handle disconnect
+    socket.on('disconnect', () => {
+        console.log('🔌 Client disconnected:', socket.id);
+        if (socket.gameId) {
+            console.log(`  - Was in game room: ${socket.gameId}`);
+        }
+    });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
@@ -94,13 +142,14 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server (use server instead of app to support Socket.IO)
+server.listen(PORT, () => {
     console.log(`✓ Server running on http://localhost:${PORT}`);
     console.log(`✓ API available at http://localhost:${PORT}/api`);
+    console.log(`✓ WebSocket server ready for real-time sync`);
     console.log(`✓ Game Editor available at http://localhost:${PORT}/index.html`);
     console.log(`✓ User API at http://localhost:${PORT}/api/users`);
     console.log(`✓ Game API at http://localhost:${PORT}/api/games`);
 });
 
-module.exports = app;
+module.exports = { app, server, io };

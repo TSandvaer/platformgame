@@ -1330,6 +1330,20 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Initialize Socket.IO for real-time sync after auth and game selection
+    if (window.socketSync) {
+        window.socketSync.initialize();
+
+        // Join the game room once connected
+        const gameId = window.apiClient?.getCurrentGameId();
+        if (gameId) {
+            // Wait a moment for socket to connect
+            setTimeout(() => {
+                window.socketSync.joinGame(gameId);
+            }, 500);
+        }
+    }
+
     const game = new PlatformRPG();
     window.game = game; // Make it available globally for debugging
 });
