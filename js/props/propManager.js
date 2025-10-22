@@ -410,6 +410,15 @@ class PropManager {
             this.ensureMovementProperties(this.propData.selectedProp);
 
             propertiesDiv.style.display = 'block';
+
+            // Auto-scroll dashboard to show selected prop properties
+            setTimeout(() => {
+                propertiesDiv.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'  // Don't scroll if already visible
+                });
+            }, 0);
+
             const xInput = document.getElementById('propX');
             const yInput = document.getElementById('propY');
             const sizeInput = document.getElementById('propSize');
