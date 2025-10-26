@@ -53,4 +53,12 @@ class InputSystem {
     showFeedbackMessage(message) {
         this.game.showFeedbackMessage(message);
     }
+
+    // Cleanup all input listeners
+    destroy() {
+        if (this.mouse && this.mouse.destroy) {
+            this.mouse.destroy();
+        }
+        console.log('🧹 InputSystem destroyed');
+    }
 }

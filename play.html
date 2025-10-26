@@ -86,6 +86,8 @@
             border: 2px solid #2d3f5f;
             border-radius: 8px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 1;
         }
 
         .loading-container {
@@ -450,8 +452,6 @@
     <!-- Session API & Components -->
     <script src="/js/player/sessionAPI.js"></script>
     <script src="/js/player/gameSessionMenu.js"></script>
-    <script src="/js/player/newSessionModal.js"></script>
-    <script src="/js/player/loadSessionModal.js"></script>
 
     <!-- Editor System Scripts (needed by game.js, will be overridden for player mode) -->
     <script src="/js/gameEditor/editorUI.js"></script>
@@ -540,8 +540,6 @@
                 this.currentSessionId = null;
                 this.currentSessionCharacter = null;
                 this.sessionMenu = null;
-                this.newSessionModal = null;
-                this.loadSessionModal = null;
 
                 // Wait for auth system to be ready
                 this.initializeAuthSystem();
@@ -709,12 +707,20 @@
                 // Session dropdown actions
                 document.getElementById('burgerNewGameBtn').addEventListener('click', () => {
                     sessionDropdown.classList.remove('show');
-                    this.handleNewGame();
+                    // Show session menu and navigate to session creation view
+                    if (this.sessionMenu) {
+                        this.sessionMenu.show();
+                        this.sessionMenu.showSessionNameView();
+                    }
                 });
 
                 document.getElementById('burgerLoadGameBtn').addEventListener('click', () => {
                     sessionDropdown.classList.remove('show');
-                    this.handleLoadGame();
+                    // Show session menu and navigate to load sessions view
+                    if (this.sessionMenu) {
+                        this.sessionMenu.show();
+                        this.sessionMenu.showLoadSessionsView();
+                    }
                 });
             }
 
@@ -782,31 +788,22 @@
                         console.log('✅ PlayerCharacters initialized');
                     }
 
-                    // Create session menu
+                    // Show canvas and initialize preview (background scene)
+                    this.canvas.style.display = 'block';
+                    await this.initializeGamePreview(gameData);
+
+                    // Create session menu with inline session creation and loading
                     this.sessionMenu = new GameSessionMenu();
                     await this.sessionMenu.initialize(
                         gameData.name,
                         this.gameId, // Use stored gameId instead of gameData._id
-                        () => this.handleNewGame(),
-                        () => this.handleLoadGame()
+                        (session) => this.handleSessionCreated(session, gameData, author), // Inline session creation
+                        (session) => this.handleSessionLoaded(session, gameData, author), // Inline session loading
+                        (session) => this.handleSessionDeleted(session), // Session deletion callback
+                        gameData.description // Pass game description for immersive start screen
                     );
 
-                    // Create new session modal
-                    this.newSessionModal = new NewSessionModal();
-                    this.newSessionModal.initialize(
-                        this.gameId, // Use stored gameId
-                        (session) => this.handleSessionCreated(session, gameData, author)
-                    );
-
-                    // Create load session modal
-                    this.loadSessionModal = new LoadSessionModal();
-                    this.loadSessionModal.initialize(
-                        this.gameId, // Use stored gameId
-                        (session) => this.handleSessionLoaded(session, gameData, author),
-                        (session) => this.handleSessionDeleted(session)
-                    );
-
-                    // Show session menu
+                    // Show session menu (overlay on top of game scene)
                     this.sessionMenu.show();
                     console.log('✅ Session system ready');
                 } catch (error) {
@@ -815,14 +812,38 @@
                 }
             }
 
-            handleNewGame() {
-                console.log('📝 Creating new game session...');
-                this.newSessionModal.show();
-            }
+            async initializeGamePreview(gameData) {
+                // Initialize a preview of the game scene (for background visual)
+                // This creates a visual preview without starting actual gameplay
+                try {
+                    console.log('🖼️ Initializing game preview...');
 
-            handleLoadGame() {
-                console.log('📁 Loading game session...');
-                this.loadSessionModal.show();
+                    // Create a temporary game instance just for rendering the first scene
+                    const dummySession = {
+                        sessionName: 'Preview',
+                        sessionCharacter: 'char1', // Default character for preview
+                        progress: { currentScene: 0 } // Start scene
+                    };
+
+                    this.previewController = new PlayerGameController(
+                        this.canvas,
+                        gameData.gameData,
+                        dummySession,
+                        'char1'
+                    );
+
+                    this.previewGame = this.previewController.getGame();
+
+                    // Render one frame to show the scene
+                    if (this.previewGame && this.previewGame.render) {
+                        this.previewGame.render();
+                    }
+
+                    console.log('✅ Game preview rendered');
+                } catch (error) {
+                    console.error('❌ Error initializing game preview:', error);
+                    // Non-critical error, continue anyway
+                }
             }
 
             async handleSessionCreated(session, gameData, author) {
@@ -859,6 +880,24 @@
                 try {
                     console.log('🎮 Starting game with session:', session.sessionName);
 
+                    // Clean up preview game if it exists
+                    if (this.previewController) {
+                        console.log('🧹 Cleaning up game preview...');
+
+                        // Destroy input system to remove event listeners
+                        if (this.previewGame && this.previewGame.inputSystem) {
+                            this.previewGame.inputSystem.destroy();
+                        }
+
+                        // Stop preview game if it has a stop method
+                        if (this.previewGame && this.previewGame.stop) {
+                            this.previewGame.stop();
+                        }
+
+                        this.previewController = null;
+                        this.previewGame = null;
+                    }
+
                     // Configure progressAPI to use session-based saving
                     window.progressAPI.setGameId(gameData._id);
                     window.progressAPI.setSessionId(this.currentSessionId);
@@ -866,8 +905,8 @@
                     // Show burger menu with current session name
                     this.showBurgerMenu(session.sessionName);
 
-                    // Show canvas
-                    this.canvas.style.display = 'block';
+                    // Canvas is already visible from preview, no need to show again
+                    // this.canvas.style.display = 'block';
 
                     // Initialize the game using PlayerGameController with session data
                     this.gameController = new PlayerGameController(

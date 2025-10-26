@@ -12,6 +12,18 @@ class InputMouse {
         this.dragScrollCameraStartX = 0;
         this.dragScrollCameraStartY = 0;
 
+        // Store bound event handlers for cleanup
+        this.boundHandlers = {
+            canvasMouseDown: (e) => this.handleCanvasMouseDown(e),
+            canvasMouseUp: (e) => this.handleCanvasMouseUp(e),
+            canvasMouseMove: (e) => this.handleCanvasMouseMove(e),
+            canvasMouseLeave: () => this.handleCanvasMouseLeave(),
+            canvasWheel: (e) => this.handleCanvasWheel(e),
+            canvasContextMenu: (e) => this.handleContextMenu(e),
+            windowMouseMove: (e) => this.handleWindowMouseMove(e),
+            windowMouseUp: (e) => this.handleWindowMouseUp(e)
+        };
+
         this.setupMouseListeners();
     }
 
@@ -92,16 +104,33 @@ class InputMouse {
 
     setupMouseListeners() {
         // Canvas mouse events
-        this.game.canvas.addEventListener('mousedown', (e) => this.handleCanvasMouseDown(e));
-        this.game.canvas.addEventListener('mouseup', (e) => this.handleCanvasMouseUp(e));
-        this.game.canvas.addEventListener('mousemove', (e) => this.handleCanvasMouseMove(e));
-        this.game.canvas.addEventListener('mouseleave', () => this.handleCanvasMouseLeave());
-        this.game.canvas.addEventListener('wheel', (e) => this.handleCanvasWheel(e));
-        this.game.canvas.addEventListener('contextmenu', (e) => this.handleContextMenu(e));
+        this.game.canvas.addEventListener('mousedown', this.boundHandlers.canvasMouseDown);
+        this.game.canvas.addEventListener('mouseup', this.boundHandlers.canvasMouseUp);
+        this.game.canvas.addEventListener('mousemove', this.boundHandlers.canvasMouseMove);
+        this.game.canvas.addEventListener('mouseleave', this.boundHandlers.canvasMouseLeave);
+        this.game.canvas.addEventListener('wheel', this.boundHandlers.canvasWheel);
+        this.game.canvas.addEventListener('contextmenu', this.boundHandlers.canvasContextMenu);
 
         // Window-level mouse events for drag operations
-        window.addEventListener('mousemove', (e) => this.handleWindowMouseMove(e));
-        window.addEventListener('mouseup', (e) => this.handleWindowMouseUp(e));
+        window.addEventListener('mousemove', this.boundHandlers.windowMouseMove);
+        window.addEventListener('mouseup', this.boundHandlers.windowMouseUp);
+    }
+
+    destroy() {
+        // Remove all event listeners
+        if (this.game && this.game.canvas) {
+            this.game.canvas.removeEventListener('mousedown', this.boundHandlers.canvasMouseDown);
+            this.game.canvas.removeEventListener('mouseup', this.boundHandlers.canvasMouseUp);
+            this.game.canvas.removeEventListener('mousemove', this.boundHandlers.canvasMouseMove);
+            this.game.canvas.removeEventListener('mouseleave', this.boundHandlers.canvasMouseLeave);
+            this.game.canvas.removeEventListener('wheel', this.boundHandlers.canvasWheel);
+            this.game.canvas.removeEventListener('contextmenu', this.boundHandlers.canvasContextMenu);
+        }
+
+        window.removeEventListener('mousemove', this.boundHandlers.windowMouseMove);
+        window.removeEventListener('mouseup', this.boundHandlers.windowMouseUp);
+
+        console.log('🧹 InputMouse destroyed and event listeners removed');
     }
 
     handleCanvasMouseDown(e) {

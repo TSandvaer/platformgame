@@ -1,19 +1,21 @@
 /* Game Session Menu & Modals */
 /* Styling for save slot management in published games */
 
-/* Session Menu Modal (main menu) */
+/* Session Menu Modal (main menu) - Immersive Overlay */
 .session-menu-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: none;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.5s ease;
 }
 
 .session-menu-modal.show {
@@ -21,70 +23,367 @@
 }
 
 .session-menu-content {
-  background: #2a2a3e;
-  border-radius: 12px;
-  padding: 50px 60px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 60px 40px;
   text-align: center;
+  animation: slideDown 0.6s ease;
+}
+
+/* Menu View Management */
+.menu-view {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu-view.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 1;
 }
 
 .session-menu-title {
-  color: #667eea;
-  font-size: 32px;
-  margin: 0 0 20px 0;
-  font-weight: 600;
+  color: #ffffff;
+  font-size: 72px;
+  margin: 0 0 30px 0;
+  font-weight: 700;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.6);
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .session-menu-subtitle {
-  color: #aaa;
-  font-size: 16px;
-  margin: 0 0 40px 0;
+  color: #e8e8e8;
+  font-size: 18px;
+  margin: 0 0 60px 0;
+  max-width: 600px;
+  line-height: 1.6;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  font-weight: 400;
 }
 
 .session-menu-buttons {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  min-width: 300px;
 }
 
 .session-btn {
-  padding: 18px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 600;
+  padding: 20px 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .session-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 100%);
+  border-color: rgba(102, 126, 234, 0.6);
 }
 
 .session-btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+  border-color: rgba(102, 126, 234, 0.9);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.6) 0%, rgba(118, 75, 162, 0.6) 100%);
 }
 
 .session-btn-secondary {
-  background: #3a3a4e;
-  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .session-btn-secondary:hover:not(:disabled) {
-  background: #4a4a5e;
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.05);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
 }
 
 .session-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none !important;
+  filter: grayscale(1);
+}
+
+/* Inline Session Creation Form (Overlay Context) */
+.session-form-group-overlay {
+  width: 100%;
+  max-width: 400px;
+  margin: 30px 0;
+  position: relative;
+}
+
+.session-form-group-overlay input {
+  width: 100%;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.session-form-group-overlay input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.session-form-group-overlay input:focus {
+  outline: none;
+  border-color: rgba(102, 126, 234, 0.8);
+  background: rgba(102, 126, 234, 0.2);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.session-form-group-overlay .char-counter {
+  display: block;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: right;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Session List (Overlay Context) */
+.session-list-overlay {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 30px 0;
+  width: 100%;
+  max-width: 700px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Custom scrollbar for session list */
+.session-list-overlay::-webkit-scrollbar {
+  width: 8px;
+}
+
+.session-list-overlay::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.session-list-overlay::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 4px;
+}
+
+.session-list-overlay::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.7);
+}
+
+.session-card-overlay {
+  background: rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.session-card-overlay:hover {
+  border-color: rgba(102, 126, 234, 0.8);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.session-character-icon-overlay {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  flex-shrink: 0;
+  font-size: 32px;
+  border: 2px solid rgba(102, 126, 234, 0.4);
+}
+
+.session-info-overlay {
+  flex: 1;
+}
+
+.session-name-overlay {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.session-meta-overlay {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.session-meta-item-overlay {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.session-actions-overlay {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-btn-overlay {
+  padding: 10px 14px;
+  background: rgba(255, 107, 107, 0.3);
+  color: white;
+  border: 2px solid rgba(255, 107, 107, 0.5);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.delete-btn-overlay:hover {
+  background: rgba(255, 107, 107, 0.6);
+  border-color: rgba(255, 107, 107, 0.9);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+}
+
+.empty-sessions-overlay {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-sessions-overlay .empty-sessions-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.empty-sessions-overlay p {
+  font-size: 16px;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Character Grid (Overlay Context) */
+.character-grid-overlay {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin: 30px 0;
+  width: 100%;
+  max-width: 600px;
+}
+
+.character-grid-overlay .character-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.character-grid-overlay .character-card:hover {
+  border-color: rgba(102, 126, 234, 0.8);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.character-grid-overlay .character-card.selected {
+  border-color: rgba(102, 126, 234, 0.9);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+}
+
+.character-grid-overlay .character-card.selected::after {
+  content: '✓ Selected';
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 12px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.character-grid-overlay .character-info {
+  text-align: center;
+}
+
+.character-grid-overlay .character-name {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.character-grid-overlay .character-description {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.character-grid-overlay .character-size {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 /* New Session Modal */
@@ -461,10 +760,50 @@
   }
 }
 
+@keyframes slideDown {
+  from {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Responsive */
+@media (max-width: 768px) {
+  .session-menu-title {
+    font-size: 48px;
+  }
+
+  .session-menu-subtitle {
+    font-size: 16px;
+    margin: 0 0 40px 0;
+  }
+
+  .session-menu-buttons {
+    min-width: 250px;
+  }
+
+  .session-btn {
+    padding: 16px 32px;
+    font-size: 18px;
+  }
+}
+
 @media (max-width: 600px) {
   .session-menu-content {
-    padding: 40px 30px;
+    padding: 40px 20px;
+  }
+
+  .session-menu-title {
+    font-size: 36px;
+    letter-spacing: 1px;
+  }
+
+  .session-menu-subtitle {
+    font-size: 14px;
   }
 
   .new-session-content,
@@ -475,6 +814,42 @@
   .character-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+  }
+
+  .character-grid-overlay {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-width: 100%;
+  }
+
+  .character-grid-overlay .character-card {
+    padding: 16px;
+    min-height: 120px;
+  }
+
+  .session-form-group-overlay {
+    max-width: 100%;
+    margin: 20px 0;
+  }
+
+  .session-form-group-overlay input {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+
+  .session-list-overlay {
+    max-width: 100%;
+    max-height: 300px;
+  }
+
+  .session-card-overlay {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+
+  .session-meta-overlay {
+    justify-content: center;
   }
 
   .session-card {
