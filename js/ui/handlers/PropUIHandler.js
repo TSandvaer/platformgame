@@ -18,6 +18,7 @@ class PropUIHandler extends UIHandler {
         this.setupPropZOrderListeners();
         this.setupPropDropListeners();
         this.setupPropPlatformBindingListeners();
+        this.setupPropMovementListeners();
     }
 
     /**
@@ -626,5 +627,28 @@ class PropUIHandler extends UIHandler {
                 clearInterval(checkBinding);
             }
         }, 100);
+    }
+
+    /**
+     * Set up prop movement zone controls
+     */
+    setupPropMovementListeners() {
+        // Draw prop movement zone button
+        this.addListener('drawPropMovementZone', 'click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.startMovementZoneDrawingMode(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
+            }
+        });
+
+        // Clear prop movement zone button
+        this.addListener('clearPropMovementZone', 'click', () => {
+            if (this.game.propSystem.selectedProp) {
+                this.game.propSystem.manager.clearMovementZone(this.game.propSystem.selectedProp);
+            } else {
+                alert('Please select a prop first');
+            }
+        });
     }
 }
