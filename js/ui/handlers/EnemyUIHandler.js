@@ -419,6 +419,14 @@ class EnemyUIHandler extends UIHandler {
 
         propertiesDiv.style.display = 'block';
 
+        // Auto-scroll dashboard to show selected enemy properties
+        setTimeout(() => {
+            propertiesDiv.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'  // Don't scroll if already visible
+            });
+        }, 0);
+
         // Update enemy properties form
         const updateValue = (id, value) => {
             const element = document.getElementById(id);
