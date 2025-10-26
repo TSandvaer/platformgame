@@ -25,28 +25,28 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
+    "clean-webpack-plugin": "^4.0.0",
     "compression": "^1.7.4",
+    "copy-webpack-plugin": "^13.0.1",
     "cors": "^2.8.5",
+    "css-loader": "^7.1.2",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "firebase": "^12.4.0",
     "firebase-admin": "^13.5.0",
+    "html-webpack-plugin": "^5.6.4",
     "mongodb": "^6.20.0",
     "mongoose": "^8.0.3",
-    "socket.io": "^4.8.1"
-  },
-  "devDependencies": {
-    "@types/node": "^24.9.1",
-    "clean-webpack-plugin": "^4.0.0",
-    "copy-webpack-plugin": "^13.0.1",
-    "css-loader": "^7.1.2",
-    "html-webpack-plugin": "^5.6.4",
-    "nodemon": "^3.0.2",
+    "socket.io": "^4.8.1",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "webpack": "^5.102.1",
-    "webpack-cli": "^6.0.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "nodemon": "^3.0.2",
     "webpack-dev-server": "^5.2.2"
   }
 }
