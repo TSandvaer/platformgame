@@ -44,7 +44,8 @@ class GameDataSystem {
                 jumpForce: 15
             },
             characterSettings: {
-                selectedCharacter: 'soldier' // Default character
+                selectedCharacter: 'soldier', // Default character
+                availableCharacters: ['soldier', 'dwarfWarrior', 'wizard', 'archer'] // All characters available by default
             }
         };
 
@@ -336,7 +337,7 @@ class GameDataSystem {
         }
     }
 
-    updateCharacterSettings(characterSettings) {
+    async updateCharacterSettings(characterSettings) {
         if (!characterSettings) {
             console.warn('⚠️ updateCharacterSettings called with no settings');
             return;
@@ -354,6 +355,10 @@ class GameDataSystem {
         } else {
             console.error('❌ Failed to save character settings to localStorage');
         }
+
+        // Save full game data to MongoDB immediately
+        await this.saveCurrentData();
+        console.log('✅ Character settings saved to MongoDB');
     }
 
     // Apply GUI theme to the interface

@@ -800,7 +800,8 @@
                         (session) => this.handleSessionCreated(session, gameData, author), // Inline session creation
                         (session) => this.handleSessionLoaded(session, gameData, author), // Inline session loading
                         (session) => this.handleSessionDeleted(session), // Session deletion callback
-                        gameData.description // Pass game description for immersive start screen
+                        gameData.description, // Pass game description for immersive start screen
+                        gameData // Pass full game data for character filtering
                     );
 
                     // Show session menu (overlay on top of game scene)

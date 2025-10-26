@@ -10,6 +10,7 @@ class GameSessionMenu {
     this.modal = null;
     this.gameTitle = '';
     this.gameId = null;
+    this.gameData = null;
     this.hasExistingSessions = false;
     this.onLoadGameCallback = null;
     this.onSessionCreatedCallback = null;
@@ -31,10 +32,12 @@ class GameSessionMenu {
    * @param {Function} onSessionLoaded - Callback when session is loaded
    * @param {Function} onSessionDeleted - Callback when session is deleted (optional)
    * @param {string} gameDescription - Description of the game (optional)
+   * @param {Object} gameData - Full game data including characterSettings (optional)
    */
-  async initialize(gameTitle, gameId, onSessionCreated, onSessionLoaded, onSessionDeleted = null, gameDescription = '') {
+  async initialize(gameTitle, gameId, onSessionCreated, onSessionLoaded, onSessionDeleted = null, gameDescription = '', gameData = null) {
     this.gameTitle = gameTitle;
     this.gameId = gameId;
+    this.gameData = gameData;
     this.gameDescription = gameDescription || 'Start your adventure in this exciting game';
     this.onSessionCreatedCallback = onSessionCreated;
     this.onSessionLoadedCallback = onSessionLoaded;
@@ -329,8 +332,19 @@ class GameSessionMenu {
       return;
     }
 
-    // Get character data using the class property
-    const characterKeys = window.playerCharacters.getCharacterIds();
+    // Get available characters from game settings
+    const availableCharacters = this.gameData?.gameData?.characterSettings?.availableCharacters ||
+                                ['soldier', 'dwarfWarrior', 'wizard', 'archer']; // Default: all available
+
+    // Get all character IDs and filter by availability
+    const allCharacterKeys = window.playerCharacters.getCharacterIds();
+    const characterKeys = allCharacterKeys.filter(charKey => availableCharacters.includes(charKey));
+
+    // Check if any characters are available
+    if (characterKeys.length === 0) {
+      gridContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b; padding: 40px;">No characters available for selection. Please contact the game creator.</p>';
+      return;
+    }
 
     characterKeys.forEach(charKey => {
       const char = window.playerCharacters.getCharacter(charKey);

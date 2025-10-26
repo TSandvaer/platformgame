@@ -801,10 +801,16 @@ class UIEventHandler {
         const characters = window.playerCharacters.getAllCharacters();
         this.selectedCharacterId = selectedCharacterId || 'soldier';
 
+        // Get available characters from game settings
+        const availableCharacters = this.game.gameDataSystem?.gameData?.characterSettings?.availableCharacters ||
+                                    ['soldier', 'dwarfWarrior', 'wizard', 'archer'];
+
         let html = '';
 
         characters.forEach(character => {
             const isSelected = this.selectedCharacterId === character.id;
+            const isAvailable = availableCharacters.includes(character.id);
+
             html += `<div class="character-card ${isSelected ? 'selected' : ''}" data-character-id="${character.id}" style="
                 cursor: pointer;
                 padding: 12px;
@@ -827,6 +833,18 @@ class UIEventHandler {
                     Size: ${character.playerSize.width}x${character.playerSize.height}
                 </div>
                 ${isSelected ? '<div style="color: #4CAF50; font-size: 11px; font-weight: bold;">✓ Selected</div>' : ''}
+                <div class="character-availability-badge" style="
+                    margin-top: 4px;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 10px;
+                    font-weight: bold;
+                    background-color: ${isAvailable ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 107, 107, 0.2)'};
+                    color: ${isAvailable ? '#4CAF50' : '#ff6b6b'};
+                    border: 1px solid ${isAvailable ? '#4CAF50' : '#ff6b6b'};
+                ">
+                    ${isAvailable ? '✓ Available in game' : '✗ Unavailable for game'}
+                </div>
             </div>`;
         });
 
@@ -853,9 +871,17 @@ class UIEventHandler {
 
         // Add click handlers
         gridContainer.querySelectorAll('.character-card').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
                 const characterId = card.dataset.characterId;
-                this.selectCharacter(characterId);
+
+                // Check if Ctrl key is pressed (or Cmd on Mac)
+                if (e.ctrlKey || e.metaKey) {
+                    // Toggle availability
+                    this.toggleCharacterAvailability(characterId);
+                } else {
+                    // Normal click - select character
+                    this.selectCharacter(characterId);
+                }
             });
         });
     }
@@ -891,6 +917,55 @@ class UIEventHandler {
             }
         });
 
+    }
+
+    async toggleCharacterAvailability(characterId) {
+        // Don't allow toggling the currently selected character
+        if (characterId === this.selectedCharacterId) {
+            console.warn('⚠️ Cannot toggle availability for the currently selected character');
+            // Show a temporary message to the user
+            if (this.game.editorSystem && this.game.editorSystem.ui) {
+                this.game.editorSystem.ui.showTemporaryMessage('Cannot disable the currently selected character', 2000);
+            }
+            return;
+        }
+
+        // Get current available characters
+        const availableCharacters = this.game.gameDataSystem?.gameData?.characterSettings?.availableCharacters ||
+                                    ['soldier', 'dwarfWarrior', 'wizard', 'archer'];
+
+        // Toggle availability
+        const isCurrentlyAvailable = availableCharacters.includes(characterId);
+        let newAvailableCharacters;
+
+        if (isCurrentlyAvailable) {
+            // Remove from available list
+            newAvailableCharacters = availableCharacters.filter(id => id !== characterId);
+
+            // Ensure at least one character remains available
+            if (newAvailableCharacters.length === 0) {
+                console.warn('⚠️ Cannot disable all characters - at least one must be available');
+                if (this.game.editorSystem && this.game.editorSystem.ui) {
+                    this.game.editorSystem.ui.showTemporaryMessage('At least one character must be available', 2000);
+                }
+                return;
+            }
+        } else {
+            // Add to available list
+            newAvailableCharacters = [...availableCharacters, characterId];
+        }
+
+        // Update character settings (saves to both localStorage and MongoDB)
+        if (this.game.gameDataSystem) {
+            await this.game.gameDataSystem.updateCharacterSettings({
+                availableCharacters: newAvailableCharacters
+            });
+        }
+
+        // Re-render the grid to show updated availability
+        this.renderCharacterSelectionGrid(this.selectedCharacterId);
+
+        console.log(`✅ Character ${characterId} ${isCurrentlyAvailable ? 'disabled' : 'enabled'} for game`);
     }
 
     applyCharacterSelection() {
