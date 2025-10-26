@@ -477,6 +477,15 @@ class PlatformManager {
             this.ensureMovementProperties(this.platformData.selectedPlatform);
 
             propertiesDiv.style.display = 'block';
+
+            // Auto-scroll dashboard to show selected platform properties
+            setTimeout(() => {
+                propertiesDiv.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'  // Don't scroll if already visible
+                });
+            }, 0);
+
             const xInput = document.getElementById('platformX');
             const yInput = document.getElementById('platformY');
             const widthInput = document.getElementById('platformWidth');
