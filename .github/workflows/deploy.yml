@@ -1,0 +1,112 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Build with Webpack (PRODUCTION MODE)
+      - name: Build project
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      # 5. Run type checking (optional - fails if TS errors)
+      # Uncomment this if you want strict type checking before deploy
+      # - name: Type check
+      #   run: npm run type-check
+
+      # 6. Deploy to DigitalOcean
+      # OPTION A: DigitalOcean App Platform (Recommended - easiest)
+      # If using App Platform, it automatically detects this workflow
+      # Just ensure your App Platform is connected to this GitHub repo
+
+      # OPTION B: Deploy via SSH to Droplet
+      # Uncomment and configure the steps below if deploying to a Droplet via SSH
+
+      # - name: Deploy to Droplet via SSH
+      #   uses: appleboy/scp-action@master
+      #   with:
+      #     host: ${{ secrets.DROPLET_HOST }}
+      #     username: ${{ secrets.DROPLET_USERNAME }}
+      #     key: ${{ secrets.DROPLET_SSH_KEY }}
+      #     source: "dist/,server.js,package.json,package-lock.json,routes/,models/,middleware/,config/,.env.production"
+      #     target: "/var/www/platformgame"
+      #     rm: false
+
+      # - name: Restart application on Droplet
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.DROPLET_HOST }}
+      #     username: ${{ secrets.DROPLET_USERNAME }}
+      #     key: ${{ secrets.DROPLET_SSH_KEY }}
+      #     script: |
+      #       cd /var/www/platformgame
+      #       npm ci --production
+      #       pm2 restart platformgame || pm2 start server.js --name platformgame
+
+      # OPTION C: Deploy via rsync
+      # - name: Deploy with rsync
+      #   run: |
+      #     echo "${{ secrets.DROPLET_SSH_KEY }}" > deploy_key
+      #     chmod 600 deploy_key
+      #     rsync -avz -e "ssh -i deploy_key -o StrictHostKeyChecking=no" \
+      #       --exclude 'node_modules' \
+      #       --exclude '.git' \
+      #       ./ ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }}:/var/www/platformgame/
+      #     rm deploy_key
+
+      # 7. Notify on success (optional)
+      - name: Deployment complete
+        run: |
+          echo "✅ Build completed successfully!"
+          echo "📦 Webpack bundle created in dist/"
+          echo "🚀 Ready for deployment"
+
+      # 8. Upload build artifacts (for debugging/manual deploy)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: webpack-build
+          path: dist/
+          retention-days: 7
+
+  # Optional: Separate job for notifications
+  notify:
+    needs: build-and-deploy
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send notification
+        run: |
+          if [ "${{ needs.build-and-deploy.result }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed!"
+          fi
+          # Add Slack/Discord webhook here if needed

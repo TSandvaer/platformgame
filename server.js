@@ -45,6 +45,10 @@ app.use(compression({
 app.use(bodyParser.json({ limit: '50mb' })); // Increased limit for large game data
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
+// Environment Configuration
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const IS_PRODUCTION = NODE_ENV === 'production';
+
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI;
 const PORT = process.env.PORT || 3000;
@@ -80,19 +84,24 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Determine static files directory based on environment
+const STATIC_DIR = IS_PRODUCTION ? path.join(__dirname, 'dist') : __dirname;
+
 // Player routes - serve play.html for game URLs
 app.get('/play/:username/:slug', (req, res) => {
-    res.sendFile(path.join(__dirname, 'play.html'));
+    res.sendFile(path.join(STATIC_DIR, 'play.html'));
 });
 
 // Gallery route - serve gallery.html
 app.get('/gallery', (req, res) => {
-    res.sendFile(path.join(__dirname, 'gallery.html'));
+    res.sendFile(path.join(STATIC_DIR, 'gallery.html'));
 });
 
 // Serve static files (AFTER routes so routes take priority)
 // Files are automatically compressed via compression middleware
-app.use(express.static(__dirname));
+// In production: serves from 'dist/' (webpack build output)
+// In development: serves from root (direct file access)
+app.use(express.static(STATIC_DIR));
 
 // Socket.IO Configuration for Real-Time Game Data Sync
 io.on('connection', (socket) => {
@@ -144,12 +153,18 @@ app.use((err, req, res, next) => {
 
 // Start server (use server instead of app to support Socket.IO)
 server.listen(PORT, () => {
+    console.log('');
+    console.log('='.repeat(60));
+    console.log(`🚀 Platform RPG Server - ${NODE_ENV.toUpperCase()} MODE`);
+    console.log('='.repeat(60));
     console.log(`✓ Server running on http://localhost:${PORT}`);
+    console.log(`✓ Static files served from: ${IS_PRODUCTION ? 'dist/ (webpack build)' : 'root (development)'}`);
     console.log(`✓ API available at http://localhost:${PORT}/api`);
     console.log(`✓ WebSocket server ready for real-time sync`);
-    console.log(`✓ Game Editor available at http://localhost:${PORT}/index.html`);
-    console.log(`✓ User API at http://localhost:${PORT}/api/users`);
-    console.log(`✓ Game API at http://localhost:${PORT}/api/games`);
+    console.log(`✓ Game Editor: http://localhost:${PORT}/index.html`);
+    console.log(`✓ Gallery: http://localhost:${PORT}/gallery`);
+    console.log('='.repeat(60));
+    console.log('');
 });
 
 module.exports = { app, server, io };

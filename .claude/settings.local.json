@@ -10,7 +10,8 @@
       "Bash(npx serve:*)",
       "Bash(findstr:*)",
       "Bash(powershell:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
