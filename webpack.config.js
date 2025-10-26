@@ -76,6 +76,7 @@ module.exports = (env, argv) => {
           { from: 'game.js', to: 'game.js' },
           { from: 'play.html', to: 'play.html' },
           { from: 'gallery.html', to: 'gallery.html' },
+          { from: 'textures_02_08_25.png', to: 'textures_02_08_25.png' },
           // Include other editor HTML files if needed
           { from: 'sprite-editor.html', to: 'sprite-editor.html', noErrorOnMissing: true },
           { from: 'tile-selector.html', to: 'tile-selector.html', noErrorOnMissing: true },
