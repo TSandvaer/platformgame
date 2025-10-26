@@ -64,6 +64,7 @@ module.exports = (env, argv) => {
           { from: 'css', to: 'css' },
           { from: 'sprites', to: 'sprites' },
           { from: 'backgrounds', to: 'backgrounds' },
+          { from: 'GUI', to: 'GUI' },
           {
             from: 'js',
             to: 'js',
@@ -71,6 +72,14 @@ module.exports = (env, argv) => {
               ignore: ['**/*.backup.js']
             }
           },
+          // Root-level files needed by the application
+          { from: 'game.js', to: 'game.js' },
+          { from: 'play.html', to: 'play.html' },
+          { from: 'gallery.html', to: 'gallery.html' },
+          // Include other editor HTML files if needed
+          { from: 'sprite-editor.html', to: 'sprite-editor.html', noErrorOnMissing: true },
+          { from: 'tile-selector.html', to: 'tile-selector.html', noErrorOnMissing: true },
+          { from: 'inventory-sprite-editor.html', to: 'inventory-sprite-editor.html', noErrorOnMissing: true },
         ],
       }),
     ],
