@@ -1,3 +1,55 @@
+// Default character stats - used for resetting characters to defaults
+const DEFAULT_CHARACTER_STATS = {
+    'soldier': {
+        maxHealth: 120,
+        healthRegen: 1,
+        maxStamina: 100,
+        staminaRegen: 5,
+        runningCost: 1.5,
+        jumpCost: 10,
+        attackDamage: 30,
+        walkSpeed: 5,
+        runSpeed: 10,
+        jumpForce: 15
+    },
+    'dwarfWarrior': {
+        maxHealth: 150,
+        healthRegen: 2,
+        maxStamina: 80,
+        staminaRegen: 4,
+        runningCost: 2,
+        jumpCost: 12,
+        attackDamage: 40,
+        walkSpeed: 4,
+        runSpeed: 8,
+        jumpForce: 12
+    },
+    'wizard': {
+        maxHealth: 80,
+        healthRegen: 0,
+        maxStamina: 150,
+        staminaRegen: 8,
+        runningCost: 1,
+        jumpCost: 8,
+        attackDamage: 45,
+        walkSpeed: 4.5,
+        runSpeed: 9,
+        jumpForce: 14
+    },
+    'archer': {
+        maxHealth: 90,
+        healthRegen: 0.5,
+        maxStamina: 120,
+        staminaRegen: 6,
+        runningCost: 1.2,
+        jumpCost: 9,
+        attackDamage: 35,
+        walkSpeed: 5.5,
+        runSpeed: 11,
+        jumpForce: 16
+    }
+};
+
 class GameDataSystem {
     constructor(game) {
         this.game = game;
@@ -7,6 +59,9 @@ class GameDataSystem {
         this.exporter = new GameDataExporter(this);
         this.importer = new GameDataImporter(this);
         this.validator = new GameDataValidator(this);
+
+        // Store reference to default character stats
+        this.defaultCharacterStats = DEFAULT_CHARACTER_STATS;
 
         // Default game data structure
         this.defaultGameData = {
@@ -45,7 +100,8 @@ class GameDataSystem {
             },
             characterSettings: {
                 selectedCharacter: 'soldier', // Default character
-                availableCharacters: ['soldier', 'dwarfWarrior', 'wizard', 'archer'] // All characters available by default
+                availableCharacters: ['soldier', 'dwarfWarrior', 'wizard', 'archer'], // All characters available by default
+                characterStats: JSON.parse(JSON.stringify(DEFAULT_CHARACTER_STATS)) // Deep copy of default stats
             }
         };
 
@@ -99,7 +155,21 @@ class GameDataSystem {
                 // Apply player settings immediately if player system exists
                 if (this.game.playerSystem && this.game.playerSystem.data) {
                     const player = this.game.playerSystem.data;
-                    const settings = savedData.playerSettings;
+
+                    // Determine which character is being used
+                    // Check savedData first since characterSettings might not be loaded into player yet
+                    const selectedCharacter = savedData.characterSettings?.selectedCharacter ||
+                                            player.selectedCharacter ||
+                                            'soldier';
+
+                    // Try to get character-specific stats first
+                    let settings = null;
+                    if (savedData.characterSettings?.characterStats?.[selectedCharacter]) {
+                        settings = savedData.characterSettings.characterStats[selectedCharacter];
+                    } else {
+                        // Fall back to global player settings
+                        settings = savedData.playerSettings;
+                    }
 
                     // Apply saved settings to player
                     player.maxHealth = settings.maxHealth || 100;
@@ -113,9 +183,9 @@ class GameDataSystem {
                     player.jumpCost = settings.jumpCost || 10;
                     player.runningCost = settings.runningCost || 1.5;
 
-                    // Ensure current health/stamina don't exceed new maximums
-                    if (player.health > player.maxHealth) player.health = player.maxHealth;
-                    if (player.stamina > player.maxStamina) player.stamina = player.maxStamina;
+                    // Initialize health and stamina to max values
+                    player.health = player.maxHealth;
+                    player.stamina = player.maxStamina;
 
                 } else {
                     console.warn('⚠️ Player system not available yet - settings loaded but not applied');
@@ -359,6 +429,51 @@ class GameDataSystem {
         // Save full game data to MongoDB immediately
         await this.saveCurrentData();
         console.log('✅ Character settings saved to MongoDB');
+    }
+
+    // Get default stats for a specific character
+    getDefaultCharacterStats(characterId) {
+        return this.defaultCharacterStats[characterId] ?
+               JSON.parse(JSON.stringify(this.defaultCharacterStats[characterId])) :
+               null;
+    }
+
+    // Get current stats for a specific character
+    getCharacterStats(characterId) {
+        if (!this.gameData.characterSettings.characterStats) {
+            // Initialize if not present
+            this.gameData.characterSettings.characterStats = JSON.parse(JSON.stringify(DEFAULT_CHARACTER_STATS));
+        }
+        return this.gameData.characterSettings.characterStats[characterId] || this.getDefaultCharacterStats(characterId);
+    }
+
+    // Update stats for a specific character
+    async updateCharacterStats(characterId, stats) {
+        if (!characterId || !stats) {
+            console.warn('⚠️ updateCharacterStats called with invalid parameters');
+            return;
+        }
+
+        // Ensure characterStats exists
+        if (!this.gameData.characterSettings.characterStats) {
+            this.gameData.characterSettings.characterStats = JSON.parse(JSON.stringify(DEFAULT_CHARACTER_STATS));
+        }
+
+        // Update stats for specific character
+        this.gameData.characterSettings.characterStats[characterId] = { ...stats };
+
+        // Update characterSettings in localStorage
+        const success = this.storage.updateCharacterSettings(this.gameData.characterSettings);
+
+        if (success) {
+            console.log(`✅ Stats updated for character: ${characterId}`);
+        } else {
+            console.error('❌ Failed to save character stats to localStorage');
+        }
+
+        // Save full game data to MongoDB immediately
+        await this.saveCurrentData();
+        console.log('✅ Character stats saved to MongoDB');
     }
 
     // Apply GUI theme to the interface

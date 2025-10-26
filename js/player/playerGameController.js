@@ -51,16 +51,8 @@ class PlayerGameController {
 
             window.GameDataSystem = class PlayerGameDataSystem {
                 constructor(game) {
-                    console.log('🔧 PlayerGameDataSystem constructor called!');
                     this.game = game;
                     this.gameData = loadedGameData;
-
-                    console.log('🔧 PlayerGameDataSystem constructor');
-                    console.log('   - loadedGameData:', loadedGameData);
-                    console.log('   - loadedGameData.gameSettings:', loadedGameData?.gameSettings);
-                    console.log('   - loadedGameData.gameSettings.hud:', loadedGameData?.gameSettings?.hud);
-                    console.log('   - this.gameData set to:', this.gameData);
-                    console.log('   - this.gameData.gameSettings:', this.gameData?.gameSettings);
 
                     // Stub storage to prevent loading from localStorage
                     this.storage = {
@@ -87,7 +79,6 @@ class PlayerGameController {
                     // Ensure pending import is set
                     if (this.game && loadedGameData && loadedGameData.scenes) {
                         this.game.pendingGameDataImport = loadedGameData;
-                        console.log('Game data injected:', loadedGameData);
                     }
 
                     // Load all game settings (HUD, player, GUI, character)
@@ -120,7 +111,20 @@ class PlayerGameController {
 
                         if (this.game.playerSystem && this.game.playerSystem.data) {
                             const player = this.game.playerSystem.data;
-                            const settings = loadedGameData.playerSettings;
+
+                            // Determine which character is being used
+                            const selectedCharacter = lockedSessionCharacter ||
+                                                    loadedGameData.characterSettings?.selectedCharacter ||
+                                                    'soldier';
+
+                            // Try to get character-specific stats first
+                            let settings = null;
+                            if (loadedGameData.characterSettings?.characterStats?.[selectedCharacter]) {
+                                settings = loadedGameData.characterSettings.characterStats[selectedCharacter];
+                            } else {
+                                // Fall back to global player settings
+                                settings = loadedGameData.playerSettings;
+                            }
 
                             player.maxHealth = settings.maxHealth || 100;
                             player.healthRegenRate = settings.healthRegen || 0;
@@ -133,8 +137,9 @@ class PlayerGameController {
                             player.jumpCost = settings.jumpCost || 10;
                             player.runningCost = settings.runningCost || 1.5;
 
-                            if (player.health > player.maxHealth) player.health = player.maxHealth;
-                            if (player.stamina > player.maxStamina) player.stamina = player.maxStamina;
+                            // Initialize health and stamina to max values
+                            player.health = player.maxHealth;
+                            player.stamina = player.maxStamina;
                         }
                     }
                 }
@@ -186,6 +191,9 @@ class PlayerGameController {
                     return loadedGameData;
                 }
             };
+
+            // ALSO set the bare global variable (not just window.GameDataSystem)
+            globalThis.GameDataSystem = window.GameDataSystem;
 
             // Create the game instance
             this.game = new PlatformRPG();
@@ -315,9 +323,41 @@ class PlayerGameController {
             }
 
             console.log('✅ Player progress loaded successfully');
+
+            // Apply character-specific stats after progress is loaded
+            this.applyCharacterStats();
         } catch (error) {
             console.error('Error loading player progress:', error);
             // Don't throw - let player start fresh if progress loading fails
+        }
+    }
+
+    applyCharacterStats() {
+        if (!this.game.playerSystem || !this.game.playerSystem.data) {
+            return;
+        }
+
+        const player = this.game.playerSystem.data;
+        const selectedCharacter = this.sessionCharacter || player.selectedCharacter || 'soldier';
+
+        // Get character-specific stats from game data
+        if (this.gameData?.characterSettings?.characterStats?.[selectedCharacter]) {
+            const stats = this.gameData.characterSettings.characterStats[selectedCharacter];
+
+            player.maxHealth = stats.maxHealth;
+            player.healthRegenRate = stats.healthRegen;
+            player.maxStamina = stats.maxStamina;
+            player.staminaRegenRate = stats.staminaRegen;
+            player.attackDamage = stats.attackDamage;
+            player.speed = stats.walkSpeed;
+            player.runSpeed = stats.runSpeed;
+            player.jumpPower = -Math.abs(stats.jumpForce);
+            player.jumpCost = stats.jumpCost;
+            player.runningCost = stats.runningCost;
+
+            // Initialize health and stamina to max values
+            player.health = player.maxHealth;
+            player.stamina = player.maxStamina;
         }
     }
 

@@ -772,6 +772,48 @@ class UIEventHandler {
                 this.resetCharacterSelection();
             });
         }
+
+        // Character Stats Modal - Close button
+        const closeModalBtn = document.getElementById('closeCharacterStatsModal');
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => {
+                this.closeCharacterStatsModal();
+            });
+        }
+
+        // Character Stats Modal - Reset to Default button
+        const resetStatsBtn = document.getElementById('resetCharacterStatsBtn');
+        if (resetStatsBtn) {
+            resetStatsBtn.addEventListener('click', () => {
+                this.resetCharacterStatsToDefault();
+            });
+        }
+
+        // Character Stats Modal - Cancel button
+        const cancelStatsBtn = document.getElementById('cancelCharacterStatsBtn');
+        if (cancelStatsBtn) {
+            cancelStatsBtn.addEventListener('click', () => {
+                this.closeCharacterStatsModal();
+            });
+        }
+
+        // Character Stats Modal - Save button
+        const saveStatsBtn = document.getElementById('saveCharacterStatsBtn');
+        if (saveStatsBtn) {
+            saveStatsBtn.addEventListener('click', () => {
+                this.saveCharacterStats();
+            });
+        }
+
+        // Character Stats Modal - Click outside to close
+        const statsModal = document.getElementById('characterStatsModal');
+        if (statsModal) {
+            statsModal.addEventListener('click', (e) => {
+                if (e.target === statsModal) {
+                    this.closeCharacterStatsModal();
+                }
+            });
+        }
     }
 
     loadCharacterValues() {
@@ -832,7 +874,7 @@ class UIEventHandler {
                 <div style="color: #888; font-size: 10px;">
                     Size: ${character.playerSize.width}x${character.playerSize.height}
                 </div>
-                ${isSelected ? '<div style="color: #4CAF50; font-size: 11px; font-weight: bold;">✓ Selected</div>' : ''}
+                ${isSelected ? '<div class="character-check" style="color: #4CAF50; font-size: 11px; font-weight: bold;">✓ Selected</div>' : ''}
                 <div class="character-availability-badge" style="
                     margin-top: 4px;
                     padding: 4px 8px;
@@ -845,6 +887,18 @@ class UIEventHandler {
                 ">
                     ${isAvailable ? '✓ Available in game' : '✗ Unavailable for game'}
                 </div>
+                ${isAvailable ? `<button class="character-stats-btn" data-character-id="${character.id}" style="
+                    margin-top: 8px;
+                    padding: 6px 12px;
+                    background-color: #555;
+                    color: #fff;
+                    border: 1px solid #777;
+                    border-radius: 4px;
+                    font-size: 11px;
+                    cursor: pointer;
+                    width: 100%;
+                    transition: all 0.2s;
+                ">Set character game stats</button>` : ''}
             </div>`;
         });
 
@@ -862,6 +916,12 @@ class UIEventHandler {
             .character-card.selected:hover {
                 background-color: #2a4a2a !important;
                 border-color: #4CAF50 !important;
+            }
+            .character-stats-btn:hover {
+                background-color: #667eea !important;
+                border-color: #667eea !important;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
             }
         `;
         if (!document.getElementById('characterCardStyles')) {
@@ -882,6 +942,15 @@ class UIEventHandler {
                     // Normal click - select character
                     this.selectCharacter(characterId);
                 }
+            });
+        });
+
+        // Add click handlers for stats buttons
+        gridContainer.querySelectorAll('.character-stats-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent card click
+                const characterId = btn.dataset.characterId;
+                this.openCharacterStatsModal(characterId);
             });
         });
     }
@@ -987,6 +1056,31 @@ class UIEventHandler {
         // Switch character sprites and dimensions
         this.game.playerSystem.animator.switchCharacter(this.selectedCharacterId);
 
+        // Apply character-specific stats if they exist
+        if (this.game.gameDataSystem) {
+            const characterStats = this.game.gameDataSystem.getCharacterStats(this.selectedCharacterId);
+            if (characterStats) {
+                const player = this.game.playerSystem.data;
+
+                player.maxHealth = characterStats.maxHealth;
+                player.healthRegenRate = characterStats.healthRegen;
+                player.maxStamina = characterStats.maxStamina;
+                player.staminaRegenRate = characterStats.staminaRegen;
+                player.attackDamage = characterStats.attackDamage;
+                player.speed = characterStats.walkSpeed;
+                player.runSpeed = characterStats.runSpeed;
+                player.jumpPower = -Math.abs(characterStats.jumpForce);
+                player.jumpCost = characterStats.jumpCost;
+                player.runningCost = characterStats.runningCost;
+
+                // Set health and stamina to max values for testing
+                player.health = player.maxHealth;
+                player.stamina = player.maxStamina;
+
+                console.log(`✅ Applied character-specific stats for ${this.selectedCharacterId}`);
+            }
+        }
+
         // Update current character display
         const currentCharacterName = document.getElementById('currentCharacterName');
         if (currentCharacterName) {
@@ -1005,6 +1099,169 @@ class UIEventHandler {
     resetCharacterSelection() {
         this.selectCharacter('soldier');
         this.applyCharacterSelection();
+    }
+
+    // Character Stats Modal Methods
+    openCharacterStatsModal(characterId) {
+        // Store the character we're editing
+        this.editingCharacterId = characterId;
+
+        // Get character name for modal title
+        const characterConfig = window.playerCharacters?.getCharacter(characterId);
+        const characterName = characterConfig?.name || characterId;
+
+        const modalTitle = document.getElementById('characterStatsModalTitle');
+        if (modalTitle) {
+            modalTitle.textContent = `${characterName} - Character Stats`;
+        }
+
+        // Load character stats into the form
+        this.loadCharacterStatsToForm(characterId);
+
+        // Show the modal
+        const modal = document.getElementById('characterStatsModal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+
+        console.log(`📝 Opened character stats modal for: ${characterName}`);
+    }
+
+    loadCharacterStatsToForm(characterId) {
+        if (!this.game.gameDataSystem) {
+            console.error('❌ Game data system not available');
+            return;
+        }
+
+        // Get character stats (will use defaults if not set)
+        const stats = this.game.gameDataSystem.getCharacterStats(characterId);
+
+        // Populate form fields
+        const fields = {
+            'charMaxHealth': stats.maxHealth,
+            'charHealthRegen': stats.healthRegen,
+            'charMaxStamina': stats.maxStamina,
+            'charStaminaRegen': stats.staminaRegen,
+            'charRunningCost': stats.runningCost,
+            'charJumpCost': stats.jumpCost,
+            'charAttackDamage': stats.attackDamage,
+            'charWalkSpeed': stats.walkSpeed,
+            'charRunSpeed': stats.runSpeed,
+            'charJumpForce': stats.jumpForce
+        };
+
+        Object.entries(fields).forEach(([fieldId, value]) => {
+            const input = document.getElementById(fieldId);
+            if (input) {
+                input.value = value;
+            }
+        });
+
+        console.log(`✅ Loaded stats for ${characterId}:`, stats);
+    }
+
+    resetCharacterStatsToDefault() {
+        if (!this.editingCharacterId || !this.game.gameDataSystem) {
+            console.error('❌ Cannot reset stats - no character selected or game data system unavailable');
+            return;
+        }
+
+        // Get default stats for this character
+        const defaultStats = this.game.gameDataSystem.getDefaultCharacterStats(this.editingCharacterId);
+
+        // Populate form with defaults
+        const fields = {
+            'charMaxHealth': defaultStats.maxHealth,
+            'charHealthRegen': defaultStats.healthRegen,
+            'charMaxStamina': defaultStats.maxStamina,
+            'charStaminaRegen': defaultStats.staminaRegen,
+            'charRunningCost': defaultStats.runningCost,
+            'charJumpCost': defaultStats.jumpCost,
+            'charAttackDamage': defaultStats.attackDamage,
+            'charWalkSpeed': defaultStats.walkSpeed,
+            'charRunSpeed': defaultStats.runSpeed,
+            'charJumpForce': defaultStats.jumpForce
+        };
+
+        Object.entries(fields).forEach(([fieldId, value]) => {
+            const input = document.getElementById(fieldId);
+            if (input) {
+                input.value = value;
+            }
+        });
+
+        console.log(`🔄 Reset ${this.editingCharacterId} stats to defaults`);
+    }
+
+    async saveCharacterStats() {
+        if (!this.editingCharacterId || !this.game.gameDataSystem) {
+            console.error('❌ Cannot save stats - no character selected or game data system unavailable');
+            return;
+        }
+
+        // Read values from form
+        const stats = {
+            maxHealth: parseFloat(document.getElementById('charMaxHealth').value),
+            healthRegen: parseFloat(document.getElementById('charHealthRegen').value),
+            maxStamina: parseFloat(document.getElementById('charMaxStamina').value),
+            staminaRegen: parseFloat(document.getElementById('charStaminaRegen').value),
+            runningCost: parseFloat(document.getElementById('charRunningCost').value),
+            jumpCost: parseFloat(document.getElementById('charJumpCost').value),
+            attackDamage: parseFloat(document.getElementById('charAttackDamage').value),
+            walkSpeed: parseFloat(document.getElementById('charWalkSpeed').value),
+            runSpeed: parseFloat(document.getElementById('charRunSpeed').value),
+            jumpForce: parseFloat(document.getElementById('charJumpForce').value)
+        };
+
+        // Save to game data system (saves to both localStorage and MongoDB)
+        await this.game.gameDataSystem.updateCharacterStats(this.editingCharacterId, stats);
+
+        console.log(`💾 Saved character stats for ${this.editingCharacterId}:`, stats);
+
+        // If this character is currently selected, apply stats immediately
+        if (this.game.playerSystem && this.game.playerSystem.data) {
+            const currentCharacter = this.game.playerSystem.data.selectedCharacter;
+            if (currentCharacter === this.editingCharacterId) {
+                const player = this.game.playerSystem.data;
+
+                player.maxHealth = stats.maxHealth;
+                player.healthRegenRate = stats.healthRegen;
+                player.maxStamina = stats.maxStamina;
+                player.staminaRegenRate = stats.staminaRegen;
+                player.attackDamage = stats.attackDamage;
+                player.speed = stats.walkSpeed;
+                player.runSpeed = stats.runSpeed;
+                player.jumpPower = -Math.abs(stats.jumpForce);
+                player.jumpCost = stats.jumpCost;
+                player.runningCost = stats.runningCost;
+
+                // Set health and stamina to max values
+                player.health = player.maxHealth;
+                player.stamina = player.maxStamina;
+
+                console.log(`✅ Applied stats immediately to currently selected character: ${currentCharacter}`);
+            }
+        }
+
+        // Show success message if available
+        if (this.game.editorSystem && this.game.editorSystem.ui) {
+            this.game.editorSystem.ui.showTemporaryMessage('Character stats saved successfully', 2000);
+        }
+
+        // Close modal
+        this.closeCharacterStatsModal();
+    }
+
+    closeCharacterStatsModal() {
+        const modal = document.getElementById('characterStatsModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+
+        // Clear editing state
+        this.editingCharacterId = null;
+
+        console.log('❌ Closed character stats modal');
     }
 
     refreshInventoryItemsList() {
