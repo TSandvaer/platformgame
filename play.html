@@ -796,13 +796,14 @@
                     // Create session menu with inline session creation and loading
                     this.sessionMenu = new GameSessionMenu();
                     const displayTitle = gameData.gameData?.gameInfo?.title || gameData.name;
+                    const displayDescription = gameData.gameData?.gameInfo?.description || '';
                     await this.sessionMenu.initialize(
                         displayTitle, // Use gameInfo.title if available, fallback to name
                         this.gameId, // Use stored gameId instead of gameData._id
                         (session) => this.handleSessionCreated(session, gameData, author), // Inline session creation
                         (session) => this.handleSessionLoaded(session, gameData, author), // Inline session loading
                         (session) => this.handleSessionDeleted(session), // Session deletion callback
-                        gameData.description, // Pass game description for immersive start screen
+                        displayDescription, // Use gameInfo.description
                         gameData // Pass full game data for character filtering
                     );
 

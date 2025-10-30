@@ -67,6 +67,7 @@ class GameDataSystem {
         this.defaultGameData = {
             gameInfo: {
                 title: "Platform RPG Game",
+                description: "Start your adventure in this exciting game",
                 version: "1.0.0",
                 lastModified: new Date().toISOString().split('T')[0]
             },
@@ -399,6 +400,7 @@ class GameDataSystem {
     getGameInfo() {
         return this.gameData.gameInfo || {
             title: "Platform RPG Game",
+            description: "Start your adventure in this exciting game",
             version: "1.0.0",
             lastModified: new Date().toISOString().split('T')[0]
         };
@@ -621,6 +623,7 @@ class GameDataSystem {
         return {
             gameInfo: this.gameData.gameInfo || {
                 title: "Platform RPG Game",
+                description: "Start your adventure in this exciting game",
                 version: "1.0.0",
                 lastModified: new Date().toISOString().split('T')[0]
             },

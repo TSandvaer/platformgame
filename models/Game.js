@@ -22,6 +22,7 @@ const gameSchema = new mongoose.Schema({
     // Game info (version tracking)
     gameInfo: {
         title: { type: String, default: 'Platform RPG Game' },
+        description: { type: String, default: 'Start your adventure in this exciting game' },
         version: { type: String, default: '1.0.0' },
         lastModified: { type: String, default: () => new Date().toISOString().split('T')[0] }
     },
