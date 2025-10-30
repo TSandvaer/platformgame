@@ -34,6 +34,10 @@ class ModalUIHandler extends UIHandler {
                     if (this.game.uiEventHandler && this.game.uiEventHandler.loadCharacterValues) {
                         this.game.uiEventHandler.loadCharacterValues();
                     }
+                    // Load game info when modal opens
+                    if (this.game.uiEventHandler && this.game.uiEventHandler.loadGameInfo) {
+                        this.game.uiEventHandler.loadGameInfo();
+                    }
                 }
             });
         }

@@ -763,8 +763,9 @@
 
             async startGame(gameData, author) {
                 try {
-                    // Update header
-                    document.getElementById('gameTitle').textContent = gameData.name;
+                    // Update header - use gameInfo.title if available, fallback to name
+                    const displayTitle = gameData.gameData?.gameInfo?.title || gameData.name;
+                    document.getElementById('gameTitle').textContent = displayTitle;
                     document.getElementById('gameAuthor').textContent = author.displayName || author.username;
 
                     // Hide loading
@@ -794,8 +795,9 @@
 
                     // Create session menu with inline session creation and loading
                     this.sessionMenu = new GameSessionMenu();
+                    const displayTitle = gameData.gameData?.gameInfo?.title || gameData.name;
                     await this.sessionMenu.initialize(
-                        gameData.name,
+                        displayTitle, // Use gameInfo.title if available, fallback to name
                         this.gameId, // Use stored gameId instead of gameData._id
                         (session) => this.handleSessionCreated(session, gameData, author), // Inline session creation
                         (session) => this.handleSessionLoaded(session, gameData, author), // Inline session loading

@@ -304,6 +304,25 @@ class GameDataStorage {
         return false;
     }
 
+    // Update only the gameInfo in localStorage
+    updateGameInfo(gameInfo) {
+        try {
+            const storageKey = this.getStorageKey();
+            const dataStr = localStorage.getItem(storageKey);
+            if (dataStr) {
+                const gameData = JSON.parse(dataStr);
+                gameData.gameInfo = gameInfo;
+                localStorage.setItem(storageKey, JSON.stringify(gameData));
+                return true;
+            } else {
+                console.warn('⚠️ Storage: No existing game data found in localStorage');
+            }
+        } catch (error) {
+            console.error('❌ Storage: Error updating game info in localStorage:', error);
+        }
+        return false;
+    }
+
     // Load game data (MongoDB or localStorage)
     async loadGameData() {
         if (this.storageMode === 'mongodb') {

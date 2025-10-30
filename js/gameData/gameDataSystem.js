@@ -288,6 +288,11 @@ class GameDataSystem {
         if (gameData.weapons) this.gameData.weapons = gameData.weapons;
         if (gameData.items) this.gameData.items = gameData.items;
 
+        // Apply game info (title, version, etc.)
+        if (gameData.gameInfo) {
+            this.gameData.gameInfo = gameData.gameInfo;
+        }
+
         // Apply game settings (HUD, etc.)
         if (gameData.gameSettings) {
             this.gameData.gameSettings = gameData.gameSettings;
@@ -370,6 +375,33 @@ class GameDataSystem {
 
         // Apply the theme change immediately
         this.applyGUITheme(guiSettings.theme);
+    }
+
+    // Update game info (title for player display)
+    updateGameInfo(gameInfo) {
+        if (!gameInfo) return;
+
+        // Update gameInfo
+        this.gameData.gameInfo = {
+            ...this.gameData.gameInfo,
+            ...gameInfo,
+            lastModified: new Date().toISOString().split('T')[0]
+        };
+
+        // Save to localStorage
+        this.storage.updateGameInfo(this.gameData.gameInfo);
+
+        // Save to MongoDB
+        this.saveCurrentData();
+    }
+
+    // Get current game info
+    getGameInfo() {
+        return this.gameData.gameInfo || {
+            title: "Platform RPG Game",
+            version: "1.0.0",
+            lastModified: new Date().toISOString().split('T')[0]
+        };
     }
 
     // Load just the characterSettings from localStorage
@@ -587,7 +619,7 @@ class GameDataSystem {
         } : this.defaultGameData.gameSettings.hud;
 
         return {
-            gameInfo: {
+            gameInfo: this.gameData.gameInfo || {
                 title: "Platform RPG Game",
                 version: "1.0.0",
                 lastModified: new Date().toISOString().split('T')[0]

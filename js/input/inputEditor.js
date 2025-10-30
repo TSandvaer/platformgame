@@ -205,6 +205,16 @@ class InputEditor {
                 this.game.gameDataSystem.importGameData(e);
             });
         }
+
+        // Save game info button
+        const saveGameInfoBtn = document.getElementById('saveGameInfo');
+        if (saveGameInfoBtn) {
+            saveGameInfoBtn.addEventListener('click', () => {
+                if (this.game.uiEventHandler) {
+                    this.game.uiEventHandler.saveGameInfo();
+                }
+            });
+        }
     }
 
     saveScene() {

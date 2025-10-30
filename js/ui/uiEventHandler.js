@@ -1310,4 +1310,45 @@ class UIEventHandler {
         const parsed = parseFloat(value);
         return isNaN(parsed) ? 0 : parsed;
     }
+
+    // Load game info into the modal
+    loadGameInfo() {
+        if (!this.game.gameDataSystem) {
+            console.warn('⚠️ Game data system not available');
+            return;
+        }
+
+        const gameInfo = this.game.gameDataSystem.getGameInfo();
+        const titleInput = document.getElementById('gameInfoTitle');
+
+        if (titleInput) {
+            titleInput.value = gameInfo.title || 'Platform RPG Game';
+        }
+    }
+
+    // Save game info (title)
+    saveGameInfo() {
+        const titleInput = document.getElementById('gameInfoTitle');
+
+        if (!titleInput) return;
+
+        const title = titleInput.value.trim();
+
+        if (!title) {
+            alert('Title cannot be empty');
+            return;
+        }
+
+        // Update game info
+        this.game.gameDataSystem.updateGameInfo({
+            title: title
+        });
+
+        console.log('✅ Game title saved:', title);
+
+        // Show success message
+        if (this.game.editorSystem && this.game.editorSystem.ui) {
+            this.game.editorSystem.ui.showTemporaryMessage('Game title saved!');
+        }
+    }
 }
