@@ -173,16 +173,16 @@ class GameDataSystem {
                     }
 
                     // Apply saved settings to player
-                    player.maxHealth = settings.maxHealth || 100;
-                    player.healthRegenRate = settings.healthRegen || 0;
-                    player.maxStamina = settings.maxStamina || 100;
-                    player.staminaRegenRate = settings.staminaRegen || 5;
-                    player.attackDamage = settings.attackDamage || 25;
-                    player.speed = settings.walkSpeed || 5;
-                    player.runSpeed = settings.runSpeed || 10;
-                    player.jumpPower = -Math.abs(settings.jumpForce || 15);
-                    player.jumpCost = settings.jumpCost || 10;
-                    player.runningCost = settings.runningCost || 1.5;
+                    player.maxHealth = settings.maxHealth ?? 100;
+                    player.healthRegenRate = settings.healthRegen ?? 0;
+                    player.maxStamina = settings.maxStamina ?? 100;
+                    player.staminaRegenRate = settings.staminaRegen ?? 5;
+                    player.attackDamage = settings.attackDamage ?? 25;
+                    player.speed = settings.walkSpeed ?? 5;
+                    player.runSpeed = settings.runSpeed ?? 10;
+                    player.jumpPower = -Math.abs(settings.jumpForce ?? 15);
+                    player.jumpCost = settings.jumpCost ?? 10;
+                    player.runningCost = settings.runningCost ?? 1.5;
 
                     // Initialize health and stamina to max values
                     player.health = player.maxHealth;

@@ -21,7 +21,7 @@ class PlayerController {
         // Handle space key for jump (one-time trigger)
         if (key === ' ' && this.data.onGround && !this.data.spaceKeyPressed) {
             // Check if player has enough stamina to jump
-            const jumpCost = this.data.jumpCost || 10;
+            const jumpCost = this.data.jumpCost ?? 10;
             if (this.data.stamina >= jumpCost) {
                 const jumpPower = this.keys['shift'] ? 1.2 : 1.0;
                 this.physics.jump(jumpPower);

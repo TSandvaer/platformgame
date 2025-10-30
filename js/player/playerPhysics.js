@@ -172,8 +172,8 @@ class PlayerPhysics {
 
         if (this.data.isRunning || isJumping) {
             // Drain stamina when running or jumping using configurable costs
-            const runningCostPerFrame = (this.data.runningCost || 1.5) / 60; // Convert SP/sec to SP/frame (60fps)
-            const jumpCostTotal = this.data.jumpCost || 10; // SP per jump
+            const runningCostPerFrame = (this.data.runningCost ?? 1.5) / 60; // Convert SP/sec to SP/frame (60fps)
+            const jumpCostTotal = this.data.jumpCost ?? 10; // SP per jump
 
             let drainRate = 0;
             if (isJumping) {
