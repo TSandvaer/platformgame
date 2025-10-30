@@ -19,7 +19,7 @@ router.get('/', optionalAuth, async (req, res) => {
         }
 
         const games = await Game.find(query)
-            .select('_id name description gameInfo isPublished slug visibility stats createdAt updatedAt')
+            .select('_id name description gameInfo isPublished slug visibility stats createdAt updatedAt scenes')
             .sort({ updatedAt: -1 })
             .lean();
 
