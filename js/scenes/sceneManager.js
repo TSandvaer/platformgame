@@ -161,6 +161,11 @@ class SceneManager {
             this.game.lootableSystem.updateLootableProperties();
         }
 
+        // Clear dropped items from previous scene
+        if (this.game.itemDropSystem) {
+            this.game.itemDropSystem.clearAllDrops();
+        }
+
         // Clean up any invalid transition zones in this scene
         this.cleanupInvalidTransitions(scene);
 
