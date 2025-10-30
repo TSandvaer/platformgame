@@ -825,46 +825,7 @@ class PlatformRPG {
             return;
         }
 
-        // Only update UI elements if they exist (editor mode)
-        const charactersList = document.getElementById('charactersList');
-        if (charactersList) {
-            charactersList.innerHTML = (gameData.characters || []).map(char =>
-                `<div class="item">
-                    <div class="item-name">${char.name}</div>
-                    <div class="item-details">${char.description}</div>
-                </div>`
-            ).join('');
-        }
-
-        const classesList = document.getElementById('classesList');
-        if (classesList) {
-            classesList.innerHTML = (gameData.classes || []).map(cls =>
-                `<div class="item">
-                    <div class="item-name">${cls.name}</div>
-                    <div class="item-details">${cls.description}</div>
-                </div>`
-            ).join('');
-        }
-
-        const weaponsList = document.getElementById('weaponsList');
-        if (weaponsList) {
-            weaponsList.innerHTML = (gameData.weapons || []).map(weapon =>
-                `<div class="item">
-                    <div class="item-name">${weapon.name}</div>
-                    <div class="item-details">${weapon.description}</div>
-                </div>`
-            ).join('');
-        }
-
-        const itemsList = document.getElementById('itemsList');
-        if (itemsList) {
-            itemsList.innerHTML = (gameData.items || []).map(item =>
-                `<div class="item">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-details">${item.description}</div>
-                </div>`
-            ).join('');
-        }
+        // UI elements removed: charactersList, classesList, weaponsList, itemsList
     }
 
 
