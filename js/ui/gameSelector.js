@@ -315,20 +315,62 @@ class GameSelector {
      * Select a game to edit
      */
     async selectGame(gameId) {
-        if (confirm('Switch to this game? Any unsaved changes will be lost.')) {
-            try {
-                // Set the current game ID
-                this.apiClient.setCurrentGameId(gameId);
+        // Check if there are unsaved changes
+        const hasUnsavedChanges = window.game && window.game.sceneSystem &&
+                                 window.game.sceneSystem.manager &&
+                                 window.game.sceneSystem.manager.hasUnsavedChanges;
 
-                // Update the UI indicator
-                this.updateCurrentGameIndicator(gameId);
-
-                // Reload the page to load the new game
-                window.location.reload();
-            } catch (error) {
-                console.error('Error selecting game:', error);
-                alert('Error selecting game: ' + error.message);
+        if (hasUnsavedChanges) {
+            // Use modal handler for better confirmation
+            if (window.uiEventHandler && window.uiEventHandler.modalHandler && window.uiEventHandler.modalHandler.showUnsavedChangesModal) {
+                window.uiEventHandler.modalHandler.showUnsavedChangesModal(
+                    () => {
+                        // Save and switch
+                        if (window.game.sceneSystem.manager) {
+                            window.game.sceneSystem.manager.saveCurrentSceneData();
+                        }
+                        this._performGameSwitch(gameId);
+                    },
+                    () => {
+                        // Discard and switch
+                        // First reload the current scene to revert all changes
+                        if (window.game.sceneSystem.manager) {
+                            window.game.sceneSystem.manager.reloadCurrentScene();
+                            window.game.sceneSystem.manager.clearDirtyFlag();
+                        }
+                        this._performGameSwitch(gameId);
+                    },
+                    () => {
+                        // Cancel - do nothing
+                    }
+                );
+            } else {
+                // Fallback to basic confirm
+                if (confirm('You have unsaved changes. Switch to this game anyway?')) {
+                    this._performGameSwitch(gameId);
+                }
             }
+        } else {
+            // No unsaved changes, just confirm the switch
+            if (confirm('Switch to this game?')) {
+                this._performGameSwitch(gameId);
+            }
+        }
+    }
+
+    async _performGameSwitch(gameId) {
+        try {
+            // Set the current game ID
+            this.apiClient.setCurrentGameId(gameId);
+
+            // Update the UI indicator
+            this.updateCurrentGameIndicator(gameId);
+
+            // Reload the page to load the new game
+            window.location.reload();
+        } catch (error) {
+            console.error('Error selecting game:', error);
+            alert('Error selecting game: ' + error.message);
         }
     }
 

@@ -185,6 +185,104 @@ class ModalUIHandler extends UIHandler {
     }
 
     /**
+     * Show unsaved changes modal with three options
+     */
+    showUnsavedChangesModal(onSave, onDiscard, onCancel = null) {
+        const modal = document.getElementById('confirmationModal');
+        const messageEl = document.getElementById('confirmationModalMessage');
+        const okBtn = document.getElementById('confirmationModalOK');
+        const cancelBtn = document.getElementById('confirmationModalCancel');
+
+        if (!modal || !messageEl || !okBtn || !cancelBtn) return;
+
+        // Set message
+        messageEl.innerHTML = 'You have unsaved changes. What would you like to do?<br><br>' +
+                            '<b>Save</b> - Save changes and continue<br>' +
+                            '<b>Discard</b> - Discard changes and continue<br>' +
+                            '<b>Cancel</b> - Stay on current scene';
+
+        // Change button labels
+        okBtn.textContent = 'Save';
+        cancelBtn.textContent = 'Cancel';
+
+        // Create a discard button by cloning the OK button
+        const discardBtn = okBtn.cloneNode(true);
+        discardBtn.textContent = 'Discard';
+        discardBtn.id = 'confirmationModalDiscard';
+        discardBtn.className = 'btn small warning'; // Use warning style for discard
+
+        // Insert discard button between OK and Cancel
+        okBtn.parentNode.insertBefore(discardBtn, cancelBtn);
+
+        // Remove old event listeners by cloning and replacing
+        const newOkBtn = okBtn.cloneNode(true);
+        const newDiscardBtn = discardBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+        discardBtn.parentNode.replaceChild(newDiscardBtn, discardBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+        // Add new event listeners
+        newOkBtn.addEventListener('click', () => {
+            this.closeUnsavedChangesModal();
+            if (onSave) onSave();
+        });
+
+        newDiscardBtn.addEventListener('click', () => {
+            this.closeUnsavedChangesModal();
+            if (onDiscard) onDiscard();
+        });
+
+        newCancelBtn.addEventListener('click', () => {
+            this.closeUnsavedChangesModal();
+            if (onCancel) onCancel();
+        });
+
+        // Show modal
+        modal.style.display = 'block';
+
+        // Focus on Save button by default
+        setTimeout(() => newOkBtn.focus(), 100);
+
+        // Handle ESC key
+        this._unsavedChangesKeyHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.closeUnsavedChangesModal();
+                if (onCancel) onCancel();
+            }
+        };
+        document.addEventListener('keydown', this._unsavedChangesKeyHandler);
+    }
+
+    /**
+     * Close the unsaved changes modal
+     */
+    closeUnsavedChangesModal() {
+        const modal = document.getElementById('confirmationModal');
+        if (modal) {
+            modal.style.display = 'none';
+
+            // Remove the extra discard button
+            const discardBtn = document.getElementById('confirmationModalDiscard');
+            if (discardBtn && discardBtn.parentNode) {
+                discardBtn.parentNode.removeChild(discardBtn);
+            }
+
+            // Reset button labels
+            const okBtn = document.getElementById('confirmationModalOK');
+            const cancelBtn = document.getElementById('confirmationModalCancel');
+            if (okBtn) okBtn.textContent = 'OK';
+            if (cancelBtn) cancelBtn.textContent = 'Cancel';
+        }
+
+        // Remove keyboard event listener
+        if (this._unsavedChangesKeyHandler) {
+            document.removeEventListener('keydown', this._unsavedChangesKeyHandler);
+            this._unsavedChangesKeyHandler = null;
+        }
+    }
+
+    /**
      * Close the game settings modal
      */
     closeGameSettingsModal() {

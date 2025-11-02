@@ -2,6 +2,7 @@ class LootableManager {
     constructor(data) {
         this.data = data;
         this.currentLootableType = 'coin'; // Default lootable type
+        this.game = null; // Will be set by lootableSystem
     }
 
     // UI Updates

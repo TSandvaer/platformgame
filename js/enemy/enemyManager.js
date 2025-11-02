@@ -1,12 +1,17 @@
 class EnemyManager {
     constructor(data) {
         this.data = data;
+        this.game = null; // Will be set by enemySystem
     }
 
     // Create a new enemy at the specified position
     addEnemy(x, y, enemyType = 'orc') {
         const enemy = this.data.createEnemy(x, y, enemyType);
         if (enemy) {
+            // Mark scene as dirty when enemy is added
+            if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+                this.game.sceneSystem.manager.markSceneAsDirty();
+            }
         }
         return enemy;
     }
@@ -15,6 +20,10 @@ class EnemyManager {
     removeEnemy(id) {
         const removed = this.data.removeEnemy(id);
         if (removed) {
+            // Mark scene as dirty when enemy is removed
+            if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+                this.game.sceneSystem.manager.markSceneAsDirty();
+            }
         }
         return removed;
     }
@@ -112,6 +121,11 @@ class EnemyManager {
             enemy.attractionZone = { ...enemy.attractionZone, ...properties.attractionZone };
         }
 
+        // Mark scene as dirty when enemy properties are updated
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
+
         return true;
     }
 
@@ -132,6 +146,11 @@ class EnemyManager {
             enemy.movementZone.startX = x - zoneWidth / 2;
             enemy.movementZone.endX = x + zoneWidth / 2;
             enemy.movementZone.y = y;
+        }
+
+        // Mark scene as dirty when enemy is moved
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
         }
 
         return true;

@@ -5,6 +5,7 @@ class PlatformData {
         this.nextPlatformId = 0;
         this.nextPlatformZOrder = 0;
         this.selectedPlatform = null;
+        this.game = null; // Will be set by platformSystem
 
         // Platform placement system
         this.platformPlacementMode = false;
@@ -70,6 +71,12 @@ class PlatformData {
 
         this.platforms.push(newPlatform);
         this.selectedPlatform = newPlatform;
+
+        // Mark scene as dirty when platform is added
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
+
         return newPlatform;
     }
 
@@ -77,6 +84,11 @@ class PlatformData {
         this.platforms = this.platforms.filter(p => p.id !== platformId);
         if (this.selectedPlatform && this.selectedPlatform.id === platformId) {
             this.selectedPlatform = null;
+        }
+
+        // Mark scene as dirty when platform is deleted
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
         }
     }
 
@@ -87,6 +99,11 @@ class PlatformData {
 
     updatePlatform(platform, updates) {
         Object.assign(platform, updates);
+
+        // Mark scene as dirty when platform is updated
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
     }
 
     getPlatformById(id) {

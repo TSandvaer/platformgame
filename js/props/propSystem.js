@@ -231,11 +231,7 @@ class PropSystem {
         this.data.deleteSelectedProp();
         this.manager.updatePropProperties();
         this.manager.updatePropList();
-
-        // Save the scene to persist the deletion
-        if (this.game && this.game.sceneSystem) {
-            this.game.sceneSystem.saveScenes();
-        }
+        // Don't save immediately - let the dirty flag system handle it
     }
 
     togglePropPlacement() {
@@ -431,11 +427,7 @@ class PropSystem {
         this.data.deleteSelectedProps();
         this.manager.updatePropProperties();
         this.manager.updatePropList();
-
-        // Save the scene to persist the deletion
-        if (this.game && this.game.sceneSystem) {
-            this.game.sceneSystem.saveScenes();
-        }
+        // Don't save immediately - let the dirty flag system handle it
     }
 
     clearSelection() {

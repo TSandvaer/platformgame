@@ -1,12 +1,17 @@
 class NPCManager {
     constructor(data) {
         this.data = data;
+        this.game = null; // Will be set by npcSystem
     }
 
     // Create a new NPC at the specified position
     addNPC(x, y, npcType = 'blacksmith') {
         const npc = this.data.createNPC(x, y, npcType);
         if (npc) {
+            // Mark scene as dirty when NPC is added
+            if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+                this.game.sceneSystem.manager.markSceneAsDirty();
+            }
         }
         return npc;
     }
@@ -15,6 +20,10 @@ class NPCManager {
     removeNPC(id) {
         const removed = this.data.removeNPC(id);
         if (removed) {
+            // Mark scene as dirty when NPC is removed
+            if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+                this.game.sceneSystem.manager.markSceneAsDirty();
+            }
         }
         return removed;
     }
@@ -62,6 +71,11 @@ class NPCManager {
             npc.dialogueId = properties.dialogueId;
         }
 
+        // Mark scene as dirty when NPC properties are updated
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
+
         return true;
     }
 
@@ -72,6 +86,11 @@ class NPCManager {
 
         npc.x = x;
         npc.y = y;
+
+        // Mark scene as dirty when NPC is moved
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
 
         return true;
     }

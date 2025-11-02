@@ -4,7 +4,20 @@ class PlatformSystem {
         this.renderer = new PlatformRenderer(ctx, onSpritesLoadedCallback);
         this.collisions = new PlatformCollisions();
         this.manager = new PlatformManager(this.data);
-        this.game = null; // Will be set by Game after construction
+        this._game = null; // Will be set by Game after construction
+    }
+
+    // Game reference setter
+    set game(value) {
+        this._game = value;
+        // Also set game reference in data
+        if (this.data) {
+            this.data.game = value;
+        }
+    }
+
+    get game() {
+        return this._game;
     }
 
     // Data access methods

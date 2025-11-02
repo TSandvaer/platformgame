@@ -345,6 +345,12 @@ class PropData {
 
         this.props.push(newProp);
         this.selectedProp = newProp;
+
+        // Mark scene as dirty when prop is added
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
+
         return newProp;
     }
 
@@ -362,6 +368,11 @@ class PropData {
         if (this.selectedProp && this.selectedProp.id === propId) {
             this.selectedProp = null;
         }
+
+        // Mark scene as dirty when prop is deleted
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
     }
 
     deleteSelectedProp() {
@@ -374,6 +385,11 @@ class PropData {
 
     updateProp(prop, updates) {
         Object.assign(prop, updates);
+
+        // Mark scene as dirty when prop is updated
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
     }
 
     getPropById(id) {
@@ -604,6 +620,11 @@ class PropData {
         this.props = this.props.filter(prop => !idsToDelete.includes(prop.id));
 
         this.clearMultiSelection();
+
+        // Mark scene as dirty when props are deleted
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
     }
 
     // Convert screen-relative positioning to absolute coordinates

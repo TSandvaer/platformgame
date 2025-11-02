@@ -4,10 +4,21 @@ class SceneManager {
         this.game = game;
         this.isTransitioning = false;
         this.transitionCallback = null;
+        this.hasUnsavedChanges = false;  // Track if current scene has unsaved changes
         this.setupEventListeners();
     }
 
     setupEventListeners() {
+        // Set up beforeunload event to warn about unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges) {
+                const message = 'You have unsaved changes. Are you sure you want to leave?';
+                e.preventDefault();
+                e.returnValue = message; // For Chrome
+                return message; // For other browsers
+            }
+        });
+
         // Set up event delegation for scene list clicks
         const listElement = document.getElementById('scenesList');
         if (listElement) {
@@ -91,6 +102,42 @@ class SceneManager {
             return false;
         }
         const currentScene = this.sceneData.getCurrentScene();
+
+        // Check for unsaved changes before switching scenes
+        if (this.hasUnsavedChanges && currentScene && currentScene.id !== sceneId) {
+            // Use the modal handler to show confirmation
+            if (window.uiEventHandler && window.uiEventHandler.modalHandler && window.uiEventHandler.modalHandler.showUnsavedChangesModal) {
+                window.uiEventHandler.modalHandler.showUnsavedChangesModal(
+                    () => {
+                        // Save and continue
+                        this.saveCurrentSceneData();
+                        // Persist to storage (localStorage/MongoDB)
+                        if (this.game && this.game.gameDataSystem) {
+                            this.game.gameDataSystem.saveCurrentData();
+                        }
+                        this._continueLoadScene(scene, sceneId, playerStartX, playerStartY, currentScene);
+                    },
+                    () => {
+                        // Discard and continue
+                        // First reload the current scene to revert all changes
+                        this.reloadCurrentScene();
+                        // Then clear the dirty flag
+                        this.clearDirtyFlag();
+                        // Finally continue with loading the new scene
+                        this._continueLoadScene(scene, sceneId, playerStartX, playerStartY, currentScene);
+                    },
+                    () => {
+                        // Cancel - do nothing, stay on current scene
+                    }
+                );
+                return false; // Don't load yet
+            }
+        }
+
+        return this._continueLoadScene(scene, sceneId, playerStartX, playerStartY, currentScene);
+    }
+
+    _continueLoadScene(scene, sceneId, playerStartX, playerStartY, currentScene) {
 
         // Check if this is an initial load (no platforms loaded yet) or scene has platforms but they aren't loaded
         const scenePlatformCount = scene.platforms ? scene.platforms.length : 0;
@@ -595,6 +642,75 @@ class SceneManager {
                 npcDataToSave,
                 lootableDataToSave
             );
+
+            // Clear the dirty flag after successful save
+            this.clearDirtyFlag();
+        }
+    }
+
+    // Change tracking methods
+    markSceneAsDirty() {
+        if (!this.hasUnsavedChanges) {
+            this.hasUnsavedChanges = true;
+            console.log('📝 Scene marked as having unsaved changes');
+            this.updateUnsavedIndicator();
+        }
+    }
+
+    clearDirtyFlag() {
+        if (this.hasUnsavedChanges) {
+            this.hasUnsavedChanges = false;
+            console.log('✅ Scene changes saved, dirty flag cleared');
+            this.updateUnsavedIndicator();
+        }
+    }
+
+    reloadCurrentScene() {
+        const currentScene = this.sceneData.getCurrentScene();
+        if (!currentScene) {
+            console.warn('⚠️ No current scene to reload');
+            return false;
+        }
+
+        console.log('🔄 Reloading current scene data from storage...');
+
+        // Force reload the scene data from storage
+        // This will replace all in-memory data with the last saved state
+        const sceneId = currentScene.id;
+
+        // Call _performSceneLoad to reload all data from the stored scene
+        // Pass null for playerStartX/Y to maintain current player position
+        this._performSceneLoad(currentScene, sceneId, null, null, currentScene);
+
+        console.log('✅ Scene data reloaded from last saved state');
+        return true;
+    }
+
+    updateUnsavedIndicator() {
+        // Update visual indicator in the UI
+        const currentScene = this.sceneData.getCurrentScene();
+        if (!currentScene) return;
+
+        // Update scene list item
+        const sceneItem = document.querySelector(`[data-scene-id="${currentScene.id}"]`);
+        if (sceneItem) {
+            const nameElement = sceneItem.querySelector('.scene-name');
+            if (nameElement) {
+                if (this.hasUnsavedChanges) {
+                    if (!nameElement.textContent.endsWith(' *')) {
+                        nameElement.textContent += ' *';
+                    }
+                } else {
+                    nameElement.textContent = nameElement.textContent.replace(' *', '');
+                }
+            }
+        }
+
+        // Update save button text
+        const saveBtn = document.getElementById('saveSceneBtn');
+        if (saveBtn) {
+            saveBtn.textContent = this.hasUnsavedChanges ?
+                'Save Current Scene *' : 'Save Current Scene';
         }
     }
 
@@ -998,6 +1114,7 @@ class SceneManager {
             currentScene.name = name;
             currentScene.metadata.modified = new Date().toISOString();
             this.updateSceneUI();
+            this.markSceneAsDirty();
         }
     }
 
@@ -1007,6 +1124,7 @@ class SceneManager {
             currentScene.description = description;
             currentScene.metadata.modified = new Date().toISOString();
             this.updateSceneUI();
+            this.markSceneAsDirty();
         }
     }
 
@@ -1019,6 +1137,7 @@ class SceneManager {
             currentScene.settings.playerStartX = startX;
             currentScene.settings.playerStartY = startY;
             currentScene.metadata.modified = new Date().toISOString();
+            this.markSceneAsDirty();
 
             // Save to localStorage to persist the change
             if (this.game && this.game.sceneSystem) {
@@ -1032,6 +1151,7 @@ class SceneManager {
         if (currentScene) {
             currentScene.settings.defaultBackgroundColor = color;
             currentScene.metadata.modified = new Date().toISOString();
+            this.markSceneAsDirty();
 
             // Save scenes to persist the change
             if (this.game && this.game.sceneSystem) {
@@ -1058,6 +1178,7 @@ class SceneManager {
             currentScene.boundaries.top = top;
             currentScene.boundaries.bottom = bottom;
             currentScene.metadata.modified = new Date().toISOString();
+            this.markSceneAsDirty();
             // Save to localStorage to persist changes
             if (this.game && this.game.sceneSystem) {
                 this.game.sceneSystem.saveScenes();

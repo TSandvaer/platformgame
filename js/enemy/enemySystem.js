@@ -10,6 +10,7 @@ class EnemySystem {
         this.projectileSystem = new EnemyProjectileSystem();
         this.projectileAnimator = null;
         this.isInitialized = false;
+        this.game = null; // Will be set by game.js
     }
 
     initialize(ctx, platformSystem, viewport, camera) {
@@ -17,6 +18,10 @@ class EnemySystem {
         this.mouseHandler = new EnemyMouseHandler(this, platformSystem, viewport, camera);
         this.projectileAnimator = new EnemyProjectileAnimator();
         this.isInitialized = true;
+        // Pass game reference to manager
+        if (this.game) {
+            this.manager.game = this.game;
+        }
     }
 
     update(deltaTime, player, platforms) {

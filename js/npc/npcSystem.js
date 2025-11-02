@@ -6,12 +6,17 @@ class NPCSystem {
         this.animators = new Map();
         this.mouseHandler = null;
         this.isInitialized = false;
+        this.game = null; // Will be set by game.js
     }
 
     initialize(ctx, platformSystem, viewport, camera) {
         this.renderer = new NPCRenderer(ctx);
         this.mouseHandler = new NPCMouseHandler(this, platformSystem, viewport, camera);
         this.isInitialized = true;
+        // Pass game reference to manager
+        if (this.game) {
+            this.manager.game = this.game;
+        }
     }
 
     update(deltaTime) {

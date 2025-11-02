@@ -10,10 +10,11 @@ class LootableSystem {
         this.renderer.loadSprites(onSpritesLoadedCallback);
     }
 
-    // Game reference setter - pass it down to LootableData
+    // Game reference setter - pass it down to LootableData and LootableManager
     set game(value) {
         this._game = value;
         this.data.game = value;
+        this.manager.game = value;
     }
 
     get game() {

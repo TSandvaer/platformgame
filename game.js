@@ -123,6 +123,7 @@ class PlatformRPG {
 
         // Initialize NPC system (mouse handler will be initialized later)
         this.npcSystem = new NPCSystem();
+        this.npcSystem.game = this; // Add game reference for NPC system
 
         // Initialize scene system
         this.sceneSystem = new SceneSystem(this);

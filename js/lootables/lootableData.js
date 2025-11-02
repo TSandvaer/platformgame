@@ -5,6 +5,7 @@ class LootableData {
         this.selectedLootables = [];
         this.nextLootableId = 1;
         this.lootablePlacementMode = false;
+        this.game = null; // Will be set by lootableSystem
         this.isDraggingLootable = false;
         this.lootableDragOffset = { x: 0, y: 0 };
         this.clipboard = [];
@@ -61,6 +62,12 @@ class LootableData {
         };
 
         this.lootables.push(lootable);
+
+        // Mark scene as dirty when lootable is added
+        if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+            this.game.sceneSystem.manager.markSceneAsDirty();
+        }
+
         return lootable;
     }
 
@@ -77,6 +84,10 @@ class LootableData {
             // Remove from multi-selection
             this.removeFromSelection(lootable);
 
+            // Mark scene as dirty when lootable is deleted
+            if (this.game && this.game.sceneSystem && this.game.sceneSystem.manager) {
+                this.game.sceneSystem.manager.markSceneAsDirty();
+            }
         }
     }
 
