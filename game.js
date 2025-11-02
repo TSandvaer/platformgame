@@ -295,6 +295,31 @@ class PlatformRPG {
             await this.gameDataSystem.loadGameData();
             console.log('✅ Game data loaded');
 
+            // Load GLOBAL props from database after game data is loaded
+            // Props are shared across all games
+            if (this.propSystem && this.propSystem.data) {
+                console.log('📥 Loading global props from database...');
+                await this.propSystem.data.loadPropTypesFromDatabase();
+
+                // Load and register GLOBAL sprite sheets from database
+                if (window.propService) {
+                    const spriteSheets = await window.propService.getSpriteSheets();
+                    if (spriteSheets && spriteSheets.length > 0) {
+                        console.log(`📥 Loading ${spriteSheets.length} sprite sheets from database...`);
+                        for (const sheet of spriteSheets) {
+                            if (sheet.isLoaded) {
+                                await this.propSystem.renderer.registerSpriteSheet(
+                                    sheet.sheetKey,
+                                    sheet.filePath,
+                                    sheet.tileWidth,
+                                    sheet.tileHeight
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
             // Reload HUD settings now that game data is loaded
             // This ensures HUD uses saved settings from MongoDB instead of localStorage fallback
             if (this.hudSystem) {

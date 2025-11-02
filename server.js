@@ -54,9 +54,13 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const PORT = process.env.PORT || 3000;
 
 mongoose.connect(MONGODB_URI)
-.then(() => {
+.then(async () => {
     console.log('✓ Connected to MongoDB Atlas');
     console.log(`✓ Database: ${mongoose.connection.name}`);
+
+    // Run migrations after MongoDB connection is established
+    const migratePropData = require('./migrations/migratePropData');
+    await migratePropData();
 })
 .catch((error) => {
     console.error('✗ MongoDB connection error:', error);
@@ -68,12 +72,14 @@ const gameRoutes = require('./routes/games');
 const userRoutes = require('./routes/users');
 const progressRoutes = require('./routes/playerProgress');
 const sessionRoutes = require('./routes/gameSessions');
+const propRoutes = require('./routes/props');
 
 // API Routes (must come before static file middleware)
 app.use('/api/games', gameRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/sessions', sessionRoutes);
+app.use('/api/props', propRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

@@ -61,6 +61,16 @@ class PropUIHandler extends UIHandler {
      * Set up props editor modal event listeners
      */
     setupPropsEditorListeners() {
+        // Open sprite editor button
+        const spriteEditorBtn = this.getElementById('openSpriteEditorBtn');
+        if (spriteEditorBtn) {
+            spriteEditorBtn.addEventListener('click', () => {
+                if (window.uiEventHandler && window.uiEventHandler.spriteEditorHandler) {
+                    window.uiEventHandler.spriteEditorHandler.open();
+                }
+            });
+        }
+
         // Open props editor button
         const openBtn = this.getElementById('openPropsEditorBtn');
         if (openBtn) {
@@ -308,10 +318,18 @@ class PropUIHandler extends UIHandler {
         // Clear and draw
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw from tileset
-        const tileSize = 32;
-        const sourceX = propType.tileX * tileSize;
-        const sourceY = propType.tileY * tileSize;
+        // If tileWidth/tileHeight match the full image dimensions, treat tileX/tileY as pixel coordinates
+        // Otherwise, treat them as tile coordinates that need to be multiplied
+        let sourceX, sourceY;
+        if (spriteSheet.tileWidth === img.width && spriteSheet.tileHeight === img.height) {
+            // Non-tiled sprite sheet: use pixel coordinates directly
+            sourceX = propType.tileX;
+            sourceY = propType.tileY;
+        } else {
+            // Tiled sprite sheet: multiply by tile dimensions
+            sourceX = propType.tileX * spriteSheet.tileWidth;
+            sourceY = propType.tileY * spriteSheet.tileHeight;
+        }
 
         ctx.drawImage(
             img,

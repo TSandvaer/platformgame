@@ -13,6 +13,7 @@ class UIEventHandler {
         this.enemyHandler = new EnemyUIHandler(game, this.modalHandler);
         this.npcHandler = new NPCUIHandler(game);
         this.sceneHandler = new SceneUIHandler(game);
+        this.spriteEditorHandler = new SpriteEditorHandler(game);
 
         // Store references for backward compatibility
         this.handlers = {
@@ -21,7 +22,8 @@ class UIEventHandler {
             prop: this.propHandler,
             enemy: this.enemyHandler,
             npc: this.npcHandler,
-            scene: this.sceneHandler
+            scene: this.sceneHandler,
+            spriteEditor: this.spriteEditorHandler
         };
     }
 

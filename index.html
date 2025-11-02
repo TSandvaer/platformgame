@@ -239,7 +239,7 @@
                 <div class="platform-editor" id="propsEditor" style="display: none;">
                     <h4>Village Props Editor</h4>
                     <div class="property-row">
-                        <a href="sprite-editor.html" class="btn small" target="_blank" style="text-decoration: none;">🎨 Open Sprite Editor</a>
+                        <button class="btn small" id="openSpriteEditorBtn">🎨 Open Sprite Editor</button>
                     </div>
                     <div class="property-row">
                         <button class="btn small" id="openPropsEditorBtn">Open Props Editor</button>
@@ -778,6 +778,7 @@
     <script src="js/platforms/platformSystem.js"></script>
 
     <!-- Prop System Scripts -->
+    <script src="js/services/PropService.js"></script>
     <script src="js/props/propData.js"></script>
 
     <!-- Inventory System Scripts -->
@@ -880,6 +881,7 @@
     <script src="js/ui/handlers/EnemyUIHandler.js"></script>
     <script src="js/ui/handlers/NPCUIHandler.js"></script>
     <script src="js/ui/handlers/SceneUIHandler.js"></script>
+    <script src="js/ui/handlers/SpriteEditorHandler.js"></script>
 
     <!-- Main UI Event Handler (refactored) -->
     <script src="js/ui/uiEventHandler.js"></script>
@@ -1536,6 +1538,160 @@
                         Select a background from the grid above to apply it
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sprite Editor Modal -->
+    <div id="spriteEditorModal" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 95%; max-width: 1200px; max-height: 95vh;">
+            <div class="modal-header">
+                <h3>Sprite Editor</h3>
+                <button class="modal-close" id="closeSpriteEditorModal">&times;</button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px; max-height: calc(95vh - 100px); overflow-y: auto;">
+
+                <!-- Sprite Sheet Selection -->
+                <div class="section">
+                    <h4>1. Select Sprite Sheet</h4>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                        <select id="spriteSheetSelect" style="flex: 1; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                            <option value="">-- Select Sprite Sheet --</option>
+                        </select>
+                        <button class="btn small" id="registerNewSheetBtn">+ Register New Sheet</button>
+                    </div>
+                </div>
+
+                <!-- Canvas Area -->
+                <div class="section" id="canvasSection" style="display: none;">
+                    <h4>2. Select Region on Sprite Sheet</h4>
+                    <div style="background: #222; padding: 15px; border-radius: 4px; overflow: auto; max-height: 500px;">
+                        <div style="position: relative; display: inline-block;">
+                            <canvas id="spriteEditorCanvas" style="border: 2px solid #666; cursor: crosshair; image-rendering: pixelated;"></canvas>
+                            <div id="selectionOverlay" style="position: absolute; top: 0; left: 0; pointer-events: none;"></div>
+                        </div>
+                        <div style="margin-top: 10px; color: #888; font-size: 12px;">
+                            Click and drag to select a region. Selection coordinates will appear below.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selection Info & Prop Properties -->
+                <div class="section" id="propertiesSection" style="display: none;">
+                    <h4>3. Define Prop Properties</h4>
+
+                    <!-- Selection Coordinates -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; padding: 10px; background: #333; border-radius: 4px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #888; margin-bottom: 4px;">X Position</label>
+                            <input type="number" id="selectionX" step="0.01" style="width: 100%; padding: 6px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;" readonly>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #888; margin-bottom: 4px;">Y Position</label>
+                            <input type="number" id="selectionY" step="0.01" style="width: 100%; padding: 6px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;" readonly>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #888; margin-bottom: 4px;">Width</label>
+                            <input type="number" id="selectionWidth" step="1" style="width: 100%; padding: 6px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;" readonly>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #888; margin-bottom: 4px;">Height</label>
+                            <input type="number" id="selectionHeight" step="1" style="width: 100%; padding: 6px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Prop Details -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 4px;">Prop Key (Unique ID)</label>
+                            <input type="text" id="propKey" placeholder="e.g., dungeonTorch" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 4px;">Display Name</label>
+                            <input type="text" id="propName" placeholder="e.g., Dungeon Torch" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 4px;">Category</label>
+                            <input type="text" id="propCategory" placeholder="e.g., Lighting" value="Custom" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                        </div>
+                    </div>
+
+                    <!-- Special Properties -->
+                    <div style="margin-top: 15px;">
+                        <h5 style="margin-bottom: 10px;">Special Properties</h5>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="propHasGlow">
+                                <span>Has Glow</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="propHasFlame">
+                                <span>Has Flame</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="propIsChest">
+                                <span>Is Chest</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="propIsObstacle">
+                                <span>Is Obstacle</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" id="propDestroyable">
+                                <span>Destroyable</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Damage Properties (shown when destroyable is checked) -->
+                    <div id="damageProperties" style="display: none; margin-top: 15px;">
+                        <h5 style="margin-bottom: 10px;">Damage Properties</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 4px;">Damage Per Second</label>
+                                <input type="number" id="propDamagePerSecond" value="0" min="0" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 4px;">Max Durability</label>
+                                <input type="number" id="propMaxDurability" value="100" min="1" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn" id="savePropBtn" style="flex: 1;">Save Prop to Database</button>
+                        <button class="btn secondary" id="clearSelectionBtn">Clear Selection</button>
+                    </div>
+                </div>
+
+                <!-- Register New Sheet Section (hidden by default) -->
+                <div class="section" id="registerSheetSection" style="display: none;">
+                    <h4>Register New Sprite Sheet</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 4px;">Sheet Key (Unique ID)</label>
+                            <input type="text" id="newSheetKey" placeholder="e.g., dungeon" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 4px;">Display Name</label>
+                            <input type="text" id="newSheetName" placeholder="e.g., Dungeon Props" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 4px;">File Path</label>
+                            <input type="text" id="newSheetPath" placeholder="e.g., PROPS/dungeon_props.png" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 4px;">Category</label>
+                            <input type="text" id="newSheetCategory" placeholder="e.g., Dungeon" value="General" style="width: 100%; padding: 8px; border-radius: 4px; background: #444; color: white; border: 1px solid #666;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn" id="confirmRegisterSheetBtn">Register Sheet</button>
+                        <button class="btn secondary" id="cancelRegisterSheetBtn">Cancel</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

@@ -114,7 +114,7 @@ class PlatformRenderer {
         propsImg.onerror = () => {
             console.error('Failed to load village props tileset');
         };
-        propsImg.src = '/sprites/Pixel Art Platformer/Texture/TX Village Props.png';
+        propsImg.src = '/sprites/PROPS/Pixel Art Platformer/Texture/TX Village Props.png';
         this.platformSprites.villageProps.image = propsImg;
 
         // Load Fantasy Forest Trees tileset

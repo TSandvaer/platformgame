@@ -198,6 +198,56 @@ class PropData {
         };
     }
 
+    /**
+     * Load prop types from database (GLOBAL)
+     * Props are shared across all games
+     */
+    async loadPropTypesFromDatabase() {
+        if (!window.propService) {
+            console.warn('PropService not available, skipping database prop load');
+            return;
+        }
+
+        try {
+            // Fetch ALL props from database (global)
+            const dbProps = await window.propService.getProps();
+
+            // Convert database props to propTypes format and merge
+            dbProps.forEach(prop => {
+                this.propTypes[prop.propKey] = {
+                    tileX: prop.tileX,
+                    tileY: prop.tileY,
+                    width: prop.width,
+                    height: prop.height,
+                    name: prop.name,
+                    spriteSheet: prop.spriteSheet,
+                    category: prop.category,
+                    hasGlow: prop.hasGlow,
+                    hasFlame: prop.hasFlame,
+                    isChest: prop.isChest,
+                    chestRow: prop.chestRow,
+                    isObstacle: prop.isObstacle,
+                    destroyable: prop.destroyable,
+                    damagePerSecond: prop.damagePerSecond,
+                    maxDurability: prop.maxDurability
+                };
+
+                // Add to propCategories if category exists
+                const category = prop.category || 'Custom';
+                if (!this.propCategories[category]) {
+                    this.propCategories[category] = [];
+                }
+                if (!this.propCategories[category].includes(prop.propKey)) {
+                    this.propCategories[category].push(prop.propKey);
+                }
+            });
+
+            console.log(`✓ Loaded ${dbProps.length} props from database`);
+        } catch (error) {
+            console.error('Error loading props from database:', error);
+        }
+    }
+
     // Get all category names
     getCategories() {
         return Object.keys(this.propCategories);

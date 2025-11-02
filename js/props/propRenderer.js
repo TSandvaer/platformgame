@@ -39,7 +39,7 @@ class PropRenderer {
             loadedCount++;
             checkAllLoaded();
         };
-        torchFlameImg.src = '/sprites/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
+        torchFlameImg.src = '/sprites/PROPS/Pixel Art Platformer/Texture/TX FX Torch Flame.png';
         this.propSprites.torchFlame.image = torchFlameImg;
 
         // Load chest animation sprite sheet
@@ -53,7 +53,7 @@ class PropRenderer {
             loadedCount++;
             checkAllLoaded();
         };
-        chestImg.src = '/sprites/Pixel Art Platformer/Texture/TX Chest Animation.png';
+        chestImg.src = '/sprites/PROPS/Pixel Art Platformer/Texture/TX Chest Animation.png';
         this.propSprites.chestAnimation.image = chestImg;
     }
 
@@ -61,10 +61,30 @@ class PropRenderer {
         if (!this.platformSprites.villageProps.image) return;
 
         // Filter props based on whether we're rendering obstacles or not, and visibility
+        // Debug: log all props being checked
+        if (props.some(p => p.type && p.type.includes('Door'))) {
+            console.log('🚪 Door prop found in props list:', props.find(p => p.type && p.type.includes('Door')));
+            console.log('🚪 Rendering obstacles:', renderObstacles);
+        }
+
         const filteredProps = props.filter(prop => {
             const obstacleMatch = prop.isObstacle === renderObstacles;
             const isVisible = prop.isVisible !== false; // Default to visible if property doesn't exist
-            return obstacleMatch && isVisible;
+            const shouldRender = obstacleMatch && isVisible;
+
+            // Debug door filtering
+            if (prop.type && prop.type.includes('Door')) {
+                console.log('🚪 Door filter check:', {
+                    type: prop.type,
+                    isObstacle: prop.isObstacle,
+                    renderObstacles: renderObstacles,
+                    obstacleMatch: obstacleMatch,
+                    isVisible: isVisible,
+                    shouldRender: shouldRender
+                });
+            }
+
+            return shouldRender;
         });
 
         // Sort by z-order (lowest first)
@@ -128,7 +148,11 @@ class PropRenderer {
 
     drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps = [], viewport = null) {
         const propType = propTypes[prop.type];
-        if (!propType) return;
+        if (!propType) {
+            console.warn(`PropType not found for prop.type: '${prop.type}'`);
+            console.warn(`Available propTypes:`, Object.keys(propTypes));
+            return;
+        }
 
         // For chests, we'll handle rendering differently since they use their own sprite sheet
         if (prop.isChest && this.propSprites.chestAnimation.image) {
@@ -141,11 +165,41 @@ class PropRenderer {
         const tileset = this.platformSprites[spriteSheetName];
         if (!tileset || !tileset.image) {
             console.warn(`Sprite sheet '${spriteSheetName}' not found or not loaded for prop type '${prop.type}'`);
+            console.warn(`Available sprite sheets:`, Object.keys(this.platformSprites));
+            console.warn(`Prop data:`, prop);
+            console.warn(`PropType data:`, propType);
             return;
         }
 
-        const sourceX = propType.tileX * tileset.tileWidth;
-        const sourceY = propType.tileY * tileset.tileHeight;
+        // If tileWidth/tileHeight match the full image dimensions, treat tileX/tileY as pixel coordinates
+        // Otherwise, treat them as tile coordinates that need to be multiplied
+        let sourceX, sourceY;
+        if (tileset.tileWidth === tileset.image.width && tileset.tileHeight === tileset.image.height) {
+            // Non-tiled sprite sheet: use pixel coordinates directly
+            sourceX = propType.tileX;
+            sourceY = propType.tileY;
+        } else {
+            // Tiled sprite sheet: multiply by tile dimensions
+            sourceX = propType.tileX * tileset.tileWidth;
+            sourceY = propType.tileY * tileset.tileHeight;
+        }
+
+        // Debug sprite sheet dimensions for Door
+        if (prop.type && prop.type.includes('Door')) {
+            console.log('🚪 Rendering door:', {
+                sheetName: spriteSheetName,
+                tileWidth: tileset.tileWidth,
+                tileHeight: tileset.tileHeight,
+                imageWidth: tileset.image.width,
+                imageHeight: tileset.image.height,
+                propTileX: propType.tileX,
+                propTileY: propType.tileY,
+                finalSourceX: sourceX,
+                finalSourceY: sourceY,
+                propWidth: propType.width,
+                propHeight: propType.height
+            });
+        }
 
         // Use sizeMultiplier for resolution-independent sizing
         const sizeMultiplier = prop.sizeMultiplier !== undefined ? prop.sizeMultiplier : 1.0;
@@ -960,5 +1014,65 @@ class PropRenderer {
         this.ctx.fillText('Press E', promptX, promptY);
 
         this.ctx.restore();
+    }
+
+    /**
+     * Dynamically register a new sprite sheet for props
+     * @param {string} sheetKey - Unique identifier for the sprite sheet
+     * @param {string} filePath - Path to the sprite sheet image
+     * @param {number} tileWidth - Default tile width (optional)
+     * @param {number} tileHeight - Default tile height (optional)
+     * @returns {Promise} - Resolves when sprite sheet is loaded
+     */
+    async registerSpriteSheet(sheetKey, filePath, tileWidth = null, tileHeight = null) {
+        return new Promise((resolve, reject) => {
+            // Check if sprite sheet already exists
+            if (this.platformSprites[sheetKey]) {
+                console.warn(`Sprite sheet '${sheetKey}' already registered, skipping...`);
+                resolve();
+                return;
+            }
+
+            // Create new image
+            const img = new Image();
+
+            img.onload = () => {
+                // Register sprite sheet in platformSprites
+                this.platformSprites[sheetKey] = {
+                    image: img,
+                    tileWidth: tileWidth || img.width,
+                    tileHeight: tileHeight || img.height
+                };
+
+                console.log(`✓ Registered sprite sheet '${sheetKey}' from ${filePath}`);
+                resolve();
+            };
+
+            img.onerror = () => {
+                console.error(`✗ Failed to load sprite sheet '${sheetKey}' from ${filePath}`);
+                reject(new Error(`Failed to load sprite sheet: ${filePath}`));
+            };
+
+            img.src = filePath;
+        });
+    }
+
+    /**
+     * Unregister a sprite sheet
+     * @param {string} sheetKey - Sprite sheet identifier to remove
+     */
+    unregisterSpriteSheet(sheetKey) {
+        if (this.platformSprites[sheetKey]) {
+            delete this.platformSprites[sheetKey];
+            console.log(`✓ Unregistered sprite sheet '${sheetKey}'`);
+        }
+    }
+
+    /**
+     * Get all registered sprite sheet keys
+     * @returns {Array<string>} Array of sprite sheet keys
+     */
+    getRegisteredSheets() {
+        return Object.keys(this.platformSprites);
     }
 }
