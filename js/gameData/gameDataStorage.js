@@ -263,9 +263,10 @@ class GameDataStorage {
                     return;
                 }
 
-                console.log('💾 Auto-save: Saving game data...');
-                this.dataSystem.saveCurrentData();
-                console.log('✅ Auto-save: Save complete');
+                console.log('💾 Auto-save: Saving game data (excluding scenes)...');
+                // Pass excludeScenes: true to prevent autosaving scene data
+                this.dataSystem.saveCurrentData({ excludeScenes: true });
+                console.log('✅ Auto-save: Save complete (scenes not included)');
             }, this.autoSaveInterval);
         }, this.initialAutoSaveDelay);
     }

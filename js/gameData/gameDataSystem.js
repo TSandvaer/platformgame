@@ -200,10 +200,11 @@ class GameDataSystem {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + S to save
+            // Ctrl/Cmd + S to save (includes scenes - full save)
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                this.saveCurrentData();
+                this.saveCurrentData(); // No options = includes scenes
+                console.log('💾 Manual save triggered (Ctrl+S) - including scenes');
             }
         });
     }
@@ -313,8 +314,8 @@ class GameDataSystem {
     }
 
     // Save current game state
-    async saveCurrentData() {
-        const gameData = this.collectCurrentGameData();
+    async saveCurrentData(options = {}) {
+        const gameData = this.collectCurrentGameData(options);
         await this.storage.saveGameData(gameData);
     }
 
@@ -605,11 +606,26 @@ class GameDataSystem {
     }
 
     // Collect current game state
-    collectCurrentGameData() {
-        // Get scene data from scene system
-        const sceneData = this.game.sceneSystem ?
-            this.game.sceneSystem.exportSceneData() :
-            { scenes: [], currentSceneId: null, startSceneId: null };
+    collectCurrentGameData(options = {}) {
+        const { excludeScenes = false } = options;
+
+        // Get scene data from scene system (or use existing if excluded)
+        let sceneData;
+        if (excludeScenes) {
+            // When excluding scenes, use the existing saved scene data
+            sceneData = {
+                scenes: this.gameData.scenes || [],
+                currentSceneId: this.gameData.currentSceneId || null,
+                startSceneId: this.gameData.startSceneId || null
+            };
+            console.log('📊 Collecting game data (excluding scenes) - using existing scene data');
+        } else {
+            // Include current scene data from the scene system
+            sceneData = this.game.sceneSystem ?
+                this.game.sceneSystem.exportSceneData() :
+                { scenes: [], currentSceneId: null, startSceneId: null };
+            console.log('📊 Collecting game data (including scenes) - using current scene data');
+        }
 
         // Collect current HUD settings (use unscaled manual values)
         const hudSettings = this.game.hudSystem ? {
