@@ -12,7 +12,8 @@
       "Bash(powershell:*)",
       "Bash(npm install:*)",
       "WebSearch",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(del \"c:\\Trunk\\platformgame\\js\\gameData\\gameDataExporter.js\" \"c:\\Trunk\\platformgame\\js\\gameData\\gameDataImporter.js\")"
     ],
     "deny": [],
     "ask": []

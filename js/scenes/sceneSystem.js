@@ -137,8 +137,6 @@ class SceneSystem {
 
     // Save/Load
     saveScenes() {
-        const stackTrace = new Error().stack;
-
         this.manager.saveCurrentSceneData();
 
         // Use the GameDataSystem to save all game data
@@ -229,9 +227,10 @@ class SceneSystem {
         return false;
     }
 
-    // Export/Import
+    // Export scene data (internal use - for collecting data)
     exportSceneData() {
-        this.manager.saveCurrentSceneData();
+        // Don't call saveCurrentSceneData here to avoid redundancy
+        // The current scene data should already be saved before this is called
         return this.data.exportSceneData();
     }
 

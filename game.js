@@ -1068,43 +1068,14 @@ class PlatformRPG {
 
 
     async savePlatforms() {
-        // Use the new scene system for saving
+        // Use the scene system and gameDataSystem for saving
         if (this.sceneSystem) {
             this.sceneSystem.saveScenes();
 
-            // Create the gameData object
-            const currentGameData = this.gameDataSystem ? this.gameDataSystem.gameData : {};
-            const gameData = {
-                gameInfo: {
-                    title: "Platform RPG Game",
-                    version: "1.0.0",
-                    lastModified: new Date().toISOString().split('T')[0]
-                },
-                scenes: this.sceneSystem.exportSceneData().scenes,
-                characters: currentGameData.characters || [],
-                classes: currentGameData.classes || [],
-                weapons: currentGameData.weapons || [],
-                items: currentGameData.items || []
-            };
-
-            try {
-                // Try to save to gameData.json file
-                const response = await fetch('./gameData.json', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(gameData, null, 2)
-                });
-
-                if (response.ok) {
-                    alert('Platforms and game data saved to gameData.json!');
-                } else {
-                    throw new Error('Could not save to file');
-                }
-            } catch (error) {
-                // Fallback: trigger download
-                this.exportGameData();
+            // Save through the gameDataSystem (MongoDB/localStorage)
+            if (this.gameDataSystem) {
+                this.gameDataSystem.saveCurrentData();
+                alert('Game data saved successfully!');
             }
         }
     }

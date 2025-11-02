@@ -217,6 +217,9 @@ class SceneManager {
 
         // Load enemies
         if (this.game.enemySystem && this.game.enemySystem.data) {
+            // CRITICAL: Clear existing enemies first to prevent cross-contamination
+            this.game.enemySystem.data.enemies = [];
+            console.log(`📥 Loading enemies for scene ${sceneId}: ${scene.enemies ? scene.enemies.length : 0} enemies`);
             this.game.enemySystem.data.enemies = [...(scene.enemies || [])];
             this.game.enemySystem.animators.clear(); // Clear animators, they'll be recreated
 
@@ -376,12 +379,19 @@ class SceneManager {
     saveCurrentSceneData() {
         const currentScene = this.sceneData.getCurrentScene();
         if (currentScene) {
+            console.log(`🔍 saveCurrentSceneData called for scene ${currentScene.id} (currentSceneId: ${this.sceneData.currentSceneId})`);
+            console.log(`🔍 Enemy system has ${this.game.enemySystem?.data?.enemies?.length || 0} enemies in memory`);
+
             // Check if we're in initial loading phase (systems not fully initialized)
             const isInitialLoading = !this.game.allSpritesLoaded ||
                                    (this.game.enemySystem && !this.game.enemySystem.isInitialized);
 
+            // CRITICAL: Check if this is the currently loaded/active scene
+            // Use == instead of === to handle type coercion (string vs number IDs)
+            const isCurrentlyLoadedScene = (currentScene.id == this.sceneData.currentSceneId);
+
             // Check if we're about to wipe out existing platforms
-            if (currentScene.platforms.length > 0 && this.game.platformSystem.platforms.length === 0) {
+            if (isCurrentlyLoadedScene && currentScene.platforms.length > 0 && this.game.platformSystem.platforms.length === 0) {
                 if (!isInitialLoading) {
                     console.warn('⚠️ WARNING: Attempting to save empty platforms over existing platforms!');
                     console.warn('⚠️ Scene had', currentScene.platforms.length, 'platforms but platformSystem has 0');
@@ -394,9 +404,9 @@ class SceneManager {
             }
 
             // Check if we're about to wipe out existing props
-            // Only restore props if we're in the initial loading phase
+            // Only restore props if we're in the initial loading phase AND this is the current scene
             // During normal operation, allow props to be deleted
-            if (currentScene.props.length > 0 && this.game.propSystem.props.length === 0) {
+            if (isCurrentlyLoadedScene && currentScene.props.length > 0 && this.game.propSystem.props.length === 0) {
                 if (isInitialLoading) {
                     // During initial loading, this might indicate props weren't loaded properly
                     console.warn('⚠️ Initial loading: Scene had props but propSystem is empty - restoring');
@@ -416,38 +426,34 @@ class SceneManager {
                 }
             }
 
-            // Use current enemy data if enemy system is initialized, otherwise preserve existing enemy data
+            // Use current enemy data if enemy system is initialized AND this is the currently loaded scene
             let enemyDataToSave;
 
-            if (this.game.enemySystem && this.game.enemySystem.isInitialized) {
-                const currentEnemyData = this.game.enemySystem.data.enemies;
+            if (isCurrentlyLoadedScene && this.game.enemySystem && this.game.enemySystem.isInitialized) {
+                // For the current scene, always use the in-memory enemy data
+                // This includes empty arrays when the user has deleted all enemies
+                const currentEnemyData = this.game.enemySystem.data.enemies || [];
+                enemyDataToSave = currentEnemyData;
+                console.log(`✅ Saving enemies for active scene ${currentScene.id}: ${enemyDataToSave.length} enemies`);
 
-                // Only prevent saving empty array during initial loading phase
-                // During normal operation, allow empty arrays (user may have deleted all enemies)
-                if (isInitialLoading &&
-                    currentScene.enemies && currentScene.enemies.length > 0 &&
-                    (!currentEnemyData || currentEnemyData.length === 0)) {
-
-                    console.warn('🚨 INITIAL LOAD: Preserving enemy data from scene (not saving empty array)');
-                    console.warn('🚨 Scene previously had:', currentScene.enemies.length, 'enemies');
-                    console.warn('🚨 Current memory has:', currentEnemyData ? currentEnemyData.length : 'null', 'enemies');
-
-                    // Preserve existing enemy data during initialization
-                    enemyDataToSave = currentScene.enemies;
-                } else {
-                    // Safe to use current enemy data (including empty array from intentional deletions)
-                    enemyDataToSave = currentEnemyData;
-                    if (currentEnemyData && currentEnemyData.length === 0 && currentScene.enemies && currentScene.enemies.length > 0) {
-                    }
+                // Log if we're clearing enemies
+                if (enemyDataToSave.length === 0 && currentScene.enemies && currentScene.enemies.length > 0) {
+                    console.log(`🗑️ Clearing all enemies from scene ${currentScene.id} (was ${currentScene.enemies.length}, now 0)`);
                 }
+            } else if (isCurrentlyLoadedScene && (!this.game.enemySystem || !this.game.enemySystem.isInitialized)) {
+                // Current scene but enemy system not ready - this is the initial load case
+                // Preserve existing data to avoid data loss during initialization
+                enemyDataToSave = currentScene.enemies || [];
+                console.log(`⏳ Enemy system not ready for scene ${currentScene.id}, preserving ${enemyDataToSave.length} enemies`);
             } else {
-                // Enemy system not initialized - preserve existing enemy data
-                enemyDataToSave = currentScene.enemies;
+                // Not the current scene - preserve existing enemy data
+                enemyDataToSave = currentScene.enemies || [];
+                console.log(`📦 Preserving existing enemies for non-active scene ${currentScene.id}: ${enemyDataToSave.length} enemies`);
             }
 
 
-            // Check if we're about to wipe out existing lootables
-            if (currentScene.lootables && currentScene.lootables.length > 0 &&
+            // Check if we're about to wipe out existing lootables (only for current scene)
+            if (isCurrentlyLoadedScene && currentScene.lootables && currentScene.lootables.length > 0 &&
                 (!this.game.lootableSystem?.lootables || this.game.lootableSystem.lootables.length === 0)) {
                 if (isInitialLoading) {
                     // During initial loading, this indicates lootables weren't loaded properly - restore them
@@ -472,9 +478,9 @@ class SceneManager {
                 }
             }
 
-            // Handle lootable data
+            // Handle lootable data - only use memory data for current scene
             let lootableDataToSave = [];
-            if (this.game.lootableSystem && this.game.lootableSystem.lootables) {
+            if (isCurrentlyLoadedScene && this.game.lootableSystem && this.game.lootableSystem.lootables) {
                 const currentLootableData = this.game.lootableSystem.lootables;
 
                 // CRITICAL: Detect if lootables have been collected during gameplay
@@ -504,6 +510,13 @@ class SceneManager {
                     lootableDataToSave = currentLootableData;
                 }
 
+                console.log(`✅ Saving lootables for active scene ${currentScene.id}: ${lootableDataToSave.length} lootables`);
+            } else {
+                // Not the current scene - preserve existing lootable data
+                lootableDataToSave = currentScene.lootables || [];
+                if (!isCurrentlyLoadedScene && currentScene.lootables && currentScene.lootables.length > 0) {
+                    console.log(`📦 Preserving existing lootables for non-active scene ${currentScene.id}: ${lootableDataToSave.length} lootables`);
+                }
             }
 
             // Handle chest inventory protection (similar to lootable protection)
@@ -539,22 +552,44 @@ class SceneManager {
                 return prop;
             });
 
-            // Get NPC data to save - check if NPC system is initialized
+            // Get NPC data to save - check if NPC system is initialized AND this is the current scene
             let npcDataToSave = [];
-            if (this.game.npcSystem && this.game.npcSystem.isInitialized) {
+            if (isCurrentlyLoadedScene && this.game.npcSystem && this.game.npcSystem.isInitialized) {
                 npcDataToSave = this.game.npcSystem.data.npcs;
+                console.log(`✅ Saving NPCs for active scene ${currentScene.id}: ${npcDataToSave.length} NPCs`);
                 if (npcDataToSave.length > 0) {
                 }
             } else {
-                // Don't save NPC data if NPC system isn't initialized - preserve existing NPC data
-                if (currentScene.npcs && currentScene.npcs.length > 0) {
-                    npcDataToSave = currentScene.npcs; // Preserve existing NPCs
+                // Not the current scene OR NPC system not initialized - preserve existing NPC data
+                npcDataToSave = currentScene.npcs || [];
+                if (!isCurrentlyLoadedScene && currentScene.npcs && currentScene.npcs.length > 0) {
+                    console.log(`📦 Preserving existing NPCs for non-active scene ${currentScene.id}: ${npcDataToSave.length} NPCs`);
                 }
+            }
+
+            // Determine which platform data to save based on whether this is the current scene
+            const platformDataToSave = isCurrentlyLoadedScene
+                ? this.game.platformSystem.platforms  // Use in-memory data for current scene
+                : (currentScene.platforms || []);      // Preserve existing data for non-current scenes
+
+            if (isCurrentlyLoadedScene) {
+                console.log(`✅ Saving platforms for active scene ${currentScene.id}: ${platformDataToSave.length} platforms`);
+            } else {
+                console.log(`📦 Preserving existing platforms for non-active scene ${currentScene.id}: ${platformDataToSave.length} platforms`);
+            }
+
+            // Props are already handled above with propsDataToSave variable
+            // For non-current scenes, we should preserve their existing props
+            if (!isCurrentlyLoadedScene) {
+                propsDataToSave = currentScene.props || [];
+                console.log(`📦 Preserving existing props for non-active scene ${currentScene.id}: ${propsDataToSave.length} props`);
+            } else {
+                console.log(`✅ Saving props for active scene ${currentScene.id}: ${propsDataToSave.length} props`);
             }
 
             this.sceneData.updateSceneData(
                 currentScene.id,
-                this.game.platformSystem.platforms,
+                platformDataToSave,
                 propsDataToSave,
                 enemyDataToSave,
                 npcDataToSave,

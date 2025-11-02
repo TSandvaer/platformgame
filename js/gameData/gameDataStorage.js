@@ -25,11 +25,167 @@ class GameDataStorage {
         return this.storageKeyPrefix;
     }
 
+    /**
+     * Check if a localStorage key is a valid game data key
+     * @param {string} key - The localStorage key to validate
+     * @returns {boolean} True if the key is a valid game data key
+     */
+    isValidGameDataKey(key) {
+        // List of valid key patterns for our game
+        const validPatterns = [
+            /^platformGame_gameData_[a-zA-Z0-9]+$/,  // Game data with ID
+            /^platformGame_gameData$/,                // Legacy game data
+            /^platformGame_playerData$/,              // Player data
+            /^platformGame_autoSave$/,                // Auto-save setting
+            /^currentGameId$/,                         // Current game ID
+            /^authToken$/,                             // Authentication token
+            /^platformGame_selectedGame$/,            // Selected game
+            /^platformGame_scenes$/,                  // Legacy scenes (to be migrated)
+            /^platformGame_sceneData$/                // Legacy scene data (to be cleaned)
+        ];
+
+        // Check if the key matches any valid pattern
+        return validPatterns.some(pattern => pattern.test(key));
+    }
+
+    /**
+     * Get all localStorage keys related to our game
+     * @returns {Array<string>} Array of game-related localStorage keys
+     */
+    getGameRelatedKeys() {
+        const gameKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (this.isValidGameDataKey(key)) {
+                gameKeys.push(key);
+            }
+        }
+        return gameKeys;
+    }
+
+    /**
+     * Clean up invalid localStorage keys (not related to our game)
+     * @param {boolean} dryRun - If true, only logs what would be cleaned without actually removing
+     * @returns {Array<string>} Array of keys that were (or would be) removed
+     */
+    cleanupInvalidKeys(dryRun = true) {
+        const invalidKeys = [];
+        const allKeys = [];
+
+        // Collect all localStorage keys
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            allKeys.push(key);
+        }
+
+        // Find invalid keys
+        for (const key of allKeys) {
+            if (!this.isValidGameDataKey(key)) {
+                // Check if it looks like it might be game-related but malformed
+                const looksLikeGameData = key.includes('platformGame') ||
+                                         key.includes('gameData') ||
+                                         key.includes('scene');
+
+                if (looksLikeGameData) {
+                    console.warn(`⚠️ Found suspicious key that looks game-related but is invalid: ${key}`);
+                    invalidKeys.push(key);
+                } else {
+                    // Skip Firebase and other third-party keys
+                    // Firebase keys are typically 32-char hex strings or contain 'firebase'
+                    const isFirebaseKey = /^[a-f0-9]{32}$/.test(key) ||
+                                        key.includes('firebase') ||
+                                        key.includes('Firebase');
+
+                    if (!isFirebaseKey) {
+                        console.log(`🔍 Found non-game key: ${key}`);
+                    }
+                }
+            }
+        }
+
+        // Remove or log invalid keys
+        if (!dryRun && invalidKeys.length > 0) {
+            console.log('🧹 Cleaning up invalid keys...');
+            for (const key of invalidKeys) {
+                try {
+                    localStorage.removeItem(key);
+                    console.log(`✅ Removed invalid key: ${key}`);
+                } catch (error) {
+                    console.error(`❌ Failed to remove key ${key}:`, error);
+                }
+            }
+        } else if (dryRun && invalidKeys.length > 0) {
+            console.log('🔍 Dry run - would remove these keys:', invalidKeys);
+        }
+
+        return invalidKeys;
+    }
+
+    /**
+     * Log all localStorage keys for debugging
+     * Categorizes keys as game-related, Firebase, or unknown
+     */
+    debugLocalStorageKeys() {
+        console.group('📦 LocalStorage Key Analysis');
+
+        const gameKeys = [];
+        const firebaseKeys = [];
+        const unknownKeys = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            const size = new Blob([value]).size;
+
+            if (this.isValidGameDataKey(key)) {
+                gameKeys.push({ key, size });
+            } else if (/^[a-f0-9]{32}$/.test(key) || key.includes('firebase') || key.includes('Firebase')) {
+                firebaseKeys.push({ key, size });
+            } else {
+                unknownKeys.push({ key, size });
+            }
+        }
+
+        console.group('🎮 Game-related keys:');
+        gameKeys.forEach(({ key, size }) => {
+            console.log(`  ${key} (${(size / 1024).toFixed(2)} KB)`);
+        });
+        console.groupEnd();
+
+        console.group('🔥 Firebase/Auth keys:');
+        firebaseKeys.forEach(({ key, size }) => {
+            console.log(`  ${key} (${(size / 1024).toFixed(2)} KB)`);
+        });
+        console.groupEnd();
+
+        if (unknownKeys.length > 0) {
+            console.group('❓ Unknown keys:');
+            unknownKeys.forEach(({ key, size }) => {
+                console.log(`  ${key} (${(size / 1024).toFixed(2)} KB)`);
+            });
+            console.groupEnd();
+        }
+
+        console.groupEnd();
+    }
+
     initialize() {
         // Check for auto-save settings
         this.autoSaveEnabled = localStorage.getItem('platformGame_autoSave') !== 'false';
         this.autoSaveInterval = 60000; // Auto-save every minute
         this.initialAutoSaveDelay = 10000; // Wait 10 seconds before first auto-save (allow initialization)
+
+        // Debug localStorage keys in development mode
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('🔍 Analyzing localStorage keys on initialization...');
+            this.debugLocalStorageKeys();
+
+            // Run cleanup in dry-run mode to see what would be cleaned
+            const invalidKeys = this.cleanupInvalidKeys(true);
+            if (invalidKeys.length > 0) {
+                console.log('💡 To clean up invalid keys, run: gameDataSystem.storage.cleanupInvalidKeys(false)');
+            }
+        }
 
         // Clean up any inconsistent legacy data
         this.cleanupLegacyData();
@@ -153,9 +309,10 @@ class GameDataStorage {
             await this.apiClient.saveGameData(gameId, gameData);
             console.log(`✅ Game saved successfully - ID: ${gameId}`);
 
-            // Also save to localStorage as backup
+            // Only cache the game ID in localStorage for reference, not the full data
+            // This prevents data sync issues between MongoDB and localStorage
             if (this.useLocalStorageFallback) {
-                this.saveToLocalStorage(gameData);
+                localStorage.setItem('currentGameId', gameId);
             }
 
             // Notify other tabs via Socket.IO
@@ -182,16 +339,28 @@ class GameDataStorage {
     saveToLocalStorage(gameData) {
         try {
             const storageKey = this.getStorageKey();
+
+            // Validate that we're using a proper key
+            if (!this.isValidGameDataKey(storageKey)) {
+                console.error(`❌ Invalid storage key format: ${storageKey}`);
+                return false;
+            }
+
             const dataStr = JSON.stringify(gameData);
             localStorage.setItem(storageKey, dataStr);
             console.log(`💾 Saved to localStorage with key: ${storageKey}`);
+
+            // Log key tracking for debugging
+            console.log(`📊 Total localStorage keys: ${localStorage.length}`);
+            console.log(`📊 Game-related keys: ${this.getGameRelatedKeys().length}`);
+
             return true;
         } catch (error) {
             console.error('Error saving to localStorage:', error);
 
             // Handle quota exceeded error
             if (error.name === 'QuotaExceededError') {
-                alert('Storage quota exceeded. Please export your game data and clear some space.');
+                alert('Storage quota exceeded. Please clear some space.');
             }
 
             return false;
@@ -389,6 +558,34 @@ class GameDataStorage {
         try {
             // Load from the game-specific storage key
             const storageKey = this.getStorageKey();
+
+            // Validate that we're using a proper key
+            if (!this.isValidGameDataKey(storageKey)) {
+                console.error(`❌ Invalid storage key format for loading: ${storageKey}`);
+                return null;
+            }
+
+            // Check if there are any suspicious duplicate keys
+            const allKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                // Check for keys that look like they might be game data but aren't properly formatted
+                if (key.length === 32 && /^[a-f0-9]+$/.test(key)) {
+                    // This might be a raw game ID being used as a key
+                    const value = localStorage.getItem(key);
+                    try {
+                        const parsed = JSON.parse(value);
+                        if (parsed && parsed.scenes && Array.isArray(parsed.scenes)) {
+                            console.warn(`⚠️ Found game data stored with raw ID key: ${key}`);
+                            console.warn(`⚠️ This data should be stored with key: platformGame_gameData_${key}`);
+                            // Don't load from this key - it's incorrectly formatted
+                        }
+                    } catch (e) {
+                        // Not JSON or not game data, ignore
+                    }
+                }
+            }
+
             const dataStr = localStorage.getItem(storageKey);
             if (dataStr) {
                 console.log(`📂 Loaded from localStorage with key: ${storageKey}`);

@@ -185,26 +185,7 @@ class InputEditor {
     }
 
     setupImportExportListeners() {
-        const exportBtn = document.getElementById('exportGameData');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                this.game.gameDataSystem.exportGameData();
-            });
-        }
-
-        const importBtn = document.getElementById('importGameDataBtn');
-        if (importBtn) {
-            importBtn.addEventListener('click', () => {
-                document.getElementById('importGameData').click();
-            });
-        }
-
-        const importInput = document.getElementById('importGameData');
-        if (importInput) {
-            importInput.addEventListener('change', (e) => {
-                this.game.gameDataSystem.importGameData(e);
-            });
-        }
+        // Import/Export functionality removed - using MongoDB/localStorage only
 
         // Save game info button
         const saveGameInfoBtn = document.getElementById('saveGameInfo');

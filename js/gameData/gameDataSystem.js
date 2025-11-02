@@ -56,8 +56,6 @@ class GameDataSystem {
 
         // Initialize sub-systems
         this.storage = new GameDataStorage(this);
-        this.exporter = new GameDataExporter(this);
-        this.importer = new GameDataImporter(this);
         this.validator = new GameDataValidator(this);
 
         // Store reference to default character stats
@@ -113,8 +111,6 @@ class GameDataSystem {
     initialize() {
         // Initialize all sub-systems
         this.storage.initialize();
-        this.exporter.initialize();
-        this.importer.initialize();
         this.validator.initialize();
 
         // Load saved data from localStorage (especially gameSettings, playerSettings, GUISettings, and characterSettings)
@@ -209,11 +205,6 @@ class GameDataSystem {
                 e.preventDefault();
                 this.saveCurrentData();
             }
-            // Ctrl/Cmd + E to export
-            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-                e.preventDefault();
-                this.exportGameData();
-            }
         });
     }
 
@@ -229,7 +220,8 @@ class GameDataSystem {
             const hasTutorialPlatforms = tutorialScene && tutorialScene.platforms && tutorialScene.platforms.length > 0;
 
             if (hasTutorialPlatforms || savedData.scenes.length > 1) {
-                this.applyGameData(savedData);
+                // Always skip save when loading data - we're loading, not saving!
+                this.applyGameData(savedData, { skipSave: true });
                 return;
             } else {
             }
@@ -242,7 +234,8 @@ class GameDataSystem {
             const currentGameData = this.collectCurrentGameData();
             this.gameData = currentGameData;
         } else {
-            this.applyGameData(this.defaultGameData);
+            // Skip save when applying default data
+            this.applyGameData(this.defaultGameData, { skipSave: true });
         }
     }
 
@@ -268,10 +261,22 @@ class GameDataSystem {
 
             // Save the scene data to localStorage using scene system's method
             // Skip save when applying remote updates (data is already in MongoDB)
-            if (!skipSave) {
+            // IMPORTANT: We should NEVER save during applyGameData - we're loading, not saving!
+            // The skipSave parameter should always be true when called from loadGameData
+
+            // Only save if explicitly requested (skipSave is false) AND systems are ready
+            const isSystemsReady = this.game.allSpritesLoaded &&
+                                 (!this.game.enemySystem || this.game.enemySystem.isInitialized);
+
+            if (!skipSave && isSystemsReady) {
+                console.warn('⚠️ WARNING: Save triggered during applyGameData - this is unusual');
                 this.game.sceneSystem.saveScenes();
             } else {
-                console.log('⏭️ Skipping save (applying remote data from MongoDB)');
+                if (skipSave) {
+                    console.log('⏭️ Skipping save (data already in storage)');
+                } else {
+                    console.log('⏭️ Skipping save (systems not ready)');
+                }
             }
 
             // Load the appropriate scene
@@ -644,40 +649,6 @@ class GameDataSystem {
         };
     }
 
-    // Export game data to file
-    exportGameData() {
-        // Save current state first
-        this.saveCurrentData();
-
-        // Collect and export data
-        const gameData = this.collectCurrentGameData();
-        this.exporter.exportToFile(gameData, 'gameData.json');
-    }
-
-    // Import game data from file
-    importGameData(event) {
-        this.importer.importFromFile(event, (gameData) => {
-            if (this.applyGameData(gameData)) {
-                // Update UI after successful import
-                if (this.game.platformSystem) {
-                    this.game.platformSystem.selectedPlatform = null;
-                    this.game.platformSystem.updatePlatformProperties();
-                    this.game.platformSystem.updatePlatformList();
-                }
-
-                if (this.game.propSystem) {
-                    this.game.propSystem.updatePropList();
-                }
-
-                alert('Game data imported successfully!');
-
-                // Reload the page to load the newly imported data from localStorage
-                window.location.reload();
-            } else {
-                alert('Error importing game data. Please check the file format.');
-            }
-        });
-    }
 
     // Clear all game data
     clearGameData() {
