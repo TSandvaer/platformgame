@@ -641,6 +641,9 @@ class GameDataSystem {
                 (this.game.hudSystem.height / this.game.hudSystem.uiScale)
         } : this.defaultGameData.gameSettings.hud;
 
+        // Collect used prop definitions and sprite sheets
+        const { propDefinitions, spriteSheets } = this.collectUsedPropsAndSpriteSheets(sceneData.scenes);
+
         return {
             gameInfo: this.gameData.gameInfo || {
                 title: "Platform RPG Game",
@@ -661,8 +664,91 @@ class GameDataSystem {
             playerSettings: this.gameData.playerSettings || this.defaultGameData.playerSettings,
             inventoryItems: this.gameData.inventoryItems || [],
             GUISettings: this.gameData.GUISettings || this.defaultGameData.GUISettings,
-            characterSettings: this.gameData.characterSettings || this.defaultGameData.characterSettings
+            characterSettings: this.gameData.characterSettings || this.defaultGameData.characterSettings,
+            propDefinitions: propDefinitions,
+            spriteSheets: spriteSheets
         };
+    }
+
+    // Collect prop definitions and sprite sheets used in scenes
+    collectUsedPropsAndSpriteSheets(scenes) {
+        const usedPropTypes = new Set();
+        const propDefinitions = {};
+        const spriteSheetKeys = new Set();
+        const spriteSheets = {};
+
+        // Scan all scenes for used prop types
+        if (scenes && Array.isArray(scenes)) {
+            scenes.forEach(scene => {
+                if (scene.props && Array.isArray(scene.props)) {
+                    scene.props.forEach(prop => {
+                        if (prop.type) {
+                            usedPropTypes.add(prop.type);
+                        }
+                    });
+                }
+            });
+        }
+
+        console.log('📦 Collecting props from scenes...');
+        console.log('📦 Found prop types in scenes:', Array.from(usedPropTypes));
+
+        // Get prop definitions from propSystem
+        if (this.game.propSystem && this.game.propSystem.data && this.game.propSystem.data.propTypes) {
+            const propTypes = this.game.propSystem.data.propTypes;
+            console.log('📦 Available propTypes:', Object.keys(propTypes).length);
+
+            usedPropTypes.forEach(propKey => {
+                const propType = propTypes[propKey];
+                if (propType) {
+                    // Store prop definition
+                    propDefinitions[propKey] = {
+                        tileX: propType.tileX,
+                        tileY: propType.tileY,
+                        width: propType.width,
+                        height: propType.height,
+                        name: propType.name,
+                        spriteSheet: propType.spriteSheet,
+                        category: propType.category,
+                        hasGlow: propType.hasGlow,
+                        hasFlame: propType.hasFlame,
+                        isChest: propType.isChest,
+                        chestRow: propType.chestRow,
+                        isObstacle: propType.isObstacle,
+                        destroyable: propType.destroyable,
+                        damagePerSecond: propType.damagePerSecond,
+                        maxDurability: propType.maxDurability
+                    };
+
+                    // Track sprite sheet used by this prop
+                    if (propType.spriteSheet) {
+                        spriteSheetKeys.add(propType.spriteSheet);
+                    }
+                }
+            });
+        }
+
+        // Get sprite sheet definitions from propRenderer
+        if (this.game.propSystem && this.game.propSystem.renderer && this.game.propSystem.renderer.platformSprites) {
+            const platformSprites = this.game.propSystem.renderer.platformSprites;
+
+            spriteSheetKeys.forEach(sheetKey => {
+                const spriteSheet = platformSprites[sheetKey];
+                if (spriteSheet && spriteSheet.image) {
+                    spriteSheets[sheetKey] = {
+                        filePath: spriteSheet.filePath,  // Path to sprite sheet image
+                        tileWidth: spriteSheet.tileWidth,
+                        tileHeight: spriteSheet.tileHeight,
+                        imageWidth: spriteSheet.image.width,
+                        imageHeight: spriteSheet.image.height
+                    };
+                }
+            });
+        }
+
+        console.log(`📦 Collected ${Object.keys(propDefinitions).length} prop definitions and ${Object.keys(spriteSheets).length} sprite sheets for export`);
+
+        return { propDefinitions, spriteSheets };
     }
 
 

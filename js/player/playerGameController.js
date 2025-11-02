@@ -227,6 +227,41 @@ class PlayerGameController {
                 console.log('Game data set after construction (safety check):', loadedGameData);
             }
 
+            // Load props and sprite sheets from game data (for play mode)
+            if (loadedGameData.propDefinitions && loadedGameData.spriteSheets) {
+                console.log('🎮 Player mode: Loading props and sprite sheets from game data');
+
+                // Load prop definitions into propSystem
+                if (this.game.propSystem && this.game.propSystem.data) {
+                    this.game.propSystem.data.loadPropTypesFromGameData(loadedGameData.propDefinitions);
+                }
+
+                // Register sprite sheets from game data
+                if (this.game.propSystem && this.game.propSystem.renderer) {
+                    const spriteSheets = loadedGameData.spriteSheets;
+                    for (const sheetKey in spriteSheets) {
+                        const sheet = spriteSheets[sheetKey];
+                        if (sheet && sheet.filePath) {
+                            // Ensure absolute path (prepend / if not already absolute)
+                            let filePath = sheet.filePath;
+                            if (!filePath.startsWith('/') && !filePath.startsWith('http')) {
+                                filePath = '/' + filePath;
+                            }
+
+                            // Register sprite sheet (async, but we don't await - it will load in background)
+                            this.game.propSystem.renderer.registerSpriteSheet(
+                                sheetKey,
+                                filePath,
+                                sheet.tileWidth,
+                                sheet.tileHeight
+                            ).catch(err => {
+                                console.error(`Failed to load sprite sheet '${sheetKey}':`, err);
+                            });
+                        }
+                    }
+                }
+            }
+
             // Restore original classes
             window.EditorSystem = originalEditorSystem;
             window.GameDataSystem = originalGameDataSystem;

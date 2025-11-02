@@ -222,6 +222,8 @@ router.put('/:id', optionalAuth, async (req, res) => {
             game.GUISettings = gameData.GUISettings || game.GUISettings;
             game.playerSettings = gameData.playerSettings || game.playerSettings;
             game.characterSettings = gameData.characterSettings || game.characterSettings;
+            game.propDefinitions = gameData.propDefinitions || game.propDefinitions;
+            game.spriteSheets = gameData.spriteSheets || game.spriteSheets;
         }
 
         await game.save();
@@ -303,6 +305,8 @@ router.patch('/:id', optionalAuth, async (req, res) => {
         game.GUISettings = gameData.GUISettings || game.GUISettings;
         game.playerSettings = gameData.playerSettings || game.playerSettings;
         game.characterSettings = gameData.characterSettings || game.characterSettings;
+        game.propDefinitions = gameData.propDefinitions || game.propDefinitions;
+        game.spriteSheets = gameData.spriteSheets || game.spriteSheets;
 
         await game.save();
 

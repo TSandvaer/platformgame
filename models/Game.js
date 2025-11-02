@@ -113,6 +113,17 @@ const gameSchema = new mongoose.Schema({
         }
     },
 
+    // Prop definitions and sprite sheets (for games using database-defined props)
+    propDefinitions: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+
+    spriteSheets: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+
     // Metadata
     createdAt: {
         type: Date,
@@ -234,7 +245,9 @@ gameSchema.methods.toGameData = function() {
         gameSettings: this.gameSettings,
         GUISettings: this.GUISettings,
         playerSettings: this.playerSettings,
-        characterSettings: this.characterSettings
+        characterSettings: this.characterSettings,
+        propDefinitions: this.propDefinitions,
+        spriteSheets: this.spriteSheets
     };
 };
 
@@ -255,7 +268,9 @@ gameSchema.statics.createFromGameData = function(name, gameData, description = '
         gameSettings: gameData.gameSettings || {},
         GUISettings: gameData.GUISettings || {},
         playerSettings: gameData.playerSettings || {},
-        characterSettings: gameData.characterSettings || {}
+        characterSettings: gameData.characterSettings || {},
+        propDefinitions: gameData.propDefinitions || {},
+        spriteSheets: gameData.spriteSheets || {}
     });
 };
 

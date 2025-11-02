@@ -5,10 +5,10 @@ class PlatformRenderer {
 
         // Initialize platform sprites
         this.platformSprites = {
-            tileset: { image: null, tileWidth: 16, tileHeight: 16 },
-            villageProps: { image: null, tileWidth: 32, tileHeight: 32 },
-            trees: { image: null, tileWidth: 32, tileHeight: 32 },
-            vegetation: { image: null, tileWidth: 32, tileHeight: 32 },
+            tileset: { image: null, tileWidth: 16, tileHeight: 16, filePath: 'sprites/TX Tileset Ground.png' },
+            villageProps: { image: null, tileWidth: 32, tileHeight: 32, filePath: 'sprites/PROPS/Pixel Art Platformer/Texture/TX Village Props.png' },
+            trees: { image: null, tileWidth: 32, tileHeight: 32, filePath: 'sprites/PROPS/Full Fantasy Forest/Trees.png' },
+            vegetation: { image: null, tileWidth: 32, tileHeight: 32, filePath: 'sprites/PROPS/Full Fantasy Forest/Vegetation.png' },
         };
         this.spritesLoaded = false;
         this.loadSprites();

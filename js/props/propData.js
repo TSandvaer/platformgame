@@ -248,6 +248,50 @@ class PropData {
         }
     }
 
+    /**
+     * Load prop types from game data (for play mode)
+     * Props are loaded from the exported game data instead of database
+     */
+    loadPropTypesFromGameData(propDefinitions) {
+        if (!propDefinitions || typeof propDefinitions !== 'object') {
+            console.warn('No prop definitions provided in game data');
+            return;
+        }
+
+        // Convert prop definitions to propTypes format
+        Object.keys(propDefinitions).forEach(propKey => {
+            const prop = propDefinitions[propKey];
+            this.propTypes[propKey] = {
+                tileX: prop.tileX,
+                tileY: prop.tileY,
+                width: prop.width,
+                height: prop.height,
+                name: prop.name,
+                spriteSheet: prop.spriteSheet,
+                category: prop.category,
+                hasGlow: prop.hasGlow,
+                hasFlame: prop.hasFlame,
+                isChest: prop.isChest,
+                chestRow: prop.chestRow,
+                isObstacle: prop.isObstacle,
+                destroyable: prop.destroyable,
+                damagePerSecond: prop.damagePerSecond,
+                maxDurability: prop.maxDurability
+            };
+
+            // Add to propCategories
+            const category = prop.category || 'Custom';
+            if (!this.propCategories[category]) {
+                this.propCategories[category] = [];
+            }
+            if (!this.propCategories[category].includes(propKey)) {
+                this.propCategories[category].push(propKey);
+            }
+        });
+
+        console.log(`✓ Loaded ${Object.keys(propDefinitions).length} props from game data`);
+    }
+
     // Get all category names
     getCategories() {
         return Object.keys(this.propCategories);

@@ -61,30 +61,10 @@ class PropRenderer {
         if (!this.platformSprites.villageProps.image) return;
 
         // Filter props based on whether we're rendering obstacles or not, and visibility
-        // Debug: log all props being checked
-        if (props.some(p => p.type && p.type.includes('Door'))) {
-            console.log('🚪 Door prop found in props list:', props.find(p => p.type && p.type.includes('Door')));
-            console.log('🚪 Rendering obstacles:', renderObstacles);
-        }
-
         const filteredProps = props.filter(prop => {
             const obstacleMatch = prop.isObstacle === renderObstacles;
             const isVisible = prop.isVisible !== false; // Default to visible if property doesn't exist
-            const shouldRender = obstacleMatch && isVisible;
-
-            // Debug door filtering
-            if (prop.type && prop.type.includes('Door')) {
-                console.log('🚪 Door filter check:', {
-                    type: prop.type,
-                    isObstacle: prop.isObstacle,
-                    renderObstacles: renderObstacles,
-                    obstacleMatch: obstacleMatch,
-                    isVisible: isVisible,
-                    shouldRender: shouldRender
-                });
-            }
-
-            return shouldRender;
+            return obstacleMatch && isVisible;
         });
 
         // Sort by z-order (lowest first)
@@ -149,8 +129,6 @@ class PropRenderer {
     drawProp(prop, propTypes, isDevelopmentMode, selectedProp, selectedProps = [], viewport = null) {
         const propType = propTypes[prop.type];
         if (!propType) {
-            console.warn(`PropType not found for prop.type: '${prop.type}'`);
-            console.warn(`Available propTypes:`, Object.keys(propTypes));
             return;
         }
 
@@ -164,10 +142,6 @@ class PropRenderer {
         const spriteSheetName = propType.spriteSheet || 'villageProps';
         const tileset = this.platformSprites[spriteSheetName];
         if (!tileset || !tileset.image) {
-            console.warn(`Sprite sheet '${spriteSheetName}' not found or not loaded for prop type '${prop.type}'`);
-            console.warn(`Available sprite sheets:`, Object.keys(this.platformSprites));
-            console.warn(`Prop data:`, prop);
-            console.warn(`PropType data:`, propType);
             return;
         }
 
@@ -182,23 +156,6 @@ class PropRenderer {
             // Tiled sprite sheet: multiply by tile dimensions
             sourceX = propType.tileX * tileset.tileWidth;
             sourceY = propType.tileY * tileset.tileHeight;
-        }
-
-        // Debug sprite sheet dimensions for Door
-        if (prop.type && prop.type.includes('Door')) {
-            console.log('🚪 Rendering door:', {
-                sheetName: spriteSheetName,
-                tileWidth: tileset.tileWidth,
-                tileHeight: tileset.tileHeight,
-                imageWidth: tileset.image.width,
-                imageHeight: tileset.image.height,
-                propTileX: propType.tileX,
-                propTileY: propType.tileY,
-                finalSourceX: sourceX,
-                finalSourceY: sourceY,
-                propWidth: propType.width,
-                propHeight: propType.height
-            });
         }
 
         // Use sizeMultiplier for resolution-independent sizing
@@ -1041,7 +998,8 @@ class PropRenderer {
                 this.platformSprites[sheetKey] = {
                     image: img,
                     tileWidth: tileWidth || img.width,
-                    tileHeight: tileHeight || img.height
+                    tileHeight: tileHeight || img.height,
+                    filePath: filePath  // Store filePath for export
                 };
 
                 console.log(`✓ Registered sprite sheet '${sheetKey}' from ${filePath}`);
