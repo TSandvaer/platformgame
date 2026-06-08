@@ -275,7 +275,7 @@ class AuthModal {
                 statusEl.textContent = 'Checking...';
                 statusEl.style.color = '#888';
 
-                const response = await fetch(`http://localhost:3000/api/users/check-username/${username}`);
+                const response = await fetch(`${authSystem.baseURL}/users/check-username/${username}`);
                 const data = await response.json();
 
                 if (data.available) {

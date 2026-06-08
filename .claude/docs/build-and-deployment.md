@@ -21,6 +21,8 @@ Two processes:
 
 `npm run serve` does `build:dev` then `npm start` (single-server flow, no dev-server/proxy).
 
+> **First-run dependency install:** `node_modules` is not committed. On a fresh clone — or after a long break where the directory was wiped — run `npm install` (~616 packages) before any `npm start` / `npm run build`, or scripts fail with `Cannot find module 'dotenv'`. Populate `.env` from `.env.example` first; `server.js` loads it via `require('dotenv').config()` at startup.
+
 | Command | Effect |
 |---------|--------|
 | `npm start` / `npm run dev` | Express server (`server.js`) on `:3000`. |
@@ -28,6 +30,22 @@ Two processes:
 | `npm run serve:webpack` | webpack-dev-server `:8080` with `/api` proxy to `:3000`. |
 | `npm run type-check` | `tsc --noEmit`. |
 | `npm run migrate` / `cleanup` | MongoDB migration scripts — **act on the configured (prod) Atlas DB; do not run against prod from a Claude session.** |
+
+## Client base-URL resolution (same-origin in production)
+
+All client-side API and socket calls derive their backend URL from **one shared pattern**, implemented in three files:
+
+| File | Function | Returns |
+|------|----------|---------|
+| `js/api/apiClient.js` (~L15-28) | `getBaseURL()` | `http://localhost:3000/api` (dev) or `<protocol>//<host>/api` (prod) |
+| `js/auth/authSystem.js` (~L19-31) | `getBaseURL()` → `this.baseURL` | same logic |
+| `js/sync/socketSync.js` (~L40-52) | `getServerURL()` | same localhost-vs-host branch, **no `/api` suffix** (Socket.IO) |
+
+**Pattern:** if `window.location.hostname` is `localhost`, `127.0.0.1`, or empty → `http://localhost:3000`; else → `${window.location.protocol}//${window.location.host}`.
+
+**Consequence for hosting migrations:** in production the client always calls the same host that served the page — the API is same-origin. **Migrating the backend to a new domain requires zero frontend code changes**, as long as the app and API are served from the same origin.
+
+**Rule for new client-side fetches:** always derive the URL from `apiClient.baseURL` / `authSystem.baseURL` (or the in-scope `getBaseURL()` helper). **Never hardcode `http://localhost:3000`** in a `fetch()` — it works locally but silently calls the developer's machine from production browsers. (`js/auth/authModal.js:278` had this exact bug for the signup username-availability check; fixed 2026-06-08 to use `authSystem.baseURL`.)
 
 ## Deployment targets
 
